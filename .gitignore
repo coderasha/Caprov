@@ -1,0 +1,149 @@
+# ==========================================
+# Node / pnpm
+# ==========================================
+
+node_modules/
+.pnpm-store/
+
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# ==========================================
+# Next.js
+# ==========================================
+
+.next/
+out/
+.vercel/
+
+# ==========================================
+# NestJS / TypeScript builds
+# ==========================================
+
+dist/
+build/
+coverage/
+
+# ==========================================
+# Python
+# ==========================================
+
+__pycache__/
+*.py[cod]
+*.pyo
+
+.venv/
+venv/
+env/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# ==========================================
+# AI / ML model weights
+# ==========================================
+
+*.bin
+*.safetensors
+*.pt
+*.pth
+*.onnx
+*.gguf
+*.ggml
+*.ckpt
+
+# ==========================================
+# Local model directories
+# ==========================================
+
+model-weights/
+models-weights/
+checkpoints/
+weights/
+
+# ==========================================
+# Hugging Face / ML caches
+# ==========================================
+
+.cache/
+.huggingface/
+
+# ==========================================
+# Vector databases / indexes
+# ==========================================
+
+chroma_db/
+chroma/
+*.faiss
+*.index
+
+# ==========================================
+# AI-generated / runtime data
+# ==========================================
+
+uploads/
+datasets/
+processed/
+artifacts/
+outputs/
+generated/
+embeddings/
+tmp/
+temp/
+
+# ==========================================
+# Environment / secrets
+# ==========================================
+
+.env*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Allow example environment files
+!.env.example
+
+# ==========================================
+# IDE
+# ==========================================
+
+.vscode/
+.idea/
+
+# ==========================================
+# OS
+# ==========================================
+
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# Logs
+# ==========================================
+
+*.log
+logs/
+
+# ==========================================
+# Database runtime data
+# ==========================================
+
+postgres-data/
+redis-data/
+mongo-data/
+*.db
+apps/api/data/
+apps/api/storage/
+
+# ==========================================
+# Docker runtime data
+# ==========================================
+
+docker-data/

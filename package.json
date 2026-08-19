@@ -1,0 +1,28 @@
+{
+  "name": "Caprov",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CAPROV monorepo",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "format": "turbo run format"
+  },
+  "keywords": [
+    "caprov",
+    "monorepo",
+    "private-assets",
+    "ai"
+  ],
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.30.3",
+  "devDependencies": {
+    "ethers": "^6.17.0",
+    "solc": "^0.8.36",
+    "turbo": "^2.10.5",
+    "typescript": "^5.9.3"
+  }
+}

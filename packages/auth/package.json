@@ -1,0 +1,17 @@
+{
+  "name": "@caprov/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "echo \"No tests for @caprov/auth\""
+  },
+  "dependencies": {
+    "@caprov/types": "workspace:*"
+  }
+}

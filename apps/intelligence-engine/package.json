@@ -1,0 +1,13 @@
+{
+  "name": "intelligence-engine",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "bash ../../scripts/run-intelligence-engine.sh",
+    "start": "bash ../../scripts/run-intelligence-engine.sh",
+    "test": ".venv/bin/python -m pytest || python3 -m pytest",
+    "lint": "echo \"No JS lint for intelligence-engine\"",
+    "typecheck": "echo \"No TS typecheck for intelligence-engine\"",
+    "format": "echo \"Formatting is handled separately\""
+  }
+}

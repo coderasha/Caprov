@@ -1,0 +1,9 @@
+VALUATION APPRAISAL
+Asset: Canal Side Logistics Park
+Valuer: EuroLog Valuation
+As of: 30 June 2026
+Market value: EUR 78,500,000
+Method: Discounted cash flow
+Occupancy: 97%
+WALE: 8.1 years
+NIA: 92,400 sq m

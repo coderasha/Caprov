@@ -1,0 +1,268 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// CAPROV Phase 2 domain model. Local development currently uses a file-backed
+/// store with the same entities so the operator platform can run without
+/// external Postgres. This schema remains the target PostgreSQL model.
+
+enum AssetClass {
+  REAL_ESTATE
+  PRIVATE_CREDIT
+  PRIVATE_EQUITY
+  INFRASTRUCTURE
+  AVIATION
+  ART
+  AGRICULTURE
+  FUND
+  OTHER
+}
+
+enum AssetStatus {
+  DRAFT
+  ACTIVE
+  UNDER_REVIEW
+  ARCHIVED
+}
+
+enum DocumentType {
+  TITLE_DEED
+  SPA
+  VALUATION_MEMO
+  KYC
+  INSURANCE
+  FINANCIAL_STATEMENT
+  CAP_TABLE
+  LPA
+  OTHER
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum IntelligenceJobType {
+  DOCUMENT_INTELLIGENCE
+  EXTRACTION
+  ENTITY_RESOLUTION
+  KNOWLEDGE_GRAPH
+  ASSET_DNA
+  VALUATION
+  RISK
+  FULL_PIPELINE
+}
+
+enum IntelligenceJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum MembershipRole {
+  PLATFORM_ADMIN
+  ORG_ADMIN
+  ANALYST
+  COMPLIANCE
+  VIEWER
+}
+
+enum OwnershipType {
+  LEGAL
+  BENEFICIAL
+  ECONOMIC
+}
+
+model Organization {
+  id          String   @id
+  name        String
+  slug        String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  memberships Membership[]
+  assets      Asset[]
+  documents   Document[]
+  portfolios  Portfolio[]
+  auditEvents AuditEvent[]
+  jobs        IntelligenceJob[]
+}
+
+model User {
+  id           String   @id
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  title        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  memberships  Membership[]
+  auditEvents  AuditEvent[]
+}
+
+model Role {
+  id          String         @id
+  key         MembershipRole @unique
+  name        String
+  description String
+}
+
+model Membership {
+  id             String         @id
+  organizationId String
+  userId         String
+  role           MembershipRole
+  createdAt      DateTime       @default(now())
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  user           User           @relation(fields: [userId], references: [id])
+
+  @@unique([organizationId, userId])
+}
+
+model Asset {
+  id              String   @id
+  organizationId  String
+  name            String
+  assetClass      AssetClass
+  status          AssetStatus @default(DRAFT)
+  currency        String
+  jurisdiction    String?
+  location        String?
+  description     String?
+  acquisitionDate DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  ownerships      AssetOwnership[]
+  documents       Document[]
+  holdings        PortfolioHolding[]
+  dnaSnapshots    AssetDnaSnapshot[]
+  valuations      ValuationSnapshot[]
+  risks           RiskSnapshot[]
+  jobs            IntelligenceJob[]
+}
+
+model AssetOwnership {
+  id         String        @id
+  assetId    String
+  holderName String
+  type       OwnershipType
+  percentage Float
+  asOf       DateTime?
+  notes      String?
+  asset      Asset         @relation(fields: [assetId], references: [id])
+}
+
+model Document {
+  id             String         @id
+  organizationId String
+  assetId        String?
+  name           String
+  type           DocumentType
+  status         DocumentStatus @default(UPLOADED)
+  mimeType       String
+  storageKey     String
+  sizeBytes      Int
+  extractedText  String?
+  createdAt      DateTime       @default(now())
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  asset          Asset?         @relation(fields: [assetId], references: [id])
+  facts          ProvenanceFact[]
+}
+
+model Portfolio {
+  id             String   @id
+  organizationId String
+  name           String
+  description    String?
+  baseCurrency   String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  holdings       PortfolioHolding[]
+}
+
+model PortfolioHolding {
+  id          String    @id
+  portfolioId String
+  assetId     String
+  weight      Float?
+  notes       String?
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+  asset       Asset     @relation(fields: [assetId], references: [id])
+
+  @@unique([portfolioId, assetId])
+}
+
+model AuditEvent {
+  id             String   @id
+  organizationId String
+  actorUserId    String?
+  action         String
+  entityType     String
+  entityId       String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  actor          User?        @relation(fields: [actorUserId], references: [id])
+}
+
+model IntelligenceJob {
+  id             String                 @id
+  organizationId String
+  assetId        String?
+  documentId     String?
+  type           IntelligenceJobType
+  status         IntelligenceJobStatus  @default(QUEUED)
+  result         Json?
+  error          String?
+  createdAt      DateTime               @default(now())
+  completedAt    DateTime?
+  organization   Organization           @relation(fields: [organizationId], references: [id])
+  asset          Asset?                 @relation(fields: [assetId], references: [id])
+}
+
+model AssetDnaSnapshot {
+  id        String   @id
+  assetId   String
+  version   Int
+  envelope  Json
+  createdAt DateTime @default(now())
+  asset     Asset    @relation(fields: [assetId], references: [id])
+
+  @@unique([assetId, version])
+}
+
+model ValuationSnapshot {
+  id        String   @id
+  assetId   String
+  payload   Json
+  createdAt DateTime @default(now())
+  asset     Asset    @relation(fields: [assetId], references: [id])
+}
+
+model RiskSnapshot {
+  id        String   @id
+  assetId   String
+  payload   Json
+  createdAt DateTime @default(now())
+  asset     Asset    @relation(fields: [assetId], references: [id])
+}
+
+model ProvenanceFact {
+  id         String   @id
+  documentId String
+  key        String
+  value      String
+  confidence Float
+  fragment   String?
+  observedAt DateTime
+  document   Document @relation(fields: [documentId], references: [id])
+}
