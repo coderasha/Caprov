@@ -14,6 +14,8 @@ export interface CreateAssetInput {
   location?: string;
   description?: string;
   acquisitionDate?: string;
+  primaryImageUrl?: string;
+  imageUrls?: string[];
 }
 
 export interface OwnershipInput {
@@ -58,6 +60,8 @@ export class AssetsService {
       location: input.location,
       description: input.description,
       acquisitionDate: input.acquisitionDate,
+      primaryImageUrl: input.primaryImageUrl,
+      imageUrls: normalizeImageUrls(input.imageUrls, input.primaryImageUrl),
       createdAt: now,
       updatedAt: now,
     };
@@ -85,6 +89,11 @@ export class AssetsService {
         ...input,
         status: input.status ?? asset.status,
         currency: input.currency ?? asset.currency,
+        primaryImageUrl: input.primaryImageUrl ?? asset.primaryImageUrl,
+        imageUrls:
+          input.imageUrls != null || input.primaryImageUrl != null
+            ? normalizeImageUrls(input.imageUrls, input.primaryImageUrl ?? asset.primaryImageUrl)
+            : asset.imageUrls,
         updatedAt: new Date().toISOString(),
       });
     });
@@ -151,4 +160,15 @@ export class AssetsService {
       jobCount: jobs.length,
     };
   }
+}
+
+function normalizeImageUrls(imageUrls?: string[], primaryImageUrl?: string): string[] {
+  const urls = Array.from(
+    new Set(
+      [primaryImageUrl, ...(imageUrls ?? [])]
+        .map((value) => value?.trim())
+        .filter((value): value is string => Boolean(value)),
+    ),
+  );
+  return urls;
 }

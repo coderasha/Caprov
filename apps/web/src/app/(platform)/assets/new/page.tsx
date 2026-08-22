@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
+import { readFileAsDataUrl, readFilesAsDataUrls } from '@/lib/files';
 import { assetClassLabel } from '@/lib/format';
 import type { HydratedAsset } from '@/lib/types';
 import type { AssetClass, AssetStatus, CurrencyCode } from '@caprov/types';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -25,6 +27,10 @@ export default function NewAssetPage() {
     location: '',
     description: '',
     acquisitionDate: '',
+    primaryImageUrl: '',
+    imageUrls: [] as string[],
+    primaryImageName: '',
+    galleryImageNames: [] as string[],
   });
 
   async function onSubmit(event: React.FormEvent) {
@@ -32,7 +38,11 @@ export default function NewAssetPage() {
     setLoading(true);
     setError('');
     try {
-      const response = await api.post<HydratedAsset>('/assets', form);
+      const imageUrls = Array.from(new Set([form.primaryImageUrl, ...form.imageUrls].filter(Boolean)));
+      const response = await api.post<HydratedAsset>('/assets', {
+        ...form,
+        imageUrls,
+      });
       router.push(`/assets/${response.data.id}`);
     } catch {
       setError('Could not create the asset. Check the fields and try again.');
@@ -106,6 +116,59 @@ export default function NewAssetPage() {
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
+          </Field>
+          <Field label="Primary image">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) {
+                  setForm({ ...form, primaryImageUrl: '', primaryImageName: '' });
+                  return;
+                }
+                const primaryImageUrl = await readFileAsDataUrl(file);
+                setForm({ ...form, primaryImageUrl, primaryImageName: file.name });
+              }}
+            />
+            {form.primaryImageName ? (
+              <p className="mt-2 text-xs text-[var(--muted)]">Selected: {form.primaryImageName}</p>
+            ) : null}
+            {form.primaryImageUrl ? (
+              <Image
+                src={form.primaryImageUrl}
+                alt="Primary asset preview"
+                width={640}
+                height={288}
+                className="mt-3 h-36 w-full rounded-2xl object-cover"
+                unoptimized
+              />
+            ) : null}
+          </Field>
+          <Field label="Gallery images">
+            <Input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={async (e) => {
+                const files = e.target.files;
+                if (!files?.length) {
+                  setForm({ ...form, imageUrls: [], galleryImageNames: [] });
+                  return;
+                }
+                const imageUrls = await readFilesAsDataUrls(files);
+                setForm({
+                  ...form,
+                  imageUrls,
+                  galleryImageNames: Array.from(files).map((file) => file.name),
+                });
+              }}
+            />
+            {form.galleryImageNames.length > 0 ? (
+              <p className="mt-2 text-xs text-[var(--muted)]">
+                Selected: {form.galleryImageNames.join(', ')}
+              </p>
+            ) : null}
           </Field>
           {error ? <p className="text-sm text-[var(--danger)]">{error}</p> : null}
           <Button type="submit" disabled={loading}>

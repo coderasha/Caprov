@@ -311,6 +311,8 @@ export interface LlmModelSelection {
 
 export type ListingStatus = 'OPEN' | 'PARTIALLY_FILLED' | 'FILLED' | 'CLOSED' | 'CANCELLED';
 
+export type ListingOfferingType = 'SALE' | 'LEASE';
+
 export type OrderSide = 'BUY' | 'SELL';
 
 export type OrderStatus = 'OPEN' | 'PARTIAL' | 'FILLED' | 'CANCELLED';
@@ -330,9 +332,16 @@ export interface MarketplaceListing {
   organizationId: EntityId;
   assetId: EntityId;
   title: string;
+  offeringType: ListingOfferingType;
   status: ListingStatus;
+  summary?: string;
+  imageUrl?: string;
   askPrice: number;
   currency: CurrencyCode;
+  leaseRate?: number;
+  leaseTermMonths?: number;
+  tokenPositionId?: EntityId;
+  tokenizationMode?: 'LIVE' | 'SIMULATED';
   /** Basis points of economic interest offered (10000 = 100%). */
   quantityBps: number;
   remainingBps: number;

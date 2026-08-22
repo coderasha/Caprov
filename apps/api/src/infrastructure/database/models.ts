@@ -80,6 +80,8 @@ export interface AssetRecord {
   location?: string;
   description?: string;
   acquisitionDate?: string;
+  primaryImageUrl?: string;
+  imageUrls?: string[];
   createdAt: string;
   updatedAt: string;
 }

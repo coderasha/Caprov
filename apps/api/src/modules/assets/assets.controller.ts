@@ -8,6 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  IsArray,
   IsEnum,
   IsNumber,
   IsOptional,
@@ -65,6 +66,15 @@ class CreateAssetDto {
   @IsOptional()
   @IsString()
   acquisitionDate?: string;
+
+  @IsOptional()
+  @IsString()
+  primaryImageUrl?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  imageUrls?: string[];
 }
 
 class OwnershipDto {

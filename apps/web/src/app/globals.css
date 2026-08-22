@@ -134,64 +134,52 @@ canvas {
   word-break: break-word;
 }
 
-.landing-hero__plane {
+.landing-hero__backdrop {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(118deg, rgba(239, 236, 230, 0.42) 0%, rgba(239, 236, 230, 0.18) 38%, rgba(12, 18, 32, 0.18) 100%),
-    url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2400&q=80')
-      center / cover no-repeat;
-  transform: scale(1.04);
-  animation: landing-pan 28s ease-in-out infinite alternate;
+    linear-gradient(180deg, rgba(251, 250, 247, 0.96) 0%, rgba(239, 236, 230, 0.98) 48%, rgba(229, 225, 216, 0.92) 100%);
 }
 
-.landing-hero__veil {
+.landing-hero__mesh {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 70% 55% at 18% 42%, rgba(239, 236, 230, 0.92) 0%, rgba(239, 236, 230, 0.55) 42%, transparent 72%),
-    linear-gradient(180deg, rgba(239, 236, 230, 0.55) 0%, rgba(239, 236, 230, 0.22) 48%, rgba(239, 236, 230, 0.72) 100%);
+    linear-gradient(rgba(10, 15, 26, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10, 15, 26, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.36), transparent 78%);
 }
 
-.landing-hero__grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(10, 15, 26, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(10, 15, 26, 0.045) 1px, transparent 1px);
-  background-size: 58px 58px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.4), transparent 82%);
-}
-
-.landing-hero__orb {
+.landing-hero__halo {
   position: absolute;
   border-radius: 999px;
-  filter: blur(10px);
-  opacity: 0.75;
-  animation: landing-float 10s ease-in-out infinite;
+  filter: blur(20px);
+  opacity: 0.55;
+  animation: landing-float 16s ease-in-out infinite;
 }
 
-.landing-hero__orb--one {
-  top: 12%;
-  right: 10%;
+.landing-hero__halo--one {
+  top: 9%;
+  right: 7%;
+  height: 260px;
+  width: 260px;
+  background: radial-gradient(circle, rgba(157, 107, 36, 0.14) 0%, rgba(157, 107, 36, 0.01) 72%);
+}
+
+.landing-hero__halo--two {
+  bottom: 18%;
+  left: -2%;
   height: 220px;
   width: 220px;
-  background: radial-gradient(circle, rgba(157, 107, 36, 0.22) 0%, rgba(157, 107, 36, 0.02) 70%);
-}
-
-.landing-hero__orb--two {
-  bottom: 14%;
-  right: 28%;
-  height: 160px;
-  width: 160px;
-  background: radial-gradient(circle, rgba(15, 111, 104, 0.18) 0%, rgba(15, 111, 104, 0.02) 72%);
-  animation-delay: 1.4s;
+  background: radial-gradient(circle, rgba(15, 111, 104, 0.10) 0%, rgba(15, 111, 104, 0.01) 70%);
+  animation-delay: 2.2s;
 }
 
 .landing-fade {
   opacity: 0;
-  transform: translateY(18px);
-  animation: landing-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform: translateY(14px);
+  animation: landing-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .landing-fade--delay-1 {
@@ -203,7 +191,7 @@ canvas {
 }
 
 .landing-cta {
-  box-shadow: 0 10px 30px rgba(12, 18, 32, 0.18);
+  box-shadow: 0 12px 28px rgba(12, 18, 32, 0.16);
 }
 
 .landing-cta:hover {
@@ -228,7 +216,7 @@ canvas {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(157, 107, 36, 0.18));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(10, 15, 26, 0.06));
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
@@ -244,28 +232,18 @@ canvas {
   }
 }
 
-@keyframes landing-pan {
-  from {
-    transform: scale(1.04) translate3d(0, 0, 0);
-  }
-  to {
-    transform: scale(1.08) translate3d(-1.5%, -1%, 0);
-  }
-}
-
 @keyframes landing-float {
   0%,
   100% {
     transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translate3d(0, -14px, 0);
+    transform: translate3d(0, -10px, 0);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .landing-hero__plane,
-  .landing-hero__orb,
+  .landing-hero__halo,
   .landing-fade,
   .landing-cta,
   .landing-proof,

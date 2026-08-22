@@ -14,9 +14,11 @@ interface ListingRow {
   id: string;
   title: string;
   status: string;
+  offeringType: 'SALE' | 'LEASE';
   askPrice: number;
   currency: string;
   remainingBps: number;
+  asset?: { name: string } | null;
 }
 
 interface OrderRow {
@@ -56,7 +58,9 @@ export default function TradingPage() {
   const openListings = useMemo(
     () =>
       (listings.data ?? []).filter(
-        (item) => item.status === 'OPEN' || item.status === 'PARTIALLY_FILLED',
+        (item) =>
+          item.offeringType === 'SALE' &&
+          (item.status === 'OPEN' || item.status === 'PARTIALLY_FILLED'),
       ),
     [listings.data],
   );
@@ -98,7 +102,7 @@ export default function TradingPage() {
                 <option value="">Select listing</option>
                 {openListings.map((listing) => (
                   <option key={listing.id} value={listing.id}>
-                    {listing.title}
+                    {listing.title} {listing.asset?.name ? `· ${listing.asset.name}` : ''}
                   </option>
                 ))}
               </Select>

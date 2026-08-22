@@ -10,7 +10,10 @@ describe('TokenizationController', () => {
   const user: AuthUser = {
     id: 'usr_test',
     email: 'test@caprov.io',
+    fullName: 'Test User',
     organizationId: 'org_test',
+    organizationName: 'Test Org',
+    organizationSlug: 'test-org',
     roles: ['ORG_ADMIN'],
   };
 
@@ -91,4 +94,3 @@ function createDbMock(store: CaprovData): DatabaseService {
     },
   } as DatabaseService;
 }
-

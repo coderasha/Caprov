@@ -8,13 +8,24 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { IsInt, IsNumber, IsOptional, IsString, Max, Min, MinLength } from 'class-validator';
-import type { CurrencyCode, MarketplaceListing } from '@caprov/types';
+import {
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  MinLength,
+} from 'class-validator';
+import type { CurrencyCode, MarketplaceListing, TokenPosition } from '@caprov/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import type { AuthUser } from '../../common/types/auth-user';
+import { EthereumSepoliaTokenService } from '../../infrastructure/blockchain/ethereum-sepolia-token.service';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import { createId } from '../../infrastructure/database/ids';
 import { AuditService } from '../audit/audit.service';
@@ -27,6 +38,19 @@ class CreateListingDto {
   @IsString()
   @MinLength(2)
   title?: string;
+
+  @IsOptional()
+  @IsEnum(['SALE', 'LEASE'])
+  offeringType?: 'SALE' | 'LEASE';
+
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  summary?: string;
+
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
 
   @IsOptional()
   @IsNumber()
@@ -42,6 +66,30 @@ class CreateListingDto {
   @Min(1)
   @Max(10_000)
   quantityBps?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  leaseRate?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  leaseTermMonths?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  tokenizeOnCreate?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  tokenSupply?: number;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(42)
+  recipientAddress?: string;
 }
 
 @Controller('marketplace')
@@ -50,6 +98,7 @@ export class MarketplaceController {
   constructor(
     private readonly db: DatabaseService,
     private readonly audit: AuditService,
+    private readonly sepolia: EthereumSepoliaTokenService,
   ) {}
 
   @Get()
@@ -80,7 +129,7 @@ export class MarketplaceController {
 
   @Post('listings')
   @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
-  create(@CurrentUser() user: AuthUser, @Body() dto: CreateListingDto) {
+  async create(@CurrentUser() user: AuthUser, @Body() dto: CreateListingDto) {
     const asset = this.db.snapshot.assets.find(
       (item) => item.id === dto.assetId && item.organizationId === user.organizationId,
     );
@@ -89,24 +138,76 @@ export class MarketplaceController {
       .filter((item) => item.assetId === asset.id)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
     const now = new Date().toISOString();
-    const quantityBps = dto.quantityBps ?? 10_000;
+    const offeringType = dto.offeringType ?? 'SALE';
+    const quantityBps = offeringType === 'LEASE' ? 10_000 : (dto.quantityBps ?? 10_000);
+    let token: TokenPosition | null = this.db.snapshot.tokens
+      .filter((item) => item.assetId === asset.id)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null;
+    let mintedToken: TokenPosition | null = null;
+
+    if (dto.tokenizeOnCreate) {
+      const pendingId = createId('tok');
+      const mint = await this.sepolia.mintAssetToken({
+        assetId: asset.id,
+        tokenId: pendingId,
+        supply: dto.tokenSupply ?? 1_000_000,
+        recipientAddress: dto.recipientAddress,
+      });
+      mintedToken = {
+        id: pendingId,
+        organizationId: user.organizationId,
+        assetId: asset.id,
+        status:
+          mint.status === 'CONFIRMED' ? 'CONFIRMED' : mint.status === 'FAILED' ? 'FAILED' : 'SIMULATED',
+        chainId: mint.chainId,
+        chainName: mint.chainName,
+        contractAddress: mint.contractAddress,
+        tokenId: mint.tokenId,
+        supply: mint.supply,
+        recipientAddress: mint.recipientAddress,
+        txHash: mint.txHash,
+        explorerUrl: mint.explorerUrl,
+        mode: mint.mode,
+        createdAt: now,
+        updatedAt: now,
+      };
+      token = mintedToken;
+    }
+
+    const askPrice =
+      offeringType === 'LEASE'
+        ? dto.leaseRate ?? dto.askPrice ?? 0
+        : dto.askPrice ?? valuation?.payload.amount ?? 0;
     const listing: MarketplaceListing = {
       id: createId('lst'),
       organizationId: user.organizationId,
       assetId: asset.id,
-      title: dto.title ?? `${asset.name} interest`,
+      title: dto.title ?? `${asset.name} ${offeringType === 'LEASE' ? 'lease' : 'interest'}`,
+      offeringType,
       status: 'OPEN',
-      askPrice: dto.askPrice ?? valuation?.payload.amount ?? 0,
+      summary: dto.summary?.trim(),
+      imageUrl: dto.imageUrl?.trim() || asset.primaryImageUrl || asset.imageUrls?.[0],
+      askPrice,
       currency: dto.currency ?? valuation?.payload.currency ?? asset.currency,
+      leaseRate: offeringType === 'LEASE' ? dto.leaseRate ?? dto.askPrice : undefined,
+      leaseTermMonths: offeringType === 'LEASE' ? dto.leaseTermMonths : undefined,
+      tokenPositionId: token?.id,
+      tokenizationMode: token?.mode,
       quantityBps,
       remainingBps: quantityBps,
       createdAt: now,
       updatedAt: now,
     };
-    if (!listing.askPrice) {
+    if (offeringType === 'SALE' && !listing.askPrice) {
       throw new BadRequestException('Ask price required when asset has no valuation mark');
     }
+    if (offeringType === 'LEASE' && !listing.leaseRate) {
+      throw new BadRequestException('Lease rate is required for lease listings');
+    }
     this.db.mutate((draft) => {
+      if (mintedToken) {
+        draft.tokens.unshift(mintedToken);
+      }
       draft.listings.unshift(listing);
     });
     this.audit.log({
@@ -115,7 +216,12 @@ export class MarketplaceController {
       action: 'marketplace.listing_created',
       entityType: 'Listing',
       entityId: listing.id,
-      metadata: { assetId: asset.id, askPrice: listing.askPrice },
+      metadata: {
+        assetId: asset.id,
+        askPrice: listing.askPrice,
+        offeringType: listing.offeringType,
+        tokenPositionId: token?.id,
+      },
     });
     return this.hydrate(listing);
   }
@@ -154,6 +260,12 @@ export class MarketplaceController {
       this.db.snapshot.risks
         .filter((item) => item.assetId === listing.assetId)
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null;
-    return { ...listing, asset, valuation, risk };
+    const token =
+      this.db.snapshot.tokens.find((item) => item.id === listing.tokenPositionId) ??
+      this.db.snapshot.tokens
+        .filter((item) => item.assetId === listing.assetId)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ??
+      null;
+    return { ...listing, asset, valuation, risk, token };
   }
 }

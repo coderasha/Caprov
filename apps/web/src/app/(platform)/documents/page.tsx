@@ -11,7 +11,7 @@ import type { DocumentRow, HydratedAsset } from '@/lib/types';
 import type { DocumentType } from '@caprov/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export default function DocumentsPage() {
   const queryClient = useQueryClient();
@@ -22,6 +22,7 @@ export default function DocumentsPage() {
     extractedText: '',
   });
   const [file, setFile] = useState<File | null>(null);
+  const [formError, setFormError] = useState('');
   const docsQuery = useQuery({
     queryKey: ['documents'],
     queryFn: async () => (await api.get<DocumentRow[]>('/documents')).data,
@@ -40,6 +41,7 @@ export default function DocumentsPage() {
       }),
     onSuccess: async () => {
       setForm({ name: '', type: 'OTHER', assetId: '', extractedText: '' });
+      setFormError('');
       await queryClient.invalidateQueries({ queryKey: ['documents'] });
     },
   });
@@ -66,9 +68,17 @@ export default function DocumentsPage() {
     onSuccess: async () => {
       setForm({ name: '', type: 'OTHER', assetId: '', extractedText: '' });
       setFile(null);
+      setFormError('');
       await queryClient.invalidateQueries({ queryKey: ['documents'] });
     },
   });
+  const documents = docsQuery.data ?? [];
+  const assetNameById = useMemo(
+    () => Object.fromEntries((assetsQuery.data ?? []).map((asset) => [asset.id, asset.name])),
+    [assetsQuery.data],
+  );
+  const assets = assetsQuery.data ?? [];
+  const linkedDocuments = documents.filter((document) => document.assetId).length;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -76,7 +86,44 @@ export default function DocumentsPage() {
         eyebrow="Documents"
         title="Upload source documents"
         description="Add the files behind an asset. CAPROV reads them, extracts key details, and makes them easier to review."
+        actions={
+          <Link href="/assets/new">
+            <Button variant="secondary">Create asset first</Button>
+          </Link>
+        }
       />
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          { label: 'Documents', value: String(documents.length), hint: 'Files and text ingested' },
+          { label: 'Linked to assets', value: String(linkedDocuments), hint: 'Documents already tied to an asset' },
+          { label: 'Assets ready', value: String(assets.length), hint: 'Assets available for document linking' },
+          { label: 'Unlinked docs', value: String(documents.length - linkedDocuments), hint: 'May need operator cleanup' },
+        ].map((stat) => (
+          <Card key={stat.label} className="p-5">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">{stat.label}</p>
+            <p className="mt-4 font-display text-2xl font-semibold tracking-[-0.03em] text-[var(--ink)]">
+              {stat.value}
+            </p>
+            <p className="mt-2 text-xs text-[var(--muted)]">{stat.hint}</p>
+          </Card>
+        ))}
+      </section>
+      {assets.length === 0 ? (
+        <Card className="p-6">
+          <h2 className="font-display text-lg font-semibold tracking-[-0.02em] text-[var(--ink)]">
+            Create an asset before you start uploading
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted)]">
+            The cleanest workflow is asset first, then documents. That way every uploaded file is connected to the
+            right record, and Asset DNA, valuation, risk, and downstream workflows stay organized.
+          </p>
+          <div className="mt-4">
+            <Link href="/assets/new">
+              <Button>Create asset</Button>
+            </Link>
+          </div>
+        </Card>
+      ) : null}
       <Card className="p-5">
         <div className="grid gap-3 md:grid-cols-3">
           {[
@@ -98,23 +145,38 @@ export default function DocumentsPage() {
               <tr>
                 <th className="px-4 py-3.5 font-medium sm:px-6">Document</th>
                 <th className="px-3 py-3.5 font-medium">Type</th>
+                <th className="px-3 py-3.5 font-medium">Asset</th>
                 <th className="px-4 py-3.5 font-medium sm:px-6">Ingested</th>
               </tr>
             </thead>
             <tbody>
-              {(docsQuery.data ?? []).map((document) => (
-                <tr key={document.id} className="border-t border-[var(--line)]/80">
-                  <td className="px-4 py-4 sm:px-6">
-                    <Link href={`/documents/${document.id}`} className="font-medium text-[var(--ink)] hover:underline">
-                      {document.name}
-                    </Link>
+              {documents.length ? (
+                documents.map((document) => (
+                  <tr key={document.id} className="border-t border-[var(--line)]/80">
+                    <td className="px-4 py-4 sm:px-6">
+                      <Link href={`/documents/${document.id}`} className="font-medium text-[var(--ink)] hover:underline">
+                        {document.name}
+                      </Link>
+                    </td>
+                    <td className="px-3 py-4">
+                      <Badge>{documentTypeLabel[document.type]}</Badge>
+                    </td>
+                    <td className="px-3 py-4 text-[var(--muted)]">
+                      {document.assetId ? assetNameById[document.assetId] ?? 'Linked asset' : 'Unassigned'}
+                    </td>
+                    <td className="px-4 py-4 text-[var(--muted)] sm:px-6">{formatDate(document.createdAt)}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr className="border-t border-[var(--line)]/80">
+                  <td colSpan={4} className="px-6 py-8">
+                    <p className="text-sm font-medium text-[var(--ink)]">No documents yet</p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">
+                      Upload the first source file to kick off extraction and downstream Asset DNA review.
+                    </p>
                   </td>
-                  <td className="px-3 py-4">
-                    <Badge>{documentTypeLabel[document.type]}</Badge>
-                  </td>
-                  <td className="px-4 py-4 text-[var(--muted)] sm:px-6">{formatDate(document.createdAt)}</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
           </div>
@@ -125,6 +187,11 @@ export default function DocumentsPage() {
             className="mt-4 grid gap-3"
             onSubmit={(event) => {
               event.preventDefault();
+              setFormError('');
+              if (!file && !form.extractedText.trim()) {
+                setFormError('Add a file or paste text so the document has something to ingest.');
+                return;
+              }
               if (file) {
                 upload.mutate();
                 return;
@@ -175,6 +242,7 @@ export default function DocumentsPage() {
                 placeholder="Optional: paste text directly, or leave blank when uploading PDF / DOCX."
               />
             </Field>
+            {formError ? <p className="text-sm text-[var(--danger)]">{formError}</p> : null}
             <Button type="submit" disabled={ingest.isPending || upload.isPending}>
               {upload.isPending || ingest.isPending
                 ? 'Saving…'

@@ -67,13 +67,16 @@ export class TradingController {
   }
 
   @Post('orders')
-  @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
+  @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN', 'COMPLIANCE', 'VIEWER')
   createOrder(@CurrentUser() user: AuthUser, @Body() dto: CreateOrderDto) {
     const listing = this.db.snapshot.listings.find(
       (item) => item.id === dto.listingId && item.organizationId === user.organizationId,
     );
     if (!listing || listing.status === 'CLOSED' || listing.status === 'CANCELLED') {
       throw new NotFoundException('Open listing not found');
+    }
+    if (listing.offeringType === 'LEASE') {
+      throw new BadRequestException('Lease listings are not tradeable. Contact the org admin to lease.');
     }
     if (dto.quantityBps > listing.remainingBps) {
       throw new BadRequestException('Order quantity exceeds remaining listing interest');
@@ -114,7 +117,7 @@ export class TradingController {
   }
 
   @Post('orders/:id/match')
-  @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
+  @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN', 'COMPLIANCE', 'VIEWER')
   matchOrder(@CurrentUser() user: AuthUser, @Param('id') id: string) {
     const order = this.db.snapshot.orders.find(
       (item) => item.id === id && item.organizationId === user.organizationId,
@@ -125,6 +128,9 @@ export class TradingController {
     const listing = this.db.snapshot.listings.find((item) => item.id === order.listingId);
     if (!listing || listing.remainingBps <= 0) {
       throw new BadRequestException('Listing has no remaining quantity');
+    }
+    if (listing.offeringType === 'LEASE') {
+      throw new BadRequestException('Lease listings cannot be matched as trades');
     }
     const fillBps = Math.min(order.quantityBps - order.filledBps, listing.remainingBps);
     if (fillBps <= 0) {

@@ -16,7 +16,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import type { AuthSession } from '@caprov/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 function statusTone(status: PlatformOrganizationRow['status']) {
   return status === 'ACTIVE' ? 'ok' : 'danger';
@@ -50,24 +50,19 @@ export default function PlatformAdminPage() {
     queryFn: async () => (await api.get<PlatformOrganizationRow[]>('/organizations')).data,
     enabled: roles.includes('PLATFORM_ADMIN'),
   });
+  const fallbackOrgId = orgsQuery.data?.[0]?.id ?? '';
+  const effectiveSelectedOrgId = selectedOrgId || fallbackOrgId;
   const requestsQuery = useQuery({
     queryKey: ['org-access-requests'],
     queryFn: async () => (await api.get<OrganizationAccessRequestRow[]>('/organizations/requests')).data,
     enabled: roles.includes('PLATFORM_ADMIN'),
   });
   const membersQuery = useQuery({
-    queryKey: ['platform-organization-members', selectedOrgId],
+    queryKey: ['platform-organization-members', effectiveSelectedOrgId],
     queryFn: async () =>
-      (await api.get<MemberRow[]>(`/organizations/${selectedOrgId}/members`)).data,
-    enabled: roles.includes('PLATFORM_ADMIN') && Boolean(selectedOrgId),
+      (await api.get<MemberRow[]>(`/organizations/${effectiveSelectedOrgId}/members`)).data,
+    enabled: roles.includes('PLATFORM_ADMIN') && Boolean(effectiveSelectedOrgId),
   });
-
-  useEffect(() => {
-    const firstOrganization = orgsQuery.data?.[0];
-    if (!selectedOrgId && firstOrganization) {
-      setSelectedOrgId(firstOrganization.id);
-    }
-  }, [orgsQuery.data, selectedOrgId]);
 
   const switchOrg = useMutation({
     mutationFn: async (organizationId: string) =>
@@ -110,11 +105,13 @@ export default function PlatformAdminPage() {
     },
   });
   const assignOrgAdmin = useMutation({
-    mutationFn: async () => api.post(`/organizations/${selectedOrgId}/org-admins`, adminForm),
+    mutationFn: async () => api.post(`/organizations/${effectiveSelectedOrgId}/org-admins`, adminForm),
     onSuccess: async () => {
       setAdminForm({ fullName: '', email: '', password: '', title: '' });
       await queryClient.invalidateQueries({ queryKey: ['platform-organizations'] });
-      await queryClient.invalidateQueries({ queryKey: ['platform-organization-members', selectedOrgId] });
+      await queryClient.invalidateQueries({
+        queryKey: ['platform-organization-members', effectiveSelectedOrgId],
+      });
     },
   });
 
@@ -136,7 +133,8 @@ export default function PlatformAdminPage() {
   const organizations = orgsQuery.data ?? [];
   const requests = requestsQuery.data ?? [];
   const pendingRequests = requests.filter((item) => item.status === 'PENDING');
-  const selectedOrganization = organizations.find((item) => item.id === selectedOrgId) ?? null;
+  const selectedOrganization =
+    organizations.find((item) => item.id === effectiveSelectedOrgId) ?? null;
   const selectedMembers = membersQuery.data ?? [];
   const selectedOrgAdmins = selectedMembers.filter((item) => item.role === 'ORG_ADMIN');
 
@@ -314,7 +312,7 @@ export default function PlatformAdminPage() {
               <tbody>
                 {organizations.map((item) => {
                   const active = organization?.id === item.id;
-                  const selected = selectedOrgId === item.id;
+                  const selected = effectiveSelectedOrgId === item.id;
                   return (
                     <tr
                       key={item.id}

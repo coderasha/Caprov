@@ -6,23 +6,26 @@
       "slug": "meridian-capital",
       "llmModelId": "caprov-deterministic",
       "createdAt": "2021-04-12T09:00:00.000Z",
-      "updatedAt": "2026-08-17T19:04:57.353Z"
+      "updatedAt": "2026-08-17T19:04:57.353Z",
+      "status": "ACTIVE"
     },
     {
       "id": "org_caprov",
       "name": "Caprov Platform",
       "slug": "caprov-platform",
-      "llmModelId": "caprov-deterministic",
+      "llmModelId": "openai-gpt-4.1",
       "createdAt": "2020-01-06T09:00:00.000Z",
-      "updatedAt": "2026-08-10T10:00:00.000Z"
+      "updatedAt": "2026-08-10T10:00:00.000Z",
+      "status": "ACTIVE"
     },
     {
       "id": "org_0906d5c35cfe4547",
       "name": "ABC Pvt Ltd",
       "slug": "abc-pvt-ltd-09485a",
-      "llmModelId": "caprov-deterministic",
+      "llmModelId": "openai-gpt-4.1",
       "createdAt": "2026-08-17T17:01:46.037Z",
-      "updatedAt": "2026-08-17T17:01:46.037Z"
+      "updatedAt": "2026-08-17T17:01:46.037Z",
+      "status": "ACTIVE"
     }
   ],
   "users": [
@@ -55,9 +58,9 @@
     },
     {
       "id": "usr_caprov_admin",
-      "email": "admin@caprov.io",
-      "passwordHash": "$2b$10$BC2n3Cv1/CdTVVawvSrN/Om2l2fQhlv1kqdIyTMNWZl7e3MyCLgO6",
-      "fullName": "Caprov Admin",
+      "email": "priya@caprov.io",
+      "passwordHash": "$2b$10$LhbNojqm6me2O6LyYP6Cj.MyPdWAhXjlqcsRzvJ3AkCnk4dPqBpYq",
+      "fullName": "Priya Nair",
       "title": "Platform Administrator",
       "createdAt": "2020-01-06T09:00:00.000Z",
       "updatedAt": "2026-08-10T10:00:00.000Z"
@@ -122,7 +125,8 @@
       "description": "",
       "acquisitionDate": "2026-08-14",
       "createdAt": "2026-08-17T17:48:57.239Z",
-      "updatedAt": "2026-08-17T17:48:57.239Z"
+      "updatedAt": "2026-08-17T17:48:57.239Z",
+      "imageUrls": []
     },
     {
       "id": "ast_35e56d51f981470a",
@@ -136,7 +140,8 @@
       "description": "",
       "acquisitionDate": "2026-08-15",
       "createdAt": "2026-08-17T16:59:21.134Z",
-      "updatedAt": "2026-08-17T16:59:21.134Z"
+      "updatedAt": "2026-08-17T16:59:21.134Z",
+      "imageUrls": []
     },
     {
       "id": "ast_harbourview",
@@ -150,7 +155,8 @@
       "description": "Class A office tower with a diversified tenant roster and 312,000 sq ft NIA.",
       "acquisitionDate": "2024-03-18",
       "createdAt": "2024-03-18T12:00:00.000Z",
-      "updatedAt": "2026-08-10T10:00:00.000Z"
+      "updatedAt": "2026-08-10T10:00:00.000Z",
+      "imageUrls": []
     },
     {
       "id": "ast_aurelia",
@@ -164,7 +170,8 @@
       "description": "Senior secured mid-market private credit commitment with quarterly NAV reporting.",
       "acquisitionDate": "2023-11-02",
       "createdAt": "2023-11-02T12:00:00.000Z",
-      "updatedAt": "2026-08-10T10:00:00.000Z"
+      "updatedAt": "2026-08-10T10:00:00.000Z",
+      "imageUrls": []
     },
     {
       "id": "ast_soleil",
@@ -178,7 +185,8 @@
       "description": "42-hectare AOC vineyard estate operated with a local wine-making partner.",
       "acquisitionDate": "2022-09-08",
       "createdAt": "2022-09-08T12:00:00.000Z",
-      "updatedAt": "2026-08-10T10:00:00.000Z"
+      "updatedAt": "2026-08-10T10:00:00.000Z",
+      "imageUrls": []
     },
     {
       "id": "ast_nimbus",
@@ -192,7 +200,8 @@
       "description": "2018 Gulfstream G650ER held in an Isle of Man aviation SPV.",
       "acquisitionDate": "2024-01-19",
       "createdAt": "2024-01-19T12:00:00.000Z",
-      "updatedAt": "2026-08-10T10:00:00.000Z"
+      "updatedAt": "2026-08-10T10:00:00.000Z",
+      "imageUrls": []
     },
     {
       "id": "ast_kline",
@@ -206,7 +215,8 @@
       "description": "Color-field canvas with gallery and exhibition provenance from 1998.",
       "acquisitionDate": "2019-06-04",
       "createdAt": "2019-06-04T12:00:00.000Z",
-      "updatedAt": "2026-08-10T10:00:00.000Z"
+      "updatedAt": "2026-08-10T10:00:00.000Z",
+      "imageUrls": []
     },
     {
       "id": "ast_cedar",
@@ -220,7 +230,8 @@
       "description": "Multi-let industrial and logistics campus with 98% occupancy.",
       "acquisitionDate": "2023-07-21",
       "createdAt": "2023-07-21T12:00:00.000Z",
-      "updatedAt": "2026-08-10T10:00:00.000Z"
+      "updatedAt": "2026-08-10T10:00:00.000Z",
+      "imageUrls": []
     }
   ],
   "ownerships": [
@@ -294,7 +305,13 @@
       "storageKey": "inline/txt_bb4f3b8f4a814037.txt",
       "sizeBytes": 102,
       "extractedText": "INDEPENDENT VALUATION\nMarket value: GBP 99,500,000\nAs of: 1 August 2026\nOccupancy: 95%\nWALT: 6.8 years",
-      "createdAt": "2026-08-17T19:04:57.345Z"
+      "createdAt": "2026-08-17T19:04:57.345Z",
+      "groupKey": "ast_455d4a43ed9943c9:VALUATION_MEMO",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/inline/txt_bb4f3b8f4a814037.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_1b9503905b7448e3",
@@ -306,7 +323,13 @@
       "mimeType": "application/pdf",
       "storageKey": "2026-08-17/bin_54129b62fe8b4091-Real_Estate_Property_Test_Document_40_Pages.pdf",
       "sizeBytes": 69809,
-      "createdAt": "2026-08-17T17:49:55.070Z"
+      "createdAt": "2026-08-17T17:49:55.070Z",
+      "groupKey": "ast_455d4a43ed9943c9:VALUATION_MEMO",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/2026-08-17/bin_54129b62fe8b4091-Real_Estate_Property_Test_Document_40_Pages.pdf",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_7bf1aeb0159844b3",
@@ -319,7 +342,13 @@
       "storageKey": "inline/txt_b620bf41012a499b.txt",
       "sizeBytes": 11,
       "extractedText": "ekdjgkklfdg",
-      "createdAt": "2026-08-17T17:00:01.445Z"
+      "createdAt": "2026-08-17T17:00:01.445Z",
+      "groupKey": "ast_35e56d51f981470a:SPA",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/inline/txt_b620bf41012a499b.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_c786e00dd2694dcd",
@@ -332,7 +361,13 @@
       "storageKey": "inline/txt_06343c4a4e994f06.txt",
       "sizeBytes": 0,
       "extractedText": "",
-      "createdAt": "2026-08-17T16:52:57.381Z"
+      "createdAt": "2026-08-17T16:52:57.381Z",
+      "groupKey": "ast_soleil:FINANCIAL_STATEMENT",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/inline/txt_06343c4a4e994f06.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_hv_spa",
@@ -345,7 +380,13 @@
       "storageKey": "seed/doc_hv_spa.txt",
       "sizeBytes": 290,
       "extractedText": "SHARE PURCHASE AGREEMENT\nHarbourview Tower SPV Limited\nDate: 18 March 2024\nBuyer: Meridian Capital Partners LLP\nSeller: Northbridge Estates Ltd\nPurchase price: GBP 86,400,000\nOwnership transferred: 100%\nProperty: 14 Harbourview, Canary Wharf, London E14 5AB\nGoverning law: England and Wales",
-      "createdAt": "2024-03-18T13:00:00.000Z"
+      "createdAt": "2024-03-18T13:00:00.000Z",
+      "groupKey": "ast_harbourview:SPA",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_hv_spa.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_hv_title",
@@ -358,7 +399,13 @@
       "storageKey": "seed/doc_hv_title.txt",
       "sizeBytes": 255,
       "extractedText": "HM LAND REGISTRY EXTRACT\nTitle number: EGL938441\nProperty: Harbourview Tower, 14 Harbourview, London E14 5AB\nProprietor: Harbourview Tower SPV Limited\nLegal ownership: 100% Harbourview Tower SPV Limited\nCharges: None recorded\nJurisdiction: England & Wales",
-      "createdAt": "2024-03-18T13:05:00.000Z"
+      "createdAt": "2024-03-18T13:05:00.000Z",
+      "groupKey": "ast_harbourview:TITLE_DEED",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_hv_title.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_hv_val",
@@ -371,7 +418,13 @@
       "storageKey": "seed/doc_hv_val.txt",
       "sizeBytes": 258,
       "extractedText": "INDEPENDENT VALUATION MEMORANDUM\nAsset: Harbourview Tower\nValuer: Knightvale Advisory\nAs of: 30 June 2026\nMarket value: GBP 92,800,000\nMethod: Income capitalization\nCap rate: 5.35%\nNIA: 312,000 sq ft\nOccupancy: 94%\nWALT: 7.4 years\nPassing rent: GBP 5,120,000",
-      "createdAt": "2026-07-02T09:00:00.000Z"
+      "createdAt": "2026-07-02T09:00:00.000Z",
+      "groupKey": "ast_harbourview:VALUATION_MEMO",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_hv_val.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_hv_ins",
@@ -384,7 +437,13 @@
       "storageKey": "seed/doc_hv_ins.txt",
       "sizeBytes": 190,
       "extractedText": "PROPERTY INSURANCE CERTIFICATE\nInsured: Harbourview Tower SPV Limited\nPeriod: 1 September 2025 to 31 August 2026\nDeclared value: GBP 95,000,000\nCoverage: All risks of physical loss or damage",
-      "createdAt": "2025-09-01T09:00:00.000Z"
+      "createdAt": "2025-09-01T09:00:00.000Z",
+      "groupKey": "ast_harbourview:INSURANCE",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_hv_ins.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_hv_kyc",
@@ -397,7 +456,13 @@
       "storageKey": "seed/doc_hv_kyc.txt",
       "sizeBytes": 196,
       "extractedText": "KYC / OWNERSHIP PACK\nUltimate parent: Meridian Capital Partners LLP\nSPV: Harbourview Tower SPV Limited\nBeneficial ownership: 100% Meridian Capital Partners LLP\nDirectors: Elena Voss, Jonathan Hale",
-      "createdAt": "2024-03-10T09:00:00.000Z"
+      "createdAt": "2024-03-10T09:00:00.000Z",
+      "groupKey": "ast_harbourview:KYC",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_hv_kyc.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_au_lpa",
@@ -410,7 +475,13 @@
       "storageKey": "seed/doc_au_lpa.txt",
       "sizeBytes": 420,
       "extractedText": "LIMITED PARTNERSHIP AGREEMENT\nAurelia Private Credit Fund III\nCommitment: USD 50,000,000\nLP: Meridian Capital Partners LLP\nGP: Aurelia Credit Partners LP\nFinal close: 2 November 2023",
-      "createdAt": "2023-11-02T14:00:00.000Z"
+      "createdAt": "2023-11-02T14:00:00.000Z",
+      "groupKey": "ast_aurelia:LPA",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_au_lpa.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_au_nav",
@@ -423,7 +494,13 @@
       "storageKey": "seed/doc_au_nav.txt",
       "sizeBytes": 380,
       "extractedText": "NAV STATEMENT\nAurelia Private Credit Fund III\nAs of: 30 June 2026\nLatest NAV: USD 48,250,000\nCalled capital: 96%\nCurrent yield: 11.4%\nECL overlay: 1.8%",
-      "createdAt": "2026-07-12T14:00:00.000Z"
+      "createdAt": "2026-07-12T14:00:00.000Z",
+      "groupKey": "ast_aurelia:FINANCIAL_STATEMENT",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_au_nav.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_au_kyc",
@@ -436,7 +513,13 @@
       "storageKey": "seed/doc_au_kyc.txt",
       "sizeBytes": 220,
       "extractedText": "KYC SUMMARY\nAurelia Credit Partners LP\nDomicile: Delaware\nAML status: Approved\nLast review: 12 January 2026",
-      "createdAt": "2026-01-12T14:00:00.000Z"
+      "createdAt": "2026-01-12T14:00:00.000Z",
+      "groupKey": "ast_aurelia:KYC",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_au_kyc.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_so_deed",
@@ -449,7 +532,13 @@
       "storageKey": "seed/doc_so_deed.txt",
       "sizeBytes": 300,
       "extractedText": "NOTARIAL DEED\nSoleil Estate SARL\nEstate size: 42 hectares\nAppellation: Saint-Émilion AOC\nLegal ownership: 100%\nAcquisition date: 8 September 2022\nPurchase price: EUR 16,900,000",
-      "createdAt": "2022-09-08T14:00:00.000Z"
+      "createdAt": "2022-09-08T14:00:00.000Z",
+      "groupKey": "ast_soleil:TITLE_DEED",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_so_deed.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_so_val",
@@ -462,7 +551,13 @@
       "storageKey": "seed/doc_so_val.txt",
       "sizeBytes": 240,
       "extractedText": "APPRAISAL\nDomaine Soleil\nMarket value: EUR 18,600,000\nAs of: 15 May 2026\nMethod: Comparable vineyard transactions",
-      "createdAt": "2026-05-20T14:00:00.000Z"
+      "createdAt": "2026-05-20T14:00:00.000Z",
+      "groupKey": "ast_soleil:VALUATION_MEMO",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_so_val.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_so_ins",
@@ -475,7 +570,13 @@
       "storageKey": "seed/doc_so_ins.txt",
       "sizeBytes": 180,
       "extractedText": "INSURANCE CERTIFICATE\nInsured: Soleil Estate SARL\nDeclared value: EUR 19,000,000\nPeriod: 2026",
-      "createdAt": "2026-01-05T14:00:00.000Z"
+      "createdAt": "2026-01-05T14:00:00.000Z",
+      "groupKey": "ast_soleil:INSURANCE",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_so_ins.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_ni_sale",
@@ -488,7 +589,13 @@
       "storageKey": "seed/doc_ni_sale.txt",
       "sizeBytes": 260,
       "extractedText": "AIRCRAFT BILL OF SALE\nNimbus Aviation IOM Ltd\nSerial number: G650-6231\nType: Gulfstream G650ER\nPurchase price: USD 34,200,000\nDate: 19 January 2024",
-      "createdAt": "2024-01-19T14:00:00.000Z"
+      "createdAt": "2024-01-19T14:00:00.000Z",
+      "groupKey": "ast_nimbus:SPA",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_ni_sale.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_ni_val",
@@ -501,7 +608,13 @@
       "storageKey": "seed/doc_ni_val.txt",
       "sizeBytes": 240,
       "extractedText": "AVIATION APPRAISAL\nMarket value: USD 31,400,000\nAirframe hours: 2,140\nEngines: JSSI enrolled\nAs of: 20 April 2026",
-      "createdAt": "2026-04-22T14:00:00.000Z"
+      "createdAt": "2026-04-22T14:00:00.000Z",
+      "groupKey": "ast_nimbus:VALUATION_MEMO",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_ni_val.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_ni_ins",
@@ -514,7 +627,13 @@
       "storageKey": "seed/doc_ni_ins.txt",
       "sizeBytes": 160,
       "extractedText": "HULL INSURANCE\nInsured value: USD 33,000,000\nOperator: Nimbus Aviation IOM Ltd",
-      "createdAt": "2026-01-19T14:00:00.000Z"
+      "createdAt": "2026-01-19T14:00:00.000Z",
+      "groupKey": "ast_nimbus:INSURANCE",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_ni_ins.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_kl_invoice",
@@ -527,7 +646,13 @@
       "storageKey": "seed/doc_kl_invoice.txt",
       "sizeBytes": 220,
       "extractedText": "GALLERY INVOICE\nArtist: Mara Kline\nWork: Untitled (1967)\nPurchase price: USD 4,150,000\nBuyer: Meridian Art Holdings LLC\nDate: 4 June 2019",
-      "createdAt": "2019-06-04T14:00:00.000Z"
+      "createdAt": "2019-06-04T14:00:00.000Z",
+      "groupKey": "ast_kline:SPA",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_kl_invoice.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_kl_cond",
@@ -540,7 +665,13 @@
       "storageKey": "seed/doc_kl_cond.txt",
       "sizeBytes": 200,
       "extractedText": "CONDITION REPORT\nFair value: USD 6,750,000\nCondition: Excellent\nAs of: 12 March 2026",
-      "createdAt": "2026-03-12T14:00:00.000Z"
+      "createdAt": "2026-03-12T14:00:00.000Z",
+      "groupKey": "ast_kline:VALUATION_MEMO",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_kl_cond.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_kl_ins",
@@ -553,7 +684,13 @@
       "storageKey": "seed/doc_kl_ins.txt",
       "sizeBytes": 150,
       "extractedText": "FINE ART INSURANCE\nInsured value: USD 7,000,000\nLocation: Geneva freeport",
-      "createdAt": "2026-03-12T15:00:00.000Z"
+      "createdAt": "2026-03-12T15:00:00.000Z",
+      "groupKey": "ast_kline:INSURANCE",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_kl_ins.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_ce_spa",
@@ -566,7 +703,13 @@
       "storageKey": "seed/doc_ce_spa.txt",
       "sizeBytes": 240,
       "extractedText": "SALE AND PURCHASE AGREEMENT\nCedar Ridge Pte Ltd\nPurchase price: SGD 58,750,000\nDate: 21 July 2023\nLocation: Tuas, Singapore",
-      "createdAt": "2023-07-21T14:00:00.000Z"
+      "createdAt": "2023-07-21T14:00:00.000Z",
+      "groupKey": "ast_cedar:SPA",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_ce_spa.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_ce_title",
@@ -579,7 +722,13 @@
       "storageKey": "seed/doc_ce_title.txt",
       "sizeBytes": 200,
       "extractedText": "JTC TITLE EXTRACT\nLegal ownership: 100% Cedar Ridge Pte Ltd\nProperty: Cedar Ridge Industrial Park, Tuas\nForeign ownership approval: Granted",
-      "createdAt": "2023-07-21T14:10:00.000Z"
+      "createdAt": "2023-07-21T14:10:00.000Z",
+      "groupKey": "ast_cedar:TITLE_DEED",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_ce_title.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_ce_val",
@@ -592,7 +741,13 @@
       "storageKey": "seed/doc_ce_val.txt",
       "sizeBytes": 220,
       "extractedText": "VALUATION\nMarket value: SGD 64,200,000\nOccupancy: 98%\nWALE: 6.1 years\nMethod: Discounted cash flow\nAs of: 31 May 2026",
-      "createdAt": "2026-06-04T14:00:00.000Z"
+      "createdAt": "2026-06-04T14:00:00.000Z",
+      "groupKey": "ast_cedar:VALUATION_MEMO",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_ce_val.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     },
     {
       "id": "doc_ce_ins",
@@ -605,7 +760,13 @@
       "storageKey": "seed/doc_ce_ins.txt",
       "sizeBytes": 150,
       "extractedText": "INSURANCE\nDeclared value: SGD 68,000,000\nInsured: Cedar Ridge Pte Ltd",
-      "createdAt": "2026-01-15T14:00:00.000Z"
+      "createdAt": "2026-01-15T14:00:00.000Z",
+      "groupKey": "ast_cedar:INSURANCE",
+      "version": 1,
+      "isCurrent": true,
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/seed/doc_ce_ins.txt",
+      "anchorStatus": "NOT_APPLICABLE"
     }
   ],
   "portfolios": [
@@ -642,7 +803,7 @@
       "id": "hld_1",
       "portfolioId": "ptf_core",
       "assetId": "ast_harbourview",
-      "weight": 58
+      "weight": 100
     },
     {
       "id": "hld_3",
@@ -670,6 +831,110 @@
     }
   ],
   "auditEvents": [
+    {
+      "id": "aud_7f26d364c0ea4395",
+      "createdAt": "2026-08-21T17:30:53.185Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_be384c0ac9454fac",
+      "createdAt": "2026-08-21T17:30:38.742Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_elena"
+    },
+    {
+      "id": "aud_90c260307f6942a6",
+      "createdAt": "2026-08-21T17:30:16.106Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_04bf28f77e704a3f",
+      "createdAt": "2026-08-21T17:30:06.494Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_683ab37db90543b8",
+      "createdAt": "2026-08-21T17:29:37.522Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_elena"
+    },
+    {
+      "id": "aud_9f557bc7afcc4749",
+      "createdAt": "2026-08-20T06:13:49.742Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_ecd9b380745b4351",
+      "createdAt": "2026-08-20T06:13:48.684Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "marketplace.listing_created",
+      "entityType": "Listing",
+      "entityId": "lst_95f79a69fb9f4ae6",
+      "metadata": {
+        "assetId": "ast_harbourview",
+        "askPrice": 1000,
+        "offeringType": "SALE"
+      }
+    },
+    {
+      "id": "aud_169af4803aff4e4b",
+      "createdAt": "2026-08-20T06:12:56.164Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_8a321c299ef84ad8",
+      "createdAt": "2026-08-20T06:10:30.910Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_elena"
+    },
+    {
+      "id": "aud_9404bba6786a459b",
+      "createdAt": "2026-08-20T06:04:53.497Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_485e0eb5e9e54e3a",
+      "createdAt": "2026-08-20T06:01:46.039Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_elena"
+    },
     {
       "id": "aud_2add7539527a4e4b",
       "createdAt": "2026-08-17T19:08:10.362Z",
@@ -5577,6 +5842,15 @@
   ],
   "copilotThreads": [
     {
+      "id": "thd_3bde7aa1ca64423b",
+      "organizationId": "org_meridian",
+      "userId": "usr_arjun",
+      "assetId": "ast_harbourview",
+      "title": "What is the current value and main risk?",
+      "createdAt": "2026-08-21T17:32:09.249Z",
+      "updatedAt": "2026-08-21T17:32:09.250Z"
+    },
+    {
       "id": "thd_ee3a3be477b04625",
       "organizationId": "org_meridian",
       "userId": "usr_arjun",
@@ -5970,9 +6244,96 @@
         "disclaimer": "Briefing derived from Asset DNA facts with source provenance. Not a legal opinion."
       },
       "createdAt": "2026-08-17T19:04:57.383Z"
+    },
+    {
+      "id": "msg_538fab970a0945b8",
+      "threadId": "thd_3bde7aa1ca64423b",
+      "role": "user",
+      "content": "What is the current value and main risk?",
+      "createdAt": "2026-08-21T17:32:09.249Z"
+    },
+    {
+      "id": "msg_4a3fca8876f448b1",
+      "threadId": "thd_3bde7aa1ca64423b",
+      "role": "assistant",
+      "content": "Current valuation\nPrimary mark taken from the Asset DNA envelope.\n\nCurrent mark: GBP 92,800,000\n\nRisk rating\nLOW (28/100)\n\nAs of\n2026-06-30\n\nMethod\nIndependent valuation memo / appraisal extract\n\nAcquisition price\nGBP 86,400,000\n\nNotes\nPrimary mark taken from market value / fair value language.\nAcquisition price was GBP 86,400,000.\nInsurance / replacement / book figures were ignored as market marks.\n\nPrimary dimension\nDocument coverage: 5 distinct document types ingested for this asset.\n\nFlags\nOccupancy at 94%\nLease duration 7.4 years creates roll risk\n\nConfidence: 99%\n\nBriefing derived from Asset DNA facts with source provenance. Not a legal opinion.",
+      "citations": [
+        {
+          "label": "Market value",
+          "documentId": "doc_hv_val"
+        },
+        {
+          "label": "Purchase price",
+          "documentId": "doc_hv_spa"
+        },
+        {
+          "label": "Risk snapshot"
+        }
+      ],
+      "briefing": {
+        "title": "Current valuation",
+        "headline": "Primary mark taken from the Asset DNA envelope.",
+        "metric": "GBP 92,800,000",
+        "metricLabel": "Current mark",
+        "confidence": 0.99,
+        "sections": [
+          {
+            "title": "Risk rating",
+            "body": "LOW (28/100)",
+            "kind": "metric"
+          },
+          {
+            "title": "As of",
+            "body": "2026-06-30",
+            "kind": "detail"
+          },
+          {
+            "title": "Method",
+            "body": "Independent valuation memo / appraisal extract",
+            "kind": "detail"
+          },
+          {
+            "title": "Acquisition price",
+            "body": "GBP 86,400,000",
+            "kind": "detail"
+          },
+          {
+            "title": "Notes",
+            "body": "Primary mark taken from market value / fair value language.\nAcquisition price was GBP 86,400,000.\nInsurance / replacement / book figures were ignored as market marks.",
+            "kind": "note"
+          },
+          {
+            "title": "Primary dimension",
+            "body": "Document coverage: 5 distinct document types ingested for this asset.",
+            "kind": "detail"
+          },
+          {
+            "title": "Flags",
+            "body": "Occupancy at 94%\nLease duration 7.4 years creates roll risk",
+            "kind": "list"
+          }
+        ],
+        "disclaimer": "Briefing derived from Asset DNA facts with source provenance. Not a legal opinion."
+      },
+      "createdAt": "2026-08-21T17:32:09.249Z"
     }
   ],
   "listings": [
+    {
+      "id": "lst_95f79a69fb9f4ae6",
+      "organizationId": "org_meridian",
+      "assetId": "ast_harbourview",
+      "title": "Harbourview Tower interest",
+      "offeringType": "SALE",
+      "status": "OPEN",
+      "askPrice": 1000,
+      "currency": "GBP",
+      "quantityBps": 2500,
+      "remainingBps": 2500,
+      "createdAt": "2026-08-20T06:13:48.684Z",
+      "updatedAt": "2026-08-20T06:13:48.684Z",
+      "summary": ""
+    },
     {
       "id": "lst_harbour_core",
       "organizationId": "org_meridian",
@@ -5984,7 +6345,9 @@
       "quantityBps": 2500,
       "remainingBps": 1500,
       "createdAt": "2026-07-20T10:00:00.000Z",
-      "updatedAt": "2026-07-22T11:00:00.000Z"
+      "updatedAt": "2026-07-22T11:00:00.000Z",
+      "offeringType": "SALE",
+      "summary": ""
     },
     {
       "id": "lst_cedar_open",
@@ -5997,7 +6360,9 @@
       "quantityBps": 10000,
       "remainingBps": 10000,
       "createdAt": "2026-07-28T09:00:00.000Z",
-      "updatedAt": "2026-07-28T09:00:00.000Z"
+      "updatedAt": "2026-07-28T09:00:00.000Z",
+      "offeringType": "SALE",
+      "summary": ""
     }
   ],
   "orders": [

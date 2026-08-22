@@ -183,21 +183,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
   const user = useAuthStore((state) => state.user);
-  const [ready, setReady] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
-    setReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (!ready) return;
     if (!token) router.replace('/login');
-  }, [ready, token, router]);
-
-  useEffect(() => {
-    setNavOpen(false);
-  }, [pathname]);
+  }, [token, router]);
 
   useEffect(() => {
     if (!navOpen) return;

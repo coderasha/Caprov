@@ -113,6 +113,35 @@ export class DatabaseService implements OnModuleInit {
         changed = true;
       }
     }
+    for (const asset of this.data.assets) {
+      if (!Array.isArray(asset.imageUrls)) {
+        asset.imageUrls = asset.primaryImageUrl ? [asset.primaryImageUrl] : [];
+        changed = true;
+      }
+      if (!asset.primaryImageUrl && asset.imageUrls.length > 0) {
+        asset.primaryImageUrl = asset.imageUrls[0];
+        changed = true;
+      }
+    }
+    for (const listing of this.data.listings) {
+      if (!listing.offeringType) {
+        listing.offeringType = 'SALE';
+        changed = true;
+      }
+      if (listing.summary == null) {
+        listing.summary = '';
+        changed = true;
+      }
+      if (
+        listing.offeringType === 'LEASE' &&
+        listing.leaseRate == null &&
+        typeof listing.askPrice === 'number' &&
+        listing.askPrice > 0
+      ) {
+        listing.leaseRate = listing.askPrice;
+        changed = true;
+      }
+    }
     const holdingsByPortfolio = new Map<string, Array<{ id: string; weight?: number }>>();
     for (const holding of this.data.holdings) {
       const portfolioHoldings = holdingsByPortfolio.get(holding.portfolioId) ?? [];
@@ -197,16 +226,6 @@ export class DatabaseService implements OnModuleInit {
         this.data.memberships.unshift(seededPlatformMembership);
         changed = true;
       }
-    }
-    if ((this.data.listings?.length ?? 0) === 0 && this.data.organizations.some((item) => item.id === 'org_meridian')) {
-      this.data.listings = seeded.listings;
-      this.data.orders = seeded.orders;
-      this.data.trades = seeded.trades;
-      this.data.settlements = seeded.settlements;
-      this.data.tokens = seeded.tokens;
-      this.data.collateralPositions = seeded.collateralPositions;
-      this.data.loans = seeded.loans;
-      changed = true;
     }
     if (changed) {
       this.saveSync();
