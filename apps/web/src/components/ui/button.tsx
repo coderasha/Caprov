@@ -11,7 +11,7 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium tracking-[-0.01em] transition disabled:cursor-not-allowed disabled:opacity-50',
+        'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium tracking-[-0.01em] transition disabled:cursor-not-allowed disabled:opacity-50',
         variant === 'primary' &&
           'bg-[var(--ink)] text-white shadow-[0_10px_24px_rgba(10,15,26,0.18)] hover:bg-[#152033]',
         variant === 'ink' && 'bg-[var(--gold)] text-[var(--ink)] hover:bg-[#b07a2e]',

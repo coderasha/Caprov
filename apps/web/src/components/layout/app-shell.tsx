@@ -139,7 +139,7 @@ function SidebarContent({
                       data-active={active}
                       onClick={onNavigate}
                       className={cn(
-                        'platform-nav-link flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] text-white/55 transition hover:bg-white/[0.06] hover:text-white',
+                        'platform-nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] text-white/55 transition hover:bg-white/[0.06] hover:text-white',
                         active && 'bg-white/[0.08] font-medium text-white',
                       )}
                     >
@@ -212,14 +212,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[272px_minmax(0,1fr)]">
-      <aside className="platform-sidebar hidden text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
+    <div className="min-h-screen xl:grid xl:grid-cols-[272px_minmax(0,1fr)]">
+      <aside className="platform-sidebar hidden text-white xl:sticky xl:top-0 xl:flex xl:h-screen xl:w-[272px] xl:flex-col">
         <SidebarContent pathname={pathname} />
       </aside>
 
       <div
         className={cn(
-          'fixed inset-0 z-40 lg:hidden',
+          'fixed inset-0 z-40 xl:hidden',
           navOpen ? 'pointer-events-auto' : 'pointer-events-none',
         )}
         aria-hidden={!navOpen}
@@ -252,11 +252,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <div className="platform-canvas min-w-0">
-        <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-[var(--line)]/80 bg-[color-mix(in_srgb,var(--paper)_78%,transparent)] px-4 py-3 backdrop-blur-md sm:px-6 sm:py-4 lg:px-10">
+        <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-[var(--line)]/80 bg-[color-mix(in_srgb,var(--paper)_78%,transparent)] px-4 py-3 backdrop-blur-md sm:px-6 sm:py-4 xl:px-10">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--card)] text-[var(--ink)] transition hover:border-[var(--ink)]/25 lg:hidden"
+              className="caprov-touch-target inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--card)] text-[var(--ink)] transition hover:border-[var(--ink)]/25 xl:hidden"
               aria-label="Open navigation"
               aria-expanded={navOpen}
               onClick={() => setNavOpen(true)}
@@ -276,7 +276,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             Collect → Review → Act
           </div>
         </header>
-        <main className="px-4 py-6 sm:px-6 sm:py-9 lg:px-10 lg:py-10">{children}</main>
+        <main className="px-4 py-6 sm:px-6 sm:py-9 xl:px-10 xl:py-10">{children}</main>
       </div>
     </div>
   );

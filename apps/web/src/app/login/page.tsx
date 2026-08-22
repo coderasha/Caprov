@@ -50,8 +50,8 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="platform-canvas grid min-h-screen place-items-center px-4">
-      <div className="w-full max-w-md">
+    <main className="platform-canvas grid min-h-screen place-items-center px-4 py-8">
+      <div className="hub-auth-shell">
         <div className="text-center">
           <CaprovWordmark className="font-display text-3xl font-semibold text-[var(--ink)]" markClassName="text-[var(--gold)]" />
           <p className="mt-3 text-sm text-[var(--muted)]">Private-asset intelligence</p>
@@ -85,7 +85,7 @@ export default function LoginPage() {
                   <button
                     key={account.email}
                     type="button"
-                    className="rounded-2xl border border-[var(--line)] px-3 py-2 text-left text-sm hover:bg-[var(--paper)]"
+                    className="min-h-12 rounded-2xl border border-[var(--line)] px-3 py-3 text-left text-sm hover:bg-[var(--paper)]"
                     onClick={() => {
                       setEmail(account.email);
                       setPassword(account.password);
