@@ -13,7 +13,7 @@ export interface CreateAssetInput {
   jurisdiction?: string;
   location?: string;
   description?: string;
-  acquisitionDate?: string;
+  creationDate?: string;
   primaryImageUrl?: string;
   imageUrls?: string[];
 }
@@ -59,7 +59,7 @@ export class AssetsService {
       jurisdiction: input.jurisdiction,
       location: input.location,
       description: input.description,
-      acquisitionDate: input.acquisitionDate,
+      creationDate: input.creationDate,
       primaryImageUrl: input.primaryImageUrl,
       imageUrls: normalizeImageUrls(input.imageUrls, input.primaryImageUrl),
       createdAt: now,

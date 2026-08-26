@@ -65,7 +65,7 @@ class CreateAssetDto {
 
   @IsOptional()
   @IsString()
-  acquisitionDate?: string;
+  creationDate?: string;
 
   @IsOptional()
   @IsString()

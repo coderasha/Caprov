@@ -79,7 +79,7 @@ export interface AssetRecord {
   jurisdiction?: string;
   location?: string;
   description?: string;
-  acquisitionDate?: string;
+  creationDate?: string;
   primaryImageUrl?: string;
   imageUrls?: string[];
   createdAt: string;

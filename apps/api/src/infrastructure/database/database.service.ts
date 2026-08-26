@@ -114,6 +114,12 @@ export class DatabaseService implements OnModuleInit {
       }
     }
     for (const asset of this.data.assets) {
+      const legacy = asset as typeof asset & { acquisitionDate?: string };
+      if (legacy.acquisitionDate && !legacy.creationDate) {
+        legacy.creationDate = legacy.acquisitionDate;
+        delete legacy.acquisitionDate;
+        changed = true;
+      }
       if (!Array.isArray(asset.imageUrls)) {
         asset.imageUrls = asset.primaryImageUrl ? [asset.primaryImageUrl] : [];
         changed = true;

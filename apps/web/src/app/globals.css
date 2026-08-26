@@ -151,11 +151,7 @@ canvas {
 
 @media (min-width: 1080px) and (max-width: 1920px) and (orientation: landscape) {
   .landing-page {
-    --landing-gutter: clamp(1rem, 2vw, 1.75rem);
-  }
-
-  .landing-header__inner {
-    column-gap: 2.5rem;
+    --landing-max: min(107rem, calc(100vw - 2 * var(--landing-gutter)));
   }
 
   .platform-canvas > main {
@@ -218,114 +214,326 @@ canvas {
 
 .landing-page {
   scroll-behavior: smooth;
-  --landing-gutter: clamp(0.75rem, 1.8vw, 1.5rem);
+  --landing-gutter: clamp(1.25rem, 2.2vw, 2.25rem);
+  --landing-max: min(94rem, calc(100vw - 2 * var(--landing-gutter)));
 }
 
-@media (min-width: 640px) {
-  .landing-page {
-    --landing-gutter: clamp(1rem, 2.2vw, 2rem);
-  }
-}
-
-@media (min-width: 1280px) {
-  .landing-page {
-    --landing-gutter: clamp(1.25rem, 2.8vw, 2.5rem);
-  }
+.landing-shell,
+.landing-header-bar {
+  width: min(100%, var(--landing-max));
+  margin-inline: auto;
+  padding-inline: var(--landing-gutter);
 }
 
 @media (min-width: 1536px) {
   .landing-page {
-    --landing-gutter: clamp(1.5rem, 3vw, 3rem);
+    --landing-gutter: clamp(1.5rem, 2.4vw, 2.5rem);
+    --landing-max: min(107rem, calc(100vw - 2 * var(--landing-gutter)));
   }
 }
 
-.landing-header-bar,
-.landing-shell {
-  width: 100%;
-  max-width: none;
-  padding-inline: var(--landing-gutter);
+.landing-read {
+  max-width: 34rem;
 }
 
-.landing-header-bar {
-  margin-inline: 0;
+.landing-section {
+  padding-block: clamp(4rem, 7vw, 6rem);
 }
 
-.landing-shell {
-  margin-inline: auto;
+.landing-kicker {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.landing-title {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(1.625rem, 2.8vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.landing-hero-title {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(2.125rem, 3.6vw, 3.625rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.landing-lead {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--ink) 64%, transparent);
+}
+
+@media (min-width: 640px) {
+  .landing-lead {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+}
+
+.landing-surface {
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  border-radius: 1.25rem;
+  background: var(--card);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 20px 50px rgba(10, 15, 26, 0.05);
+}
+
+.landing-surface--flat {
+  box-shadow: none;
+  background: white;
+}
+
+.landing-btn {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding-inline: 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.landing-btn--primary {
+  border: 1px solid transparent;
+  background: var(--ink);
+  color: white;
+  box-shadow: 0 10px 24px rgba(10, 15, 26, 0.14);
+}
+
+.landing-btn--primary:hover {
+  background: #1a2338;
+  transform: translateY(-1px);
+}
+
+.landing-btn--ghost {
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  background: white;
+  color: var(--ink);
+}
+
+.landing-btn--ghost:hover {
+  border-color: color-mix(in srgb, var(--ink) 24%, transparent);
+  background: var(--card);
+}
+
+.landing-btn--light {
+  border: 1px solid transparent;
+  background: white;
+  color: var(--ink);
+}
+
+.landing-btn--light:hover {
+  background: var(--paper);
+}
+
+.landing-btn--outline-light {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: white;
+}
+
+.landing-btn--outline-light:hover {
+  border-color: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.landing-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.landing-badge--ok {
+  border: 1px solid color-mix(in srgb, var(--ok) 18%, transparent);
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.landing-badge--teal {
+  border: 1px solid color-mix(in srgb, var(--teal) 15%, transparent);
+  background: var(--teal-soft);
+  color: var(--teal);
+}
+
+.landing-badge--glass {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(8px);
+}
+
+.landing-icon-btn {
+  display: inline-flex;
+  height: 2.5rem;
+  width: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  background: white;
+  color: var(--ink);
+  transition:
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.landing-icon-btn:hover {
+  border-color: color-mix(in srgb, var(--gold) 24%, transparent);
+  background: var(--gold-soft);
+}
+
+.landing-text-link {
+  font-weight: 500;
+  color: var(--ink);
+  text-underline-offset: 4px;
+}
+
+.landing-text-link:hover {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+.landing-metric-label {
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.landing-metric-value {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+
+.landing-proof-strip__item {
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+}
+
+.landing-section-header .landing-lead {
+  max-width: 42rem;
+}
+
+.landing-module-icon {
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.875rem;
+  border: 1px solid color-mix(in srgb, var(--gold) 14%, transparent);
+  background: var(--gold-soft);
+  color: var(--gold);
+  transition: transform 200ms ease;
+}
+
+.landing-module-card:hover .landing-module-icon {
+  transform: scale(1.04);
+}
+
+.landing-btn--compact {
+  min-height: 2.625rem;
+  padding-inline: 1.125rem;
+  font-size: 0.8125rem;
+}
+
+.landing-header__signin {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  padding-inline: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
+  transition: color 180ms ease;
+}
+
+.landing-header__signin:hover {
+  color: var(--ink);
 }
 
 .landing-hero__backdrop {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 70% 55% at 78% 8%, rgba(157, 107, 36, 0.08), transparent 58%),
-    radial-gradient(ellipse 55% 45% at 8% 92%, rgba(15, 111, 104, 0.06), transparent 52%),
-    linear-gradient(180deg, rgba(251, 250, 247, 0.96) 0%, rgba(239, 236, 230, 0.98) 48%, rgba(229, 225, 216, 0.92) 100%);
+    radial-gradient(ellipse 50% 40% at 100% 0%, rgba(157, 107, 36, 0.05), transparent 60%),
+    linear-gradient(180deg, #fcfaf6 0%, var(--paper) 100%);
+}
+
+.landing-hero {
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
 }
 
 .landing-hero__mesh {
   position: absolute;
   inset: 0;
+  opacity: 0.45;
   background:
-    linear-gradient(rgba(10, 15, 26, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(10, 15, 26, 0.035) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.36), transparent 78%);
-  animation: landing-mesh-drift 28s linear infinite;
+    linear-gradient(rgba(10, 15, 26, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10, 15, 26, 0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.25), transparent 85%);
 }
 
-.landing-hero__grain {
-  position: absolute;
-  inset: 0;
-  opacity: 0.35;
-  background-image: radial-gradient(rgba(10, 15, 26, 0.08) 0.6px, transparent 0.6px);
-  background-size: 3px 3px;
-  mix-blend-mode: multiply;
-  pointer-events: none;
+.landing-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding-block: 1rem;
+  transition:
+    background 240ms ease,
+    border-color 240ms ease,
+    box-shadow 240ms ease,
+    backdrop-filter 240ms ease;
 }
 
-.landing-hero__beam {
-  position: absolute;
-  top: -20%;
-  left: 18%;
-  height: 140%;
-  width: 38%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
-  transform: rotate(12deg);
-  opacity: 0.35;
-  animation: landing-beam 12s ease-in-out infinite;
-  pointer-events: none;
+.landing-header--scrolled {
+  background: rgba(251, 250, 247, 0.82);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  backdrop-filter: blur(16px);
 }
 
-.landing-hero__halo {
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(20px);
-  opacity: 0.55;
-  animation: landing-float 16s ease-in-out infinite;
+.landing-header__link {
+  position: relative;
+  font-size: 0.875rem;
+  color: color-mix(in srgb, var(--ink) 68%, transparent);
+  transition: color 180ms ease;
 }
 
-.landing-hero__halo--one {
-  top: 9%;
-  right: 7%;
-  height: 260px;
-  width: 260px;
-  background: radial-gradient(circle, rgba(157, 107, 36, 0.14) 0%, rgba(157, 107, 36, 0.01) 72%);
-}
-
-.landing-hero__halo--two {
-  bottom: 18%;
-  left: -2%;
-  height: 220px;
-  width: 220px;
-  background: radial-gradient(circle, rgba(15, 111, 104, 0.10) 0%, rgba(15, 111, 104, 0.01) 70%);
-  animation-delay: 2.2s;
+.landing-header__link:hover {
+  color: var(--ink);
 }
 
 .landing-fade {
   opacity: 0;
-  transform: translateY(14px);
-  animation: landing-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform: translateY(10px);
+  animation: landing-rise 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .landing-fade--delay-1 {
@@ -334,18 +542,6 @@ canvas {
 
 .landing-fade--delay-2 {
   animation-delay: 0.22s;
-}
-
-.landing-header {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  padding-block: 0.85rem;
-  transition:
-    background 240ms ease,
-    border-color 240ms ease,
-    box-shadow 240ms ease,
-    backdrop-filter 240ms ease;
 }
 
 .landing-header__inner {
@@ -380,99 +576,13 @@ canvas {
 .landing-header__actions {
   justify-self: end;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-end;
+  gap: 0.75rem;
 }
 
 .landing-header__auth {
   margin-left: auto;
-}
-
-@media (min-width: 640px) {
-  .landing-header {
-    padding-block: 1.1rem;
-  }
-}
-
-.landing-header--scrolled {
-  background: color-mix(in srgb, var(--card) 82%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
-  box-shadow: 0 10px 30px rgba(10, 15, 26, 0.06);
-  backdrop-filter: blur(14px);
-}
-
-.landing-header__link {
-  position: relative;
-  font-size: 0.875rem;
-  color: color-mix(in srgb, var(--ink) 72%, transparent);
-  transition: color 180ms ease;
-}
-
-.landing-header__link::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -0.35rem;
-  width: 100%;
-  height: 1px;
-  background: var(--gold);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 220ms ease;
-}
-
-.landing-header__link:hover {
-  color: var(--ink);
-}
-
-.landing-header__link:hover::after {
-  transform: scaleX(1);
-}
-
-.landing-eyebrow {
-  animation: landing-shimmer 4.5s ease-in-out infinite;
-}
-
-.landing-headline {
-  text-wrap: balance;
-}
-
-.landing-cta {
-  box-shadow: 0 12px 28px rgba(12, 18, 32, 0.16);
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease,
-    background 180ms ease;
-}
-
-.landing-cta:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 16px 34px rgba(12, 18, 32, 0.18);
-}
-
-.landing-proof,
-.landing-step {
-  opacity: 0;
-  transform: translateY(16px);
-  animation: landing-rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.landing-console {
-  position: relative;
-}
-
-.landing-console--float {
-  animation: landing-console-float 8s ease-in-out infinite;
-}
-
-.landing-pulse-badge {
-  animation: landing-pulse 2.8s ease-in-out infinite;
-}
-
-.landing-signal {
-  opacity: 0;
-  transform: translateX(-8px);
-  animation: landing-signal-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .landing-marquee {
@@ -489,19 +599,17 @@ canvas {
 
 .landing-marquee__item {
   flex-shrink: 0;
-  font-size: 0.75rem;
-  letter-spacing: 0.24em;
+  font-size: 0.6875rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--ink) 58%, transparent);
+  color: color-mix(in srgb, var(--ink) 50%, transparent);
   white-space: nowrap;
 }
 
 .landing-marquee__item::before {
-  content: '◆';
-  margin-right: 1rem;
+  content: '·';
+  margin-right: 1.25rem;
   color: var(--gold);
-  font-size: 0.55rem;
-  vertical-align: middle;
 }
 
 .landing-mobile-menu {
@@ -563,38 +671,13 @@ canvas {
   background: var(--paper);
 }
 
-.landing-stats > * {
-  position: relative;
-}
-
-.landing-stats > *:nth-child(odd)::after {
-  content: '';
-  position: absolute;
-  top: 10%;
-  right: -0.5rem;
-  height: 80%;
-  width: 1px;
-  background: color-mix(in srgb, var(--line) 80%, transparent);
-}
-
-.landing-stats > *:not(:nth-last-child(-n + 2))::before {
-  content: '';
-  position: absolute;
-  left: 10%;
-  bottom: -1rem;
-  height: 1px;
-  width: 80%;
-  background: color-mix(in srgb, var(--line) 80%, transparent);
+.landing-stats > * + * {
+  border-left: 0;
 }
 
 @media (min-width: 1024px) {
-  .landing-stats > *::after,
-  .landing-stats > *::before {
-    display: none;
-  }
-
   .landing-stats > * + * {
-    border-left: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    border-left: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
   }
 }
 
@@ -669,17 +752,26 @@ canvas {
   transform: translateY(0);
 }
 
+.landing-module-card {
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease;
+}
+
+.landing-module-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--gold) 18%, transparent);
+}
+
 .landing-workflow-step {
   transition:
     transform 220ms ease,
-    box-shadow 220ms ease,
     border-color 220ms ease;
 }
 
 .landing-workflow-step:hover {
-  transform: translateY(-4px);
-  border-color: color-mix(in srgb, var(--gold) 22%, var(--line));
-  box-shadow: 0 18px 40px rgba(10, 15, 26, 0.08);
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--gold) 16%, transparent);
 }
 
 .landing-workflow-connector {
@@ -690,19 +782,6 @@ canvas {
   height: 1px;
   background: linear-gradient(90deg, var(--gold), color-mix(in srgb, var(--gold) 20%, transparent));
   transform: translateY(-50%);
-}
-
-.landing-module-card {
-  transition:
-    transform 240ms ease,
-    box-shadow 240ms ease,
-    border-color 240ms ease;
-}
-
-.landing-module-card:hover {
-  transform: translateY(-5px);
-  border-color: color-mix(in srgb, var(--gold) 24%, var(--line));
-  box-shadow: 0 20px 44px rgba(10, 15, 26, 0.08);
 }
 
 .landing-feature-card {
@@ -768,7 +847,7 @@ canvas {
 
 .landing-asset-carousel__viewport {
   position: relative;
-  min-height: 28rem;
+  min-height: 24rem;
 }
 
 .landing-asset-carousel__slide {
@@ -798,25 +877,11 @@ canvas {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.landing-asset-carousel__visual-grid {
+.landing-asset-carousel__visual-shine {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 32px 32px;
-  opacity: 0.35;
-}
-
-.landing-asset-carousel__visual-glow {
-  position: absolute;
-  top: -20%;
-  right: -10%;
-  height: 70%;
-  width: 55%;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(157, 107, 36, 0.22), transparent 68%);
-  filter: blur(8px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 42%, rgba(157, 107, 36, 0.08));
+  pointer-events: none;
 }
 
 .landing-asset-carousel__dot {

@@ -9,14 +9,18 @@ interface AuthState {
   user?: PublicUser;
   organization?: AuthSession['organization'];
   roles: MembershipRole[];
+  hasHydrated: boolean;
   setSession: (session: AuthSession) => void;
   logout: () => void;
+  setHasHydrated: (hasHydrated: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       roles: [],
+      hasHydrated: false,
+      setHasHydrated: (hasHydrated) => set({ hasHydrated }),
       setSession: (session) =>
         set({
           token: session.token,
@@ -32,6 +36,17 @@ export const useAuthStore = create<AuthState>()(
           roles: [],
         }),
     }),
-    { name: 'caprov-auth' },
+    {
+      name: 'caprov-auth',
+      partialize: (state) => ({
+        token: state.token,
+        user: state.user,
+        organization: state.organization,
+        roles: state.roles,
+      }),
+      onRehydrateStorage: () => () => {
+        useAuthStore.getState().setHasHydrated(true);
+      },
+    },
   ),
 );

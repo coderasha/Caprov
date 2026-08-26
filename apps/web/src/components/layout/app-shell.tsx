@@ -183,11 +183,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
   const user = useAuthStore((state) => state.user);
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
+    if (!hasHydrated) return;
     if (!token) router.replace('/login');
-  }, [token, router]);
+  }, [hasHydrated, token, router]);
 
   useEffect(() => {
     if (!navOpen) return;
@@ -203,7 +205,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     };
   }, [navOpen]);
 
-  if (!token) {
+  if (!hasHydrated || !token) {
     return (
       <div className="grid min-h-screen place-items-center bg-[var(--paper)] px-4 text-sm text-[var(--muted)]">
         Opening CAPROV…

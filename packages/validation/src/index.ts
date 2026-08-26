@@ -39,7 +39,7 @@ export const assetSchema = z.object({
   jurisdiction: z.string().max(80).optional(),
   location: z.string().max(180).optional(),
   description: z.string().max(2000).optional(),
-  acquisitionDate: z.string().optional(),
+  creationDate: z.string().optional(),
 });
 
 export const ownershipSchema = z.object({

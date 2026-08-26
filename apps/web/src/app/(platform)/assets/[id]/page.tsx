@@ -173,7 +173,7 @@ export default function AssetDetailPage() {
             <dl className="mt-4 grid gap-3 text-sm">
               <Row label="Location" value={asset.location} />
               <Row label="Jurisdiction" value={asset.jurisdiction} />
-              <Row label="Acquired" value={formatDate(asset.acquisitionDate)} />
+              <Row label="Created" value={formatDate(asset.creationDate)} />
               <Row label="Currency" value={asset.currency} />
             </dl>
           </Card>

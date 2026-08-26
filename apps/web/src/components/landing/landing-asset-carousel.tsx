@@ -2,7 +2,7 @@
 
 import { assetClassLabel } from '@/lib/format';
 import type { AssetClass } from '@caprov/types';
-import { ChevronLeft, ChevronRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -17,7 +17,6 @@ type ShowcaseAsset = {
   risk: 'LOW' | 'MODERATE' | 'ELEVATED';
   accent: string;
   highlight: string;
-  note: string;
 };
 
 const showcaseAssets: ShowcaseAsset[] = [
@@ -30,9 +29,8 @@ const showcaseAssets: ShowcaseAsset[] = [
     markLabel: 'Market mark',
     confidence: 0.94,
     risk: 'MODERATE',
-    accent: 'from-[#1a2338] via-[#243049] to-[#121a2b]',
+    accent: 'from-[#151c2c] via-[#1f2a3f] to-[#0e1420]',
     highlight: 'Grade A office · 94% occupancy',
-    note: 'Valuation memo, title, and insurance reconciled in Asset DNA.',
   },
   {
     id: 'aurelia',
@@ -43,9 +41,8 @@ const showcaseAssets: ShowcaseAsset[] = [
     markLabel: 'Latest NAV',
     confidence: 0.91,
     risk: 'MODERATE',
-    accent: 'from-[#1f1a14] via-[#3d2f1c] to-[#15120d]',
+    accent: 'from-[#18140f] via-[#2e2418] to-[#100d08]',
     highlight: '11.4% current yield · 96% called',
-    note: 'LPA, NAV statement, and GP KYC linked with provenance.',
   },
   {
     id: 'soleil',
@@ -56,9 +53,8 @@ const showcaseAssets: ShowcaseAsset[] = [
     markLabel: 'Market mark',
     confidence: 0.89,
     risk: 'LOW',
-    accent: 'from-[#1a2418] via-[#2f4a2a] to-[#101810]',
+    accent: 'from-[#141a13] via-[#243824] to-[#0c100c]',
     highlight: '42 hectares · Grand Cru classé',
-    note: 'Notarial deed and vineyard appraisal under governed review.',
   },
   {
     id: 'nimbus',
@@ -69,9 +65,8 @@ const showcaseAssets: ShowcaseAsset[] = [
     markLabel: 'Market mark',
     confidence: 0.92,
     risk: 'LOW',
-    accent: 'from-[#101820] via-[#1c3040] to-[#0a1018]',
+    accent: 'from-[#0e141c] via-[#182634] to-[#080c12]',
     highlight: '2,140 airframe hours · JSSI enrolled',
-    note: 'Bill of sale, hull insurance, and residual appraisal on file.',
   },
   {
     id: 'kline',
@@ -82,9 +77,8 @@ const showcaseAssets: ShowcaseAsset[] = [
     markLabel: 'Fair value',
     confidence: 0.88,
     risk: 'LOW',
-    accent: 'from-[#241818] via-[#4a2820] to-[#140f0f]',
+    accent: 'from-[#1c1412] via-[#342018] to-[#100c0a]',
     highlight: 'Condition: excellent · Insured',
-    note: 'Gallery invoice and condition report anchored to DNA.',
   },
   {
     id: 'cedar',
@@ -95,14 +89,13 @@ const showcaseAssets: ShowcaseAsset[] = [
     markLabel: 'Market mark',
     confidence: 0.93,
     risk: 'MODERATE',
-    accent: 'from-[#141820] via-[#243040] to-[#0c1014]',
+    accent: 'from-[#101418] via-[#1c2834] to-[#080a0e]',
     highlight: 'Logistics · 100% leased',
-    note: 'SPA, JTC title, and valuation memo in one operating record.',
   },
 ];
 
 const riskLabel = {
-  LOW: 'Low risk',
+  LOW: 'Low',
   MODERATE: 'Moderate',
   ELEVATED: 'Elevated',
 } as const;
@@ -120,32 +113,27 @@ export function LandingAssetCarousel() {
 
   useEffect(() => {
     if (paused) return;
-    const timer = window.setInterval(next, 5500);
+    const timer = window.setInterval(next, 6000);
     return () => window.clearInterval(timer);
   }, [next, paused]);
 
   return (
     <div
-      className="landing-asset-carousel landing-console--float flex w-full min-w-0 flex-col overflow-hidden rounded-[1.35rem] border border-[var(--ink)]/10 bg-[var(--card)] shadow-[0_26px_60px_rgba(10,15,26,0.10)] sm:rounded-[1.75rem]"
+      className="landing-asset-carousel landing-surface flex w-full min-w-0 flex-col overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <div className="flex flex-col gap-3 border-b border-[var(--ink)]/10 px-5 pb-5 pt-5 sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-7 sm:pt-7">
-        <div className="min-w-0">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--gold)]">Curated assets</p>
-          <h2 className="mt-2 max-w-sm text-lg font-semibold tracking-[-0.03em] text-[var(--ink)] sm:text-xl">
-            Institutional holdings under governed review
-          </h2>
+      <div className="flex items-center justify-between gap-4 border-b border-[var(--ink)]/6 px-6 py-5 sm:px-7">
+        <div>
+          <p className="landing-kicker">Portfolio preview</p>
+          <p className="mt-2 text-sm text-[var(--muted)]">Representative private assets under governed review</p>
         </div>
-        <div className="landing-pulse-badge inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border border-[var(--ok)]/16 bg-[var(--ok-soft)] px-3 py-1.5 text-xs font-medium text-[var(--ok)]">
-          <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-          Asset DNA verified
-        </div>
+        <span className="landing-badge landing-badge--ok shrink-0">Verified DNA</span>
       </div>
 
-      <div className="landing-asset-carousel__viewport relative px-5 py-5 sm:px-7 sm:py-6">
+      <div className="landing-asset-carousel__viewport relative px-6 py-6 sm:px-7">
         {showcaseAssets.map((item, index) => {
           const isActive = index === active;
           return (
@@ -154,48 +142,37 @@ export function LandingAssetCarousel() {
               aria-hidden={!isActive}
               className={`landing-asset-carousel__slide ${isActive ? 'landing-asset-carousel__slide--active' : ''}`}
             >
-              <div
-                className={`landing-asset-carousel__visual bg-gradient-to-br ${item.accent}`}
-              >
-                <div className="landing-asset-carousel__visual-grid" aria-hidden="true" />
-                <div className="landing-asset-carousel__visual-glow" aria-hidden="true" />
-                <div className="relative z-10 flex h-full flex-col justify-between p-5 sm:p-6">
+              <div className={`landing-asset-carousel__visual bg-gradient-to-br ${item.accent}`}>
+                <div className="landing-asset-carousel__visual-shine" aria-hidden="true" />
+                <div className="relative z-10 flex h-full min-h-[12.5rem] flex-col justify-between p-6 sm:min-h-[14rem]">
                   <div className="flex items-start justify-between gap-3">
-                    <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-white/80 backdrop-blur-sm">
-                      {assetClassLabel[item.assetClass]}
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full border border-[var(--gold)]/25 bg-black/20 px-2.5 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--gold-soft)]">
-                      <Sparkles className="h-3 w-3" aria-hidden="true" />
+                    <span className="landing-badge landing-badge--glass">{assetClassLabel[item.assetClass]}</span>
+                    <span className="text-[11px] uppercase tracking-[0.16em] text-white/50">
                       {Math.round(item.confidence * 100)}% confidence
                     </span>
                   </div>
                   <div>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/45">
-                      {item.location}
-                    </p>
-                    <h3 className="mt-2 font-display text-2xl font-semibold tracking-[-0.03em] text-white sm:text-[1.65rem]">
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-white/45">{item.location}</p>
+                    <h3 className="mt-2 font-display text-[1.65rem] font-semibold leading-tight tracking-[-0.03em] text-white sm:text-[1.85rem]">
                       {item.name}
                     </h3>
-                    <p className="mt-2 text-sm text-white/62">{item.highlight}</p>
+                    <p className="mt-2 text-sm text-white/60">{item.highlight}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-[var(--ink)]/8 bg-white px-4 py-4">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">{item.markLabel}</p>
-                  <p className="mt-2 font-display text-2xl font-semibold tracking-[-0.04em] text-[var(--ink)]">
-                    {item.mark}
-                  </p>
+              <div className="mt-5 grid gap-px overflow-hidden rounded-2xl border border-[var(--ink)]/6 bg-[var(--ink)]/6 sm:grid-cols-3">
+                <div className="bg-white px-5 py-4">
+                  <p className="landing-metric-label">{item.markLabel}</p>
+                  <p className="landing-metric-value mt-2">{item.mark}</p>
                 </div>
-                <div className="rounded-2xl border border-[var(--ink)]/8 bg-white px-4 py-4">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">Risk profile</p>
+                <div className="bg-white px-5 py-4">
+                  <p className="landing-metric-label">Risk profile</p>
                   <p className="mt-2 text-sm font-medium text-[var(--ink)]">{riskLabel[item.risk]}</p>
-                  <p className="mt-1 text-xs text-[var(--muted)]">Document-backed review</p>
                 </div>
-                <div className="rounded-2xl border border-[var(--ink)]/8 bg-[var(--paper)] px-4 py-4 sm:col-span-1">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">Operating record</p>
-                  <p className="mt-2 text-sm leading-6 text-[var(--ink)]">{item.note}</p>
+                <div className="bg-[var(--paper)] px-5 py-4 sm:col-span-1">
+                  <p className="landing-metric-label">Status</p>
+                  <p className="mt-2 text-sm text-[var(--ink)]">Document-backed · Provenance linked</p>
                 </div>
               </div>
             </article>
@@ -203,27 +180,16 @@ export function LandingAssetCarousel() {
         })}
       </div>
 
-      <div className="flex items-center justify-between gap-4 border-t border-[var(--ink)]/10 px-5 py-4 sm:px-7">
+      <div className="flex items-center justify-between gap-4 border-t border-[var(--ink)]/6 px-6 py-4 sm:px-7">
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="caprov-touch-target inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--ink)]/10 bg-white text-[var(--ink)] transition hover:border-[var(--gold)]/25 hover:bg-[var(--gold-soft)]"
-            aria-label="Previous asset"
-            onClick={prev}
-          >
+          <button type="button" className="landing-icon-btn" aria-label="Previous asset" onClick={prev}>
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <button
-            type="button"
-            className="caprov-touch-target inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--ink)]/10 bg-white text-[var(--ink)] transition hover:border-[var(--gold)]/25 hover:bg-[var(--gold-soft)]"
-            aria-label="Next asset"
-            onClick={next}
-          >
+          <button type="button" className="landing-icon-btn" aria-label="Next asset" onClick={next}>
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
-
-        <div className="landing-asset-carousel__dots flex flex-wrap items-center justify-end gap-2">
+        <div className="landing-asset-carousel__dots flex items-center gap-2">
           {showcaseAssets.map((item, index) => (
             <button
               key={item.id}
@@ -237,18 +203,13 @@ export function LandingAssetCarousel() {
         </div>
       </div>
 
-      <div className="border-t border-[var(--ink)]/10 bg-[var(--paper)] px-5 py-4 sm:px-7">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
-            {active + 1} of {showcaseAssets.length} private assets · Representative demo portfolio
-          </p>
-          <Link
-            href="/login"
-            className="inline-flex min-h-10 items-center justify-center text-sm font-medium text-[var(--ink)] underline-offset-4 transition hover:text-[var(--gold)] hover:underline"
-          >
-            Review assets in the workspace
-          </Link>
-        </div>
+      <div className="flex flex-col gap-2 border-t border-[var(--ink)]/6 bg-[var(--paper)]/70 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+        <p className="text-xs text-[var(--muted)]">
+          {active + 1} of {showcaseAssets.length} assets
+        </p>
+        <Link href="/login" className="landing-text-link text-sm">
+          Open in workspace
+        </Link>
       </div>
     </div>
   );

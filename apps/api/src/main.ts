@@ -1,6 +1,7 @@
 import { resolve } from 'node:path';
 import { config as loadEnv } from 'dotenv';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -13,7 +14,11 @@ loadEnv({
 });
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false,
+  });
+  app.useBodyParser('json', { limit: '15mb' });
+  app.useBodyParser('urlencoded', { limit: '15mb', extended: true });
   app.use(helmet({ contentSecurityPolicy: false }));
   app.use(compression());
   app.enableCors({

@@ -26,7 +26,7 @@ export default function NewAssetPage() {
     jurisdiction: '',
     location: '',
     description: '',
-    acquisitionDate: '',
+    creationDate: '',
     primaryImageUrl: '',
     imageUrls: [] as string[],
     primaryImageName: '',
@@ -96,11 +96,11 @@ export default function NewAssetPage() {
                 ))}
               </Select>
             </Field>
-            <Field label="Acquisition date">
+            <Field label="Creation date">
               <Input
                 type="date"
-                value={form.acquisitionDate}
-                onChange={(e) => setForm({ ...form, acquisitionDate: e.target.value })}
+                value={form.creationDate}
+                onChange={(e) => setForm({ ...form, creationDate: e.target.value })}
               />
             </Field>
             <Field label="Jurisdiction">
