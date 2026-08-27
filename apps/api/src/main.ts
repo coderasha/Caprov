@@ -37,11 +37,17 @@ async function bootstrap() {
 
   const swagger = new DocumentBuilder()
     .setTitle('CAPROV API')
-    .setDescription('Private-asset intelligence platform — Asset DNA, documents, portfolios and audit.')
+    .setDescription(
+      'Private-asset intelligence platform — Asset DNA, documents, portfolios and audit.',
+    )
     .setVersion('0.2.0')
     .addBearerAuth()
     .build();
-  SwaggerModule.setup('api/docs', app, SwaggerModule.createDocument(app, swagger));
+  SwaggerModule.setup(
+    'api/docs',
+    app,
+    SwaggerModule.createDocument(app, swagger),
+  );
 
   await app.listen(process.env.PORT ?? 3001);
 }

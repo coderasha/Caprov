@@ -26,7 +26,11 @@ export class AuditService {
     });
   }
 
-  list(organizationId: string, limit = 100, includeAll = false): AuditEventRecord[] {
+  list(
+    organizationId: string,
+    limit = 100,
+    includeAll = false,
+  ): AuditEventRecord[] {
     return this.db.snapshot.auditEvents
       .filter((event) => includeAll || event.organizationId === organizationId)
       .slice(0, limit);

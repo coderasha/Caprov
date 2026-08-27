@@ -6,7 +6,7 @@
       "slug": "meridian-capital",
       "llmModelId": "caprov-deterministic",
       "createdAt": "2021-04-12T09:00:00.000Z",
-      "updatedAt": "2026-08-26T08:46:26.604Z",
+      "updatedAt": "2026-08-27T15:05:03.271Z",
       "status": "ACTIVE"
     },
     {
@@ -59,7 +59,7 @@
     {
       "id": "usr_caprov_admin",
       "email": "priya@caprov.io",
-      "passwordHash": "$2b$10$7wgzp57crOBUsAdOqBHnyeeg2tlgMzrRde2ijHxAqW8neNubnZ/dK",
+      "passwordHash": "$2b$10$SH.5So2oMfLMYr0eKMKngO2Nk1syyggdt3rgLVSMbpZiT.fK6jCl2",
       "fullName": "Priya Nair",
       "title": "Platform Administrator",
       "createdAt": "2020-01-06T09:00:00.000Z",
@@ -113,6 +113,64 @@
     }
   ],
   "assets": [
+    {
+      "id": "ast_3bd729e164ef4be7",
+      "organizationId": "org_meridian",
+      "name": "Bayfront Offices",
+      "assetClass": "REAL_ESTATE",
+      "status": "ACTIVE",
+      "currency": "SGD",
+      "jurisdiction": "Singapore",
+      "location": "Marina Bay, Singapore",
+      "description": "Dummy RE valuation accuracy case — expected mark 112000000",
+      "imageUrls": [],
+      "createdAt": "2026-08-27T14:45:41.433Z",
+      "updatedAt": "2026-08-27T14:45:41.433Z"
+    },
+    {
+      "id": "ast_0c8be51f0bd04fb9",
+      "organizationId": "org_meridian",
+      "name": "Canal Side Logistics Park",
+      "assetClass": "REAL_ESTATE",
+      "status": "ACTIVE",
+      "currency": "EUR",
+      "jurisdiction": "Netherlands",
+      "location": "Rotterdam, Netherlands",
+      "description": "Dummy RE valuation accuracy case — expected mark 78500000",
+      "imageUrls": [],
+      "createdAt": "2026-08-27T14:44:15.657Z",
+      "updatedAt": "2026-08-27T14:44:15.657Z"
+    },
+    {
+      "id": "ast_513be945dd504cb8",
+      "organizationId": "org_meridian",
+      "name": "Riverside Quay Tower",
+      "assetClass": "REAL_ESTATE",
+      "status": "ACTIVE",
+      "currency": "GBP",
+      "jurisdiction": "England & Wales",
+      "location": "Salford Quays, Manchester",
+      "description": "Dummy RE valuation accuracy case — expected mark 45200000",
+      "imageUrls": [],
+      "createdAt": "2026-08-27T14:42:16.190Z",
+      "updatedAt": "2026-08-27T14:42:16.190Z"
+    },
+    {
+      "id": "ast_24998212687f47b4",
+      "organizationId": "org_meridian",
+      "name": "Clean-run check asset",
+      "assetClass": "REAL_ESTATE",
+      "status": "DRAFT",
+      "currency": "USD",
+      "jurisdiction": "England & Wales",
+      "location": "London",
+      "description": "Verification",
+      "creationDate": "2026-08-26",
+      "primaryImageUrl": "",
+      "imageUrls": [],
+      "createdAt": "2026-08-26T18:12:56.110Z",
+      "updatedAt": "2026-08-26T18:12:56.110Z"
+    },
     {
       "id": "ast_165f9f1a78334d31",
       "organizationId": "org_meridian",
@@ -351,6 +409,260 @@
     }
   ],
   "documents": [
+    {
+      "id": "doc_cabfc20eb1ba4d6c",
+      "organizationId": "org_meridian",
+      "assetId": "ast_3bd729e164ef4be7",
+      "name": "Smoke Valuation 1787843091988.pdf",
+      "type": "VALUATION_MEMO",
+      "status": "READY",
+      "mimeType": "text/plain",
+      "storageKey": "2026-08-27/bin_fe1f026f92e44a9e-Smoke-Valuation-1787843091988.pdf",
+      "sizeBytes": 102,
+      "extractedText": "INDEPENDENT VALUATION\nMarket value: GBP 99,500,000\nAs of: 1 August 2026\nOccupancy: 95%\nWALT: 6.8 years",
+      "groupKey": "ast_3bd729e164ef4be7:VALUATION_MEMO",
+      "version": 2,
+      "isCurrent": true,
+      "previousDocumentId": "doc_cce5046251564bfb",
+      "previousVersionHash": "0x83c910114b79ce6d68d6c8fd60cc79f20644c93a403b73253713a6ff666b0e22",
+      "documentHash": "0x73ea0c857ab1af17888679ce1684271f63a033b8439b926c377647b276ebc524",
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/2026-08-27/bin_fe1f026f92e44a9e-Smoke-Valuation-1787843091988.pdf",
+      "anchorStatus": "BLOCKCHAIN_ANCHORED",
+      "anchorMode": "LIVE",
+      "anchorChainId": 11155111,
+      "anchorChainName": "Ethereum Sepolia",
+      "anchorContractAddress": "0x7B0B5bf8Db6e9cD0766f852d36D88F2b003bd841",
+      "anchorTxHash": "0x095c575f1f5950c619ea73cf076764eb9569f1153ae68857307978277120c4f1",
+      "anchorExplorerUrl": "https://sepolia.etherscan.io/tx/0x095c575f1f5950c619ea73cf076764eb9569f1153ae68857307978277120c4f1",
+      "anchoredAt": "2026-08-27T15:04:52.000Z",
+      "blockchainReference": "0xdb58a5bf38b01f0d3813a29d66ddcdf5b1b0fc05c0131420d92795b489ab6a0a",
+      "createdAt": "2026-08-27T15:04:52.000Z"
+    },
+    {
+      "id": "doc_cce5046251564bfb",
+      "organizationId": "org_meridian",
+      "assetId": "ast_3bd729e164ef4be7",
+      "name": "Pacific Crest Valuation Memo.pdf",
+      "type": "VALUATION_MEMO",
+      "status": "READY",
+      "mimeType": "text/plain",
+      "storageKey": "2026-08-27/bin_e3cc551116634af1-Pacific-Crest-Valuation-Memo.pdf",
+      "sizeBytes": 115,
+      "extractedText": "INDEPENDENT VALUATION MEMORANDUM\nMarket value: SGD 112 million\nOccupancy: 88%\nWALE: 4.5 years\nAs of: 15 August 2026",
+      "groupKey": "ast_3bd729e164ef4be7:VALUATION_MEMO",
+      "version": 1,
+      "isCurrent": false,
+      "documentHash": "0x83c910114b79ce6d68d6c8fd60cc79f20644c93a403b73253713a6ff666b0e22",
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/2026-08-27/bin_e3cc551116634af1-Pacific-Crest-Valuation-Memo.pdf",
+      "anchorStatus": "BLOCKCHAIN_ANCHORED",
+      "anchorMode": "LIVE",
+      "anchorChainId": 11155111,
+      "anchorChainName": "Ethereum Sepolia",
+      "anchorContractAddress": "0x7B0B5bf8Db6e9cD0766f852d36D88F2b003bd841",
+      "anchorTxHash": "0x2721c33e5d80653d6a5f850c11ebb9aa039db22cba45a22cd63f1aa1bc0df699",
+      "anchorExplorerUrl": "https://sepolia.etherscan.io/tx/0x2721c33e5d80653d6a5f850c11ebb9aa039db22cba45a22cd63f1aa1bc0df699",
+      "anchoredAt": "2026-08-27T14:46:05.633Z",
+      "blockchainReference": "0xdb58a5bf38b01f0d3813a29d66ddcdf5b1b0fc05c0131420d92795b489ab6a0a",
+      "createdAt": "2026-08-27T14:46:05.633Z"
+    },
+    {
+      "id": "doc_5b88d1f304664d57",
+      "organizationId": "org_meridian",
+      "assetId": "ast_3bd729e164ef4be7",
+      "name": "Bayfront Offices SPA.pdf",
+      "type": "SPA",
+      "status": "READY",
+      "mimeType": "text/plain",
+      "storageKey": "2026-08-27/bin_70c87b18510d483b-Bayfront-Offices-SPA.pdf",
+      "sizeBytes": 87,
+      "extractedText": "SALE AND PURCHASE AGREEMENT\nPurchase price: SGD 105,000,000\nOwnership transferred: 100%",
+      "groupKey": "ast_3bd729e164ef4be7:SPA",
+      "version": 1,
+      "isCurrent": true,
+      "documentHash": "0xc9899bdb1cbb12b46bd9cac0e6714c135ff88d969deb638b788f6f0cb50d9a35",
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/2026-08-27/bin_70c87b18510d483b-Bayfront-Offices-SPA.pdf",
+      "anchorStatus": "BLOCKCHAIN_ANCHORED",
+      "anchorMode": "LIVE",
+      "anchorChainId": 11155111,
+      "anchorChainName": "Ethereum Sepolia",
+      "anchorContractAddress": "0x7B0B5bf8Db6e9cD0766f852d36D88F2b003bd841",
+      "anchorTxHash": "0x92f91c1764b33fd1a09a80db4737a12b0554d5656d7ba6ef094fd5d2800e1915",
+      "anchorExplorerUrl": "https://sepolia.etherscan.io/tx/0x92f91c1764b33fd1a09a80db4737a12b0554d5656d7ba6ef094fd5d2800e1915",
+      "anchoredAt": "2026-08-27T14:45:41.441Z",
+      "blockchainReference": "0x100914a2a572d4487ce8255e7a663d9e617286d96574b343b82b8d8930b843d6",
+      "createdAt": "2026-08-27T14:45:41.441Z"
+    },
+    {
+      "id": "doc_6035520d7eff4f57",
+      "organizationId": "org_meridian",
+      "assetId": "ast_0c8be51f0bd04fb9",
+      "name": "EuroLog Appraisal 2026.pdf",
+      "type": "VALUATION_MEMO",
+      "status": "READY",
+      "mimeType": "text/plain",
+      "storageKey": "2026-08-27/bin_af659472df0d4a76-EuroLog-Appraisal-2026.pdf",
+      "sizeBytes": 99,
+      "extractedText": "VALUATION APPRAISAL\nMarket value: EUR 78,500,000\nOccupancy: 97%\nWALE: 8.1 years\nAs of: 30 June 2026",
+      "groupKey": "ast_0c8be51f0bd04fb9:VALUATION_MEMO",
+      "version": 1,
+      "isCurrent": true,
+      "documentHash": "0x3b3e541c68e8410b7c1e4cc2a5ee735e608c082fd317e8077d04f6c9e3f05f98",
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/2026-08-27/bin_af659472df0d4a76-EuroLog-Appraisal-2026.pdf",
+      "anchorStatus": "BLOCKCHAIN_ANCHORED",
+      "anchorMode": "LIVE",
+      "anchorChainId": 11155111,
+      "anchorChainName": "Ethereum Sepolia",
+      "anchorContractAddress": "0x7B0B5bf8Db6e9cD0766f852d36D88F2b003bd841",
+      "anchorTxHash": "0xae18b1be511d120a52eea23bd93de78d72d7dfe4707f1cdcbd2ff1eb75e4e094",
+      "anchorExplorerUrl": "https://sepolia.etherscan.io/tx/0xae18b1be511d120a52eea23bd93de78d72d7dfe4707f1cdcbd2ff1eb75e4e094",
+      "anchoredAt": "2026-08-27T14:44:38.972Z",
+      "blockchainReference": "0x9419441db8efa42547b86df46cbefbfa60a1fe31a8a8e61a036f9b33e2e64d40",
+      "createdAt": "2026-08-27T14:44:38.972Z"
+    },
+    {
+      "id": "doc_c4aefbfdf6bd4475",
+      "organizationId": "org_meridian",
+      "assetId": "ast_0c8be51f0bd04fb9",
+      "name": "Canal Side SPA.pdf",
+      "type": "SPA",
+      "status": "READY",
+      "mimeType": "text/plain",
+      "storageKey": "2026-08-27/bin_84e65f4899494867-Canal-Side-SPA.pdf",
+      "sizeBytes": 86,
+      "extractedText": "SALE AND PURCHASE AGREEMENT\nPurchase price: EUR 72,250,000\nOwnership transferred: 100%",
+      "groupKey": "ast_0c8be51f0bd04fb9:SPA",
+      "version": 1,
+      "isCurrent": true,
+      "documentHash": "0x5d28e0084300627813558c5bcad31ce48eb82dbe075b8378434ea873a96ad680",
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/2026-08-27/bin_84e65f4899494867-Canal-Side-SPA.pdf",
+      "anchorStatus": "BLOCKCHAIN_ANCHORED",
+      "anchorMode": "LIVE",
+      "anchorChainId": 11155111,
+      "anchorChainName": "Ethereum Sepolia",
+      "anchorContractAddress": "0x7B0B5bf8Db6e9cD0766f852d36D88F2b003bd841",
+      "anchorTxHash": "0x003bd58f99b1919babaf65ed607da66e8d5b151d81661f4efc01c978ed0a62ff",
+      "anchorExplorerUrl": "https://sepolia.etherscan.io/tx/0x003bd58f99b1919babaf65ed607da66e8d5b151d81661f4efc01c978ed0a62ff",
+      "anchoredAt": "2026-08-27T14:44:15.737Z",
+      "blockchainReference": "0x76da66e754151282ba7eddfa063ff381e35a241f4ba18979b2a275b5c08c4e32",
+      "createdAt": "2026-08-27T14:44:15.737Z"
+    },
+    {
+      "id": "doc_ec675c0a232e468b",
+      "organizationId": "org_meridian",
+      "assetId": "ast_513be945dd504cb8",
+      "name": "Northbridge Valuation Memo — Riverside Quay.pdf",
+      "type": "VALUATION_MEMO",
+      "status": "READY",
+      "mimeType": "text/plain",
+      "storageKey": "2026-08-27/bin_a5b89380788d4ddb-Northbridge-Valuation-Memo-Riverside-Quay.pdf",
+      "sizeBytes": 128,
+      "extractedText": "INDEPENDENT VALUATION MEMORANDUM\nAs of: 31 July 2026\nMarket value: GBP 45,200,000\nOccupancy: 91%\nWALT: 6.2 years\nCap rate: 5.90%",
+      "groupKey": "ast_513be945dd504cb8:VALUATION_MEMO",
+      "version": 1,
+      "isCurrent": true,
+      "documentHash": "0xcb271516c4474083ba47f3175a3a5ab1e74b115083e3a3fec9e22b5c587881d3",
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/2026-08-27/bin_a5b89380788d4ddb-Northbridge-Valuation-Memo-Riverside-Quay.pdf",
+      "anchorStatus": "BLOCKCHAIN_ANCHORED",
+      "anchorMode": "LIVE",
+      "anchorChainId": 11155111,
+      "anchorChainName": "Ethereum Sepolia",
+      "anchorContractAddress": "0x7B0B5bf8Db6e9cD0766f852d36D88F2b003bd841",
+      "anchorTxHash": "0xca37fe500492a47b86f23883413855f063003e618700c6084af5b2e2f7729334",
+      "anchorExplorerUrl": "https://sepolia.etherscan.io/tx/0xca37fe500492a47b86f23883413855f063003e618700c6084af5b2e2f7729334",
+      "anchoredAt": "2026-08-27T14:42:48.865Z",
+      "blockchainReference": "0x1152d0367b5e8933294da9967c7a2ed7a4b1962ad9d270d6ef0e8935d6c7cc99",
+      "createdAt": "2026-08-27T14:42:48.865Z"
+    },
+    {
+      "id": "doc_6cbe5c74a37b4b52",
+      "organizationId": "org_meridian",
+      "assetId": "ast_513be945dd504cb8",
+      "name": "Land Registry Extract — Riverside Quay.pdf",
+      "type": "TITLE_DEED",
+      "status": "READY",
+      "mimeType": "text/plain",
+      "storageKey": "2026-08-27/bin_53b10bfa783046e3-Land-Registry-Extract-Riverside-Quay.pdf",
+      "sizeBytes": 88,
+      "extractedText": "HM LAND REGISTRY EXTRACT\nProprietor: Riverside Quay HoldCo Limited\nLegal ownership: 100%",
+      "groupKey": "ast_513be945dd504cb8:TITLE_DEED",
+      "version": 1,
+      "isCurrent": true,
+      "documentHash": "0x6d5c160a607b89718be7099cea05b035e920d7ebad177f869ffcbb4b72b2dc0f",
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/2026-08-27/bin_53b10bfa783046e3-Land-Registry-Extract-Riverside-Quay.pdf",
+      "anchorStatus": "BLOCKCHAIN_ANCHORED",
+      "anchorMode": "LIVE",
+      "anchorChainId": 11155111,
+      "anchorChainName": "Ethereum Sepolia",
+      "anchorContractAddress": "0x7B0B5bf8Db6e9cD0766f852d36D88F2b003bd841",
+      "anchorTxHash": "0x2ef56313d7cbb07aa946d8f1cd59ac81fb4e910b0565135826fc027d7a72adae",
+      "anchorExplorerUrl": "https://sepolia.etherscan.io/tx/0x2ef56313d7cbb07aa946d8f1cd59ac81fb4e910b0565135826fc027d7a72adae",
+      "anchoredAt": "2026-08-27T14:42:27.963Z",
+      "blockchainReference": "0xa04e3a0479d2a92bd112859b4a21773297dadfe60c2e37da281520ead0a5d992",
+      "createdAt": "2026-08-27T14:42:27.963Z"
+    },
+    {
+      "id": "doc_cc8de1de1b27419b",
+      "organizationId": "org_meridian",
+      "assetId": "ast_513be945dd504cb8",
+      "name": "Riverside Quay SPA.pdf",
+      "type": "SPA",
+      "status": "READY",
+      "mimeType": "text/plain",
+      "storageKey": "2026-08-27/bin_39c2616487364594-Riverside-Quay-SPA.pdf",
+      "sizeBytes": 149,
+      "extractedText": "SHARE PURCHASE AGREEMENT\nPurchase price: GBP 41,000,000\nOwnership transferred: 100%\nProperty: Riverside Quay Tower, Salford Quays, Manchester M50 3SP",
+      "groupKey": "ast_513be945dd504cb8:SPA",
+      "version": 1,
+      "isCurrent": true,
+      "documentHash": "0xd4874bf4e7486577a1432f5c3b64f9b6484ca80475b2fc3129335856311e8248",
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/2026-08-27/bin_39c2616487364594-Riverside-Quay-SPA.pdf",
+      "anchorStatus": "BLOCKCHAIN_ANCHORED",
+      "anchorMode": "LIVE",
+      "anchorChainId": 11155111,
+      "anchorChainName": "Ethereum Sepolia",
+      "anchorContractAddress": "0x7B0B5bf8Db6e9cD0766f852d36D88F2b003bd841",
+      "anchorTxHash": "0xdb1c6e81b9207429c344d1c877d8e651c6c7eebc0c693601ad8a4de38b5fd595",
+      "anchorExplorerUrl": "https://sepolia.etherscan.io/tx/0xdb1c6e81b9207429c344d1c877d8e651c6c7eebc0c693601ad8a4de38b5fd595",
+      "anchoredAt": "2026-08-27T14:42:16.217Z",
+      "blockchainReference": "0x6b6e96b3b664dd7f4555221fe3198da1e1aabc1a9d6d908368005ba30e381b78",
+      "createdAt": "2026-08-27T14:42:16.217Z"
+    },
+    {
+      "id": "doc_bbf696a0ea5f4fbe",
+      "organizationId": "org_meridian",
+      "assetId": "ast_165f9f1a78334d31",
+      "name": "Smoke Valuation 1787766691060.pdf",
+      "type": "VALUATION_MEMO",
+      "status": "READY",
+      "mimeType": "text/plain",
+      "storageKey": "2026-08-26/bin_d62d7ff25af54869-Smoke-Valuation-1787766691060.pdf",
+      "sizeBytes": 102,
+      "extractedText": "INDEPENDENT VALUATION\nMarket value: GBP 99,500,000\nAs of: 1 August 2026\nOccupancy: 95%\nWALT: 6.8 years",
+      "groupKey": "ast_165f9f1a78334d31:VALUATION_MEMO",
+      "version": 1,
+      "isCurrent": true,
+      "documentHash": "0x73ea0c857ab1af17888679ce1684271f63a033b8439b926c377647b276ebc524",
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/2026-08-26/bin_d62d7ff25af54869-Smoke-Valuation-1787766691060.pdf",
+      "anchorStatus": "BLOCKCHAIN_ANCHORED",
+      "anchorMode": "LIVE",
+      "anchorChainId": 11155111,
+      "anchorChainName": "Ethereum Sepolia",
+      "anchorContractAddress": "0x7B0B5bf8Db6e9cD0766f852d36D88F2b003bd841",
+      "anchorTxHash": "0xd970b0a38a837bcc1566dda30d58e02fe4842370e0df394d7694d9331c9b36ec",
+      "anchorExplorerUrl": "https://sepolia.etherscan.io/tx/0xd970b0a38a837bcc1566dda30d58e02fe4842370e0df394d7694d9331c9b36ec",
+      "anchoredAt": "2026-08-26T17:51:31.065Z",
+      "blockchainReference": "0xbd015d2f6d89717cfb61d95037d2bfc2cebde6203c315c04083e6f9dd191c1e8",
+      "createdAt": "2026-08-26T17:51:31.065Z"
+    },
     {
       "id": "doc_cfeb273984164692",
       "organizationId": "org_meridian",
@@ -1113,6 +1425,672 @@
     }
   ],
   "auditEvents": [
+    {
+      "id": "aud_3834d5913fa5452b",
+      "createdAt": "2026-08-27T15:05:41.571Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "intelligence.pipeline_completed",
+      "entityType": "Asset",
+      "entityId": "ast_3bd729e164ef4be7",
+      "metadata": {
+        "jobId": "job_c629267633f34720",
+        "version": 2,
+        "type": "FULL_PIPELINE"
+      }
+    },
+    {
+      "id": "aud_ad6eefc17af14a17",
+      "createdAt": "2026-08-27T15:05:03.271Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "intelligence.llm_model_selected",
+      "entityType": "Organization",
+      "entityId": "org_meridian",
+      "metadata": {
+        "modelId": "caprov-deterministic",
+        "provider": "caprov",
+        "label": "CAPROV Deterministic Extractor"
+      }
+    },
+    {
+      "id": "aud_45077c4f6c27441b",
+      "createdAt": "2026-08-27T15:05:01.938Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "document.uploaded",
+      "entityType": "Document",
+      "entityId": "doc_cabfc20eb1ba4d6c",
+      "metadata": {
+        "assetId": "ast_3bd729e164ef4be7",
+        "type": "VALUATION_MEMO",
+        "version": 2,
+        "anchorStatus": "BLOCKCHAIN_ANCHORED",
+        "transactionHash": "0x095c575f1f5950c619ea73cf076764eb9569f1153ae68857307978277120c4f1"
+      }
+    },
+    {
+      "id": "aud_a38041dd723c4c85",
+      "createdAt": "2026-08-27T15:04:51.884Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_e9365338a9e541e9",
+      "createdAt": "2026-08-27T14:47:03.308Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "intelligence.pipeline_completed",
+      "entityType": "Asset",
+      "entityId": "ast_3bd729e164ef4be7",
+      "metadata": {
+        "jobId": "job_e77ea666d7e54d7b",
+        "version": 1,
+        "type": "FULL_PIPELINE"
+      }
+    },
+    {
+      "id": "aud_e9a3c12fa7d1404f",
+      "createdAt": "2026-08-27T14:46:15.389Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "document.uploaded",
+      "entityType": "Document",
+      "entityId": "doc_cce5046251564bfb",
+      "metadata": {
+        "assetId": "ast_3bd729e164ef4be7",
+        "type": "VALUATION_MEMO",
+        "version": 1,
+        "anchorStatus": "BLOCKCHAIN_ANCHORED",
+        "transactionHash": "0x2721c33e5d80653d6a5f850c11ebb9aa039db22cba45a22cd63f1aa1bc0df699"
+      }
+    },
+    {
+      "id": "aud_9d7f506c3e8943d7",
+      "createdAt": "2026-08-27T14:46:05.603Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "document.uploaded",
+      "entityType": "Document",
+      "entityId": "doc_5b88d1f304664d57",
+      "metadata": {
+        "assetId": "ast_3bd729e164ef4be7",
+        "type": "SPA",
+        "version": 1,
+        "anchorStatus": "BLOCKCHAIN_ANCHORED",
+        "transactionHash": "0x92f91c1764b33fd1a09a80db4737a12b0554d5656d7ba6ef094fd5d2800e1915"
+      }
+    },
+    {
+      "id": "aud_b80f544c23c04717",
+      "createdAt": "2026-08-27T14:45:41.433Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "asset.created",
+      "entityType": "Asset",
+      "entityId": "ast_3bd729e164ef4be7"
+    },
+    {
+      "id": "aud_249304e8a619490c",
+      "createdAt": "2026-08-27T14:45:41.420Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "intelligence.pipeline_completed",
+      "entityType": "Asset",
+      "entityId": "ast_0c8be51f0bd04fb9",
+      "metadata": {
+        "jobId": "job_0d16dc40377c4b61",
+        "version": 1,
+        "type": "FULL_PIPELINE"
+      }
+    },
+    {
+      "id": "aud_1994e8b163e14c05",
+      "createdAt": "2026-08-27T14:44:53.900Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "document.uploaded",
+      "entityType": "Document",
+      "entityId": "doc_6035520d7eff4f57",
+      "metadata": {
+        "assetId": "ast_0c8be51f0bd04fb9",
+        "type": "VALUATION_MEMO",
+        "version": 1,
+        "anchorStatus": "BLOCKCHAIN_ANCHORED",
+        "transactionHash": "0xae18b1be511d120a52eea23bd93de78d72d7dfe4707f1cdcbd2ff1eb75e4e094"
+      }
+    },
+    {
+      "id": "aud_f7ee7dcc94784a61",
+      "createdAt": "2026-08-27T14:44:38.955Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "document.uploaded",
+      "entityType": "Document",
+      "entityId": "doc_c4aefbfdf6bd4475",
+      "metadata": {
+        "assetId": "ast_0c8be51f0bd04fb9",
+        "type": "SPA",
+        "version": 1,
+        "anchorStatus": "BLOCKCHAIN_ANCHORED",
+        "transactionHash": "0x003bd58f99b1919babaf65ed607da66e8d5b151d81661f4efc01c978ed0a62ff"
+      }
+    },
+    {
+      "id": "aud_2c7c452e67df4f21",
+      "createdAt": "2026-08-27T14:44:15.658Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "asset.created",
+      "entityType": "Asset",
+      "entityId": "ast_0c8be51f0bd04fb9"
+    },
+    {
+      "id": "aud_1de05759e1644206",
+      "createdAt": "2026-08-27T14:44:15.515Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "intelligence.pipeline_completed",
+      "entityType": "Asset",
+      "entityId": "ast_513be945dd504cb8",
+      "metadata": {
+        "jobId": "job_e61006f4bb9f4d6f",
+        "version": 2,
+        "type": "FULL_PIPELINE"
+      }
+    },
+    {
+      "id": "aud_d604f19216214aa4",
+      "createdAt": "2026-08-27T14:43:06.401Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "document.uploaded",
+      "entityType": "Document",
+      "entityId": "doc_ec675c0a232e468b",
+      "metadata": {
+        "assetId": "ast_513be945dd504cb8",
+        "type": "VALUATION_MEMO",
+        "version": 1,
+        "anchorStatus": "BLOCKCHAIN_ANCHORED",
+        "transactionHash": "0xca37fe500492a47b86f23883413855f063003e618700c6084af5b2e2f7729334"
+      }
+    },
+    {
+      "id": "aud_9dbb1c0bf8354cf7",
+      "createdAt": "2026-08-27T14:42:48.843Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "document.uploaded",
+      "entityType": "Document",
+      "entityId": "doc_6cbe5c74a37b4b52",
+      "metadata": {
+        "assetId": "ast_513be945dd504cb8",
+        "type": "TITLE_DEED",
+        "version": 1,
+        "anchorStatus": "BLOCKCHAIN_ANCHORED",
+        "transactionHash": "0x2ef56313d7cbb07aa946d8f1cd59ac81fb4e910b0565135826fc027d7a72adae"
+      }
+    },
+    {
+      "id": "aud_d5ee9bec09d3447e",
+      "createdAt": "2026-08-27T14:42:27.951Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "document.uploaded",
+      "entityType": "Document",
+      "entityId": "doc_cc8de1de1b27419b",
+      "metadata": {
+        "assetId": "ast_513be945dd504cb8",
+        "type": "SPA",
+        "version": 1,
+        "anchorStatus": "BLOCKCHAIN_ANCHORED",
+        "transactionHash": "0xdb1c6e81b9207429c344d1c877d8e651c6c7eebc0c693601ad8a4de38b5fd595"
+      }
+    },
+    {
+      "id": "aud_70b29832d0f8409c",
+      "createdAt": "2026-08-27T14:42:26.873Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_sofia",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_sofia"
+    },
+    {
+      "id": "aud_8f45cfcb21ee4e15",
+      "createdAt": "2026-08-27T14:42:26.776Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "collateral.released",
+      "entityType": "Collateral",
+      "entityId": "col_88eebf01e58e4591"
+    },
+    {
+      "id": "aud_46ece26551af4728",
+      "createdAt": "2026-08-27T14:42:26.765Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "lending.loan_repaid",
+      "entityType": "Loan",
+      "entityId": "loan_a559e4fdf63f4f25"
+    },
+    {
+      "id": "aud_ba974110f744466d",
+      "createdAt": "2026-08-27T14:42:26.755Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "lending.loan_opened",
+      "entityType": "Loan",
+      "entityId": "loan_a559e4fdf63f4f25",
+      "metadata": {
+        "collateralId": "col_88eebf01e58e4591",
+        "principal": 1000000,
+        "ltvBps": 400
+      }
+    },
+    {
+      "id": "aud_777ab7009ef84096",
+      "createdAt": "2026-08-27T14:42:26.747Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "collateral.updated",
+      "entityType": "Collateral",
+      "entityId": "col_88eebf01e58e4591",
+      "metadata": {
+        "pledgedValue": 25000000,
+        "haircutBps": 1500
+      }
+    },
+    {
+      "id": "aud_85b219ecfab6478c",
+      "createdAt": "2026-08-27T14:42:26.735Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "collateral.pledged",
+      "entityType": "Collateral",
+      "entityId": "col_88eebf01e58e4591",
+      "metadata": {
+        "assetId": "ast_513be945dd504cb8",
+        "tokenId": "tok_8100add195774d2d",
+        "advanceableValue": 20000000
+      }
+    },
+    {
+      "id": "aud_43be986c16044b5a",
+      "createdAt": "2026-08-27T14:42:26.519Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "tokenization.minted",
+      "entityType": "Token",
+      "entityId": "tok_8100add195774d2d",
+      "metadata": {
+        "assetId": "ast_513be945dd504cb8",
+        "mode": "LIVE",
+        "txHash": "0x5b749b87a095027ac0cdd63f6cac3fa0f5e35520c407a5d4eee5081e3db2d498",
+        "chainId": 11155111
+      }
+    },
+    {
+      "id": "aud_d79a12c20210411f",
+      "createdAt": "2026-08-27T14:42:18.903Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "settlement.completed",
+      "entityType": "Settlement",
+      "entityId": "stl_482d394ceb554b51"
+    },
+    {
+      "id": "aud_339dc1ad0a9248e9",
+      "createdAt": "2026-08-27T14:42:18.880Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "settlement.created",
+      "entityType": "Settlement",
+      "entityId": "stl_482d394ceb554b51",
+      "metadata": {
+        "tradeId": "trd_955ef0fd9f4d482f"
+      }
+    },
+    {
+      "id": "aud_7e95a339264d4b1f",
+      "createdAt": "2026-08-27T14:42:18.819Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "trading.trade_matched",
+      "entityType": "Trade",
+      "entityId": "trd_955ef0fd9f4d482f",
+      "metadata": {
+        "orderId": "ord_811cd780435c4699",
+        "notional": 1250000
+      }
+    },
+    {
+      "id": "aud_43f11d54f4c540f6",
+      "createdAt": "2026-08-27T14:42:18.817Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "trading.order_created",
+      "entityType": "Order",
+      "entityId": "ord_811cd780435c4699",
+      "metadata": {
+        "listingId": "lst_4ce5911a86b54d13",
+        "side": "BUY"
+      }
+    },
+    {
+      "id": "aud_54e92b00ffd342ff",
+      "createdAt": "2026-08-27T14:42:18.782Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "marketplace.listing_created",
+      "entityType": "Listing",
+      "entityId": "lst_4ce5911a86b54d13",
+      "metadata": {
+        "assetId": "ast_513be945dd504cb8",
+        "askPrice": 25000000,
+        "offeringType": "SALE"
+      }
+    },
+    {
+      "id": "aud_85fde6296a454dbb",
+      "createdAt": "2026-08-27T14:42:18.736Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "intelligence.pipeline_completed",
+      "entityType": "Asset",
+      "entityId": "ast_513be945dd504cb8",
+      "metadata": {
+        "jobId": "job_962109785fb54598",
+        "version": 1,
+        "type": "FULL_PIPELINE"
+      }
+    },
+    {
+      "id": "aud_30ac8962ccdf401d",
+      "createdAt": "2026-08-27T14:42:16.576Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_6bd0eff0def24ab2",
+      "createdAt": "2026-08-27T14:42:16.190Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "asset.created",
+      "entityType": "Asset",
+      "entityId": "ast_513be945dd504cb8"
+    },
+    {
+      "id": "aud_739d0133b5744c7d",
+      "createdAt": "2026-08-27T14:42:16.175Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_06670f8c056c48be",
+      "createdAt": "2026-08-27T14:42:16.167Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_45b2dea1418645a6",
+      "createdAt": "2026-08-26T18:12:56.110Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "asset.created",
+      "entityType": "Asset",
+      "entityId": "ast_24998212687f47b4"
+    },
+    {
+      "id": "aud_4eef5da7467f4f96",
+      "createdAt": "2026-08-26T18:12:56.069Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_elena"
+    },
+    {
+      "id": "aud_1925830eee9d4ec5",
+      "createdAt": "2026-08-26T18:12:03.806Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_elena"
+    },
+    {
+      "id": "aud_85ce17d37be6401d",
+      "createdAt": "2026-08-26T17:52:03.597Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_sofia",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_sofia"
+    },
+    {
+      "id": "aud_67c22b4f282f4a2f",
+      "createdAt": "2026-08-26T17:52:03.416Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "collateral.released",
+      "entityType": "Collateral",
+      "entityId": "col_8ae84e3794ee402e"
+    },
+    {
+      "id": "aud_bd5534e1e77b4776",
+      "createdAt": "2026-08-26T17:52:03.385Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "lending.loan_repaid",
+      "entityType": "Loan",
+      "entityId": "loan_29bc69eb74bc44c8"
+    },
+    {
+      "id": "aud_f141e85944b548ee",
+      "createdAt": "2026-08-26T17:52:03.356Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "lending.loan_opened",
+      "entityType": "Loan",
+      "entityId": "loan_29bc69eb74bc44c8",
+      "metadata": {
+        "collateralId": "col_8ae84e3794ee402e",
+        "principal": 1000000,
+        "ltvBps": 221
+      }
+    },
+    {
+      "id": "aud_5b44435d92734428",
+      "createdAt": "2026-08-26T17:52:03.327Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "collateral.updated",
+      "entityType": "Collateral",
+      "entityId": "col_8ae84e3794ee402e",
+      "metadata": {
+        "pledgedValue": 45200000,
+        "haircutBps": 1500
+      }
+    },
+    {
+      "id": "aud_6b21a785f6694ac0",
+      "createdAt": "2026-08-26T17:52:03.282Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "collateral.pledged",
+      "entityType": "Collateral",
+      "entityId": "col_8ae84e3794ee402e",
+      "metadata": {
+        "assetId": "ast_35e73b6f6a1444a2",
+        "tokenId": "tok_efc57b56f12840a4",
+        "advanceableValue": 36160000
+      }
+    },
+    {
+      "id": "aud_f78587fef3eb4427",
+      "createdAt": "2026-08-26T17:52:03.038Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "tokenization.minted",
+      "entityType": "Token",
+      "entityId": "tok_efc57b56f12840a4",
+      "metadata": {
+        "assetId": "ast_35e73b6f6a1444a2",
+        "mode": "LIVE",
+        "txHash": "0xdba928d3c44b15b86630376a41f819f3f64632372c2653c06194d04212b441cb",
+        "chainId": 11155111
+      }
+    },
+    {
+      "id": "aud_0577b8f2deb54736",
+      "createdAt": "2026-08-26T17:52:02.342Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "intelligence.pipeline_completed",
+      "entityType": "Asset",
+      "entityId": "ast_165f9f1a78334d31",
+      "metadata": {
+        "jobId": "job_46554a8df9a3444c",
+        "version": 1,
+        "type": "FULL_PIPELINE"
+      }
+    },
+    {
+      "id": "aud_350437c897414ab9",
+      "createdAt": "2026-08-26T17:51:51.584Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "intelligence.llm_model_selected",
+      "entityType": "Organization",
+      "entityId": "org_meridian",
+      "metadata": {
+        "modelId": "caprov-deterministic",
+        "provider": "caprov",
+        "label": "CAPROV Deterministic Extractor"
+      }
+    },
+    {
+      "id": "aud_ed5997f8080842ec",
+      "createdAt": "2026-08-26T17:51:51.227Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "document.uploaded",
+      "entityType": "Document",
+      "entityId": "doc_bbf696a0ea5f4fbe",
+      "metadata": {
+        "assetId": "ast_165f9f1a78334d31",
+        "type": "VALUATION_MEMO",
+        "version": 1,
+        "anchorStatus": "BLOCKCHAIN_ANCHORED",
+        "transactionHash": "0xd970b0a38a837bcc1566dda30d58e02fe4842370e0df394d7694d9331c9b36ec"
+      }
+    },
+    {
+      "id": "aud_5b08235a61504f9b",
+      "createdAt": "2026-08-26T17:51:51.090Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "settlement.completed",
+      "entityType": "Settlement",
+      "entityId": "stl_004b658543464d7b"
+    },
+    {
+      "id": "aud_bbbfdafceb894579",
+      "createdAt": "2026-08-26T17:51:51.081Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "settlement.created",
+      "entityType": "Settlement",
+      "entityId": "stl_004b658543464d7b",
+      "metadata": {
+        "tradeId": "trd_6d90b7d3923043dd"
+      }
+    },
+    {
+      "id": "aud_f8244e554ea84a47",
+      "createdAt": "2026-08-26T17:51:51.066Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "trading.trade_matched",
+      "entityType": "Trade",
+      "entityId": "trd_6d90b7d3923043dd",
+      "metadata": {
+        "orderId": "ord_434d0763373c4517",
+        "notional": 2260000
+      }
+    },
+    {
+      "id": "aud_ba6a32599fa74659",
+      "createdAt": "2026-08-26T17:51:51.066Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "trading.order_created",
+      "entityType": "Order",
+      "entityId": "ord_434d0763373c4517",
+      "metadata": {
+        "listingId": "lst_bc45fbe519ca4ac1",
+        "side": "BUY"
+      }
+    },
+    {
+      "id": "aud_7f0865318b394117",
+      "createdAt": "2026-08-26T17:51:51.054Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "marketplace.listing_created",
+      "entityType": "Listing",
+      "entityId": "lst_bc45fbe519ca4ac1",
+      "metadata": {
+        "assetId": "ast_35e73b6f6a1444a2",
+        "askPrice": 45200000,
+        "offeringType": "SALE"
+      }
+    },
+    {
+      "id": "aud_e6cc081c39b24205",
+      "createdAt": "2026-08-26T17:51:51.030Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "intelligence.pipeline_completed",
+      "entityType": "Asset",
+      "entityId": "ast_35e73b6f6a1444a2",
+      "metadata": {
+        "jobId": "job_1b8045fc03c74dc0",
+        "version": 2,
+        "type": "FULL_PIPELINE"
+      }
+    },
+    {
+      "id": "aud_397b6cff645e40a9",
+      "createdAt": "2026-08-26T17:51:32.960Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_f3865bd3f25841a8",
+      "createdAt": "2026-08-26T17:51:31.015Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
     {
       "id": "aud_74c516b8c60b434a",
       "createdAt": "2026-08-26T11:32:52.574Z",
@@ -2126,6 +3104,146 @@
     }
   ],
   "jobs": [
+    {
+      "id": "job_c629267633f34720",
+      "organizationId": "org_meridian",
+      "assetId": "ast_3bd729e164ef4be7",
+      "type": "FULL_PIPELINE",
+      "status": "COMPLETED",
+      "createdAt": "2026-08-27T15:05:03.300Z",
+      "completedAt": "2026-08-27T15:05:03.430Z",
+      "result": {
+        "dnaVersion": 2,
+        "confidence": {
+          "overall": 0.81,
+          "coverage": 0.6,
+          "provenance": 0.95
+        },
+        "llmModelId": "caprov-deterministic",
+        "llmModelLabel": "CAPROV Deterministic Extractor",
+        "extractionEngine": "caprov-deterministic"
+      }
+    },
+    {
+      "id": "job_e77ea666d7e54d7b",
+      "organizationId": "org_meridian",
+      "assetId": "ast_3bd729e164ef4be7",
+      "type": "FULL_PIPELINE",
+      "status": "COMPLETED",
+      "createdAt": "2026-08-27T14:46:15.417Z",
+      "completedAt": "2026-08-27T14:46:15.452Z",
+      "result": {
+        "dnaVersion": 1,
+        "confidence": {
+          "overall": 0.81,
+          "coverage": 0.6,
+          "provenance": 0.95
+        },
+        "llmModelId": "caprov-deterministic",
+        "llmModelLabel": "CAPROV Deterministic Extractor",
+        "extractionEngine": "caprov-deterministic"
+      }
+    },
+    {
+      "id": "job_0d16dc40377c4b61",
+      "organizationId": "org_meridian",
+      "assetId": "ast_0c8be51f0bd04fb9",
+      "type": "FULL_PIPELINE",
+      "status": "COMPLETED",
+      "createdAt": "2026-08-27T14:44:53.908Z",
+      "completedAt": "2026-08-27T14:44:53.918Z",
+      "result": {
+        "dnaVersion": 1,
+        "confidence": {
+          "overall": 0.81,
+          "coverage": 0.6,
+          "provenance": 0.95
+        },
+        "llmModelId": "caprov-deterministic",
+        "llmModelLabel": "CAPROV Deterministic Extractor",
+        "extractionEngine": "caprov-deterministic"
+      }
+    },
+    {
+      "id": "job_e61006f4bb9f4d6f",
+      "organizationId": "org_meridian",
+      "assetId": "ast_513be945dd504cb8",
+      "type": "FULL_PIPELINE",
+      "status": "COMPLETED",
+      "createdAt": "2026-08-27T14:43:06.417Z",
+      "completedAt": "2026-08-27T14:43:06.436Z",
+      "result": {
+        "dnaVersion": 2,
+        "confidence": {
+          "overall": 0.85,
+          "coverage": 0.7,
+          "provenance": 0.95
+        },
+        "llmModelId": "caprov-deterministic",
+        "llmModelLabel": "CAPROV Deterministic Extractor",
+        "extractionEngine": "caprov-deterministic"
+      }
+    },
+    {
+      "id": "job_962109785fb54598",
+      "organizationId": "org_meridian",
+      "assetId": "ast_513be945dd504cb8",
+      "type": "FULL_PIPELINE",
+      "status": "COMPLETED",
+      "createdAt": "2026-08-27T14:42:16.371Z",
+      "completedAt": "2026-08-27T14:42:16.615Z",
+      "result": {
+        "dnaVersion": 1,
+        "confidence": {
+          "overall": 0.4,
+          "coverage": 0.4,
+          "provenance": 0.4
+        },
+        "llmModelId": "caprov-deterministic",
+        "llmModelLabel": "CAPROV Deterministic Extractor",
+        "extractionEngine": "caprov-deterministic"
+      }
+    },
+    {
+      "id": "job_46554a8df9a3444c",
+      "organizationId": "org_meridian",
+      "assetId": "ast_165f9f1a78334d31",
+      "type": "FULL_PIPELINE",
+      "status": "COMPLETED",
+      "createdAt": "2026-08-26T17:51:51.598Z",
+      "completedAt": "2026-08-26T17:51:51.613Z",
+      "result": {
+        "dnaVersion": 1,
+        "confidence": {
+          "overall": 0.77,
+          "coverage": 0.5,
+          "provenance": 0.96
+        },
+        "llmModelId": "caprov-deterministic",
+        "llmModelLabel": "CAPROV Deterministic Extractor",
+        "extractionEngine": "caprov-deterministic"
+      }
+    },
+    {
+      "id": "job_1b8045fc03c74dc0",
+      "organizationId": "org_meridian",
+      "assetId": "ast_35e73b6f6a1444a2",
+      "type": "FULL_PIPELINE",
+      "status": "COMPLETED",
+      "createdAt": "2026-08-26T17:51:32.990Z",
+      "completedAt": "2026-08-26T17:51:33.039Z",
+      "result": {
+        "dnaVersion": 2,
+        "confidence": {
+          "overall": 0.85,
+          "coverage": 0.7,
+          "provenance": 0.95
+        },
+        "llmModelId": "caprov-deterministic",
+        "llmModelLabel": "CAPROV Deterministic Extractor",
+        "extractionEngine": "caprov-deterministic"
+      }
+    },
     {
       "id": "job_0553e6996f7a493a",
       "organizationId": "org_meridian",
@@ -6650,6 +7768,1839 @@
       "contentHash": "b99417e94b438918625f5fd85be8ead74f1f94eae14042f7330ddd3c3e1fd8f4",
       "hashAlgorithm": "sha256",
       "createdAt": "2026-08-26T11:27:02.011Z"
+    },
+    {
+      "id": "dna_0c248cbbbcf446fb",
+      "assetId": "ast_35e73b6f6a1444a2",
+      "version": 2,
+      "envelope": {
+        "assetId": "ast_35e73b6f6a1444a2",
+        "version": 2,
+        "generatedAt": "2026-08-26T17:51:32.996Z",
+        "summary": "Riverside Quay Tower intelligence envelope from 3 source documents. Primary mark GBP 45,200,000 (market value). Risk moderate with 2 flag(s). Forward mark (3y base): GBP 50,521,872 at 3.8% p.a. model growth. (engine-enriched graph)",
+        "facts": [
+          {
+            "id": "fact_5924dc8bb37b45ed",
+            "key": "market_value",
+            "label": "Market value",
+            "value": "GBP 45,200,000",
+            "numericValue": 45200000,
+            "currency": "GBP",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_9e20b82416b646e3",
+                "sourceFragment": "Market value: GBP 45,200,000",
+                "confidence": 0.99,
+                "observedAt": "2026-08-26T17:51:32.992Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1785456000000,
+            "score": 139.1785456
+          },
+          {
+            "id": "fact_6759a23ac7484be1",
+            "key": "purchase_price",
+            "label": "Purchase price",
+            "value": "GBP 41,000,000",
+            "numericValue": 41000000,
+            "currency": "GBP",
+            "confidence": 0.98,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_9d922686bebd4c5d",
+                "sourceFragment": "Purchase price: GBP 41,000,000",
+                "confidence": 0.98,
+                "observedAt": "2026-08-26T17:51:32.995Z"
+              }
+            ],
+            "documentType": "SPA",
+            "documentAsOfMs": 0,
+            "score": 128
+          },
+          {
+            "id": "fact_72ad47b15eeb4c79",
+            "key": "legal_ownership",
+            "label": "Legal ownership",
+            "value": "100% Riverside Quay HoldCo Limited",
+            "numericValue": 100,
+            "currency": "USD",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_8bc70282959c41aa",
+                "sourceFragment": "Legal ownership: 100%",
+                "confidence": 0.99,
+                "observedAt": "2026-08-26T17:51:32.994Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 0,
+            "score": 132
+          },
+          {
+            "id": "fact_006cda99d8164105",
+            "key": "proprietor",
+            "label": "Proprietor",
+            "value": "Riverside Quay HoldCo Limited",
+            "confidence": 0.96,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_8bc70282959c41aa",
+                "sourceFragment": "Proprietor: Riverside Quay HoldCo Limited",
+                "confidence": 0.96,
+                "observedAt": "2026-08-26T17:51:32.994Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 0,
+            "score": 104
+          },
+          {
+            "id": "fact_d6f2d5f71c4047af",
+            "key": "location",
+            "label": "Location",
+            "value": "Riverside Quay Tower, Salford Quays, Manchester M50 3SP",
+            "numericValue": 50,
+            "currency": "USD",
+            "confidence": 0.92,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_9d922686bebd4c5d",
+                "sourceFragment": "Property: Riverside Quay Tower, Salford Quays, Manchester M50 3SP",
+                "confidence": 0.92,
+                "observedAt": "2026-08-26T17:51:32.995Z"
+              }
+            ],
+            "documentType": "SPA",
+            "documentAsOfMs": 0,
+            "score": 102
+          },
+          {
+            "id": "fact_bf5102fd74744c8e",
+            "key": "occupancy",
+            "label": "Occupancy",
+            "value": "91%",
+            "numericValue": 91,
+            "currency": "USD",
+            "confidence": 0.95,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_9e20b82416b646e3",
+                "sourceFragment": "Occupancy: 91%",
+                "confidence": 0.95,
+                "observedAt": "2026-08-26T17:51:32.993Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1785456000000,
+            "score": 135
+          },
+          {
+            "id": "fact_3046b203d7ac44cd",
+            "key": "walt",
+            "label": "WALT",
+            "value": "6.2 years",
+            "numericValue": 6.2,
+            "currency": "USD",
+            "unit": "years",
+            "confidence": 0.93,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_9e20b82416b646e3",
+                "sourceFragment": "WALT: 6.2 years",
+                "confidence": 0.93,
+                "observedAt": "2026-08-26T17:51:32.993Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1785456000000,
+            "score": 133
+          },
+          {
+            "id": "fact_234793ef2752400d",
+            "key": "cap_rate",
+            "label": "Cap rate",
+            "value": "5.90%",
+            "numericValue": 5.9,
+            "currency": "USD",
+            "confidence": 0.91,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_9e20b82416b646e3",
+                "sourceFragment": "Cap rate: 5.90%",
+                "confidence": 0.91,
+                "observedAt": "2026-08-26T17:51:32.994Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1785456000000,
+            "score": 131
+          }
+        ],
+        "entities": [
+          {
+            "id": "ent_449bb3a8e994447d",
+            "name": "Riverside Quay Tower",
+            "canonicalName": "Riverside Quay Tower",
+            "type": "ASSET",
+            "aliases": [],
+            "confidence": 0.99
+          },
+          {
+            "id": "ent_7e24e66355d44956",
+            "name": "Salford Quays, Manchester",
+            "canonicalName": "Salford Quays, Manchester",
+            "type": "LOCATION",
+            "aliases": [],
+            "confidence": 0.9
+          },
+          {
+            "id": "ent_f31401d5fb8b47e8",
+            "name": "Riverside Quay HoldCo Limited",
+            "canonicalName": "Riverside Quay HoldCo Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_5bb4ef0f603345f2",
+            "fromEntityId": "ent_f31401d5fb8b47e8",
+            "toEntityId": "ent_449bb3a8e994447d",
+            "type": "LEGAL_OWNER_OF",
+            "confidence": 0.99,
+            "sourceDocumentId": "doc_8bc70282959c41aa"
+          }
+        ],
+        "timeline": [
+          {
+            "id": "evt_977390f48d08478b",
+            "date": "31 July 2026",
+            "title": "Northbridge Valuation Memo — Riverside Quay",
+            "description": "INDEPENDENT VALUATION MEMORANDUM",
+            "category": "VALUATION",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_9e20b82416b646e3"
+          }
+        ],
+        "valuation": {
+          "amount": 45200000,
+          "currency": "GBP",
+          "method": "Independent valuation memo / appraisal extract",
+          "asOf": "2026-07-31T00:00:00.000Z",
+          "low": 42036000,
+          "high": 48364000,
+          "confidence": 0.99,
+          "notes": [
+            "Primary mark taken from market value / fair value language.",
+            "Acquisition price was GBP 41,000,000."
+          ]
+        },
+        "risk": {
+          "overall": 34,
+          "rating": "MODERATE",
+          "confidence": 0.88,
+          "flags": [
+            "Occupancy at 91%",
+            "Lease duration 6.2 years creates roll risk"
+          ],
+          "dimensions": [
+            {
+              "key": "document_coverage",
+              "label": "Document coverage",
+              "score": 44,
+              "rationale": "3 distinct document types ingested for this asset."
+            },
+            {
+              "key": "ownership_clarity",
+              "label": "Ownership clarity",
+              "score": 18,
+              "rationale": "Legal ownership language extracted."
+            },
+            {
+              "key": "jurisdiction",
+              "label": "Jurisdiction & legal",
+              "score": 24,
+              "rationale": "Jurisdiction recorded as England & Wales."
+            },
+            {
+              "key": "income_durability",
+              "label": "Income durability",
+              "score": 48,
+              "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+            }
+          ]
+        },
+        "confidence": {
+          "overall": 0.85,
+          "coverage": 0.7,
+          "provenance": 0.95
+        },
+        "sourceDocumentIds": [
+          "doc_9e20b82416b646e3",
+          "doc_8bc70282959c41aa",
+          "doc_9d922686bebd4c5d"
+        ],
+        "projection": {
+          "assetId": "ast_35e73b6f6a1444a2",
+          "currency": "GBP",
+          "baseAmount": 45200000,
+          "baseAsOf": "2026-07-31T00:00:00.000Z",
+          "baseMethod": "Independent valuation memo / appraisal extract",
+          "model": "caprov-forward-mark-v1",
+          "generatedAt": "2026-08-26T17:51:32.996Z",
+          "assumptions": {
+            "annualGrowthRate": 0.0378,
+            "drivers": [
+              "real estate base growth 2.5%",
+              "occupancy 91% → 0.08 pp",
+              "lease term 6.2y → 0.18 pp",
+              "cap rate 5.9% → 0.02 pp",
+              "realized mark drift vs purchase → 1.50 pp",
+              "risk moderate −0.5 pp"
+            ],
+            "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+          },
+          "horizons": [
+            {
+              "years": 1,
+              "asOf": "2027-07-31",
+              "base": 46908560,
+              "bear": 46004560,
+              "bull": 47812560,
+              "low": 42921332,
+              "high": 50895788,
+              "annualGrowthRate": 0.0378,
+              "confidence": 0.76
+            },
+            {
+              "years": 3,
+              "asOf": "2029-07-31",
+              "base": 50521872,
+              "bear": 47656898,
+              "bull": 53499426,
+              "low": 43701419,
+              "high": 57342325,
+              "annualGrowthRate": 0.0378,
+              "confidence": 0.6
+            },
+            {
+              "years": 5,
+              "asOf": "2031-07-31",
+              "base": 54413513,
+              "bear": 49368584,
+              "bull": 59862693,
+              "low": 44347013,
+              "high": 64480013,
+              "annualGrowthRate": 0.0378,
+              "confidence": 0.44
+            }
+          ],
+          "confidence": 0.76,
+          "sourceDocumentIds": [
+            "doc_9e20b82416b646e3",
+            "doc_9d922686bebd4c5d"
+          ]
+        }
+      },
+      "contentHash": "b738609dd60b8429389bd1dfa7bb7c92427f1d9988dc6d49a1f50354cbaccffc",
+      "hashAlgorithm": "sha256",
+      "createdAt": "2026-08-26T17:51:33.039Z"
+    },
+    {
+      "id": "dna_ac84501b6fac4f4d",
+      "assetId": "ast_165f9f1a78334d31",
+      "version": 1,
+      "envelope": {
+        "assetId": "ast_165f9f1a78334d31",
+        "version": 1,
+        "generatedAt": "2026-08-26T17:51:51.599Z",
+        "summary": "Payload check asset intelligence envelope from 1 source document. Primary mark GBP 99,500,000 (market value). Risk elevated with 3 flag(s). Forward mark (3y base): GBP 105,497,056 at 2.0% p.a. model growth. (engine-enriched graph)",
+        "facts": [
+          {
+            "id": "fact_d1a7f58e09764027",
+            "key": "market_value",
+            "label": "Market value",
+            "value": "GBP 99,500,000",
+            "numericValue": 99500000,
+            "currency": "GBP",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_bbf696a0ea5f4fbe",
+                "sourceFragment": "Market value: GBP 99,500,000",
+                "confidence": 0.99,
+                "observedAt": "2026-08-26T17:51:51.598Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1785542400000,
+            "score": 139.17855424
+          },
+          {
+            "id": "fact_235b246026794f54",
+            "key": "occupancy",
+            "label": "Occupancy",
+            "value": "95%",
+            "numericValue": 95,
+            "currency": "USD",
+            "confidence": 0.95,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_bbf696a0ea5f4fbe",
+                "sourceFragment": "Occupancy: 95%",
+                "confidence": 0.95,
+                "observedAt": "2026-08-26T17:51:51.598Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1785542400000,
+            "score": 135
+          },
+          {
+            "id": "fact_714ca4cfc6674b94",
+            "key": "walt",
+            "label": "WALT",
+            "value": "6.8 years",
+            "numericValue": 6.8,
+            "currency": "USD",
+            "unit": "years",
+            "confidence": 0.93,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_bbf696a0ea5f4fbe",
+                "sourceFragment": "WALT: 6.8 years",
+                "confidence": 0.93,
+                "observedAt": "2026-08-26T17:51:51.598Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1785542400000,
+            "score": 133
+          }
+        ],
+        "entities": [
+          {
+            "id": "ent_a1b953ce1a2a4f88",
+            "name": "Payload check asset",
+            "canonicalName": "Payload check asset",
+            "type": "ASSET",
+            "aliases": [],
+            "confidence": 0.99
+          }
+        ],
+        "relationships": [],
+        "timeline": [
+          {
+            "id": "evt_16b1ef0f4fba4d0d",
+            "date": "1 August 2026",
+            "title": "Smoke Valuation 1787766691060",
+            "description": "INDEPENDENT VALUATION",
+            "category": "VALUATION",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_bbf696a0ea5f4fbe"
+          }
+        ],
+        "valuation": {
+          "amount": 99500000,
+          "currency": "GBP",
+          "method": "Independent valuation memo / appraisal extract",
+          "asOf": "2026-08-01T00:00:00.000Z",
+          "low": 92535000,
+          "high": 106465000,
+          "confidence": 0.99,
+          "notes": [
+            "Primary mark taken from market value / fair value language."
+          ]
+        },
+        "risk": {
+          "overall": 53,
+          "rating": "ELEVATED",
+          "confidence": 0.88,
+          "flags": [
+            "Lease duration 6.8 years creates roll risk",
+            "Missing title / ownership evidence",
+            "Thin document coverage"
+          ],
+          "dimensions": [
+            {
+              "key": "document_coverage",
+              "label": "Document coverage",
+              "score": 68,
+              "rationale": "1 distinct document types ingested for this asset."
+            },
+            {
+              "key": "ownership_clarity",
+              "label": "Ownership clarity",
+              "score": 55,
+              "rationale": "Ownership language was not confidently extracted."
+            },
+            {
+              "key": "jurisdiction",
+              "label": "Jurisdiction & legal",
+              "score": 48,
+              "rationale": "No jurisdiction recorded on the asset master."
+            },
+            {
+              "key": "income_durability",
+              "label": "Income durability",
+              "score": 40,
+              "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+            }
+          ]
+        },
+        "confidence": {
+          "overall": 0.77,
+          "coverage": 0.5,
+          "provenance": 0.96
+        },
+        "sourceDocumentIds": [
+          "doc_bbf696a0ea5f4fbe"
+        ],
+        "projection": {
+          "assetId": "ast_165f9f1a78334d31",
+          "currency": "GBP",
+          "baseAmount": 99500000,
+          "baseAsOf": "2026-08-01T00:00:00.000Z",
+          "baseMethod": "Independent valuation memo / appraisal extract",
+          "model": "caprov-forward-mark-v1",
+          "generatedAt": "2026-08-26T17:51:51.599Z",
+          "assumptions": {
+            "annualGrowthRate": 0.0197,
+            "drivers": [
+              "real estate base growth 2.5%",
+              "occupancy 95% → 0.40 pp",
+              "lease term 6.8y → 0.27 pp",
+              "risk elevated −1.2 pp"
+            ],
+            "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+          },
+          "horizons": [
+            {
+              "years": 1,
+              "asOf": "2027-08-01",
+              "base": 101460150,
+              "bear": 99470150,
+              "bull": 103450150,
+              "low": 92836037,
+              "high": 110084263,
+              "annualGrowthRate": 0.0197,
+              "confidence": 0.76
+            },
+            {
+              "years": 3,
+              "asOf": "2029-08-01",
+              "base": 105497056,
+              "bear": 99410477,
+              "bull": 111827139,
+              "low": 91254953,
+              "high": 119739159,
+              "annualGrowthRate": 0.0197,
+              "confidence": 0.6
+            },
+            {
+              "years": 5,
+              "asOf": "2031-08-01",
+              "base": 109694582,
+              "bear": 99350840,
+              "bull": 120882463,
+              "low": 89401084,
+              "high": 129988080,
+              "annualGrowthRate": 0.0197,
+              "confidence": 0.44
+            }
+          ],
+          "confidence": 0.76,
+          "sourceDocumentIds": [
+            "doc_bbf696a0ea5f4fbe"
+          ]
+        }
+      },
+      "contentHash": "53c61722ae08a45cd7acb1dfaae179cf9f05e53d82d18fed00ed6f1b898e0718",
+      "hashAlgorithm": "sha256",
+      "createdAt": "2026-08-26T17:51:51.613Z"
+    },
+    {
+      "id": "dna_5cae37107ece4490",
+      "assetId": "ast_513be945dd504cb8",
+      "version": 1,
+      "envelope": {
+        "assetId": "ast_513be945dd504cb8",
+        "version": 1,
+        "generatedAt": "2026-08-27T14:42:16.373Z",
+        "summary": "Riverside Quay Tower intelligence envelope from 0 source documents. Risk elevated with 3 flag(s). Forward mark (3y base): GBP 25,987,730 at 1.3% p.a. model growth.",
+        "facts": [],
+        "entities": [
+          {
+            "id": "ent_6d4fce388c6b4b4a",
+            "name": "Riverside Quay Tower",
+            "canonicalName": "Riverside Quay Tower",
+            "type": "ASSET",
+            "aliases": [],
+            "confidence": 0.99
+          },
+          {
+            "id": "ent_8689cba7ac334848",
+            "name": "Salford Quays, Manchester",
+            "canonicalName": "Salford Quays, Manchester",
+            "type": "LOCATION",
+            "aliases": [],
+            "confidence": 0.9
+          }
+        ],
+        "relationships": [],
+        "timeline": [],
+        "valuation": {
+          "amount": 25000000,
+          "currency": "GBP",
+          "method": "Class heuristic pending primary valuation memo",
+          "asOf": "2026-08-27T14:42:16.373Z",
+          "low": 23250000,
+          "high": 26750000,
+          "confidence": 0.4,
+          "notes": [
+            "No explicit value extracted; heuristic placeholder used."
+          ]
+        },
+        "risk": {
+          "overall": 47,
+          "rating": "ELEVATED",
+          "confidence": 0.4,
+          "flags": [
+            "Missing title / ownership evidence",
+            "No independent valuation memo / NAV pack",
+            "Thin document coverage"
+          ],
+          "dimensions": [
+            {
+              "key": "document_coverage",
+              "label": "Document coverage",
+              "score": 80,
+              "rationale": "0 distinct document types ingested for this asset."
+            },
+            {
+              "key": "ownership_clarity",
+              "label": "Ownership clarity",
+              "score": 55,
+              "rationale": "Ownership language was not confidently extracted."
+            },
+            {
+              "key": "jurisdiction",
+              "label": "Jurisdiction & legal",
+              "score": 24,
+              "rationale": "Jurisdiction recorded as England & Wales."
+            },
+            {
+              "key": "income_durability",
+              "label": "Income durability",
+              "score": 30,
+              "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+            }
+          ]
+        },
+        "confidence": {
+          "overall": 0.4,
+          "coverage": 0.4,
+          "provenance": 0.4
+        },
+        "sourceDocumentIds": [],
+        "projection": {
+          "assetId": "ast_513be945dd504cb8",
+          "currency": "GBP",
+          "baseAmount": 25000000,
+          "baseAsOf": "2026-08-27T14:42:16.373Z",
+          "baseMethod": "Class heuristic pending primary valuation memo",
+          "model": "caprov-forward-mark-v1",
+          "generatedAt": "2026-08-27T14:42:16.374Z",
+          "assumptions": {
+            "annualGrowthRate": 0.013,
+            "drivers": [
+              "real estate base growth 2.5%",
+              "risk elevated −1.2 pp"
+            ],
+            "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+          },
+          "horizons": [
+            {
+              "years": 1,
+              "asOf": "2027-08-27",
+              "base": 25325000,
+              "bear": 24825000,
+              "bull": 25825000,
+              "low": 23172375,
+              "high": 27477625,
+              "annualGrowthRate": 0.013,
+              "confidence": 0.27
+            },
+            {
+              "years": 3,
+              "asOf": "2029-08-27",
+              "base": 25987730,
+              "bear": 24478666,
+              "bull": 27557573,
+              "low": 22479386,
+              "high": 29496074,
+              "annualGrowthRate": 0.013,
+              "confidence": 0.25
+            },
+            {
+              "years": 5,
+              "asOf": "2031-08-27",
+              "base": 26667803,
+              "bear": 24137165,
+              "bull": 29406383,
+              "low": 21734259,
+              "high": 31601347,
+              "annualGrowthRate": 0.013,
+              "confidence": 0.25
+            }
+          ],
+          "confidence": 0.27,
+          "sourceDocumentIds": []
+        }
+      },
+      "contentHash": "8e69c4ffb38f74fa37525dc2df571ab524025ca7ba51fbbd00873efe77ce4975",
+      "hashAlgorithm": "sha256",
+      "createdAt": "2026-08-27T14:42:16.615Z"
+    },
+    {
+      "id": "dna_f3f23389986b4189",
+      "assetId": "ast_513be945dd504cb8",
+      "version": 2,
+      "envelope": {
+        "assetId": "ast_513be945dd504cb8",
+        "version": 2,
+        "generatedAt": "2026-08-27T14:43:06.419Z",
+        "summary": "Riverside Quay Tower intelligence envelope from 3 source documents. Primary mark GBP 45,200,000 (market value). Risk moderate with 2 flag(s). Forward mark (3y base): GBP 50,521,872 at 3.8% p.a. model growth. (engine-enriched graph)",
+        "facts": [
+          {
+            "id": "fact_71ac1770fedf4d3e",
+            "key": "market_value",
+            "label": "Market value",
+            "value": "GBP 45,200,000",
+            "numericValue": 45200000,
+            "currency": "GBP",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_ec675c0a232e468b",
+                "sourceFragment": "Market value: GBP 45,200,000",
+                "confidence": 0.99,
+                "observedAt": "2026-08-27T14:43:06.418Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1785456000000,
+            "score": 139.1785456
+          },
+          {
+            "id": "fact_509a3295e47d47cf",
+            "key": "purchase_price",
+            "label": "Purchase price",
+            "value": "GBP 41,000,000",
+            "numericValue": 41000000,
+            "currency": "GBP",
+            "confidence": 0.98,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_cc8de1de1b27419b",
+                "sourceFragment": "Purchase price: GBP 41,000,000",
+                "confidence": 0.98,
+                "observedAt": "2026-08-27T14:43:06.418Z"
+              }
+            ],
+            "documentType": "SPA",
+            "documentAsOfMs": 0,
+            "score": 128
+          },
+          {
+            "id": "fact_c8773fb0ec384d50",
+            "key": "legal_ownership",
+            "label": "Legal ownership",
+            "value": "100% Riverside Quay HoldCo Limited",
+            "numericValue": 100,
+            "currency": "USD",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_6cbe5c74a37b4b52",
+                "sourceFragment": "Legal ownership: 100%",
+                "confidence": 0.99,
+                "observedAt": "2026-08-27T14:43:06.418Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 0,
+            "score": 132
+          },
+          {
+            "id": "fact_256059e9fbf14c39",
+            "key": "proprietor",
+            "label": "Proprietor",
+            "value": "Riverside Quay HoldCo Limited",
+            "confidence": 0.96,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_6cbe5c74a37b4b52",
+                "sourceFragment": "Proprietor: Riverside Quay HoldCo Limited",
+                "confidence": 0.96,
+                "observedAt": "2026-08-27T14:43:06.418Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 0,
+            "score": 104
+          },
+          {
+            "id": "fact_4dfbba7b580942ce",
+            "key": "location",
+            "label": "Location",
+            "value": "Riverside Quay Tower, Salford Quays, Manchester M50 3SP",
+            "numericValue": 50,
+            "currency": "USD",
+            "confidence": 0.92,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_cc8de1de1b27419b",
+                "sourceFragment": "Property: Riverside Quay Tower, Salford Quays, Manchester M50 3SP",
+                "confidence": 0.92,
+                "observedAt": "2026-08-27T14:43:06.418Z"
+              }
+            ],
+            "documentType": "SPA",
+            "documentAsOfMs": 0,
+            "score": 102
+          },
+          {
+            "id": "fact_d220d1905d4e4091",
+            "key": "occupancy",
+            "label": "Occupancy",
+            "value": "91%",
+            "numericValue": 91,
+            "currency": "USD",
+            "confidence": 0.95,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_ec675c0a232e468b",
+                "sourceFragment": "Occupancy: 91%",
+                "confidence": 0.95,
+                "observedAt": "2026-08-27T14:43:06.418Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1785456000000,
+            "score": 135
+          },
+          {
+            "id": "fact_cfee4d5de7244141",
+            "key": "walt",
+            "label": "WALT",
+            "value": "6.2 years",
+            "numericValue": 6.2,
+            "currency": "USD",
+            "unit": "years",
+            "confidence": 0.93,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_ec675c0a232e468b",
+                "sourceFragment": "WALT: 6.2 years",
+                "confidence": 0.93,
+                "observedAt": "2026-08-27T14:43:06.418Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1785456000000,
+            "score": 133
+          },
+          {
+            "id": "fact_4a60795211804e49",
+            "key": "cap_rate",
+            "label": "Cap rate",
+            "value": "5.90%",
+            "numericValue": 5.9,
+            "currency": "USD",
+            "confidence": 0.91,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_ec675c0a232e468b",
+                "sourceFragment": "Cap rate: 5.90%",
+                "confidence": 0.91,
+                "observedAt": "2026-08-27T14:43:06.418Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1785456000000,
+            "score": 131
+          }
+        ],
+        "entities": [
+          {
+            "id": "ent_1bc50549f9644e87",
+            "name": "Riverside Quay Tower",
+            "canonicalName": "Riverside Quay Tower",
+            "type": "ASSET",
+            "aliases": [],
+            "confidence": 0.99
+          },
+          {
+            "id": "ent_deb463dfd0a94ccb",
+            "name": "Salford Quays, Manchester",
+            "canonicalName": "Salford Quays, Manchester",
+            "type": "LOCATION",
+            "aliases": [],
+            "confidence": 0.9
+          },
+          {
+            "id": "ent_5ea07a45cfd643fc",
+            "name": "Riverside Quay HoldCo Limited",
+            "canonicalName": "Riverside Quay HoldCo Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_74c78d2c42d7480f",
+            "fromEntityId": "ent_5ea07a45cfd643fc",
+            "toEntityId": "ent_1bc50549f9644e87",
+            "type": "LEGAL_OWNER_OF",
+            "confidence": 0.99,
+            "sourceDocumentId": "doc_6cbe5c74a37b4b52"
+          }
+        ],
+        "timeline": [
+          {
+            "id": "evt_a419a6d4f6a94d92",
+            "date": "31 July 2026",
+            "title": "Northbridge Valuation Memo — Riverside Quay",
+            "description": "INDEPENDENT VALUATION MEMORANDUM",
+            "category": "VALUATION",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_ec675c0a232e468b"
+          }
+        ],
+        "valuation": {
+          "amount": 45200000,
+          "currency": "GBP",
+          "method": "Independent valuation memo / appraisal extract",
+          "asOf": "2026-07-31T00:00:00.000Z",
+          "low": 42036000,
+          "high": 48364000,
+          "confidence": 0.99,
+          "notes": [
+            "Primary mark taken from market value / fair value language.",
+            "Acquisition price was GBP 41,000,000."
+          ]
+        },
+        "risk": {
+          "overall": 34,
+          "rating": "MODERATE",
+          "confidence": 0.88,
+          "flags": [
+            "Occupancy at 91%",
+            "Lease duration 6.2 years creates roll risk"
+          ],
+          "dimensions": [
+            {
+              "key": "document_coverage",
+              "label": "Document coverage",
+              "score": 44,
+              "rationale": "3 distinct document types ingested for this asset."
+            },
+            {
+              "key": "ownership_clarity",
+              "label": "Ownership clarity",
+              "score": 18,
+              "rationale": "Legal ownership language extracted."
+            },
+            {
+              "key": "jurisdiction",
+              "label": "Jurisdiction & legal",
+              "score": 24,
+              "rationale": "Jurisdiction recorded as England & Wales."
+            },
+            {
+              "key": "income_durability",
+              "label": "Income durability",
+              "score": 48,
+              "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+            }
+          ]
+        },
+        "confidence": {
+          "overall": 0.85,
+          "coverage": 0.7,
+          "provenance": 0.95
+        },
+        "sourceDocumentIds": [
+          "doc_ec675c0a232e468b",
+          "doc_6cbe5c74a37b4b52",
+          "doc_cc8de1de1b27419b"
+        ],
+        "projection": {
+          "assetId": "ast_513be945dd504cb8",
+          "currency": "GBP",
+          "baseAmount": 45200000,
+          "baseAsOf": "2026-07-31T00:00:00.000Z",
+          "baseMethod": "Independent valuation memo / appraisal extract",
+          "model": "caprov-forward-mark-v1",
+          "generatedAt": "2026-08-27T14:43:06.419Z",
+          "assumptions": {
+            "annualGrowthRate": 0.0378,
+            "drivers": [
+              "real estate base growth 2.5%",
+              "occupancy 91% → 0.08 pp",
+              "lease term 6.2y → 0.18 pp",
+              "cap rate 5.9% → 0.02 pp",
+              "realized mark drift vs purchase → 1.50 pp",
+              "risk moderate −0.5 pp"
+            ],
+            "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+          },
+          "horizons": [
+            {
+              "years": 1,
+              "asOf": "2027-07-31",
+              "base": 46908560,
+              "bear": 46004560,
+              "bull": 47812560,
+              "low": 42921332,
+              "high": 50895788,
+              "annualGrowthRate": 0.0378,
+              "confidence": 0.76
+            },
+            {
+              "years": 3,
+              "asOf": "2029-07-31",
+              "base": 50521872,
+              "bear": 47656898,
+              "bull": 53499426,
+              "low": 43701419,
+              "high": 57342325,
+              "annualGrowthRate": 0.0378,
+              "confidence": 0.6
+            },
+            {
+              "years": 5,
+              "asOf": "2031-07-31",
+              "base": 54413513,
+              "bear": 49368584,
+              "bull": 59862693,
+              "low": 44347013,
+              "high": 64480013,
+              "annualGrowthRate": 0.0378,
+              "confidence": 0.44
+            }
+          ],
+          "confidence": 0.76,
+          "sourceDocumentIds": [
+            "doc_ec675c0a232e468b",
+            "doc_cc8de1de1b27419b"
+          ]
+        }
+      },
+      "contentHash": "ceb33042c4c48982e10509d468f9a9ad981871244c1a88683046827b23a4a1f1",
+      "hashAlgorithm": "sha256",
+      "createdAt": "2026-08-27T14:43:06.436Z"
+    },
+    {
+      "id": "dna_7b366f6e8277485b",
+      "assetId": "ast_0c8be51f0bd04fb9",
+      "version": 1,
+      "envelope": {
+        "assetId": "ast_0c8be51f0bd04fb9",
+        "version": 1,
+        "generatedAt": "2026-08-27T14:44:53.909Z",
+        "summary": "Canal Side Logistics Park intelligence envelope from 2 source documents. Primary mark EUR 78,500,000 (market value). Risk moderate with 2 flag(s). Forward mark (3y base): EUR 89,658,715 at 4.5% p.a. model growth. (engine-enriched graph)",
+        "facts": [
+          {
+            "id": "fact_fe6c5d77e37a414b",
+            "key": "market_value",
+            "label": "Market value",
+            "value": "EUR 78,500,000",
+            "numericValue": 78500000,
+            "currency": "EUR",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_6035520d7eff4f57",
+                "sourceFragment": "Market value: EUR 78,500,000",
+                "confidence": 0.99,
+                "observedAt": "2026-08-27T14:44:53.909Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1782777600000,
+            "score": 139.17827776
+          },
+          {
+            "id": "fact_c8894386487e4210",
+            "key": "purchase_price",
+            "label": "Purchase price",
+            "value": "EUR 72,250,000",
+            "numericValue": 72250000,
+            "currency": "EUR",
+            "confidence": 0.98,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_c4aefbfdf6bd4475",
+                "sourceFragment": "Purchase price: EUR 72,250,000",
+                "confidence": 0.98,
+                "observedAt": "2026-08-27T14:44:53.909Z"
+              }
+            ],
+            "documentType": "SPA",
+            "documentAsOfMs": 0,
+            "score": 128
+          },
+          {
+            "id": "fact_19ad706f1e424693",
+            "key": "legal_ownership",
+            "label": "Legal ownership",
+            "value": "100%",
+            "numericValue": 100,
+            "currency": "USD",
+            "confidence": 0.92,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_c4aefbfdf6bd4475",
+                "sourceFragment": "Ownership transferred: 100%",
+                "confidence": 0.92,
+                "observedAt": "2026-08-27T14:44:53.909Z"
+              }
+            ],
+            "documentType": "SPA",
+            "documentAsOfMs": 0,
+            "score": 102
+          },
+          {
+            "id": "fact_0d3be0e2de074b5d",
+            "key": "occupancy",
+            "label": "Occupancy",
+            "value": "97%",
+            "numericValue": 97,
+            "currency": "USD",
+            "confidence": 0.95,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_6035520d7eff4f57",
+                "sourceFragment": "Occupancy: 97%",
+                "confidence": 0.95,
+                "observedAt": "2026-08-27T14:44:53.909Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1782777600000,
+            "score": 135
+          },
+          {
+            "id": "fact_481f465b7bca4bfd",
+            "key": "wale",
+            "label": "WALE",
+            "value": "8.1 years",
+            "numericValue": 8.1,
+            "currency": "USD",
+            "unit": "years",
+            "confidence": 0.93,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_6035520d7eff4f57",
+                "sourceFragment": "WALE: 8.1 years",
+                "confidence": 0.93,
+                "observedAt": "2026-08-27T14:44:53.909Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1782777600000,
+            "score": 133
+          }
+        ],
+        "entities": [
+          {
+            "id": "ent_6c86b8ce6e2d4782",
+            "name": "Canal Side Logistics Park",
+            "canonicalName": "Canal Side Logistics Park",
+            "type": "ASSET",
+            "aliases": [],
+            "confidence": 0.99
+          },
+          {
+            "id": "ent_2245415e3e81413d",
+            "name": "Rotterdam, Netherlands",
+            "canonicalName": "Rotterdam, Netherlands",
+            "type": "LOCATION",
+            "aliases": [],
+            "confidence": 0.9
+          }
+        ],
+        "relationships": [],
+        "timeline": [
+          {
+            "id": "evt_760a00958af14a9e",
+            "date": "30 June 2026",
+            "title": "EuroLog Appraisal 2026",
+            "description": "VALUATION APPRAISAL",
+            "category": "VALUATION",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_6035520d7eff4f57"
+          }
+        ],
+        "valuation": {
+          "amount": 78500000,
+          "currency": "EUR",
+          "method": "Independent valuation memo / appraisal extract",
+          "asOf": "2026-06-30T00:00:00.000Z",
+          "low": 73005000,
+          "high": 83995000,
+          "confidence": 0.99,
+          "notes": [
+            "Primary mark taken from market value / fair value language.",
+            "Acquisition price was EUR 72,250,000."
+          ]
+        },
+        "risk": {
+          "overall": 32,
+          "rating": "MODERATE",
+          "confidence": 0.88,
+          "flags": [
+            "Missing title / ownership evidence",
+            "Thin document coverage"
+          ],
+          "dimensions": [
+            {
+              "key": "document_coverage",
+              "label": "Document coverage",
+              "score": 56,
+              "rationale": "2 distinct document types ingested for this asset."
+            },
+            {
+              "key": "ownership_clarity",
+              "label": "Ownership clarity",
+              "score": 18,
+              "rationale": "Legal ownership language extracted."
+            },
+            {
+              "key": "jurisdiction",
+              "label": "Jurisdiction & legal",
+              "score": 24,
+              "rationale": "Jurisdiction recorded as Netherlands."
+            },
+            {
+              "key": "income_durability",
+              "label": "Income durability",
+              "score": 30,
+              "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+            }
+          ]
+        },
+        "confidence": {
+          "overall": 0.81,
+          "coverage": 0.6,
+          "provenance": 0.95
+        },
+        "sourceDocumentIds": [
+          "doc_6035520d7eff4f57",
+          "doc_c4aefbfdf6bd4475"
+        ],
+        "projection": {
+          "assetId": "ast_0c8be51f0bd04fb9",
+          "currency": "EUR",
+          "baseAmount": 78500000,
+          "baseAsOf": "2026-06-30T00:00:00.000Z",
+          "baseMethod": "Independent valuation memo / appraisal extract",
+          "model": "caprov-forward-mark-v1",
+          "generatedAt": "2026-08-27T14:44:53.909Z",
+          "assumptions": {
+            "annualGrowthRate": 0.0453,
+            "drivers": [
+              "real estate base growth 2.5%",
+              "occupancy 97% → 0.56 pp",
+              "lease term 8.1y → 0.46 pp",
+              "realized mark drift vs purchase → 1.50 pp",
+              "risk moderate −0.5 pp"
+            ],
+            "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+          },
+          "horizons": [
+            {
+              "years": 1,
+              "asOf": "2027-06-30",
+              "base": 82056050,
+              "bear": 80486050,
+              "bull": 83626050,
+              "low": 75081286,
+              "high": 89030814,
+              "annualGrowthRate": 0.0453,
+              "confidence": 0.76
+            },
+            {
+              "years": 3,
+              "asOf": "2029-06-30",
+              "base": 89658715,
+              "bear": 84610162,
+              "bull": 94904201,
+              "low": 77554788,
+              "high": 101762642,
+              "annualGrowthRate": 0.0453,
+              "confidence": 0.6
+            },
+            {
+              "years": 5,
+              "asOf": "2031-06-30",
+              "base": 97965782,
+              "bear": 88945595,
+              "bull": 107703370,
+              "low": 79842112,
+              "high": 116089452,
+              "annualGrowthRate": 0.0453,
+              "confidence": 0.44
+            }
+          ],
+          "confidence": 0.76,
+          "sourceDocumentIds": [
+            "doc_6035520d7eff4f57",
+            "doc_c4aefbfdf6bd4475"
+          ]
+        }
+      },
+      "contentHash": "ce9089a335d62a0ed07d673f2d652ad34eb1ca53645ba5ec9a5913f4a1f24aa7",
+      "hashAlgorithm": "sha256",
+      "createdAt": "2026-08-27T14:44:53.918Z"
+    },
+    {
+      "id": "dna_3cc5461d8edc4086",
+      "assetId": "ast_3bd729e164ef4be7",
+      "version": 1,
+      "envelope": {
+        "assetId": "ast_3bd729e164ef4be7",
+        "version": 1,
+        "generatedAt": "2026-08-27T14:46:15.420Z",
+        "summary": "Bayfront Offices intelligence envelope from 2 source documents. Primary mark SGD 112 million (market value). Risk moderate with 4 flag(s). Forward mark (3y base): SGD 122,777,952 at 3.1% p.a. model growth. (engine-enriched graph)",
+        "facts": [
+          {
+            "id": "fact_8dc9c82716554e41",
+            "key": "market_value",
+            "label": "Market value",
+            "value": "SGD 112 million",
+            "numericValue": 112000000,
+            "currency": "SGD",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_cce5046251564bfb",
+                "sourceFragment": "Market value: SGD 112 million",
+                "confidence": 0.99,
+                "observedAt": "2026-08-27T14:46:15.418Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1786752000000,
+            "score": 139.1786752
+          },
+          {
+            "id": "fact_bf0ef5e878c2421a",
+            "key": "purchase_price",
+            "label": "Purchase price",
+            "value": "SGD 105,000,000",
+            "numericValue": 105000000,
+            "currency": "SGD",
+            "confidence": 0.98,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_5b88d1f304664d57",
+                "sourceFragment": "Purchase price: SGD 105,000,000",
+                "confidence": 0.98,
+                "observedAt": "2026-08-27T14:46:15.419Z"
+              }
+            ],
+            "documentType": "SPA",
+            "documentAsOfMs": 0,
+            "score": 128
+          },
+          {
+            "id": "fact_d642f7d5d53e4119",
+            "key": "legal_ownership",
+            "label": "Legal ownership",
+            "value": "100%",
+            "numericValue": 100,
+            "currency": "USD",
+            "confidence": 0.92,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_5b88d1f304664d57",
+                "sourceFragment": "Ownership transferred: 100%",
+                "confidence": 0.92,
+                "observedAt": "2026-08-27T14:46:15.419Z"
+              }
+            ],
+            "documentType": "SPA",
+            "documentAsOfMs": 0,
+            "score": 102
+          },
+          {
+            "id": "fact_458950efbec34d23",
+            "key": "occupancy",
+            "label": "Occupancy",
+            "value": "88%",
+            "numericValue": 88,
+            "currency": "USD",
+            "confidence": 0.95,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_cce5046251564bfb",
+                "sourceFragment": "Occupancy: 88%",
+                "confidence": 0.95,
+                "observedAt": "2026-08-27T14:46:15.418Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1786752000000,
+            "score": 135
+          },
+          {
+            "id": "fact_25d6454eeb4b49d2",
+            "key": "wale",
+            "label": "WALE",
+            "value": "4.5 years",
+            "numericValue": 4.5,
+            "currency": "USD",
+            "unit": "years",
+            "confidence": 0.93,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_cce5046251564bfb",
+                "sourceFragment": "WALE: 4.5 years",
+                "confidence": 0.93,
+                "observedAt": "2026-08-27T14:46:15.418Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1786752000000,
+            "score": 133
+          }
+        ],
+        "entities": [
+          {
+            "id": "ent_0d8fd2b6091a4e32",
+            "name": "Bayfront Offices",
+            "canonicalName": "Bayfront Offices",
+            "type": "ASSET",
+            "aliases": [],
+            "confidence": 0.99
+          },
+          {
+            "id": "ent_0a679414ba4e4d6b",
+            "name": "Marina Bay, Singapore",
+            "canonicalName": "Marina Bay, Singapore",
+            "type": "LOCATION",
+            "aliases": [],
+            "confidence": 0.9
+          }
+        ],
+        "relationships": [],
+        "timeline": [
+          {
+            "id": "evt_df361d4aa9ef428f",
+            "date": "15 August 2026",
+            "title": "Pacific Crest Valuation Memo",
+            "description": "INDEPENDENT VALUATION MEMORANDUM",
+            "category": "VALUATION",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_cce5046251564bfb"
+          }
+        ],
+        "valuation": {
+          "amount": 112000000,
+          "currency": "SGD",
+          "method": "Independent valuation memo / appraisal extract",
+          "asOf": "2026-08-15T00:00:00.000Z",
+          "low": 104160000,
+          "high": 119840000,
+          "confidence": 0.99,
+          "notes": [
+            "Primary mark taken from market value / fair value language.",
+            "Acquisition price was SGD 105,000,000."
+          ]
+        },
+        "risk": {
+          "overall": 37,
+          "rating": "MODERATE",
+          "confidence": 0.88,
+          "flags": [
+            "Occupancy at 88%",
+            "Lease duration 4.5 years creates roll risk",
+            "Missing title / ownership evidence",
+            "Thin document coverage"
+          ],
+          "dimensions": [
+            {
+              "key": "document_coverage",
+              "label": "Document coverage",
+              "score": 56,
+              "rationale": "2 distinct document types ingested for this asset."
+            },
+            {
+              "key": "ownership_clarity",
+              "label": "Ownership clarity",
+              "score": 18,
+              "rationale": "Legal ownership language extracted."
+            },
+            {
+              "key": "jurisdiction",
+              "label": "Jurisdiction & legal",
+              "score": 24,
+              "rationale": "Jurisdiction recorded as Singapore."
+            },
+            {
+              "key": "income_durability",
+              "label": "Income durability",
+              "score": 48,
+              "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+            }
+          ]
+        },
+        "confidence": {
+          "overall": 0.81,
+          "coverage": 0.6,
+          "provenance": 0.95
+        },
+        "sourceDocumentIds": [
+          "doc_cce5046251564bfb",
+          "doc_5b88d1f304664d57"
+        ],
+        "projection": {
+          "assetId": "ast_3bd729e164ef4be7",
+          "currency": "SGD",
+          "baseAmount": 112000000,
+          "baseAsOf": "2026-08-15T00:00:00.000Z",
+          "baseMethod": "Independent valuation memo / appraisal extract",
+          "model": "caprov-forward-mark-v1",
+          "generatedAt": "2026-08-27T14:46:15.421Z",
+          "assumptions": {
+            "annualGrowthRate": 0.0311,
+            "drivers": [
+              "real estate base growth 2.5%",
+              "occupancy 88% → -0.16 pp",
+              "lease term 4.5y → -0.07 pp",
+              "realized mark drift vs purchase → 1.35 pp",
+              "risk moderate −0.5 pp"
+            ],
+            "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+          },
+          "horizons": [
+            {
+              "years": 1,
+              "asOf": "2027-08-15",
+              "base": 115483200,
+              "bear": 113243200,
+              "bull": 117723200,
+              "low": 105667128,
+              "high": 125299272,
+              "annualGrowthRate": 0.0311,
+              "confidence": 0.76
+            },
+            {
+              "years": 3,
+              "asOf": "2029-08-15",
+              "base": 122777952,
+              "bear": 115771152,
+              "bull": 130061911,
+              "low": 106202928,
+              "high": 139352976,
+              "annualGrowthRate": 0.0311,
+              "confidence": 0.6
+            },
+            {
+              "years": 5,
+              "asOf": "2031-08-15",
+              "base": 130533492,
+              "bear": 118355535,
+              "bull": 143693857,
+              "low": 106384796,
+              "high": 154682188,
+              "annualGrowthRate": 0.0311,
+              "confidence": 0.44
+            }
+          ],
+          "confidence": 0.76,
+          "sourceDocumentIds": [
+            "doc_cce5046251564bfb",
+            "doc_5b88d1f304664d57"
+          ]
+        }
+      },
+      "contentHash": "bc3aaee5a190b07311aa5d9856723c5424758bb676f0d2268a451a920a429c54",
+      "hashAlgorithm": "sha256",
+      "createdAt": "2026-08-27T14:46:15.452Z"
+    },
+    {
+      "id": "dna_a53d6cb42d124c70",
+      "assetId": "ast_3bd729e164ef4be7",
+      "version": 2,
+      "envelope": {
+        "assetId": "ast_3bd729e164ef4be7",
+        "version": 2,
+        "generatedAt": "2026-08-27T15:05:03.305Z",
+        "summary": "Bayfront Offices intelligence envelope from 2 source documents. Primary mark GBP 99,500,000 (market value). Risk moderate with 3 flag(s). Forward mark (3y base): GBP 104,568,662 at 1.7% p.a. model growth. (engine-enriched graph)",
+        "facts": [
+          {
+            "id": "fact_0ae57554912d4dc1",
+            "key": "market_value",
+            "label": "Market value",
+            "value": "GBP 99,500,000",
+            "numericValue": 99500000,
+            "currency": "GBP",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_cabfc20eb1ba4d6c",
+                "sourceFragment": "Market value: GBP 99,500,000",
+                "confidence": 0.99,
+                "observedAt": "2026-08-27T15:05:03.301Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1785542400000,
+            "score": 139.17855424
+          },
+          {
+            "id": "fact_b2f7d60163614b4a",
+            "key": "purchase_price",
+            "label": "Purchase price",
+            "value": "SGD 105,000,000",
+            "numericValue": 105000000,
+            "currency": "SGD",
+            "confidence": 0.98,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_5b88d1f304664d57",
+                "sourceFragment": "Purchase price: SGD 105,000,000",
+                "confidence": 0.98,
+                "observedAt": "2026-08-27T15:05:03.302Z"
+              }
+            ],
+            "documentType": "SPA",
+            "documentAsOfMs": 0,
+            "score": 128
+          },
+          {
+            "id": "fact_d07a2da5ca8f4ff8",
+            "key": "legal_ownership",
+            "label": "Legal ownership",
+            "value": "100%",
+            "numericValue": 100,
+            "currency": "USD",
+            "confidence": 0.92,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_5b88d1f304664d57",
+                "sourceFragment": "Ownership transferred: 100%",
+                "confidence": 0.92,
+                "observedAt": "2026-08-27T15:05:03.302Z"
+              }
+            ],
+            "documentType": "SPA",
+            "documentAsOfMs": 0,
+            "score": 102
+          },
+          {
+            "id": "fact_cfd8248e61a44bb8",
+            "key": "occupancy",
+            "label": "Occupancy",
+            "value": "95%",
+            "numericValue": 95,
+            "currency": "USD",
+            "confidence": 0.95,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_cabfc20eb1ba4d6c",
+                "sourceFragment": "Occupancy: 95%",
+                "confidence": 0.95,
+                "observedAt": "2026-08-27T15:05:03.302Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1785542400000,
+            "score": 135
+          },
+          {
+            "id": "fact_cd4516b988bd4f3c",
+            "key": "walt",
+            "label": "WALT",
+            "value": "6.8 years",
+            "numericValue": 6.8,
+            "currency": "USD",
+            "unit": "years",
+            "confidence": 0.93,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_cabfc20eb1ba4d6c",
+                "sourceFragment": "WALT: 6.8 years",
+                "confidence": 0.93,
+                "observedAt": "2026-08-27T15:05:03.302Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 1785542400000,
+            "score": 133
+          }
+        ],
+        "entities": [
+          {
+            "id": "ent_0f963cda2ce74f19",
+            "name": "Bayfront Offices",
+            "canonicalName": "Bayfront Offices",
+            "type": "ASSET",
+            "aliases": [],
+            "confidence": 0.99
+          },
+          {
+            "id": "ent_9a02c9364bb34c20",
+            "name": "Marina Bay, Singapore",
+            "canonicalName": "Marina Bay, Singapore",
+            "type": "LOCATION",
+            "aliases": [],
+            "confidence": 0.9
+          }
+        ],
+        "relationships": [],
+        "timeline": [
+          {
+            "id": "evt_cfb1d7f547d14d4d",
+            "date": "1 August 2026",
+            "title": "Smoke Valuation 1787843091988",
+            "description": "INDEPENDENT VALUATION",
+            "category": "VALUATION",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_cabfc20eb1ba4d6c"
+          }
+        ],
+        "valuation": {
+          "amount": 99500000,
+          "currency": "GBP",
+          "method": "Independent valuation memo / appraisal extract",
+          "asOf": "2026-08-01T00:00:00.000Z",
+          "low": 92535000,
+          "high": 106465000,
+          "confidence": 0.99,
+          "notes": [
+            "Primary mark taken from market value / fair value language.",
+            "Acquisition price was SGD 105,000,000."
+          ]
+        },
+        "risk": {
+          "overall": 35,
+          "rating": "MODERATE",
+          "confidence": 0.88,
+          "flags": [
+            "Lease duration 6.8 years creates roll risk",
+            "Missing title / ownership evidence",
+            "Thin document coverage"
+          ],
+          "dimensions": [
+            {
+              "key": "document_coverage",
+              "label": "Document coverage",
+              "score": 56,
+              "rationale": "2 distinct document types ingested for this asset."
+            },
+            {
+              "key": "ownership_clarity",
+              "label": "Ownership clarity",
+              "score": 18,
+              "rationale": "Legal ownership language extracted."
+            },
+            {
+              "key": "jurisdiction",
+              "label": "Jurisdiction & legal",
+              "score": 24,
+              "rationale": "Jurisdiction recorded as Singapore."
+            },
+            {
+              "key": "income_durability",
+              "label": "Income durability",
+              "score": 40,
+              "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+            }
+          ]
+        },
+        "confidence": {
+          "overall": 0.81,
+          "coverage": 0.6,
+          "provenance": 0.95
+        },
+        "sourceDocumentIds": [
+          "doc_cabfc20eb1ba4d6c",
+          "doc_5b88d1f304664d57"
+        ],
+        "projection": {
+          "assetId": "ast_3bd729e164ef4be7",
+          "currency": "GBP",
+          "baseAmount": 99500000,
+          "baseAsOf": "2026-08-01T00:00:00.000Z",
+          "baseMethod": "Independent valuation memo / appraisal extract",
+          "model": "caprov-forward-mark-v1",
+          "generatedAt": "2026-08-27T15:05:03.305Z",
+          "assumptions": {
+            "annualGrowthRate": 0.0167,
+            "drivers": [
+              "real estate base growth 2.5%",
+              "occupancy 95% → 0.40 pp",
+              "lease term 6.8y → 0.27 pp",
+              "realized mark drift vs purchase → -1.00 pp",
+              "risk moderate −0.5 pp"
+            ],
+            "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+          },
+          "horizons": [
+            {
+              "years": 1,
+              "asOf": "2027-08-01",
+              "base": 101161650,
+              "bear": 99171650,
+              "bull": 103151650,
+              "low": 92562910,
+              "high": 109760390,
+              "annualGrowthRate": 0.0167,
+              "confidence": 0.76
+            },
+            {
+              "years": 3,
+              "asOf": "2029-08-01",
+              "base": 104568662,
+              "bear": 98518197,
+              "bull": 110861915,
+              "low": 90451893,
+              "high": 118685431,
+              "annualGrowthRate": 0.0167,
+              "confidence": 0.6
+            },
+            {
+              "years": 5,
+              "asOf": "2031-08-01",
+              "base": 108090419,
+              "bear": 97869050,
+              "bull": 119148498,
+              "low": 88093691,
+              "high": 128087147,
+              "annualGrowthRate": 0.0167,
+              "confidence": 0.44
+            }
+          ],
+          "confidence": 0.76,
+          "sourceDocumentIds": [
+            "doc_cabfc20eb1ba4d6c",
+            "doc_5b88d1f304664d57"
+          ]
+        }
+      },
+      "contentHash": "f6f6c3f7e93eeb2d63db8c1cbdd0d84be4aee80b95eba8dc175d0f60d11bd6f2",
+      "hashAlgorithm": "sha256",
+      "createdAt": "2026-08-27T15:05:03.430Z"
     }
   ],
   "valuations": [
@@ -6967,6 +9918,130 @@
         ]
       },
       "createdAt": "2026-08-26T11:27:02.011Z"
+    },
+    {
+      "id": "val_2574bc6653a84670",
+      "assetId": "ast_35e73b6f6a1444a2",
+      "payload": {
+        "amount": 45200000,
+        "currency": "GBP",
+        "method": "Independent valuation memo / appraisal extract",
+        "asOf": "2026-07-31T00:00:00.000Z",
+        "low": 42036000,
+        "high": 48364000,
+        "confidence": 0.99,
+        "notes": [
+          "Primary mark taken from market value / fair value language.",
+          "Acquisition price was GBP 41,000,000."
+        ]
+      },
+      "createdAt": "2026-08-26T17:51:33.039Z"
+    },
+    {
+      "id": "val_d8365b59b9df4c3b",
+      "assetId": "ast_165f9f1a78334d31",
+      "payload": {
+        "amount": 99500000,
+        "currency": "GBP",
+        "method": "Independent valuation memo / appraisal extract",
+        "asOf": "2026-08-01T00:00:00.000Z",
+        "low": 92535000,
+        "high": 106465000,
+        "confidence": 0.99,
+        "notes": [
+          "Primary mark taken from market value / fair value language."
+        ]
+      },
+      "createdAt": "2026-08-26T17:51:51.613Z"
+    },
+    {
+      "id": "val_b9958e2cfd4e45aa",
+      "assetId": "ast_513be945dd504cb8",
+      "payload": {
+        "amount": 25000000,
+        "currency": "GBP",
+        "method": "Class heuristic pending primary valuation memo",
+        "asOf": "2026-08-27T14:42:16.373Z",
+        "low": 23250000,
+        "high": 26750000,
+        "confidence": 0.4,
+        "notes": [
+          "No explicit value extracted; heuristic placeholder used."
+        ]
+      },
+      "createdAt": "2026-08-27T14:42:16.615Z"
+    },
+    {
+      "id": "val_2d8b0121719f41e1",
+      "assetId": "ast_513be945dd504cb8",
+      "payload": {
+        "amount": 45200000,
+        "currency": "GBP",
+        "method": "Independent valuation memo / appraisal extract",
+        "asOf": "2026-07-31T00:00:00.000Z",
+        "low": 42036000,
+        "high": 48364000,
+        "confidence": 0.99,
+        "notes": [
+          "Primary mark taken from market value / fair value language.",
+          "Acquisition price was GBP 41,000,000."
+        ]
+      },
+      "createdAt": "2026-08-27T14:43:06.436Z"
+    },
+    {
+      "id": "val_8f2dfa90afa3496a",
+      "assetId": "ast_0c8be51f0bd04fb9",
+      "payload": {
+        "amount": 78500000,
+        "currency": "EUR",
+        "method": "Independent valuation memo / appraisal extract",
+        "asOf": "2026-06-30T00:00:00.000Z",
+        "low": 73005000,
+        "high": 83995000,
+        "confidence": 0.99,
+        "notes": [
+          "Primary mark taken from market value / fair value language.",
+          "Acquisition price was EUR 72,250,000."
+        ]
+      },
+      "createdAt": "2026-08-27T14:44:53.918Z"
+    },
+    {
+      "id": "val_415f021cb2b54f1e",
+      "assetId": "ast_3bd729e164ef4be7",
+      "payload": {
+        "amount": 112000000,
+        "currency": "SGD",
+        "method": "Independent valuation memo / appraisal extract",
+        "asOf": "2026-08-15T00:00:00.000Z",
+        "low": 104160000,
+        "high": 119840000,
+        "confidence": 0.99,
+        "notes": [
+          "Primary mark taken from market value / fair value language.",
+          "Acquisition price was SGD 105,000,000."
+        ]
+      },
+      "createdAt": "2026-08-27T14:46:15.452Z"
+    },
+    {
+      "id": "val_9c99e81d0f7a4dcb",
+      "assetId": "ast_3bd729e164ef4be7",
+      "payload": {
+        "amount": 99500000,
+        "currency": "GBP",
+        "method": "Independent valuation memo / appraisal extract",
+        "asOf": "2026-08-01T00:00:00.000Z",
+        "low": 92535000,
+        "high": 106465000,
+        "confidence": 0.99,
+        "notes": [
+          "Primary mark taken from market value / fair value language.",
+          "Acquisition price was SGD 105,000,000."
+        ]
+      },
+      "createdAt": "2026-08-27T15:05:03.430Z"
     }
   ],
   "projections": [
@@ -7720,6 +10795,455 @@
         ]
       },
       "createdAt": "2026-08-26T11:27:02.011Z"
+    },
+    {
+      "id": "prj_0ebfa3fbd0db4e06",
+      "assetId": "ast_35e73b6f6a1444a2",
+      "payload": {
+        "assetId": "ast_35e73b6f6a1444a2",
+        "currency": "GBP",
+        "baseAmount": 45200000,
+        "baseAsOf": "2026-07-31T00:00:00.000Z",
+        "baseMethod": "Independent valuation memo / appraisal extract",
+        "model": "caprov-forward-mark-v1",
+        "generatedAt": "2026-08-26T17:51:32.996Z",
+        "assumptions": {
+          "annualGrowthRate": 0.0378,
+          "drivers": [
+            "real estate base growth 2.5%",
+            "occupancy 91% → 0.08 pp",
+            "lease term 6.2y → 0.18 pp",
+            "cap rate 5.9% → 0.02 pp",
+            "realized mark drift vs purchase → 1.50 pp",
+            "risk moderate −0.5 pp"
+          ],
+          "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+        },
+        "horizons": [
+          {
+            "years": 1,
+            "asOf": "2027-07-31",
+            "base": 46908560,
+            "bear": 46004560,
+            "bull": 47812560,
+            "low": 42921332,
+            "high": 50895788,
+            "annualGrowthRate": 0.0378,
+            "confidence": 0.76
+          },
+          {
+            "years": 3,
+            "asOf": "2029-07-31",
+            "base": 50521872,
+            "bear": 47656898,
+            "bull": 53499426,
+            "low": 43701419,
+            "high": 57342325,
+            "annualGrowthRate": 0.0378,
+            "confidence": 0.6
+          },
+          {
+            "years": 5,
+            "asOf": "2031-07-31",
+            "base": 54413513,
+            "bear": 49368584,
+            "bull": 59862693,
+            "low": 44347013,
+            "high": 64480013,
+            "annualGrowthRate": 0.0378,
+            "confidence": 0.44
+          }
+        ],
+        "confidence": 0.76,
+        "sourceDocumentIds": [
+          "doc_9e20b82416b646e3",
+          "doc_9d922686bebd4c5d"
+        ]
+      },
+      "createdAt": "2026-08-26T17:51:33.039Z"
+    },
+    {
+      "id": "prj_e8dfa423c8a74631",
+      "assetId": "ast_165f9f1a78334d31",
+      "payload": {
+        "assetId": "ast_165f9f1a78334d31",
+        "currency": "GBP",
+        "baseAmount": 99500000,
+        "baseAsOf": "2026-08-01T00:00:00.000Z",
+        "baseMethod": "Independent valuation memo / appraisal extract",
+        "model": "caprov-forward-mark-v1",
+        "generatedAt": "2026-08-26T17:51:51.599Z",
+        "assumptions": {
+          "annualGrowthRate": 0.0197,
+          "drivers": [
+            "real estate base growth 2.5%",
+            "occupancy 95% → 0.40 pp",
+            "lease term 6.8y → 0.27 pp",
+            "risk elevated −1.2 pp"
+          ],
+          "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+        },
+        "horizons": [
+          {
+            "years": 1,
+            "asOf": "2027-08-01",
+            "base": 101460150,
+            "bear": 99470150,
+            "bull": 103450150,
+            "low": 92836037,
+            "high": 110084263,
+            "annualGrowthRate": 0.0197,
+            "confidence": 0.76
+          },
+          {
+            "years": 3,
+            "asOf": "2029-08-01",
+            "base": 105497056,
+            "bear": 99410477,
+            "bull": 111827139,
+            "low": 91254953,
+            "high": 119739159,
+            "annualGrowthRate": 0.0197,
+            "confidence": 0.6
+          },
+          {
+            "years": 5,
+            "asOf": "2031-08-01",
+            "base": 109694582,
+            "bear": 99350840,
+            "bull": 120882463,
+            "low": 89401084,
+            "high": 129988080,
+            "annualGrowthRate": 0.0197,
+            "confidence": 0.44
+          }
+        ],
+        "confidence": 0.76,
+        "sourceDocumentIds": [
+          "doc_bbf696a0ea5f4fbe"
+        ]
+      },
+      "createdAt": "2026-08-26T17:51:51.613Z"
+    },
+    {
+      "id": "prj_45a18847e8f840c4",
+      "assetId": "ast_513be945dd504cb8",
+      "payload": {
+        "assetId": "ast_513be945dd504cb8",
+        "currency": "GBP",
+        "baseAmount": 25000000,
+        "baseAsOf": "2026-08-27T14:42:16.373Z",
+        "baseMethod": "Class heuristic pending primary valuation memo",
+        "model": "caprov-forward-mark-v1",
+        "generatedAt": "2026-08-27T14:42:16.374Z",
+        "assumptions": {
+          "annualGrowthRate": 0.013,
+          "drivers": [
+            "real estate base growth 2.5%",
+            "risk elevated −1.2 pp"
+          ],
+          "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+        },
+        "horizons": [
+          {
+            "years": 1,
+            "asOf": "2027-08-27",
+            "base": 25325000,
+            "bear": 24825000,
+            "bull": 25825000,
+            "low": 23172375,
+            "high": 27477625,
+            "annualGrowthRate": 0.013,
+            "confidence": 0.27
+          },
+          {
+            "years": 3,
+            "asOf": "2029-08-27",
+            "base": 25987730,
+            "bear": 24478666,
+            "bull": 27557573,
+            "low": 22479386,
+            "high": 29496074,
+            "annualGrowthRate": 0.013,
+            "confidence": 0.25
+          },
+          {
+            "years": 5,
+            "asOf": "2031-08-27",
+            "base": 26667803,
+            "bear": 24137165,
+            "bull": 29406383,
+            "low": 21734259,
+            "high": 31601347,
+            "annualGrowthRate": 0.013,
+            "confidence": 0.25
+          }
+        ],
+        "confidence": 0.27,
+        "sourceDocumentIds": []
+      },
+      "createdAt": "2026-08-27T14:42:16.615Z"
+    },
+    {
+      "id": "prj_415e21c7a4d64fed",
+      "assetId": "ast_513be945dd504cb8",
+      "payload": {
+        "assetId": "ast_513be945dd504cb8",
+        "currency": "GBP",
+        "baseAmount": 45200000,
+        "baseAsOf": "2026-07-31T00:00:00.000Z",
+        "baseMethod": "Independent valuation memo / appraisal extract",
+        "model": "caprov-forward-mark-v1",
+        "generatedAt": "2026-08-27T14:43:06.419Z",
+        "assumptions": {
+          "annualGrowthRate": 0.0378,
+          "drivers": [
+            "real estate base growth 2.5%",
+            "occupancy 91% → 0.08 pp",
+            "lease term 6.2y → 0.18 pp",
+            "cap rate 5.9% → 0.02 pp",
+            "realized mark drift vs purchase → 1.50 pp",
+            "risk moderate −0.5 pp"
+          ],
+          "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+        },
+        "horizons": [
+          {
+            "years": 1,
+            "asOf": "2027-07-31",
+            "base": 46908560,
+            "bear": 46004560,
+            "bull": 47812560,
+            "low": 42921332,
+            "high": 50895788,
+            "annualGrowthRate": 0.0378,
+            "confidence": 0.76
+          },
+          {
+            "years": 3,
+            "asOf": "2029-07-31",
+            "base": 50521872,
+            "bear": 47656898,
+            "bull": 53499426,
+            "low": 43701419,
+            "high": 57342325,
+            "annualGrowthRate": 0.0378,
+            "confidence": 0.6
+          },
+          {
+            "years": 5,
+            "asOf": "2031-07-31",
+            "base": 54413513,
+            "bear": 49368584,
+            "bull": 59862693,
+            "low": 44347013,
+            "high": 64480013,
+            "annualGrowthRate": 0.0378,
+            "confidence": 0.44
+          }
+        ],
+        "confidence": 0.76,
+        "sourceDocumentIds": [
+          "doc_ec675c0a232e468b",
+          "doc_cc8de1de1b27419b"
+        ]
+      },
+      "createdAt": "2026-08-27T14:43:06.436Z"
+    },
+    {
+      "id": "prj_27dc5da047d84fad",
+      "assetId": "ast_0c8be51f0bd04fb9",
+      "payload": {
+        "assetId": "ast_0c8be51f0bd04fb9",
+        "currency": "EUR",
+        "baseAmount": 78500000,
+        "baseAsOf": "2026-06-30T00:00:00.000Z",
+        "baseMethod": "Independent valuation memo / appraisal extract",
+        "model": "caprov-forward-mark-v1",
+        "generatedAt": "2026-08-27T14:44:53.909Z",
+        "assumptions": {
+          "annualGrowthRate": 0.0453,
+          "drivers": [
+            "real estate base growth 2.5%",
+            "occupancy 97% → 0.56 pp",
+            "lease term 8.1y → 0.46 pp",
+            "realized mark drift vs purchase → 1.50 pp",
+            "risk moderate −0.5 pp"
+          ],
+          "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+        },
+        "horizons": [
+          {
+            "years": 1,
+            "asOf": "2027-06-30",
+            "base": 82056050,
+            "bear": 80486050,
+            "bull": 83626050,
+            "low": 75081286,
+            "high": 89030814,
+            "annualGrowthRate": 0.0453,
+            "confidence": 0.76
+          },
+          {
+            "years": 3,
+            "asOf": "2029-06-30",
+            "base": 89658715,
+            "bear": 84610162,
+            "bull": 94904201,
+            "low": 77554788,
+            "high": 101762642,
+            "annualGrowthRate": 0.0453,
+            "confidence": 0.6
+          },
+          {
+            "years": 5,
+            "asOf": "2031-06-30",
+            "base": 97965782,
+            "bear": 88945595,
+            "bull": 107703370,
+            "low": 79842112,
+            "high": 116089452,
+            "annualGrowthRate": 0.0453,
+            "confidence": 0.44
+          }
+        ],
+        "confidence": 0.76,
+        "sourceDocumentIds": [
+          "doc_6035520d7eff4f57",
+          "doc_c4aefbfdf6bd4475"
+        ]
+      },
+      "createdAt": "2026-08-27T14:44:53.918Z"
+    },
+    {
+      "id": "prj_fbb36d495f744d1e",
+      "assetId": "ast_3bd729e164ef4be7",
+      "payload": {
+        "assetId": "ast_3bd729e164ef4be7",
+        "currency": "SGD",
+        "baseAmount": 112000000,
+        "baseAsOf": "2026-08-15T00:00:00.000Z",
+        "baseMethod": "Independent valuation memo / appraisal extract",
+        "model": "caprov-forward-mark-v1",
+        "generatedAt": "2026-08-27T14:46:15.421Z",
+        "assumptions": {
+          "annualGrowthRate": 0.0311,
+          "drivers": [
+            "real estate base growth 2.5%",
+            "occupancy 88% → -0.16 pp",
+            "lease term 4.5y → -0.07 pp",
+            "realized mark drift vs purchase → 1.35 pp",
+            "risk moderate −0.5 pp"
+          ],
+          "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+        },
+        "horizons": [
+          {
+            "years": 1,
+            "asOf": "2027-08-15",
+            "base": 115483200,
+            "bear": 113243200,
+            "bull": 117723200,
+            "low": 105667128,
+            "high": 125299272,
+            "annualGrowthRate": 0.0311,
+            "confidence": 0.76
+          },
+          {
+            "years": 3,
+            "asOf": "2029-08-15",
+            "base": 122777952,
+            "bear": 115771152,
+            "bull": 130061911,
+            "low": 106202928,
+            "high": 139352976,
+            "annualGrowthRate": 0.0311,
+            "confidence": 0.6
+          },
+          {
+            "years": 5,
+            "asOf": "2031-08-15",
+            "base": 130533492,
+            "bear": 118355535,
+            "bull": 143693857,
+            "low": 106384796,
+            "high": 154682188,
+            "annualGrowthRate": 0.0311,
+            "confidence": 0.44
+          }
+        ],
+        "confidence": 0.76,
+        "sourceDocumentIds": [
+          "doc_cce5046251564bfb",
+          "doc_5b88d1f304664d57"
+        ]
+      },
+      "createdAt": "2026-08-27T14:46:15.452Z"
+    },
+    {
+      "id": "prj_fc7f3313c03e4322",
+      "assetId": "ast_3bd729e164ef4be7",
+      "payload": {
+        "assetId": "ast_3bd729e164ef4be7",
+        "currency": "GBP",
+        "baseAmount": 99500000,
+        "baseAsOf": "2026-08-01T00:00:00.000Z",
+        "baseMethod": "Independent valuation memo / appraisal extract",
+        "model": "caprov-forward-mark-v1",
+        "generatedAt": "2026-08-27T15:05:03.305Z",
+        "assumptions": {
+          "annualGrowthRate": 0.0167,
+          "drivers": [
+            "real estate base growth 2.5%",
+            "occupancy 95% → 0.40 pp",
+            "lease term 6.8y → 0.27 pp",
+            "realized mark drift vs purchase → -1.00 pp",
+            "risk moderate −0.5 pp"
+          ],
+          "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+        },
+        "horizons": [
+          {
+            "years": 1,
+            "asOf": "2027-08-01",
+            "base": 101161650,
+            "bear": 99171650,
+            "bull": 103151650,
+            "low": 92562910,
+            "high": 109760390,
+            "annualGrowthRate": 0.0167,
+            "confidence": 0.76
+          },
+          {
+            "years": 3,
+            "asOf": "2029-08-01",
+            "base": 104568662,
+            "bear": 98518197,
+            "bull": 110861915,
+            "low": 90451893,
+            "high": 118685431,
+            "annualGrowthRate": 0.0167,
+            "confidence": 0.6
+          },
+          {
+            "years": 5,
+            "asOf": "2031-08-01",
+            "base": 108090419,
+            "bear": 97869050,
+            "bull": 119148498,
+            "low": 88093691,
+            "high": 128087147,
+            "annualGrowthRate": 0.0167,
+            "confidence": 0.44
+          }
+        ],
+        "confidence": 0.76,
+        "sourceDocumentIds": [
+          "doc_cabfc20eb1ba4d6c",
+          "doc_5b88d1f304664d57"
+        ]
+      },
+      "createdAt": "2026-08-27T15:05:03.430Z"
     }
   ],
   "risks": [
@@ -8422,6 +11946,291 @@
         ]
       },
       "createdAt": "2026-08-26T11:27:02.011Z"
+    },
+    {
+      "id": "rsk_9268aed1f9f7421a",
+      "assetId": "ast_35e73b6f6a1444a2",
+      "payload": {
+        "overall": 34,
+        "rating": "MODERATE",
+        "confidence": 0.88,
+        "flags": [
+          "Occupancy at 91%",
+          "Lease duration 6.2 years creates roll risk"
+        ],
+        "dimensions": [
+          {
+            "key": "document_coverage",
+            "label": "Document coverage",
+            "score": 44,
+            "rationale": "3 distinct document types ingested for this asset."
+          },
+          {
+            "key": "ownership_clarity",
+            "label": "Ownership clarity",
+            "score": 18,
+            "rationale": "Legal ownership language extracted."
+          },
+          {
+            "key": "jurisdiction",
+            "label": "Jurisdiction & legal",
+            "score": 24,
+            "rationale": "Jurisdiction recorded as England & Wales."
+          },
+          {
+            "key": "income_durability",
+            "label": "Income durability",
+            "score": 48,
+            "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+          }
+        ]
+      },
+      "createdAt": "2026-08-26T17:51:33.039Z"
+    },
+    {
+      "id": "rsk_ac68462699364b2c",
+      "assetId": "ast_165f9f1a78334d31",
+      "payload": {
+        "overall": 53,
+        "rating": "ELEVATED",
+        "confidence": 0.88,
+        "flags": [
+          "Lease duration 6.8 years creates roll risk",
+          "Missing title / ownership evidence",
+          "Thin document coverage"
+        ],
+        "dimensions": [
+          {
+            "key": "document_coverage",
+            "label": "Document coverage",
+            "score": 68,
+            "rationale": "1 distinct document types ingested for this asset."
+          },
+          {
+            "key": "ownership_clarity",
+            "label": "Ownership clarity",
+            "score": 55,
+            "rationale": "Ownership language was not confidently extracted."
+          },
+          {
+            "key": "jurisdiction",
+            "label": "Jurisdiction & legal",
+            "score": 48,
+            "rationale": "No jurisdiction recorded on the asset master."
+          },
+          {
+            "key": "income_durability",
+            "label": "Income durability",
+            "score": 40,
+            "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+          }
+        ]
+      },
+      "createdAt": "2026-08-26T17:51:51.613Z"
+    },
+    {
+      "id": "rsk_bd56be181d704742",
+      "assetId": "ast_513be945dd504cb8",
+      "payload": {
+        "overall": 47,
+        "rating": "ELEVATED",
+        "confidence": 0.4,
+        "flags": [
+          "Missing title / ownership evidence",
+          "No independent valuation memo / NAV pack",
+          "Thin document coverage"
+        ],
+        "dimensions": [
+          {
+            "key": "document_coverage",
+            "label": "Document coverage",
+            "score": 80,
+            "rationale": "0 distinct document types ingested for this asset."
+          },
+          {
+            "key": "ownership_clarity",
+            "label": "Ownership clarity",
+            "score": 55,
+            "rationale": "Ownership language was not confidently extracted."
+          },
+          {
+            "key": "jurisdiction",
+            "label": "Jurisdiction & legal",
+            "score": 24,
+            "rationale": "Jurisdiction recorded as England & Wales."
+          },
+          {
+            "key": "income_durability",
+            "label": "Income durability",
+            "score": 30,
+            "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+          }
+        ]
+      },
+      "createdAt": "2026-08-27T14:42:16.615Z"
+    },
+    {
+      "id": "rsk_969e0d7b90ea4f7d",
+      "assetId": "ast_513be945dd504cb8",
+      "payload": {
+        "overall": 34,
+        "rating": "MODERATE",
+        "confidence": 0.88,
+        "flags": [
+          "Occupancy at 91%",
+          "Lease duration 6.2 years creates roll risk"
+        ],
+        "dimensions": [
+          {
+            "key": "document_coverage",
+            "label": "Document coverage",
+            "score": 44,
+            "rationale": "3 distinct document types ingested for this asset."
+          },
+          {
+            "key": "ownership_clarity",
+            "label": "Ownership clarity",
+            "score": 18,
+            "rationale": "Legal ownership language extracted."
+          },
+          {
+            "key": "jurisdiction",
+            "label": "Jurisdiction & legal",
+            "score": 24,
+            "rationale": "Jurisdiction recorded as England & Wales."
+          },
+          {
+            "key": "income_durability",
+            "label": "Income durability",
+            "score": 48,
+            "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+          }
+        ]
+      },
+      "createdAt": "2026-08-27T14:43:06.436Z"
+    },
+    {
+      "id": "rsk_7eb2e0068a4343b9",
+      "assetId": "ast_0c8be51f0bd04fb9",
+      "payload": {
+        "overall": 32,
+        "rating": "MODERATE",
+        "confidence": 0.88,
+        "flags": [
+          "Missing title / ownership evidence",
+          "Thin document coverage"
+        ],
+        "dimensions": [
+          {
+            "key": "document_coverage",
+            "label": "Document coverage",
+            "score": 56,
+            "rationale": "2 distinct document types ingested for this asset."
+          },
+          {
+            "key": "ownership_clarity",
+            "label": "Ownership clarity",
+            "score": 18,
+            "rationale": "Legal ownership language extracted."
+          },
+          {
+            "key": "jurisdiction",
+            "label": "Jurisdiction & legal",
+            "score": 24,
+            "rationale": "Jurisdiction recorded as Netherlands."
+          },
+          {
+            "key": "income_durability",
+            "label": "Income durability",
+            "score": 30,
+            "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+          }
+        ]
+      },
+      "createdAt": "2026-08-27T14:44:53.918Z"
+    },
+    {
+      "id": "rsk_f308ded94b824307",
+      "assetId": "ast_3bd729e164ef4be7",
+      "payload": {
+        "overall": 37,
+        "rating": "MODERATE",
+        "confidence": 0.88,
+        "flags": [
+          "Occupancy at 88%",
+          "Lease duration 4.5 years creates roll risk",
+          "Missing title / ownership evidence",
+          "Thin document coverage"
+        ],
+        "dimensions": [
+          {
+            "key": "document_coverage",
+            "label": "Document coverage",
+            "score": 56,
+            "rationale": "2 distinct document types ingested for this asset."
+          },
+          {
+            "key": "ownership_clarity",
+            "label": "Ownership clarity",
+            "score": 18,
+            "rationale": "Legal ownership language extracted."
+          },
+          {
+            "key": "jurisdiction",
+            "label": "Jurisdiction & legal",
+            "score": 24,
+            "rationale": "Jurisdiction recorded as Singapore."
+          },
+          {
+            "key": "income_durability",
+            "label": "Income durability",
+            "score": 48,
+            "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+          }
+        ]
+      },
+      "createdAt": "2026-08-27T14:46:15.452Z"
+    },
+    {
+      "id": "rsk_84df675cdb7a4aaf",
+      "assetId": "ast_3bd729e164ef4be7",
+      "payload": {
+        "overall": 35,
+        "rating": "MODERATE",
+        "confidence": 0.88,
+        "flags": [
+          "Lease duration 6.8 years creates roll risk",
+          "Missing title / ownership evidence",
+          "Thin document coverage"
+        ],
+        "dimensions": [
+          {
+            "key": "document_coverage",
+            "label": "Document coverage",
+            "score": 56,
+            "rationale": "2 distinct document types ingested for this asset."
+          },
+          {
+            "key": "ownership_clarity",
+            "label": "Ownership clarity",
+            "score": 18,
+            "rationale": "Legal ownership language extracted."
+          },
+          {
+            "key": "jurisdiction",
+            "label": "Jurisdiction & legal",
+            "score": 24,
+            "rationale": "Jurisdiction recorded as Singapore."
+          },
+          {
+            "key": "income_durability",
+            "label": "Income durability",
+            "score": 40,
+            "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+          }
+        ]
+      },
+      "createdAt": "2026-08-27T15:05:03.430Z"
     }
   ],
   "facts": [
@@ -9090,9 +12899,576 @@
       "confidence": 0.93,
       "fragment": "WALE: 4.5 years",
       "observedAt": "2026-08-26T11:27:02.011Z"
+    },
+    {
+      "id": "fact_5924dc8bb37b45ed",
+      "documentId": "doc_9e20b82416b646e3",
+      "key": "market_value",
+      "value": "GBP 45,200,000",
+      "confidence": 0.99,
+      "fragment": "Market value: GBP 45,200,000",
+      "observedAt": "2026-08-26T17:51:33.039Z"
+    },
+    {
+      "id": "fact_6759a23ac7484be1",
+      "documentId": "doc_9d922686bebd4c5d",
+      "key": "purchase_price",
+      "value": "GBP 41,000,000",
+      "confidence": 0.98,
+      "fragment": "Purchase price: GBP 41,000,000",
+      "observedAt": "2026-08-26T17:51:33.039Z"
+    },
+    {
+      "id": "fact_72ad47b15eeb4c79",
+      "documentId": "doc_8bc70282959c41aa",
+      "key": "legal_ownership",
+      "value": "100% Riverside Quay HoldCo Limited",
+      "confidence": 0.99,
+      "fragment": "Legal ownership: 100%",
+      "observedAt": "2026-08-26T17:51:33.039Z"
+    },
+    {
+      "id": "fact_006cda99d8164105",
+      "documentId": "doc_8bc70282959c41aa",
+      "key": "proprietor",
+      "value": "Riverside Quay HoldCo Limited",
+      "confidence": 0.96,
+      "fragment": "Proprietor: Riverside Quay HoldCo Limited",
+      "observedAt": "2026-08-26T17:51:33.039Z"
+    },
+    {
+      "id": "fact_d6f2d5f71c4047af",
+      "documentId": "doc_9d922686bebd4c5d",
+      "key": "location",
+      "value": "Riverside Quay Tower, Salford Quays, Manchester M50 3SP",
+      "confidence": 0.92,
+      "fragment": "Property: Riverside Quay Tower, Salford Quays, Manchester M50 3SP",
+      "observedAt": "2026-08-26T17:51:33.039Z"
+    },
+    {
+      "id": "fact_bf5102fd74744c8e",
+      "documentId": "doc_9e20b82416b646e3",
+      "key": "occupancy",
+      "value": "91%",
+      "confidence": 0.95,
+      "fragment": "Occupancy: 91%",
+      "observedAt": "2026-08-26T17:51:33.039Z"
+    },
+    {
+      "id": "fact_3046b203d7ac44cd",
+      "documentId": "doc_9e20b82416b646e3",
+      "key": "walt",
+      "value": "6.2 years",
+      "confidence": 0.93,
+      "fragment": "WALT: 6.2 years",
+      "observedAt": "2026-08-26T17:51:33.039Z"
+    },
+    {
+      "id": "fact_234793ef2752400d",
+      "documentId": "doc_9e20b82416b646e3",
+      "key": "cap_rate",
+      "value": "5.90%",
+      "confidence": 0.91,
+      "fragment": "Cap rate: 5.90%",
+      "observedAt": "2026-08-26T17:51:33.039Z"
+    },
+    {
+      "id": "fact_7edd5d426ff0465d",
+      "documentId": "doc_bbf696a0ea5f4fbe",
+      "key": "market_value",
+      "value": "GBP 99,500,000",
+      "confidence": 0.99,
+      "fragment": "Market value: GBP 99,500,000",
+      "observedAt": "2026-08-26T17:51:51.227Z"
+    },
+    {
+      "id": "fact_384b0c0d178e4cea",
+      "documentId": "doc_bbf696a0ea5f4fbe",
+      "key": "occupancy",
+      "value": "95%",
+      "confidence": 0.95,
+      "fragment": "Occupancy: 95%",
+      "observedAt": "2026-08-26T17:51:51.227Z"
+    },
+    {
+      "id": "fact_f09ddb5cffb74741",
+      "documentId": "doc_bbf696a0ea5f4fbe",
+      "key": "walt",
+      "value": "6.8 years",
+      "confidence": 0.93,
+      "fragment": "WALT: 6.8 years",
+      "observedAt": "2026-08-26T17:51:51.227Z"
+    },
+    {
+      "id": "fact_d1a7f58e09764027",
+      "documentId": "doc_bbf696a0ea5f4fbe",
+      "key": "market_value",
+      "value": "GBP 99,500,000",
+      "confidence": 0.99,
+      "fragment": "Market value: GBP 99,500,000",
+      "observedAt": "2026-08-26T17:51:51.613Z"
+    },
+    {
+      "id": "fact_235b246026794f54",
+      "documentId": "doc_bbf696a0ea5f4fbe",
+      "key": "occupancy",
+      "value": "95%",
+      "confidence": 0.95,
+      "fragment": "Occupancy: 95%",
+      "observedAt": "2026-08-26T17:51:51.613Z"
+    },
+    {
+      "id": "fact_714ca4cfc6674b94",
+      "documentId": "doc_bbf696a0ea5f4fbe",
+      "key": "walt",
+      "value": "6.8 years",
+      "confidence": 0.93,
+      "fragment": "WALT: 6.8 years",
+      "observedAt": "2026-08-26T17:51:51.613Z"
+    },
+    {
+      "id": "fact_2355b0e7501b4108",
+      "documentId": "doc_cc8de1de1b27419b",
+      "key": "purchase_price",
+      "value": "GBP 41,000,000",
+      "confidence": 0.98,
+      "fragment": "Purchase price: GBP 41,000,000",
+      "observedAt": "2026-08-27T14:42:27.948Z"
+    },
+    {
+      "id": "fact_e4e7f2c5efeb4513",
+      "documentId": "doc_cc8de1de1b27419b",
+      "key": "legal_ownership",
+      "value": "100%",
+      "confidence": 0.92,
+      "fragment": "Ownership transferred: 100%",
+      "observedAt": "2026-08-27T14:42:27.949Z"
+    },
+    {
+      "id": "fact_5bbf9603e96e4742",
+      "documentId": "doc_cc8de1de1b27419b",
+      "key": "location",
+      "value": "Riverside Quay Tower, Salford Quays, Manchester M50 3SP",
+      "confidence": 0.92,
+      "fragment": "Property: Riverside Quay Tower, Salford Quays, Manchester M50 3SP",
+      "observedAt": "2026-08-27T14:42:27.950Z"
+    },
+    {
+      "id": "fact_01b3baf4d43e4ae0",
+      "documentId": "doc_6cbe5c74a37b4b52",
+      "key": "legal_ownership",
+      "value": "100% Riverside Quay HoldCo Limited",
+      "confidence": 0.99,
+      "fragment": "Legal ownership: 100%",
+      "observedAt": "2026-08-27T14:42:48.841Z"
+    },
+    {
+      "id": "fact_7482905b1d21435c",
+      "documentId": "doc_6cbe5c74a37b4b52",
+      "key": "proprietor",
+      "value": "Riverside Quay HoldCo Limited",
+      "confidence": 0.96,
+      "fragment": "Proprietor: Riverside Quay HoldCo Limited",
+      "observedAt": "2026-08-27T14:42:48.842Z"
+    },
+    {
+      "id": "fact_fa2e3d3b909b48d9",
+      "documentId": "doc_ec675c0a232e468b",
+      "key": "market_value",
+      "value": "GBP 45,200,000",
+      "confidence": 0.99,
+      "fragment": "Market value: GBP 45,200,000",
+      "observedAt": "2026-08-27T14:43:06.401Z"
+    },
+    {
+      "id": "fact_b8459f678aee4b18",
+      "documentId": "doc_ec675c0a232e468b",
+      "key": "occupancy",
+      "value": "91%",
+      "confidence": 0.95,
+      "fragment": "Occupancy: 91%",
+      "observedAt": "2026-08-27T14:43:06.401Z"
+    },
+    {
+      "id": "fact_e79b9268831243fb",
+      "documentId": "doc_ec675c0a232e468b",
+      "key": "walt",
+      "value": "6.2 years",
+      "confidence": 0.93,
+      "fragment": "WALT: 6.2 years",
+      "observedAt": "2026-08-27T14:43:06.401Z"
+    },
+    {
+      "id": "fact_6423765acb4f4881",
+      "documentId": "doc_ec675c0a232e468b",
+      "key": "cap_rate",
+      "value": "5.90%",
+      "confidence": 0.91,
+      "fragment": "Cap rate: 5.90%",
+      "observedAt": "2026-08-27T14:43:06.401Z"
+    },
+    {
+      "id": "fact_71ac1770fedf4d3e",
+      "documentId": "doc_ec675c0a232e468b",
+      "key": "market_value",
+      "value": "GBP 45,200,000",
+      "confidence": 0.99,
+      "fragment": "Market value: GBP 45,200,000",
+      "observedAt": "2026-08-27T14:43:06.436Z"
+    },
+    {
+      "id": "fact_509a3295e47d47cf",
+      "documentId": "doc_cc8de1de1b27419b",
+      "key": "purchase_price",
+      "value": "GBP 41,000,000",
+      "confidence": 0.98,
+      "fragment": "Purchase price: GBP 41,000,000",
+      "observedAt": "2026-08-27T14:43:06.436Z"
+    },
+    {
+      "id": "fact_c8773fb0ec384d50",
+      "documentId": "doc_6cbe5c74a37b4b52",
+      "key": "legal_ownership",
+      "value": "100% Riverside Quay HoldCo Limited",
+      "confidence": 0.99,
+      "fragment": "Legal ownership: 100%",
+      "observedAt": "2026-08-27T14:43:06.436Z"
+    },
+    {
+      "id": "fact_256059e9fbf14c39",
+      "documentId": "doc_6cbe5c74a37b4b52",
+      "key": "proprietor",
+      "value": "Riverside Quay HoldCo Limited",
+      "confidence": 0.96,
+      "fragment": "Proprietor: Riverside Quay HoldCo Limited",
+      "observedAt": "2026-08-27T14:43:06.436Z"
+    },
+    {
+      "id": "fact_4dfbba7b580942ce",
+      "documentId": "doc_cc8de1de1b27419b",
+      "key": "location",
+      "value": "Riverside Quay Tower, Salford Quays, Manchester M50 3SP",
+      "confidence": 0.92,
+      "fragment": "Property: Riverside Quay Tower, Salford Quays, Manchester M50 3SP",
+      "observedAt": "2026-08-27T14:43:06.436Z"
+    },
+    {
+      "id": "fact_d220d1905d4e4091",
+      "documentId": "doc_ec675c0a232e468b",
+      "key": "occupancy",
+      "value": "91%",
+      "confidence": 0.95,
+      "fragment": "Occupancy: 91%",
+      "observedAt": "2026-08-27T14:43:06.436Z"
+    },
+    {
+      "id": "fact_cfee4d5de7244141",
+      "documentId": "doc_ec675c0a232e468b",
+      "key": "walt",
+      "value": "6.2 years",
+      "confidence": 0.93,
+      "fragment": "WALT: 6.2 years",
+      "observedAt": "2026-08-27T14:43:06.436Z"
+    },
+    {
+      "id": "fact_4a60795211804e49",
+      "documentId": "doc_ec675c0a232e468b",
+      "key": "cap_rate",
+      "value": "5.90%",
+      "confidence": 0.91,
+      "fragment": "Cap rate: 5.90%",
+      "observedAt": "2026-08-27T14:43:06.436Z"
+    },
+    {
+      "id": "fact_38e0c99079db43a5",
+      "documentId": "doc_c4aefbfdf6bd4475",
+      "key": "purchase_price",
+      "value": "EUR 72,250,000",
+      "confidence": 0.98,
+      "fragment": "Purchase price: EUR 72,250,000",
+      "observedAt": "2026-08-27T14:44:38.954Z"
+    },
+    {
+      "id": "fact_353ed232f38c4c1f",
+      "documentId": "doc_c4aefbfdf6bd4475",
+      "key": "legal_ownership",
+      "value": "100%",
+      "confidence": 0.92,
+      "fragment": "Ownership transferred: 100%",
+      "observedAt": "2026-08-27T14:44:38.955Z"
+    },
+    {
+      "id": "fact_07f72fe4c0da4456",
+      "documentId": "doc_6035520d7eff4f57",
+      "key": "market_value",
+      "value": "EUR 78,500,000",
+      "confidence": 0.99,
+      "fragment": "Market value: EUR 78,500,000",
+      "observedAt": "2026-08-27T14:44:53.900Z"
+    },
+    {
+      "id": "fact_9c9dc5b57d594a12",
+      "documentId": "doc_6035520d7eff4f57",
+      "key": "occupancy",
+      "value": "97%",
+      "confidence": 0.95,
+      "fragment": "Occupancy: 97%",
+      "observedAt": "2026-08-27T14:44:53.900Z"
+    },
+    {
+      "id": "fact_8ef3afd96b024a1f",
+      "documentId": "doc_6035520d7eff4f57",
+      "key": "wale",
+      "value": "8.1 years",
+      "confidence": 0.93,
+      "fragment": "WALE: 8.1 years",
+      "observedAt": "2026-08-27T14:44:53.900Z"
+    },
+    {
+      "id": "fact_fe6c5d77e37a414b",
+      "documentId": "doc_6035520d7eff4f57",
+      "key": "market_value",
+      "value": "EUR 78,500,000",
+      "confidence": 0.99,
+      "fragment": "Market value: EUR 78,500,000",
+      "observedAt": "2026-08-27T14:44:53.918Z"
+    },
+    {
+      "id": "fact_c8894386487e4210",
+      "documentId": "doc_c4aefbfdf6bd4475",
+      "key": "purchase_price",
+      "value": "EUR 72,250,000",
+      "confidence": 0.98,
+      "fragment": "Purchase price: EUR 72,250,000",
+      "observedAt": "2026-08-27T14:44:53.918Z"
+    },
+    {
+      "id": "fact_19ad706f1e424693",
+      "documentId": "doc_c4aefbfdf6bd4475",
+      "key": "legal_ownership",
+      "value": "100%",
+      "confidence": 0.92,
+      "fragment": "Ownership transferred: 100%",
+      "observedAt": "2026-08-27T14:44:53.918Z"
+    },
+    {
+      "id": "fact_0d3be0e2de074b5d",
+      "documentId": "doc_6035520d7eff4f57",
+      "key": "occupancy",
+      "value": "97%",
+      "confidence": 0.95,
+      "fragment": "Occupancy: 97%",
+      "observedAt": "2026-08-27T14:44:53.918Z"
+    },
+    {
+      "id": "fact_481f465b7bca4bfd",
+      "documentId": "doc_6035520d7eff4f57",
+      "key": "wale",
+      "value": "8.1 years",
+      "confidence": 0.93,
+      "fragment": "WALE: 8.1 years",
+      "observedAt": "2026-08-27T14:44:53.918Z"
+    },
+    {
+      "id": "fact_e77ed7f07595424c",
+      "documentId": "doc_5b88d1f304664d57",
+      "key": "purchase_price",
+      "value": "SGD 105,000,000",
+      "confidence": 0.98,
+      "fragment": "Purchase price: SGD 105,000,000",
+      "observedAt": "2026-08-27T14:46:05.600Z"
+    },
+    {
+      "id": "fact_bc195563259f4234",
+      "documentId": "doc_5b88d1f304664d57",
+      "key": "legal_ownership",
+      "value": "100%",
+      "confidence": 0.92,
+      "fragment": "Ownership transferred: 100%",
+      "observedAt": "2026-08-27T14:46:05.601Z"
+    },
+    {
+      "id": "fact_31c985fa76ec4276",
+      "documentId": "doc_cce5046251564bfb",
+      "key": "market_value",
+      "value": "SGD 112 million",
+      "confidence": 0.99,
+      "fragment": "Market value: SGD 112 million",
+      "observedAt": "2026-08-27T14:46:15.387Z"
+    },
+    {
+      "id": "fact_2214f2d7a0104184",
+      "documentId": "doc_cce5046251564bfb",
+      "key": "occupancy",
+      "value": "88%",
+      "confidence": 0.95,
+      "fragment": "Occupancy: 88%",
+      "observedAt": "2026-08-27T14:46:15.388Z"
+    },
+    {
+      "id": "fact_afd052f6a2274476",
+      "documentId": "doc_cce5046251564bfb",
+      "key": "wale",
+      "value": "4.5 years",
+      "confidence": 0.93,
+      "fragment": "WALE: 4.5 years",
+      "observedAt": "2026-08-27T14:46:15.388Z"
+    },
+    {
+      "id": "fact_8dc9c82716554e41",
+      "documentId": "doc_cce5046251564bfb",
+      "key": "market_value",
+      "value": "SGD 112 million",
+      "confidence": 0.99,
+      "fragment": "Market value: SGD 112 million",
+      "observedAt": "2026-08-27T14:46:15.452Z"
+    },
+    {
+      "id": "fact_bf0ef5e878c2421a",
+      "documentId": "doc_5b88d1f304664d57",
+      "key": "purchase_price",
+      "value": "SGD 105,000,000",
+      "confidence": 0.98,
+      "fragment": "Purchase price: SGD 105,000,000",
+      "observedAt": "2026-08-27T14:46:15.452Z"
+    },
+    {
+      "id": "fact_d642f7d5d53e4119",
+      "documentId": "doc_5b88d1f304664d57",
+      "key": "legal_ownership",
+      "value": "100%",
+      "confidence": 0.92,
+      "fragment": "Ownership transferred: 100%",
+      "observedAt": "2026-08-27T14:46:15.452Z"
+    },
+    {
+      "id": "fact_458950efbec34d23",
+      "documentId": "doc_cce5046251564bfb",
+      "key": "occupancy",
+      "value": "88%",
+      "confidence": 0.95,
+      "fragment": "Occupancy: 88%",
+      "observedAt": "2026-08-27T14:46:15.452Z"
+    },
+    {
+      "id": "fact_25d6454eeb4b49d2",
+      "documentId": "doc_cce5046251564bfb",
+      "key": "wale",
+      "value": "4.5 years",
+      "confidence": 0.93,
+      "fragment": "WALE: 4.5 years",
+      "observedAt": "2026-08-27T14:46:15.452Z"
+    },
+    {
+      "id": "fact_c429e8e0e4204913",
+      "documentId": "doc_cabfc20eb1ba4d6c",
+      "key": "market_value",
+      "value": "GBP 99,500,000",
+      "confidence": 0.99,
+      "fragment": "Market value: GBP 99,500,000",
+      "observedAt": "2026-08-27T15:05:01.935Z"
+    },
+    {
+      "id": "fact_f1c31008b09c4dd6",
+      "documentId": "doc_cabfc20eb1ba4d6c",
+      "key": "occupancy",
+      "value": "95%",
+      "confidence": 0.95,
+      "fragment": "Occupancy: 95%",
+      "observedAt": "2026-08-27T15:05:01.936Z"
+    },
+    {
+      "id": "fact_2ba56fa1e7934b3f",
+      "documentId": "doc_cabfc20eb1ba4d6c",
+      "key": "walt",
+      "value": "6.8 years",
+      "confidence": 0.93,
+      "fragment": "WALT: 6.8 years",
+      "observedAt": "2026-08-27T15:05:01.937Z"
+    },
+    {
+      "id": "fact_0ae57554912d4dc1",
+      "documentId": "doc_cabfc20eb1ba4d6c",
+      "key": "market_value",
+      "value": "GBP 99,500,000",
+      "confidence": 0.99,
+      "fragment": "Market value: GBP 99,500,000",
+      "observedAt": "2026-08-27T15:05:03.430Z"
+    },
+    {
+      "id": "fact_b2f7d60163614b4a",
+      "documentId": "doc_5b88d1f304664d57",
+      "key": "purchase_price",
+      "value": "SGD 105,000,000",
+      "confidence": 0.98,
+      "fragment": "Purchase price: SGD 105,000,000",
+      "observedAt": "2026-08-27T15:05:03.430Z"
+    },
+    {
+      "id": "fact_d07a2da5ca8f4ff8",
+      "documentId": "doc_5b88d1f304664d57",
+      "key": "legal_ownership",
+      "value": "100%",
+      "confidence": 0.92,
+      "fragment": "Ownership transferred: 100%",
+      "observedAt": "2026-08-27T15:05:03.430Z"
+    },
+    {
+      "id": "fact_cfd8248e61a44bb8",
+      "documentId": "doc_cabfc20eb1ba4d6c",
+      "key": "occupancy",
+      "value": "95%",
+      "confidence": 0.95,
+      "fragment": "Occupancy: 95%",
+      "observedAt": "2026-08-27T15:05:03.430Z"
+    },
+    {
+      "id": "fact_cd4516b988bd4f3c",
+      "documentId": "doc_cabfc20eb1ba4d6c",
+      "key": "walt",
+      "value": "6.8 years",
+      "confidence": 0.93,
+      "fragment": "WALT: 6.8 years",
+      "observedAt": "2026-08-27T15:05:03.430Z"
     }
   ],
   "copilotThreads": [
+    {
+      "id": "thd_078e05a137354ad7",
+      "organizationId": "org_meridian",
+      "userId": "usr_arjun",
+      "assetId": "ast_3bd729e164ef4be7",
+      "title": "What is the current value and main risk?",
+      "createdAt": "2026-08-27T15:05:41.668Z",
+      "updatedAt": "2026-08-27T15:05:41.668Z"
+    },
+    {
+      "id": "thd_e8ed1d13497746b3",
+      "organizationId": "org_meridian",
+      "userId": "usr_arjun",
+      "assetId": "ast_513be945dd504cb8",
+      "title": "What is the current value and risk?",
+      "createdAt": "2026-08-27T14:42:26.794Z",
+      "updatedAt": "2026-08-27T14:42:26.794Z"
+    },
+    {
+      "id": "thd_ec1b0b8d3ed6499a",
+      "organizationId": "org_meridian",
+      "userId": "usr_arjun",
+      "assetId": "ast_35e73b6f6a1444a2",
+      "title": "What is the current value and risk?",
+      "createdAt": "2026-08-26T17:52:03.435Z",
+      "updatedAt": "2026-08-26T17:52:03.435Z"
+    },
+    {
+      "id": "thd_d6b87236400f40ea",
+      "organizationId": "org_meridian",
+      "userId": "usr_arjun",
+      "assetId": "ast_165f9f1a78334d31",
+      "title": "What is the current value and main risk?",
+      "createdAt": "2026-08-26T17:52:02.369Z",
+      "updatedAt": "2026-08-26T17:52:02.369Z"
+    },
     {
       "id": "thd_dd3dd54626754c90",
       "organizationId": "org_meridian",
@@ -9712,9 +14088,305 @@
         "disclaimer": "Briefing derived from Asset DNA facts with source provenance. Not a legal opinion."
       },
       "createdAt": "2026-08-26T08:47:05.487Z"
+    },
+    {
+      "id": "msg_a16f00ab0a1e4581",
+      "threadId": "thd_d6b87236400f40ea",
+      "role": "user",
+      "content": "What is the current value and main risk?",
+      "createdAt": "2026-08-26T17:52:02.369Z"
+    },
+    {
+      "id": "msg_0df1c4052d394272",
+      "threadId": "thd_d6b87236400f40ea",
+      "role": "assistant",
+      "content": "Current valuation\nPrimary mark taken from the Asset DNA envelope.\n\nCurrent mark: GBP 99,500,000\n\nRisk rating\nELEVATED (53/100)\n\nAs of\n2026-08-01\n\nMethod\nIndependent valuation memo / appraisal extract\n\nNotes\nPrimary mark taken from market value / fair value language.\n\nPrimary dimension\nDocument coverage: 1 distinct document types ingested for this asset.\n\nFlags\nLease duration 6.8 years creates roll risk\nMissing title / ownership evidence\nThin document coverage\n\nConfidence: 99%\n\nBriefing derived from Asset DNA facts with source provenance. Not a legal opinion.",
+      "citations": [
+        {
+          "label": "Market value",
+          "documentId": "doc_bbf696a0ea5f4fbe"
+        },
+        {
+          "label": "Risk snapshot"
+        }
+      ],
+      "briefing": {
+        "title": "Current valuation",
+        "headline": "Primary mark taken from the Asset DNA envelope.",
+        "metric": "GBP 99,500,000",
+        "metricLabel": "Current mark",
+        "confidence": 0.99,
+        "sections": [
+          {
+            "title": "Risk rating",
+            "body": "ELEVATED (53/100)",
+            "kind": "metric"
+          },
+          {
+            "title": "As of",
+            "body": "2026-08-01",
+            "kind": "detail"
+          },
+          {
+            "title": "Method",
+            "body": "Independent valuation memo / appraisal extract",
+            "kind": "detail"
+          },
+          {
+            "title": "Notes",
+            "body": "Primary mark taken from market value / fair value language.",
+            "kind": "note"
+          },
+          {
+            "title": "Primary dimension",
+            "body": "Document coverage: 1 distinct document types ingested for this asset.",
+            "kind": "detail"
+          },
+          {
+            "title": "Flags",
+            "body": "Lease duration 6.8 years creates roll risk\nMissing title / ownership evidence\nThin document coverage",
+            "kind": "list"
+          }
+        ],
+        "disclaimer": "Briefing derived from Asset DNA facts with source provenance. Not a legal opinion."
+      },
+      "createdAt": "2026-08-26T17:52:02.369Z"
+    },
+    {
+      "id": "msg_11b501576ac244f5",
+      "threadId": "thd_ec1b0b8d3ed6499a",
+      "role": "user",
+      "content": "What is the current value and risk?",
+      "createdAt": "2026-08-26T17:52:03.435Z"
+    },
+    {
+      "id": "msg_98db099a835f4ee2",
+      "threadId": "thd_ec1b0b8d3ed6499a",
+      "role": "assistant",
+      "content": "Current valuation\nPrimary mark taken from the Asset DNA envelope.\n\nCurrent mark: GBP 45,200,000\n\nRisk rating\nMODERATE (34/100)\n\nAs of\n2026-07-31\n\nMethod\nIndependent valuation memo / appraisal extract\n\nAcquisition price\nGBP 41,000,000\n\nNotes\nPrimary mark taken from market value / fair value language.\nAcquisition price was GBP 41,000,000.\n\nPrimary dimension\nDocument coverage: 3 distinct document types ingested for this asset.\n\nFlags\nOccupancy at 91%\nLease duration 6.2 years creates roll risk\n\nConfidence: 99%\n\nBriefing derived from Asset DNA facts with source provenance. Not a legal opinion.",
+      "citations": [
+        {
+          "label": "Market value",
+          "documentId": "doc_9e20b82416b646e3"
+        },
+        {
+          "label": "Purchase price",
+          "documentId": "doc_9d922686bebd4c5d"
+        },
+        {
+          "label": "Risk snapshot"
+        }
+      ],
+      "briefing": {
+        "title": "Current valuation",
+        "headline": "Primary mark taken from the Asset DNA envelope.",
+        "metric": "GBP 45,200,000",
+        "metricLabel": "Current mark",
+        "confidence": 0.99,
+        "sections": [
+          {
+            "title": "Risk rating",
+            "body": "MODERATE (34/100)",
+            "kind": "metric"
+          },
+          {
+            "title": "As of",
+            "body": "2026-07-31",
+            "kind": "detail"
+          },
+          {
+            "title": "Method",
+            "body": "Independent valuation memo / appraisal extract",
+            "kind": "detail"
+          },
+          {
+            "title": "Acquisition price",
+            "body": "GBP 41,000,000",
+            "kind": "detail"
+          },
+          {
+            "title": "Notes",
+            "body": "Primary mark taken from market value / fair value language.\nAcquisition price was GBP 41,000,000.",
+            "kind": "note"
+          },
+          {
+            "title": "Primary dimension",
+            "body": "Document coverage: 3 distinct document types ingested for this asset.",
+            "kind": "detail"
+          },
+          {
+            "title": "Flags",
+            "body": "Occupancy at 91%\nLease duration 6.2 years creates roll risk",
+            "kind": "list"
+          }
+        ],
+        "disclaimer": "Briefing derived from Asset DNA facts with source provenance. Not a legal opinion."
+      },
+      "createdAt": "2026-08-26T17:52:03.435Z"
+    },
+    {
+      "id": "msg_685ee35f6abb4742",
+      "threadId": "thd_e8ed1d13497746b3",
+      "role": "user",
+      "content": "What is the current value and risk?",
+      "createdAt": "2026-08-27T14:42:26.794Z"
+    },
+    {
+      "id": "msg_db117fd25b134afd",
+      "threadId": "thd_e8ed1d13497746b3",
+      "role": "assistant",
+      "content": "Current valuation\nPrimary mark taken from the Asset DNA envelope.\n\nCurrent mark: GBP 25,000,000\n\nRisk rating\nELEVATED (47/100)\n\nAs of\n2026-08-27\n\nMethod\nClass heuristic pending primary valuation memo\n\nNotes\nNo explicit value extracted; heuristic placeholder used.\n\nPrimary dimension\nDocument coverage: 0 distinct document types ingested for this asset.\n\nFlags\nMissing title / ownership evidence\nNo independent valuation memo / NAV pack\nThin document coverage\n\nConfidence: 40%\n\nBriefing derived from Asset DNA facts with source provenance. Not a legal opinion.",
+      "citations": [
+        {
+          "label": "Risk snapshot"
+        }
+      ],
+      "briefing": {
+        "title": "Current valuation",
+        "headline": "Primary mark taken from the Asset DNA envelope.",
+        "metric": "GBP 25,000,000",
+        "metricLabel": "Current mark",
+        "confidence": 0.4,
+        "sections": [
+          {
+            "title": "Risk rating",
+            "body": "ELEVATED (47/100)",
+            "kind": "metric"
+          },
+          {
+            "title": "As of",
+            "body": "2026-08-27",
+            "kind": "detail"
+          },
+          {
+            "title": "Method",
+            "body": "Class heuristic pending primary valuation memo",
+            "kind": "detail"
+          },
+          {
+            "title": "Notes",
+            "body": "No explicit value extracted; heuristic placeholder used.",
+            "kind": "note"
+          },
+          {
+            "title": "Primary dimension",
+            "body": "Document coverage: 0 distinct document types ingested for this asset.",
+            "kind": "detail"
+          },
+          {
+            "title": "Flags",
+            "body": "Missing title / ownership evidence\nNo independent valuation memo / NAV pack\nThin document coverage",
+            "kind": "list"
+          }
+        ],
+        "disclaimer": "Briefing derived from Asset DNA facts with source provenance. Not a legal opinion."
+      },
+      "createdAt": "2026-08-27T14:42:26.794Z"
+    },
+    {
+      "id": "msg_1a7cae191ef048e8",
+      "threadId": "thd_078e05a137354ad7",
+      "role": "user",
+      "content": "What is the current value and main risk?",
+      "createdAt": "2026-08-27T15:05:41.668Z"
+    },
+    {
+      "id": "msg_33720ba2c9574ca7",
+      "threadId": "thd_078e05a137354ad7",
+      "role": "assistant",
+      "content": "Current valuation\nPrimary mark taken from the Asset DNA envelope.\n\nCurrent mark: GBP 99,500,000\n\nRisk rating\nMODERATE (35/100)\n\nAs of\n2026-08-01\n\nMethod\nIndependent valuation memo / appraisal extract\n\nAcquisition price\nSGD 105,000,000\n\nNotes\nPrimary mark taken from market value / fair value language.\nAcquisition price was SGD 105,000,000.\n\nPrimary dimension\nDocument coverage: 2 distinct document types ingested for this asset.\n\nFlags\nLease duration 6.8 years creates roll risk\nMissing title / ownership evidence\nThin document coverage\n\nConfidence: 99%\n\nBriefing derived from Asset DNA facts with source provenance. Not a legal opinion.",
+      "citations": [
+        {
+          "label": "Market value",
+          "documentId": "doc_cabfc20eb1ba4d6c"
+        },
+        {
+          "label": "Purchase price",
+          "documentId": "doc_5b88d1f304664d57"
+        },
+        {
+          "label": "Risk snapshot"
+        }
+      ],
+      "briefing": {
+        "title": "Current valuation",
+        "headline": "Primary mark taken from the Asset DNA envelope.",
+        "metric": "GBP 99,500,000",
+        "metricLabel": "Current mark",
+        "confidence": 0.99,
+        "sections": [
+          {
+            "title": "Risk rating",
+            "body": "MODERATE (35/100)",
+            "kind": "metric"
+          },
+          {
+            "title": "As of",
+            "body": "2026-08-01",
+            "kind": "detail"
+          },
+          {
+            "title": "Method",
+            "body": "Independent valuation memo / appraisal extract",
+            "kind": "detail"
+          },
+          {
+            "title": "Acquisition price",
+            "body": "SGD 105,000,000",
+            "kind": "detail"
+          },
+          {
+            "title": "Notes",
+            "body": "Primary mark taken from market value / fair value language.\nAcquisition price was SGD 105,000,000.",
+            "kind": "note"
+          },
+          {
+            "title": "Primary dimension",
+            "body": "Document coverage: 2 distinct document types ingested for this asset.",
+            "kind": "detail"
+          },
+          {
+            "title": "Flags",
+            "body": "Lease duration 6.8 years creates roll risk\nMissing title / ownership evidence\nThin document coverage",
+            "kind": "list"
+          }
+        ],
+        "disclaimer": "Briefing derived from Asset DNA facts with source provenance. Not a legal opinion."
+      },
+      "createdAt": "2026-08-27T15:05:41.668Z"
     }
   ],
   "listings": [
+    {
+      "id": "lst_4ce5911a86b54d13",
+      "organizationId": "org_meridian",
+      "assetId": "ast_513be945dd504cb8",
+      "title": "Riverside Quay Tower interest",
+      "offeringType": "SALE",
+      "status": "PARTIALLY_FILLED",
+      "askPrice": 25000000,
+      "currency": "GBP",
+      "quantityBps": 1000,
+      "remainingBps": 500,
+      "createdAt": "2026-08-27T14:42:18.782Z",
+      "updatedAt": "2026-08-27T14:42:18.818Z",
+      "summary": ""
+    },
+    {
+      "id": "lst_bc45fbe519ca4ac1",
+      "organizationId": "org_meridian",
+      "assetId": "ast_35e73b6f6a1444a2",
+      "title": "Riverside Quay Tower interest",
+      "offeringType": "SALE",
+      "status": "PARTIALLY_FILLED",
+      "askPrice": 45200000,
+      "currency": "GBP",
+      "quantityBps": 1000,
+      "remainingBps": 500,
+      "createdAt": "2026-08-26T17:51:51.054Z",
+      "updatedAt": "2026-08-26T17:51:51.066Z",
+      "summary": ""
+    },
     {
       "id": "lst_900723b54f924dde",
       "organizationId": "org_meridian",
@@ -9778,6 +14450,36 @@
   ],
   "orders": [
     {
+      "id": "ord_811cd780435c4699",
+      "organizationId": "org_meridian",
+      "listingId": "lst_4ce5911a86b54d13",
+      "assetId": "ast_513be945dd504cb8",
+      "side": "BUY",
+      "status": "FILLED",
+      "price": 25000000,
+      "currency": "GBP",
+      "quantityBps": 500,
+      "filledBps": 500,
+      "createdByUserId": "usr_arjun",
+      "createdAt": "2026-08-27T14:42:18.817Z",
+      "updatedAt": "2026-08-27T14:42:18.818Z"
+    },
+    {
+      "id": "ord_434d0763373c4517",
+      "organizationId": "org_meridian",
+      "listingId": "lst_bc45fbe519ca4ac1",
+      "assetId": "ast_35e73b6f6a1444a2",
+      "side": "BUY",
+      "status": "FILLED",
+      "price": 45200000,
+      "currency": "GBP",
+      "quantityBps": 500,
+      "filledBps": 500,
+      "createdByUserId": "usr_arjun",
+      "createdAt": "2026-08-26T17:51:51.066Z",
+      "updatedAt": "2026-08-26T17:51:51.066Z"
+    },
+    {
       "id": "ord_3ebaf9dd67054b24",
       "organizationId": "org_meridian",
       "listingId": "lst_900723b54f924dde",
@@ -9810,6 +14512,34 @@
   ],
   "trades": [
     {
+      "id": "trd_955ef0fd9f4d482f",
+      "organizationId": "org_meridian",
+      "listingId": "lst_4ce5911a86b54d13",
+      "orderId": "ord_811cd780435c4699",
+      "assetId": "ast_513be945dd504cb8",
+      "status": "SETTLED",
+      "price": 25000000,
+      "currency": "GBP",
+      "quantityBps": 500,
+      "notional": 1250000,
+      "createdAt": "2026-08-27T14:42:18.818Z",
+      "updatedAt": "2026-08-27T14:42:18.903Z"
+    },
+    {
+      "id": "trd_6d90b7d3923043dd",
+      "organizationId": "org_meridian",
+      "listingId": "lst_bc45fbe519ca4ac1",
+      "orderId": "ord_434d0763373c4517",
+      "assetId": "ast_35e73b6f6a1444a2",
+      "status": "SETTLED",
+      "price": 45200000,
+      "currency": "GBP",
+      "quantityBps": 500,
+      "notional": 2260000,
+      "createdAt": "2026-08-26T17:51:51.066Z",
+      "updatedAt": "2026-08-26T17:51:51.090Z"
+    },
+    {
       "id": "trd_a6fe511b1c274724",
       "organizationId": "org_meridian",
       "listingId": "lst_900723b54f924dde",
@@ -9840,6 +14570,28 @@
   ],
   "settlements": [
     {
+      "id": "stl_482d394ceb554b51",
+      "organizationId": "org_meridian",
+      "tradeId": "trd_955ef0fd9f4d482f",
+      "assetId": "ast_513be945dd504cb8",
+      "status": "COMPLETED",
+      "method": "OFF_CHAIN",
+      "createdAt": "2026-08-27T14:42:18.880Z",
+      "updatedAt": "2026-08-27T14:42:18.903Z",
+      "completedAt": "2026-08-27T14:42:18.903Z"
+    },
+    {
+      "id": "stl_004b658543464d7b",
+      "organizationId": "org_meridian",
+      "tradeId": "trd_6d90b7d3923043dd",
+      "assetId": "ast_35e73b6f6a1444a2",
+      "status": "COMPLETED",
+      "method": "OFF_CHAIN",
+      "createdAt": "2026-08-26T17:51:51.081Z",
+      "updatedAt": "2026-08-26T17:51:51.090Z",
+      "completedAt": "2026-08-26T17:51:51.090Z"
+    },
+    {
       "id": "stl_c0d095751dd04e46",
       "organizationId": "org_meridian",
       "tradeId": "trd_a6fe511b1c274724",
@@ -9864,6 +14616,40 @@
     }
   ],
   "tokens": [
+    {
+      "id": "tok_8100add195774d2d",
+      "organizationId": "org_meridian",
+      "assetId": "ast_513be945dd504cb8",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "contractAddress": "0x1B4a823cc57e31336Ca1E51d4E82E22df40D9EA3",
+      "tokenId": "18385227111596793157",
+      "supply": 100000,
+      "recipientAddress": "0xa8866A3d4f90623AFDC55DDB03A56EC962c24C95",
+      "txHash": "0x5b749b87a095027ac0cdd63f6cac3fa0f5e35520c407a5d4eee5081e3db2d498",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0x5b749b87a095027ac0cdd63f6cac3fa0f5e35520c407a5d4eee5081e3db2d498",
+      "mode": "LIVE",
+      "createdAt": "2026-08-27T14:42:18.941Z",
+      "updatedAt": "2026-08-27T14:42:18.941Z"
+    },
+    {
+      "id": "tok_efc57b56f12840a4",
+      "organizationId": "org_meridian",
+      "assetId": "ast_35e73b6f6a1444a2",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "contractAddress": "0x1B4a823cc57e31336Ca1E51d4E82E22df40D9EA3",
+      "tokenId": "8623637538199385979",
+      "supply": 100000,
+      "recipientAddress": "0xa8866A3d4f90623AFDC55DDB03A56EC962c24C95",
+      "txHash": "0xdba928d3c44b15b86630376a41f819f3f64632372c2653c06194d04212b441cb",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0xdba928d3c44b15b86630376a41f819f3f64632372c2653c06194d04212b441cb",
+      "mode": "LIVE",
+      "createdAt": "2026-08-26T17:51:51.100Z",
+      "updatedAt": "2026-08-26T17:51:51.100Z"
+    },
     {
       "id": "tok_335dd2b383254f2a",
       "organizationId": "org_meridian",
@@ -9900,6 +14686,32 @@
   ],
   "collateralPositions": [
     {
+      "id": "col_88eebf01e58e4591",
+      "organizationId": "org_meridian",
+      "assetId": "ast_513be945dd504cb8",
+      "tokenId": "tok_8100add195774d2d",
+      "status": "RELEASED",
+      "pledgedValue": 25000000,
+      "currency": "GBP",
+      "haircutBps": 1500,
+      "advanceableValue": 21250000,
+      "createdAt": "2026-08-27T14:42:26.735Z",
+      "updatedAt": "2026-08-27T14:42:26.776Z"
+    },
+    {
+      "id": "col_8ae84e3794ee402e",
+      "organizationId": "org_meridian",
+      "assetId": "ast_35e73b6f6a1444a2",
+      "tokenId": "tok_efc57b56f12840a4",
+      "status": "RELEASED",
+      "pledgedValue": 45200000,
+      "currency": "GBP",
+      "haircutBps": 1500,
+      "advanceableValue": 38420000,
+      "createdAt": "2026-08-26T17:52:03.282Z",
+      "updatedAt": "2026-08-26T17:52:03.416Z"
+    },
+    {
       "id": "col_d8fe7b3428914676",
       "organizationId": "org_meridian",
       "assetId": "ast_455d4a43ed9943c9",
@@ -9927,6 +14739,38 @@
     }
   ],
   "loans": [
+    {
+      "id": "loan_a559e4fdf63f4f25",
+      "organizationId": "org_meridian",
+      "collateralId": "col_88eebf01e58e4591",
+      "assetId": "ast_513be945dd504cb8",
+      "status": "REPAID",
+      "principal": 1000000,
+      "currency": "GBP",
+      "interestRateBps": 650,
+      "termDays": 365,
+      "outstanding": 0,
+      "ltvBps": 400,
+      "createdAt": "2026-08-27T14:42:26.754Z",
+      "updatedAt": "2026-08-27T14:42:26.764Z",
+      "repaidAt": "2026-08-27T14:42:26.764Z"
+    },
+    {
+      "id": "loan_29bc69eb74bc44c8",
+      "organizationId": "org_meridian",
+      "collateralId": "col_8ae84e3794ee402e",
+      "assetId": "ast_35e73b6f6a1444a2",
+      "status": "REPAID",
+      "principal": 1000000,
+      "currency": "GBP",
+      "interestRateBps": 650,
+      "termDays": 365,
+      "outstanding": 0,
+      "ltvBps": 221,
+      "createdAt": "2026-08-26T17:52:03.356Z",
+      "updatedAt": "2026-08-26T17:52:03.385Z",
+      "repaidAt": "2026-08-26T17:52:03.385Z"
+    },
     {
       "id": "loan_2275f00c831e49d6",
       "organizationId": "org_meridian",
@@ -10272,6 +15116,319 @@
       "explorerUrl": "https://sepolia.etherscan.io/tx/0xce1426d33c20911af13942e2a4f079e0d709701262a93ddf549447d5a50cb185",
       "mode": "LIVE",
       "anchoredAt": "2026-08-26T11:27:02.011Z",
+      "metadata": {
+        "scope": "asset-dna"
+      }
+    },
+    {
+      "id": "anc_8155f20a9c254226",
+      "organizationId": "org_meridian",
+      "assetId": "ast_35e73b6f6a1444a2",
+      "dnaSnapshotId": "dna_0c248cbbbcf446fb",
+      "kind": "DNA_SNAPSHOT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "b738609dd60b8429389bd1dfa7bb7c92427f1d9988dc6d49a1f50354cbaccffc",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0xa77af1aeb5177ff42ce19aaa3060baf0e42c2efd03ad6f40d3bcf6fac376cd9f",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0xa77af1aeb5177ff42ce19aaa3060baf0e42c2efd03ad6f40d3bcf6fac376cd9f",
+      "mode": "LIVE",
+      "anchoredAt": "2026-08-26T17:51:33.039Z",
+      "metadata": {
+        "scope": "asset-dna"
+      }
+    },
+    {
+      "id": "anc_0536f6c65a1a4f6c",
+      "organizationId": "org_meridian",
+      "assetId": "ast_165f9f1a78334d31",
+      "documentId": "doc_bbf696a0ea5f4fbe",
+      "kind": "DOCUMENT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "d92836f6d9da5650fb612cf4e0f1b84bbf8ddb894e23b7db4fb51c0d276e189d",
+      "status": "SIMULATED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0xc0c5d62d809f03260ab0875633ec103eafe94e670ba6635588e9c959ab08b9f9",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0xc0c5d62d809f03260ab0875633ec103eafe94e670ba6635588e9c959ab08b9f9",
+      "mode": "SIMULATED",
+      "anchoredAt": "2026-08-26T17:51:51.613Z",
+      "metadata": {
+        "sourceName": "Smoke Valuation 1787766691060.pdf",
+        "sourceType": "VALUATION_MEMO"
+      }
+    },
+    {
+      "id": "anc_e3f1481e5b624f2f",
+      "organizationId": "org_meridian",
+      "assetId": "ast_165f9f1a78334d31",
+      "dnaSnapshotId": "dna_ac84501b6fac4f4d",
+      "kind": "DNA_SNAPSHOT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "53c61722ae08a45cd7acb1dfaae179cf9f05e53d82d18fed00ed6f1b898e0718",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0xc1846870158fefd7652c5f4b75d6347d5ffa7e35b190caaea465159b6f78b4f9",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0xc1846870158fefd7652c5f4b75d6347d5ffa7e35b190caaea465159b6f78b4f9",
+      "mode": "LIVE",
+      "anchoredAt": "2026-08-26T17:51:51.613Z",
+      "metadata": {
+        "scope": "asset-dna"
+      }
+    },
+    {
+      "id": "anc_ac2beb8bea1a493a",
+      "organizationId": "org_meridian",
+      "assetId": "ast_513be945dd504cb8",
+      "dnaSnapshotId": "dna_5cae37107ece4490",
+      "kind": "DNA_SNAPSHOT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "8e69c4ffb38f74fa37525dc2df571ab524025ca7ba51fbbd00873efe77ce4975",
+      "status": "SIMULATED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0xb9262221d5bc2435c533ba1e31dfe845405e133ccefbe6bb35cafe4b8996ca57",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0xb9262221d5bc2435c533ba1e31dfe845405e133ccefbe6bb35cafe4b8996ca57",
+      "mode": "SIMULATED",
+      "anchoredAt": "2026-08-27T14:42:16.615Z",
+      "metadata": {
+        "scope": "asset-dna"
+      }
+    },
+    {
+      "id": "anc_be561aa3dbb8475b",
+      "organizationId": "org_meridian",
+      "assetId": "ast_513be945dd504cb8",
+      "documentId": "doc_ec675c0a232e468b",
+      "kind": "DOCUMENT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "14a6f4647f778d7cdb8ce2191c08c4ee0565c64457c80cadf15a52e521a452bd",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0x4991e69bd3e3ac4a994b802a3a584ec6a400d2b73a5d4f4a08c39a5ed493d6fc",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0x4991e69bd3e3ac4a994b802a3a584ec6a400d2b73a5d4f4a08c39a5ed493d6fc",
+      "mode": "LIVE",
+      "anchoredAt": "2026-08-27T14:43:06.436Z",
+      "metadata": {
+        "sourceName": "Northbridge Valuation Memo — Riverside Quay.pdf",
+        "sourceType": "VALUATION_MEMO"
+      }
+    },
+    {
+      "id": "anc_0379f3095c654eff",
+      "organizationId": "org_meridian",
+      "assetId": "ast_513be945dd504cb8",
+      "documentId": "doc_6cbe5c74a37b4b52",
+      "kind": "DOCUMENT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "18676f07594065ae00a283e54ad99deb0fa985372d176a5036c90d5466c3053a",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0x26da34dad84bca81da6ee96f8a9a5c433c8e22e46fbbe92053cffb44ada6ad3e",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0x26da34dad84bca81da6ee96f8a9a5c433c8e22e46fbbe92053cffb44ada6ad3e",
+      "mode": "LIVE",
+      "anchoredAt": "2026-08-27T14:43:06.436Z",
+      "metadata": {
+        "sourceName": "Land Registry Extract — Riverside Quay.pdf",
+        "sourceType": "TITLE_DEED"
+      }
+    },
+    {
+      "id": "anc_142c3e0184c1484c",
+      "organizationId": "org_meridian",
+      "assetId": "ast_513be945dd504cb8",
+      "documentId": "doc_cc8de1de1b27419b",
+      "kind": "DOCUMENT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "a7e1ed0f3def1569840d2e6038cd42b791db66942460faee909a698590ca0a9a",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0x44e2648846d568e0e72c4f941acdc8f1e4e78a361a504bccc74489db744136f7",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0x44e2648846d568e0e72c4f941acdc8f1e4e78a361a504bccc74489db744136f7",
+      "mode": "LIVE",
+      "anchoredAt": "2026-08-27T14:43:06.436Z",
+      "metadata": {
+        "sourceName": "Riverside Quay SPA.pdf",
+        "sourceType": "SPA"
+      }
+    },
+    {
+      "id": "anc_5342252b60b0478c",
+      "organizationId": "org_meridian",
+      "assetId": "ast_513be945dd504cb8",
+      "dnaSnapshotId": "dna_f3f23389986b4189",
+      "kind": "DNA_SNAPSHOT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "ceb33042c4c48982e10509d468f9a9ad981871244c1a88683046827b23a4a1f1",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0xe7ca117721c2abe4a90748a185b37b80babe424a00cb0eee70a7f985d9c7972b",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0xe7ca117721c2abe4a90748a185b37b80babe424a00cb0eee70a7f985d9c7972b",
+      "mode": "LIVE",
+      "anchoredAt": "2026-08-27T14:43:06.436Z",
+      "metadata": {
+        "scope": "asset-dna"
+      }
+    },
+    {
+      "id": "anc_f74fe7ab2b5d48ea",
+      "organizationId": "org_meridian",
+      "assetId": "ast_0c8be51f0bd04fb9",
+      "documentId": "doc_6035520d7eff4f57",
+      "kind": "DOCUMENT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "be4a7f28843b5e24478add23317e8795aaf3f349cce1a6ae91bc6d374568e97b",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0xc2e2fb8d4505d62bef8e42f2277bb557466e546219b870d7216b96f069785809",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0xc2e2fb8d4505d62bef8e42f2277bb557466e546219b870d7216b96f069785809",
+      "mode": "LIVE",
+      "anchoredAt": "2026-08-27T14:44:53.918Z",
+      "metadata": {
+        "sourceName": "EuroLog Appraisal 2026.pdf",
+        "sourceType": "VALUATION_MEMO"
+      }
+    },
+    {
+      "id": "anc_8c3be406d1294e07",
+      "organizationId": "org_meridian",
+      "assetId": "ast_0c8be51f0bd04fb9",
+      "documentId": "doc_c4aefbfdf6bd4475",
+      "kind": "DOCUMENT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "a063cd115a5019e5169fb2e8a5b729fdd796940797a0e59ade007363a1805b3d",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0x648e7fc137bcfc19326fbcc5bdca5da8cdc914e40505edc2e34b315c53ffb52e",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0x648e7fc137bcfc19326fbcc5bdca5da8cdc914e40505edc2e34b315c53ffb52e",
+      "mode": "LIVE",
+      "anchoredAt": "2026-08-27T14:44:53.918Z",
+      "metadata": {
+        "sourceName": "Canal Side SPA.pdf",
+        "sourceType": "SPA"
+      }
+    },
+    {
+      "id": "anc_6b4ee534c6414f4b",
+      "organizationId": "org_meridian",
+      "assetId": "ast_0c8be51f0bd04fb9",
+      "dnaSnapshotId": "dna_7b366f6e8277485b",
+      "kind": "DNA_SNAPSHOT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "ce9089a335d62a0ed07d673f2d652ad34eb1ca53645ba5ec9a5913f4a1f24aa7",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0x7623e5ff06d6a726997ba21986d7367813ba9fbaaeb718d9051db029347ecbb0",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0x7623e5ff06d6a726997ba21986d7367813ba9fbaaeb718d9051db029347ecbb0",
+      "mode": "LIVE",
+      "anchoredAt": "2026-08-27T14:44:53.918Z",
+      "metadata": {
+        "scope": "asset-dna"
+      }
+    },
+    {
+      "id": "anc_4efe817a805d479f",
+      "organizationId": "org_meridian",
+      "assetId": "ast_3bd729e164ef4be7",
+      "documentId": "doc_cce5046251564bfb",
+      "kind": "DOCUMENT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "a1ca30990b0cc733cc80e66f61338f9d0a1225dc06339223d19c37e6d116e8a8",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0xe9d57a7821946c1409c4bab9df3dd6ead29da51515036d915203eedd9237a30f",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0xe9d57a7821946c1409c4bab9df3dd6ead29da51515036d915203eedd9237a30f",
+      "mode": "LIVE",
+      "anchoredAt": "2026-08-27T14:46:15.452Z",
+      "metadata": {
+        "sourceName": "Pacific Crest Valuation Memo.pdf",
+        "sourceType": "VALUATION_MEMO"
+      }
+    },
+    {
+      "id": "anc_a068cce3e3c64b99",
+      "organizationId": "org_meridian",
+      "assetId": "ast_3bd729e164ef4be7",
+      "documentId": "doc_5b88d1f304664d57",
+      "kind": "DOCUMENT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "cb692b9e3185353bcbcb2c51b526c1fc520cb1829720225f07d1a656ac91de3d",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0xd7593ef5a52f54c1009b520587a907bcd938f0056e97a234e3f700d078212769",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0xd7593ef5a52f54c1009b520587a907bcd938f0056e97a234e3f700d078212769",
+      "mode": "LIVE",
+      "anchoredAt": "2026-08-27T14:46:15.452Z",
+      "metadata": {
+        "sourceName": "Bayfront Offices SPA.pdf",
+        "sourceType": "SPA"
+      }
+    },
+    {
+      "id": "anc_b3689e81d9314a6d",
+      "organizationId": "org_meridian",
+      "assetId": "ast_3bd729e164ef4be7",
+      "dnaSnapshotId": "dna_3cc5461d8edc4086",
+      "kind": "DNA_SNAPSHOT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "bc3aaee5a190b07311aa5d9856723c5424758bb676f0d2268a451a920a429c54",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0xe0bcac382681b72061bfbeaa81e1816452e6f3c86460a3b52132af8d6093a4ca",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0xe0bcac382681b72061bfbeaa81e1816452e6f3c86460a3b52132af8d6093a4ca",
+      "mode": "LIVE",
+      "anchoredAt": "2026-08-27T14:46:15.452Z",
+      "metadata": {
+        "scope": "asset-dna"
+      }
+    },
+    {
+      "id": "anc_be20b671987845d5",
+      "organizationId": "org_meridian",
+      "assetId": "ast_3bd729e164ef4be7",
+      "documentId": "doc_cabfc20eb1ba4d6c",
+      "kind": "DOCUMENT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "86e42e468940558b4ded87315c8ae2d819ce7d5d63961a6d84054dff805f35b6",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0x717781f309a1582e9580f3f9988c2a68dbcef062e0a18fe5c5ebc1bf6246695d",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0x717781f309a1582e9580f3f9988c2a68dbcef062e0a18fe5c5ebc1bf6246695d",
+      "mode": "LIVE",
+      "anchoredAt": "2026-08-27T15:05:03.430Z",
+      "metadata": {
+        "sourceName": "Smoke Valuation 1787843091988.pdf",
+        "sourceType": "VALUATION_MEMO"
+      }
+    },
+    {
+      "id": "anc_13464f356cda4f82",
+      "organizationId": "org_meridian",
+      "assetId": "ast_3bd729e164ef4be7",
+      "dnaSnapshotId": "dna_a53d6cb42d124c70",
+      "kind": "DNA_SNAPSHOT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "f6f6c3f7e93eeb2d63db8c1cbdd0d84be4aee80b95eba8dc175d0f60d11bd6f2",
+      "status": "CONFIRMED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0xf0894fdf27c20a4c26327629b335cb866cd91d2bd2387961dc639d39381f6285",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0xf0894fdf27c20a4c26327629b335cb866cd91d2bd2387961dc639d39381f6285",
+      "mode": "LIVE",
+      "anchoredAt": "2026-08-27T15:05:03.430Z",
       "metadata": {
         "scope": "asset-dna"
       }

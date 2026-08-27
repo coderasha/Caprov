@@ -62,7 +62,11 @@ export class DocumentsController {
     @Query('assetId') assetId?: string,
     @Query('currentOnly') currentOnly?: string,
   ) {
-    return this.documents.list(user.organizationId, assetId, currentOnly === 'true');
+    return this.documents.list(
+      user.organizationId,
+      assetId,
+      currentOnly === 'true',
+    );
   }
 
   @Get(':id')
@@ -92,7 +96,13 @@ export class DocumentsController {
   upload(
     @CurrentUser() user: AuthUser,
     @UploadedFile() file: Express.Multer.File,
-    @Body() body: { type?: DocumentType; assetId?: string; name?: string; extractedText?: string },
+    @Body()
+    body: {
+      type?: DocumentType;
+      assetId?: string;
+      name?: string;
+      extractedText?: string;
+    },
   ) {
     if (!file && !body.extractedText?.trim()) {
       throw new BadRequestException('Provide a file or extractedText.');

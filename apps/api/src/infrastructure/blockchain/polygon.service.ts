@@ -7,4 +7,3 @@ import { EthereumSepoliaTokenService } from './ethereum-sepolia-token.service';
  */
 @Injectable()
 export class PolygonService extends EthereumSepoliaTokenService {}
-

@@ -119,13 +119,16 @@ export class PortfoliosController {
       return null;
     }
     const asset = this.db.snapshot.assets.find(
-      (item) => item.id === dto.assetId && item.organizationId === user.organizationId,
+      (item) =>
+        item.id === dto.assetId && item.organizationId === user.organizationId,
     );
     if (!asset) {
       return null;
     }
     const requestedWeight =
-      dto.weight == null ? this.defaultWeightForNewHolding(id) : clampWeight(dto.weight);
+      dto.weight == null
+        ? this.defaultWeightForNewHolding(id)
+        : clampWeight(dto.weight);
     const holding = {
       id: createId('hld'),
       portfolioId: id,
@@ -134,11 +137,20 @@ export class PortfoliosController {
       notes: dto.notes,
     };
     this.db.mutate((draft) => {
-      if (draft.holdings.some((item) => item.portfolioId === id && item.assetId === dto.assetId)) {
+      if (
+        draft.holdings.some(
+          (item) => item.portfolioId === id && item.assetId === dto.assetId,
+        )
+      ) {
         return;
       }
-      const portfolioHoldings = draft.holdings.filter((item) => item.portfolioId === id);
-      const rebalancedExisting = rebalanceExistingWeights(portfolioHoldings, requestedWeight);
+      const portfolioHoldings = draft.holdings.filter(
+        (item) => item.portfolioId === id,
+      );
+      const rebalancedExisting = rebalanceExistingWeights(
+        portfolioHoldings,
+        requestedWeight,
+      );
       for (const existing of portfolioHoldings) {
         const nextWeight = rebalancedExisting.get(existing.id);
         if (nextWeight != null) {
@@ -157,7 +169,11 @@ export class PortfoliosController {
       action: 'portfolio.holding_added',
       entityType: 'Portfolio',
       entityId: id,
-      metadata: { assetId: dto.assetId, weight: requestedWeight, rebalanced: true },
+      metadata: {
+        assetId: dto.assetId,
+        weight: requestedWeight,
+        rebalanced: true,
+      },
     });
     return this.hydrate(id);
   }
@@ -170,8 +186,12 @@ export class PortfoliosController {
     @Param('holdingId') holdingId: string,
   ) {
     this.db.mutate((draft) => {
-      const portfolioHoldings = draft.holdings.filter((item) => item.portfolioId === id);
-      const remaining = portfolioHoldings.filter((item) => item.id !== holdingId);
+      const portfolioHoldings = draft.holdings.filter(
+        (item) => item.portfolioId === id,
+      );
+      const remaining = portfolioHoldings.filter(
+        (item) => item.id !== holdingId,
+      );
       const rebalanced = rebalanceRemainingWeightsAfterRemoval(remaining);
       draft.holdings = draft.holdings.filter(
         (item) => !(item.id === holdingId && item.portfolioId === id),
@@ -202,7 +222,9 @@ export class PortfoliosController {
   }
 
   private hydrate(portfolioId: string) {
-    const portfolio = this.db.snapshot.portfolios.find((item) => item.id === portfolioId);
+    const portfolio = this.db.snapshot.portfolios.find(
+      (item) => item.id === portfolioId,
+    );
     if (!portfolio) {
       return null;
     }
@@ -210,7 +232,10 @@ export class PortfoliosController {
       .filter((item) => item.portfolioId === portfolioId)
       .map((holding) => ({
         ...holding,
-        asset: this.db.snapshot.assets.find((asset) => asset.id === holding.assetId) ?? null,
+        asset:
+          this.db.snapshot.assets.find(
+            (asset) => asset.id === holding.assetId,
+          ) ?? null,
         valuation:
           this.db.snapshot.valuations
             .filter((item) => item.assetId === holding.assetId)
@@ -220,7 +245,8 @@ export class PortfoliosController {
             .filter((item) => item.assetId === holding.assetId)
             .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null,
       }));
-    const normalizedWeights = rebalanceRemainingWeightsAfterRemoval(rawHoldings);
+    const normalizedWeights =
+      rebalanceRemainingWeightsAfterRemoval(rawHoldings);
     const holdings = rawHoldings.map((holding) => ({
       ...holding,
       weight: normalizedWeights.get(holding.id) ?? holding.weight,
@@ -229,7 +255,9 @@ export class PortfoliosController {
   }
 
   private defaultWeightForNewHolding(portfolioId: string) {
-    const holdings = this.db.snapshot.holdings.filter((item) => item.portfolioId === portfolioId);
+    const holdings = this.db.snapshot.holdings.filter(
+      (item) => item.portfolioId === portfolioId,
+    );
     return roundWeight(100 / (holdings.length + 1));
   }
 }
@@ -291,11 +319,18 @@ function rebalanceRemainingWeightsAfterRemoval(
   return result;
 }
 
-function normalizeExistingWeights(holdings: Array<{ id: string; weight?: number }>) {
-  const validWeights = holdings.map((holding) => clampWeight(holding.weight ?? 0));
+function normalizeExistingWeights(
+  holdings: Array<{ id: string; weight?: number }>,
+) {
+  const validWeights = holdings.map((holding) =>
+    clampWeight(holding.weight ?? 0),
+  );
   const total = validWeights.reduce((sum, weight) => sum + weight, 0);
   if (total > 0) {
-    return holdings.map((holding, index) => ({ id: holding.id, weight: validWeights[index]! }));
+    return holdings.map((holding, index) => ({
+      id: holding.id,
+      weight: validWeights[index]!,
+    }));
   }
 
   const equalWeight = 100 / holdings.length;

@@ -40,7 +40,15 @@ export default function NewAssetPage() {
     try {
       const imageUrls = Array.from(new Set([form.primaryImageUrl, ...form.imageUrls].filter(Boolean)));
       const response = await api.post<HydratedAsset>('/assets', {
-        ...form,
+        name: form.name,
+        assetClass: form.assetClass,
+        status: form.status,
+        currency: form.currency,
+        jurisdiction: form.jurisdiction || undefined,
+        location: form.location || undefined,
+        description: form.description || undefined,
+        creationDate: form.creationDate || undefined,
+        primaryImageUrl: form.primaryImageUrl || undefined,
         imageUrls,
       });
       router.push(`/assets/${response.data.id}`);

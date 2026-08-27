@@ -8,7 +8,16 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { IsBoolean, IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 import type { OrderSide, TradeRecord, TradingOrder } from '@caprov/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -58,28 +67,42 @@ export class TradingController {
 
   @Get('orders')
   listOrders(@CurrentUser() user: AuthUser) {
-    return this.db.snapshot.orders.filter((item) => item.organizationId === user.organizationId);
+    return this.db.snapshot.orders.filter(
+      (item) => item.organizationId === user.organizationId,
+    );
   }
 
   @Get('trades')
   listTrades(@CurrentUser() user: AuthUser) {
-    return this.db.snapshot.trades.filter((item) => item.organizationId === user.organizationId);
+    return this.db.snapshot.trades.filter(
+      (item) => item.organizationId === user.organizationId,
+    );
   }
 
   @Post('orders')
   @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN', 'COMPLIANCE', 'VIEWER')
   createOrder(@CurrentUser() user: AuthUser, @Body() dto: CreateOrderDto) {
     const listing = this.db.snapshot.listings.find(
-      (item) => item.id === dto.listingId && item.organizationId === user.organizationId,
+      (item) =>
+        item.id === dto.listingId &&
+        item.organizationId === user.organizationId,
     );
-    if (!listing || listing.status === 'CLOSED' || listing.status === 'CANCELLED') {
+    if (
+      !listing ||
+      listing.status === 'CLOSED' ||
+      listing.status === 'CANCELLED'
+    ) {
       throw new NotFoundException('Open listing not found');
     }
     if (listing.offeringType === 'LEASE') {
-      throw new BadRequestException('Lease listings are not tradeable. Contact the org admin to lease.');
+      throw new BadRequestException(
+        'Lease listings are not tradeable. Contact the org admin to lease.',
+      );
     }
     if (dto.quantityBps > listing.remainingBps) {
-      throw new BadRequestException('Order quantity exceeds remaining listing interest');
+      throw new BadRequestException(
+        'Order quantity exceeds remaining listing interest',
+      );
     }
     const now = new Date().toISOString();
     const order: TradingOrder = {
@@ -125,14 +148,21 @@ export class TradingController {
     if (!order || order.status === 'FILLED' || order.status === 'CANCELLED') {
       throw new NotFoundException('Open order not found');
     }
-    const listing = this.db.snapshot.listings.find((item) => item.id === order.listingId);
+    const listing = this.db.snapshot.listings.find(
+      (item) => item.id === order.listingId,
+    );
     if (!listing || listing.remainingBps <= 0) {
       throw new BadRequestException('Listing has no remaining quantity');
     }
     if (listing.offeringType === 'LEASE') {
-      throw new BadRequestException('Lease listings cannot be matched as trades');
+      throw new BadRequestException(
+        'Lease listings cannot be matched as trades',
+      );
     }
-    const fillBps = Math.min(order.quantityBps - order.filledBps, listing.remainingBps);
+    const fillBps = Math.min(
+      order.quantityBps - order.filledBps,
+      listing.remainingBps,
+    );
     if (fillBps <= 0) {
       throw new BadRequestException('Nothing left to fill');
     }
@@ -155,7 +185,9 @@ export class TradingController {
 
     this.db.mutate((draft) => {
       const draftOrder = draft.orders.find((item) => item.id === order.id)!;
-      const draftListing = draft.listings.find((item) => item.id === listing.id)!;
+      const draftListing = draft.listings.find(
+        (item) => item.id === listing.id,
+      )!;
       draftOrder.filledBps += fillBps;
       draftOrder.status =
         draftOrder.filledBps >= draftOrder.quantityBps

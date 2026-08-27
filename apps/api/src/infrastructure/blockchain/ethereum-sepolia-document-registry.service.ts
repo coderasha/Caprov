@@ -1,6 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { createHash } from 'node:crypto';
-import { Contract, JsonRpcProvider, Wallet, HDNodeWallet, id as ethId } from 'ethers';
+import {
+  Contract,
+  JsonRpcProvider,
+  Wallet,
+  HDNodeWallet,
+  id as ethId,
+} from 'ethers';
 import type {
   AnchoredDocumentVersionRecord,
   BlockchainAdapter,
@@ -12,7 +18,8 @@ import type {
 export const ETHEREUM_SEPOLIA_CHAIN_ID = 11155111;
 export const ETHEREUM_SEPOLIA_NAME = 'Ethereum Sepolia';
 export const ETHEREUM_SEPOLIA_EXPLORER = 'https://sepolia.etherscan.io';
-export const DEFAULT_ETHEREUM_SEPOLIA_RPC = 'https://ethereum-sepolia-rpc.publicnode.com';
+export const DEFAULT_ETHEREUM_SEPOLIA_RPC =
+  'https://ethereum-sepolia-rpc.publicnode.com';
 
 const DOCUMENT_REGISTRY_ABI = [
   'function anchorDocumentVersion(string assetId, string documentId, string documentType, uint256 version, bytes32 documentHash, bytes32 previousVersionHash, string offChainUri)',
@@ -21,13 +28,18 @@ const DOCUMENT_REGISTRY_ABI = [
 
 @Injectable()
 export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter {
-  private readonly logger = new Logger(EthereumSepoliaDocumentRegistryService.name);
+  private readonly logger = new Logger(
+    EthereumSepoliaDocumentRegistryService.name,
+  );
 
   getDocumentNetworkStatus(): BlockchainAdapterNetworkStatus {
-    const rpcUrl = process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC;
+    const rpcUrl =
+      process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() ||
+      DEFAULT_ETHEREUM_SEPOLIA_RPC;
     const privateKey = process.env.ETHEREUM_SEPOLIA_PRIVATE_KEY?.trim();
     const mnemonic = process.env.ETHEREUM_SEPOLIA_MNEMONIC?.trim();
-    const contractAddress = process.env.ETHEREUM_DOCUMENT_REGISTRY_CONTRACT?.trim();
+    const contractAddress =
+      process.env.ETHEREUM_DOCUMENT_REGISTRY_CONTRACT?.trim();
     let walletAddress: string | undefined;
     if (privateKey || mnemonic) {
       try {
@@ -36,7 +48,9 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
         walletAddress = undefined;
       }
     }
-    const liveReady = Boolean((privateKey || mnemonic) && contractAddress && walletAddress);
+    const liveReady = Boolean(
+      (privateKey || mnemonic) && contractAddress && walletAddress,
+    );
     return {
       chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
       chainName: ETHEREUM_SEPOLIA_NAME,
@@ -52,7 +66,10 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
     };
   }
 
-  buildDocumentBlockchainReference(assetId: string, documentType: string): string {
+  buildDocumentBlockchainReference(
+    assetId: string,
+    documentType: string,
+  ): string {
     return ethId(`${assetId}|${documentType}`);
   }
 
@@ -87,7 +104,11 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
     try {
       const provider = new JsonRpcProvider(status.rpcUrl, status.chainId);
       const wallet = this.buildWallet(status.rpcUrl, provider);
-      const contract = new Contract(status.contractAddress!, DOCUMENT_REGISTRY_ABI, wallet);
+      const contract = new Contract(
+        status.contractAddress!,
+        DOCUMENT_REGISTRY_ABI,
+        wallet,
+      );
       const anchorFn = contract.getFunction('anchorDocumentVersion');
       const tx = await anchorFn(
         request.assetId,
@@ -115,8 +136,11 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
         blockchainReference,
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'document anchor failed';
-      this.logger.warn(`Live Sepolia document anchoring failed, recording simulated anchor: ${message}`);
+      const message =
+        error instanceof Error ? error.message : 'document anchor failed';
+      this.logger.warn(
+        `Live Sepolia document anchoring failed, recording simulated anchor: ${message}`,
+      );
       const transactionHash = `0x${createHash('sha256')
         .update(
           `sepolia-doc-anchor-fallback:${request.assetId}:${request.documentType}:${request.version}:${request.documentHash}:${message}:${Date.now()}`,
@@ -148,9 +172,16 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
 
     try {
       const provider = new JsonRpcProvider(status.rpcUrl, status.chainId);
-      const contract = new Contract(status.contractAddress, DOCUMENT_REGISTRY_ABI, provider);
+      const contract = new Contract(
+        status.contractAddress,
+        DOCUMENT_REGISTRY_ABI,
+        provider,
+      );
       const getVersionFn = contract.getFunction('getDocumentVersion');
-      const record = (await getVersionFn(blockchainReference, BigInt(version))) as [
+      const record = (await getVersionFn(
+        blockchainReference,
+        BigInt(version),
+      )) as [
         string,
         string,
         string,
@@ -179,13 +210,17 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
         contractAddress: status.contractAddress,
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'on-chain lookup failed';
+      const message =
+        error instanceof Error ? error.message : 'on-chain lookup failed';
       this.logger.warn(`Sepolia document version lookup failed: ${message}`);
       return null;
     }
   }
 
-  private buildWallet(rpcUrl: string, provider?: JsonRpcProvider): Wallet | HDNodeWallet {
+  private buildWallet(
+    rpcUrl: string,
+    provider?: JsonRpcProvider,
+  ): Wallet | HDNodeWallet {
     const mnemonic = process.env.ETHEREUM_SEPOLIA_MNEMONIC?.trim();
     if (mnemonic) {
       const wallet = HDNodeWallet.fromPhrase(mnemonic);
@@ -193,7 +228,9 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
     }
     const privateKey = process.env.ETHEREUM_SEPOLIA_PRIVATE_KEY?.trim();
     if (!privateKey) {
-      throw new Error(`Missing ETHEREUM_SEPOLIA_PRIVATE_KEY or ETHEREUM_SEPOLIA_MNEMONIC for ${rpcUrl}`);
+      throw new Error(
+        `Missing ETHEREUM_SEPOLIA_PRIVATE_KEY or ETHEREUM_SEPOLIA_MNEMONIC for ${rpcUrl}`,
+      );
     }
     return new Wallet(privateKey, provider);
   }

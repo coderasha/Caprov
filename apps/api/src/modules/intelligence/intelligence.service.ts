@@ -1,11 +1,19 @@
 import { createHash } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { AssetDnaEnvelope, IntelligenceJobType, ProvenanceAnchor, TrustedAssetDnaSnapshot } from '@caprov/types';
+import type {
+  AssetDnaEnvelope,
+  IntelligenceJobType,
+  ProvenanceAnchor,
+  TrustedAssetDnaSnapshot,
+} from '@caprov/types';
 import type { AuthUser } from '../../common/types/auth-user';
 import { EthereumSepoliaTokenService } from '../../infrastructure/blockchain/ethereum-sepolia-token.service';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import { createId } from '../../infrastructure/database/ids';
-import type { IntelligenceJobRecord, ProvenanceAnchorRecord } from '../../infrastructure/database/models';
+import type {
+  IntelligenceJobRecord,
+  ProvenanceAnchorRecord,
+} from '../../infrastructure/database/models';
 import { AuditService } from '../audit/audit.service';
 import {
   answerCopilot,
@@ -29,7 +37,9 @@ export class IntelligenceService {
   ) {}
 
   listJobs(organizationId: string) {
-    return this.db.snapshot.jobs.filter((job) => job.organizationId === organizationId);
+    return this.db.snapshot.jobs.filter(
+      (job) => job.organizationId === organizationId,
+    );
   }
 
   getDna(organizationId: string, assetId: string) {
@@ -86,7 +96,11 @@ export class IntelligenceService {
     });
 
     try {
-      const envelope = await this.composeEnvelope(asset, documents, user.organizationId);
+      const envelope = await this.composeEnvelope(
+        asset,
+        documents,
+        user.organizationId,
+      );
       const version =
         Math.max(
           0,
@@ -98,10 +112,23 @@ export class IntelligenceService {
       const now = new Date().toISOString();
       const snapshotId = createId('dna');
       const contentHash = sha256(canonicalStringify(envelope));
-      const documentAnchors = await this.anchorSourceDocuments(user.organizationId, asset.id, documents, now);
-      const snapshotAnchor = await this.anchorSnapshot(user.organizationId, asset.id, snapshotId, contentHash, now);
+      const documentAnchors = await this.anchorSourceDocuments(
+        user.organizationId,
+        asset.id,
+        documents,
+        now,
+      );
+      const snapshotAnchor = await this.anchorSnapshot(
+        user.organizationId,
+        asset.id,
+        snapshotId,
+        contentHash,
+        now,
+      );
 
-      const selectedModel = this.llmModels.getSelectedModel(user.organizationId);
+      const selectedModel = this.llmModels.getSelectedModel(
+        user.organizationId,
+      );
       this.db.mutate((draft) => {
         const current = draft.jobs.find((item) => item.id === job.id);
         if (current) {
@@ -181,7 +208,8 @@ export class IntelligenceService {
 
       return this.db.snapshot.jobs.find((item) => item.id === job.id);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Pipeline failed';
+      const message =
+        error instanceof Error ? error.message : 'Pipeline failed';
       this.db.mutate((draft) => {
         const current = draft.jobs.find((item) => item.id === job.id);
         if (current) {
@@ -198,9 +226,13 @@ export class IntelligenceService {
     user: AuthUser,
     input: { message: string; assetId?: string; threadId?: string },
   ) {
-    const asset = input.assetId ? this.assertAsset(user.organizationId, input.assetId) : undefined;
+    const asset = input.assetId
+      ? this.assertAsset(user.organizationId, input.assetId)
+      : undefined;
     const documents = input.assetId
-      ? this.db.snapshot.documents.filter((item) => item.assetId === input.assetId && item.isCurrent !== false)
+      ? this.db.snapshot.documents.filter(
+          (item) => item.assetId === input.assetId && item.isCurrent !== false,
+        )
       : [];
     const envelope = input.assetId
       ? this.db.snapshot.dnaSnapshots
@@ -209,7 +241,11 @@ export class IntelligenceService {
       : undefined;
 
     const selectedModel = this.llmModels.getSelectedModel(user.organizationId);
-    const local = this.answerWithEngineFallback(input.message, envelope, documents);
+    const local = this.answerWithEngineFallback(
+      input.message,
+      envelope,
+      documents,
+    );
     const context = this.buildCopilotContext(envelope, documents, asset?.name);
     const resolved = await resolveCopilotAnswer({
       model: selectedModel,
@@ -231,10 +267,17 @@ export class IntelligenceService {
                 kind: 'detail' as const,
               },
               ...(resolved.note
-                ? [{ title: 'Note', body: resolved.note, kind: 'note' as const }]
+                ? [
+                    {
+                      title: 'Note',
+                      body: resolved.note,
+                      kind: 'note' as const,
+                    },
+                  ]
                 : []),
             ],
-            disclaimer: 'Remote model synthesis over Asset DNA context. Verify against source documents.',
+            disclaimer:
+              'Remote model synthesis over Asset DNA context. Verify against source documents.',
           };
 
     const answer =
@@ -248,7 +291,9 @@ export class IntelligenceService {
     const thread =
       (input.threadId &&
         this.db.snapshot.copilotThreads.find(
-          (item) => item.id === input.threadId && item.organizationId === user.organizationId,
+          (item) =>
+            item.id === input.threadId &&
+            item.organizationId === user.organizationId,
         )) ||
       this.db.mutate((draft) => {
         const created = {
@@ -283,7 +328,9 @@ export class IntelligenceService {
           createdAt: new Date().toISOString(),
         },
       );
-      const current = draft.copilotThreads.find((item) => item.id === thread.id);
+      const current = draft.copilotThreads.find(
+        (item) => item.id === thread.id,
+      );
       if (current) {
         current.updatedAt = new Date().toISOString();
         current.title = current.title || input.message.slice(0, 72);
@@ -304,7 +351,9 @@ export class IntelligenceService {
         live: isLlmModelLive(selectedModel),
         note: resolved.note,
       },
-      messages: this.db.snapshot.copilotMessages.filter((item) => item.threadId === thread.id),
+      messages: this.db.snapshot.copilotMessages.filter(
+        (item) => item.threadId === thread.id,
+      ),
     };
   }
 
@@ -313,7 +362,9 @@ export class IntelligenceService {
       .filter((item) => item.organizationId === user.organizationId)
       .map((thread) => ({
         ...thread,
-        messages: this.db.snapshot.copilotMessages.filter((item) => item.threadId === thread.id),
+        messages: this.db.snapshot.copilotMessages.filter(
+          (item) => item.threadId === thread.id,
+        ),
       }));
   }
 
@@ -388,13 +439,17 @@ export class IntelligenceService {
       };
     }
 
-    const engineUrl = process.env.INTELLIGENCE_ENGINE_URL ?? 'http://localhost:8000';
+    const engineUrl =
+      process.env.INTELLIGENCE_ENGINE_URL ?? 'http://localhost:8000';
     try {
       const health = await fetch(`${engineUrl}/api/health`, {
         signal: AbortSignal.timeout(1500),
       });
       if (!health.ok) {
-        return { ...local, summary: `${local.summary} (local intelligence fallback)` };
+        return {
+          ...local,
+          summary: `${local.summary} (local intelligence fallback)`,
+        };
       }
       const response = await fetch(`${engineUrl}/api/pipeline/asset-dna`, {
         method: 'POST',
@@ -411,14 +466,22 @@ export class IntelligenceService {
         signal: AbortSignal.timeout(8000),
       });
       if (!response.ok) {
-        return { ...local, summary: `${local.summary} (local intelligence fallback)` };
+        return {
+          ...local,
+          summary: `${local.summary} (local intelligence fallback)`,
+        };
       }
-      const remote = (await response.json()) as AssetDnaEnvelope & { engine?: string };
+      const remote = (await response.json()) as AssetDnaEnvelope & {
+        engine?: string;
+      };
       // Accuracy-first: keep optimized local marks; enrich entities from the engine when useful.
       if (remote.facts?.length) {
         const merged: AssetDnaEnvelope = {
           ...local,
-          entities: remote.entities?.length > local.entities.length ? remote.entities : local.entities,
+          entities:
+            remote.entities?.length > local.entities.length
+              ? remote.entities
+              : local.entities,
           relationships:
             remote.relationships?.length > local.relationships.length
               ? remote.relationships
@@ -426,11 +489,16 @@ export class IntelligenceService {
           timeline: remote.timeline?.length ? remote.timeline : local.timeline,
           summary: `${local.summary} (engine-enriched graph)`.trim(),
         };
-        return merged.projection ? merged : attachProjection(merged, asset.assetClass);
+        return merged.projection
+          ? merged
+          : attachProjection(merged, asset.assetClass);
       }
       return local;
     } catch {
-      return { ...local, summary: `${local.summary} (local intelligence fallback)` };
+      return {
+        ...local,
+        summary: `${local.summary} (local intelligence fallback)`,
+      };
     }
   }
 
@@ -520,26 +588,39 @@ export class IntelligenceService {
     };
   }
 
-  private toTrustedSnapshot(organizationId: string, snapshotId: string): TrustedAssetDnaSnapshot {
-    const snapshot = this.db.snapshot.dnaSnapshots.find((item) => item.id === snapshotId);
+  private toTrustedSnapshot(
+    organizationId: string,
+    snapshotId: string,
+  ): TrustedAssetDnaSnapshot {
+    const snapshot = this.db.snapshot.dnaSnapshots.find(
+      (item) => item.id === snapshotId,
+    );
     if (!snapshot) {
       throw new NotFoundException('DNA snapshot not found');
     }
     const anchors = this.db.snapshot.provenanceAnchors.filter(
-      (item) => item.organizationId === organizationId && item.assetId === snapshot.assetId,
+      (item) =>
+        item.organizationId === organizationId &&
+        item.assetId === snapshot.assetId,
     );
     const snapshotAnchor = anchors.find(
-      (item) => item.kind === 'DNA_SNAPSHOT' && item.dnaSnapshotId === snapshot.id,
+      (item) =>
+        item.kind === 'DNA_SNAPSHOT' && item.dnaSnapshotId === snapshot.id,
     );
     const documentAnchors = snapshot.envelope.sourceDocumentIds
-      .map((documentId) =>
-        anchors
-          .filter((item) => item.kind === 'DOCUMENT' && item.documentId === documentId)
-          .sort((a, b) => b.anchoredAt.localeCompare(a.anchoredAt))[0],
+      .map(
+        (documentId) =>
+          anchors
+            .filter(
+              (item) =>
+                item.kind === 'DOCUMENT' && item.documentId === documentId,
+            )
+            .sort((a, b) => b.anchoredAt.localeCompare(a.anchoredAt))[0],
       )
       .filter((item): item is ProvenanceAnchor => Boolean(item));
     const verificationState =
-      snapshotAnchor && documentAnchors.length === snapshot.envelope.sourceDocumentIds.length
+      snapshotAnchor &&
+      documentAnchors.length === snapshot.envelope.sourceDocumentIds.length
         ? 'VERIFIED'
         : snapshotAnchor || documentAnchors.length
           ? 'PARTIAL'
@@ -569,9 +650,14 @@ function canonicalStringify(value: unknown): string {
   if (Array.isArray(value)) {
     return `[${value.map((item) => canonicalStringify(item)).join(',')}]`;
   }
-  const entries = Object.entries(value as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b));
+  const entries = Object.entries(value as Record<string, unknown>).sort(
+    ([a], [b]) => a.localeCompare(b),
+  );
   return `{${entries
-    .map(([key, entryValue]) => `${JSON.stringify(key)}:${canonicalStringify(entryValue)}`)
+    .map(
+      ([key, entryValue]) =>
+        `${JSON.stringify(key)}:${canonicalStringify(entryValue)}`,
+    )
     .join(',')}}`;
 }
 

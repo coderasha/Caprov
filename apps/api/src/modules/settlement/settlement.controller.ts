@@ -51,13 +51,16 @@ export class SettlementController {
   @Roles('ORG_ADMIN', 'ANALYST', 'COMPLIANCE', 'PLATFORM_ADMIN')
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateSettlementDto) {
     const trade = this.db.snapshot.trades.find(
-      (item) => item.id === dto.tradeId && item.organizationId === user.organizationId,
+      (item) =>
+        item.id === dto.tradeId && item.organizationId === user.organizationId,
     );
     if (!trade) throw new NotFoundException('Trade not found');
     if (trade.status === 'SETTLED') {
       throw new BadRequestException('Trade already settled');
     }
-    const existing = this.db.snapshot.settlements.find((item) => item.tradeId === trade.id);
+    const existing = this.db.snapshot.settlements.find(
+      (item) => item.tradeId === trade.id,
+    );
     if (existing) return this.hydrate(existing);
 
     const now = new Date().toISOString();
@@ -104,7 +107,9 @@ export class SettlementController {
       draftSettlement.status = 'COMPLETED';
       draftSettlement.completedAt = now;
       draftSettlement.updatedAt = now;
-      const draftTrade = draft.trades.find((item) => item.id === draftSettlement.tradeId);
+      const draftTrade = draft.trades.find(
+        (item) => item.id === draftSettlement.tradeId,
+      );
       if (draftTrade) {
         draftTrade.status = 'SETTLED';
         draftTrade.updatedAt = now;
@@ -117,14 +122,22 @@ export class SettlementController {
       entityType: 'Settlement',
       entityId: id,
     });
-    return this.hydrate(this.db.snapshot.settlements.find((item) => item.id === id)!);
+    return this.hydrate(
+      this.db.snapshot.settlements.find((item) => item.id === id)!,
+    );
   }
 
   private hydrate(settlement: SettlementRecord) {
     return {
       ...settlement,
-      trade: this.db.snapshot.trades.find((item) => item.id === settlement.tradeId) ?? null,
-      asset: this.db.snapshot.assets.find((item) => item.id === settlement.assetId) ?? null,
+      trade:
+        this.db.snapshot.trades.find(
+          (item) => item.id === settlement.tradeId,
+        ) ?? null,
+      asset:
+        this.db.snapshot.assets.find(
+          (item) => item.id === settlement.assetId,
+        ) ?? null,
     };
   }
 }

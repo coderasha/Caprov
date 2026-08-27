@@ -8,7 +8,14 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 import type { CurrencyCode, LoanFacility } from '@caprov/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -63,20 +70,26 @@ export class LendingController {
   @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateLoanDto) {
     const collateral = this.db.snapshot.collateralPositions.find(
-      (item) => item.id === dto.collateralId && item.organizationId === user.organizationId,
+      (item) =>
+        item.id === dto.collateralId &&
+        item.organizationId === user.organizationId,
     );
     if (!collateral || collateral.status !== 'ACTIVE') {
       throw new NotFoundException('Active collateral position not found');
     }
     const utilized = this.utilizedAmount(collateral.id);
-    const available = Number(Math.max(0, collateral.advanceableValue - utilized).toFixed(2));
+    const available = Number(
+      Math.max(0, collateral.advanceableValue - utilized).toFixed(2),
+    );
     if (dto.principal > available) {
       throw new BadRequestException(
         `Principal exceeds available collateral capacity ${available} ${collateral.currency}`,
       );
     }
     const now = new Date().toISOString();
-    const ltvBps = Math.round((dto.principal / collateral.pledgedValue) * 10_000);
+    const ltvBps = Math.round(
+      (dto.principal / collateral.pledgedValue) * 10_000,
+    );
     const loan: LoanFacility = {
       id: createId('loan'),
       organizationId: user.organizationId,
@@ -101,7 +114,11 @@ export class LendingController {
       action: 'lending.loan_opened',
       entityType: 'Loan',
       entityId: loan.id,
-      metadata: { collateralId: collateral.id, principal: loan.principal, ltvBps },
+      metadata: {
+        collateralId: collateral.id,
+        principal: loan.principal,
+        ltvBps,
+      },
     });
     return this.hydrate(loan);
   }
@@ -137,14 +154,21 @@ export class LendingController {
     return {
       ...loan,
       collateral:
-        this.db.snapshot.collateralPositions.find((item) => item.id === loan.collateralId) ?? null,
-      asset: this.db.snapshot.assets.find((item) => item.id === loan.assetId) ?? null,
+        this.db.snapshot.collateralPositions.find(
+          (item) => item.id === loan.collateralId,
+        ) ?? null,
+      asset:
+        this.db.snapshot.assets.find((item) => item.id === loan.assetId) ??
+        null,
     };
   }
 
   private utilizedAmount(collateralId: string) {
     return this.db.snapshot.loans
-      .filter((item) => item.collateralId === collateralId && item.status === 'ACTIVE')
+      .filter(
+        (item) =>
+          item.collateralId === collateralId && item.status === 'ACTIVE',
+      )
       .reduce((sum, loan) => sum + loan.outstanding, 0);
   }
 }

@@ -1,11 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { createHash } from 'node:crypto';
-import { Contract, JsonRpcProvider, Wallet, HDNodeWallet, id as ethId, getAddress } from 'ethers';
+import {
+  Contract,
+  JsonRpcProvider,
+  Wallet,
+  HDNodeWallet,
+  id as ethId,
+  getAddress,
+} from 'ethers';
 
 export const ETHEREUM_SEPOLIA_CHAIN_ID = 11155111;
 export const ETHEREUM_SEPOLIA_NAME = 'Ethereum Sepolia';
 export const ETHEREUM_SEPOLIA_EXPLORER = 'https://sepolia.etherscan.io';
-export const DEFAULT_ETHEREUM_SEPOLIA_RPC = 'https://ethereum-sepolia-rpc.publicnode.com';
+export const DEFAULT_ETHEREUM_SEPOLIA_RPC =
+  'https://ethereum-sepolia-rpc.publicnode.com';
 
 const CAPROV_TOKEN_ABI = [
   'function mint(address to, uint256 id, uint256 amount, bytes data)',
@@ -67,7 +75,9 @@ export class EthereumSepoliaTokenService {
   private readonly logger = new Logger(EthereumSepoliaTokenService.name);
 
   getNetworkStatus(): TokenNetworkStatus {
-    const rpcUrl = process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC;
+    const rpcUrl =
+      process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() ||
+      DEFAULT_ETHEREUM_SEPOLIA_RPC;
     const privateKey = process.env.ETHEREUM_SEPOLIA_PRIVATE_KEY?.trim();
     const mnemonic = process.env.ETHEREUM_SEPOLIA_MNEMONIC?.trim();
     const contractAddress = process.env.ETHEREUM_TOKEN_CONTRACT?.trim();
@@ -79,7 +89,9 @@ export class EthereumSepoliaTokenService {
         walletAddress = undefined;
       }
     }
-    const liveMintReady = Boolean((privateKey || mnemonic) && contractAddress && walletAddress);
+    const liveMintReady = Boolean(
+      (privateKey || mnemonic) && contractAddress && walletAddress,
+    );
     return {
       chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
       chainName: ETHEREUM_SEPOLIA_NAME,
@@ -97,13 +109,18 @@ export class EthereumSepoliaTokenService {
   }
 
   async probeRpc(): Promise<{ ok: boolean; chainId?: number; error?: string }> {
-    const rpcUrl = process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC;
+    const rpcUrl =
+      process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() ||
+      DEFAULT_ETHEREUM_SEPOLIA_RPC;
     try {
       const provider = new JsonRpcProvider(rpcUrl, ETHEREUM_SEPOLIA_CHAIN_ID);
       const network = await provider.getNetwork();
       return { ok: true, chainId: Number(network.chainId) };
     } catch (error) {
-      return { ok: false, error: error instanceof Error ? error.message : 'rpc probe failed' };
+      return {
+        ok: false,
+        error: error instanceof Error ? error.message : 'rpc probe failed',
+      };
     }
   }
 
@@ -116,7 +133,9 @@ export class EthereumSepoliaTokenService {
 
     if (!status.liveMintReady) {
       const txHash = `0x${createHash('sha256')
-        .update(`${request.assetId}:${request.tokenId}:${request.supply}:${Date.now()}`)
+        .update(
+          `${request.assetId}:${request.tokenId}:${request.supply}:${Date.now()}`,
+        )
         .digest('hex')}`;
       const to = normalizeAddress(recipient);
       return {
@@ -136,7 +155,11 @@ export class EthereumSepoliaTokenService {
     try {
       const provider = new JsonRpcProvider(status.rpcUrl, status.chainId);
       const wallet = this.buildWallet(status.rpcUrl, provider);
-      const contract = new Contract(status.contractAddress!, CAPROV_TOKEN_ABI, wallet);
+      const contract = new Contract(
+        status.contractAddress!,
+        CAPROV_TOKEN_ABI,
+        wallet,
+      );
       const to = getAddress(request.recipientAddress?.trim() || wallet.address);
       const tokenId = BigInt(ethId(request.tokenId).slice(0, 18));
       const mintFn = contract.getFunction('mint');
@@ -158,7 +181,9 @@ export class EthereumSepoliaTokenService {
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'mint failed';
-      this.logger.warn(`Live Sepolia mint failed, recording simulated mint: ${message}`);
+      this.logger.warn(
+        `Live Sepolia mint failed, recording simulated mint: ${message}`,
+      );
       const txHash = `0x${createHash('sha256').update(`fallback:${message}:${request.assetId}:${Date.now()}`).digest('hex')}`;
       return {
         mode: 'SIMULATED',
@@ -176,7 +201,9 @@ export class EthereumSepoliaTokenService {
     }
   }
 
-  async anchorProvenanceHash(request: ProvenanceAnchorRequest): Promise<ProvenanceAnchorResult> {
+  async anchorProvenanceHash(
+    request: ProvenanceAnchorRequest,
+  ): Promise<ProvenanceAnchorResult> {
     const status = this.getNetworkStatus();
     if (!status.liveMintReady) {
       const txHash = `0x${createHash('sha256')
@@ -213,9 +240,13 @@ export class EthereumSepoliaTokenService {
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'anchor failed';
-      this.logger.warn(`Live provenance anchor failed, recording simulated anchor: ${message}`);
+      this.logger.warn(
+        `Live provenance anchor failed, recording simulated anchor: ${message}`,
+      );
       const txHash = `0x${createHash('sha256')
-        .update(`anchor-fallback:${request.scopeId}:${request.hashValue}:${Date.now()}:${message}`)
+        .update(
+          `anchor-fallback:${request.scopeId}:${request.hashValue}:${Date.now()}:${message}`,
+        )
         .digest('hex')}`;
       return {
         mode: 'SIMULATED',
@@ -229,7 +260,10 @@ export class EthereumSepoliaTokenService {
     }
   }
 
-  private buildWallet(rpcUrl: string, provider?: JsonRpcProvider): Wallet | HDNodeWallet {
+  private buildWallet(
+    rpcUrl: string,
+    provider?: JsonRpcProvider,
+  ): Wallet | HDNodeWallet {
     const mnemonic = process.env.ETHEREUM_SEPOLIA_MNEMONIC?.trim();
     if (mnemonic) {
       const wallet = HDNodeWallet.fromPhrase(mnemonic);

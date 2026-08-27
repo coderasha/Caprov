@@ -48,9 +48,16 @@ describe('local intelligence pipeline accuracy', () => {
 
     expect(envelope.valuation?.amount).toBe(92_800_000);
     expect(envelope.valuation?.currency).toBe('GBP');
-    expect(envelope.facts.find((fact) => fact.key === 'purchase_price')?.numericValue).toBe(86_400_000);
-    expect(envelope.facts.find((fact) => fact.key === 'occupancy')?.numericValue).toBe(94);
-    expect(envelope.facts.find((fact) => fact.key === 'walt')?.numericValue).toBe(7.4);
+    expect(
+      envelope.facts.find((fact) => fact.key === 'purchase_price')
+        ?.numericValue,
+    ).toBe(86_400_000);
+    expect(
+      envelope.facts.find((fact) => fact.key === 'occupancy')?.numericValue,
+    ).toBe(94);
+    expect(
+      envelope.facts.find((fact) => fact.key === 'walt')?.numericValue,
+    ).toBe(7.4);
   });
 
   it('answers copilot with cited market value', () => {
@@ -63,72 +70,81 @@ describe('local intelligence pipeline accuracy', () => {
       },
       harbourviewDocs,
     );
-    const reply = answerCopilot('What is the current value?', envelope, harbourviewDocs);
+    const reply = answerCopilot(
+      'What is the current value?',
+      envelope,
+      harbourviewDocs,
+    );
     expect(reply.answer).toContain('92,800,000');
     expect(reply.citations[0]?.documentId).toBe('doc_hv_val');
   });
 
-  describe.each(RE_VALUATION_CASES)(
-    'dummy RE pack: $name',
-    (scenario) => {
-      const docs = scenario.documents.map((document) => ({
-        id: document.id,
-        name: document.name,
-        type: document.type,
-        extractedText: document.text,
-      }));
+  describe.each(RE_VALUATION_CASES)('dummy RE pack: $name', (scenario) => {
+    const docs = scenario.documents.map((document) => ({
+      id: document.id,
+      name: document.name,
+      type: document.type,
+      extractedText: document.text,
+    }));
 
-      it('marks market value over purchase price', () => {
-        const envelope = runLocalPipeline(
-          {
-            id: scenario.id,
-            name: scenario.name,
-            assetClass: 'REAL_ESTATE',
-            currency: scenario.currency,
-            location: scenario.location,
-            jurisdiction: scenario.jurisdiction,
-          },
-          docs,
-        );
+    it('marks market value over purchase price', () => {
+      const envelope = runLocalPipeline(
+        {
+          id: scenario.id,
+          name: scenario.name,
+          assetClass: 'REAL_ESTATE',
+          currency: scenario.currency,
+          location: scenario.location,
+          jurisdiction: scenario.jurisdiction,
+        },
+        docs,
+      );
 
-        expect(envelope.valuation?.amount).toBe(scenario.expectedMark);
-        expect(envelope.valuation?.currency).toBe(scenario.currency);
-        expect(envelope.facts.find((fact) => fact.key === 'market_value')?.numericValue).toBe(
-          scenario.expectedMark,
-        );
+      expect(envelope.valuation?.amount).toBe(scenario.expectedMark);
+      expect(envelope.valuation?.currency).toBe(scenario.currency);
+      expect(
+        envelope.facts.find((fact) => fact.key === 'market_value')
+          ?.numericValue,
+      ).toBe(scenario.expectedMark);
 
-        if (scenario.expectedPurchase != null) {
-          expect(envelope.facts.find((fact) => fact.key === 'purchase_price')?.numericValue).toBe(
-            scenario.expectedPurchase,
-          );
-        }
-        if (scenario.expectedOccupancy != null) {
-          expect(envelope.facts.find((fact) => fact.key === 'occupancy')?.numericValue).toBe(
-            scenario.expectedOccupancy,
-          );
-        }
-        if (scenario.expectedWaltOrWale) {
-          expect(
-            envelope.facts.find((fact) => fact.key === scenario.expectedWaltOrWale!.key)?.numericValue,
-          ).toBe(scenario.expectedWaltOrWale.value);
-        }
-      });
+      if (scenario.expectedPurchase != null) {
+        expect(
+          envelope.facts.find((fact) => fact.key === 'purchase_price')
+            ?.numericValue,
+        ).toBe(scenario.expectedPurchase);
+      }
+      if (scenario.expectedOccupancy != null) {
+        expect(
+          envelope.facts.find((fact) => fact.key === 'occupancy')?.numericValue,
+        ).toBe(scenario.expectedOccupancy);
+      }
+      if (scenario.expectedWaltOrWale) {
+        expect(
+          envelope.facts.find(
+            (fact) => fact.key === scenario.expectedWaltOrWale!.key,
+          )?.numericValue,
+        ).toBe(scenario.expectedWaltOrWale.value);
+      }
+    });
 
-      it('copilot cites the valuation memo for current value', () => {
-        const envelope = runLocalPipeline(
-          {
-            id: scenario.id,
-            name: scenario.name,
-            assetClass: 'REAL_ESTATE',
-            currency: scenario.currency,
-          },
-          docs,
-        );
-        const reply = answerCopilot('What is the current value?', envelope, docs);
-        const valuationDoc = scenario.documents.find((document) => document.type === 'VALUATION_MEMO');
-        expect(reply.answer).toContain(scenario.expectedMark.toLocaleString('en-GB'));
-        expect(reply.citations[0]?.documentId).toBe(valuationDoc?.id);
-      });
-    },
-  );
+    it('copilot cites the valuation memo for current value', () => {
+      const envelope = runLocalPipeline(
+        {
+          id: scenario.id,
+          name: scenario.name,
+          assetClass: 'REAL_ESTATE',
+          currency: scenario.currency,
+        },
+        docs,
+      );
+      const reply = answerCopilot('What is the current value?', envelope, docs);
+      const valuationDoc = scenario.documents.find(
+        (document) => document.type === 'VALUATION_MEMO',
+      );
+      expect(reply.answer).toContain(
+        scenario.expectedMark.toLocaleString('en-GB'),
+      );
+      expect(reply.citations[0]?.documentId).toBe(valuationDoc?.id);
+    });
+  });
 });

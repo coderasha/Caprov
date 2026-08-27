@@ -3,7 +3,8 @@ import type { LlmModelOption } from '@caprov/types';
 
 export const DEFAULT_LLM_MODEL_ID = 'caprov-deterministic';
 export const DEFAULT_OPENAI_MODEL_ID = 'openai-gpt-4.1';
-const CURSOR_AGENT_BINARY = process.env.CURSOR_AGENT_BIN?.trim() || 'cursor-agent';
+const CURSOR_AGENT_BINARY =
+  process.env.CURSOR_AGENT_BIN?.trim() || 'cursor-agent';
 
 let cursorAgentAvailable: boolean | undefined;
 
@@ -35,7 +36,8 @@ export const LLM_MODEL_CATALOG: LlmModelOption[] = [
     id: 'openai-gpt-4.1',
     provider: 'openai',
     label: 'OpenAI GPT-4.1',
-    description: 'Strong general reasoning for free-form legal narrative and copilot synthesis.',
+    description:
+      'Strong general reasoning for free-form legal narrative and copilot synthesis.',
     contextWindow: 1_000_000,
     strengths: ['Reasoning', 'Long context', 'Copilot'],
     capabilities: ['extraction', 'asset_dna', 'copilot'],
@@ -46,7 +48,8 @@ export const LLM_MODEL_CATALOG: LlmModelOption[] = [
     id: 'openai-gpt-4o',
     provider: 'openai',
     label: 'OpenAI GPT-4o',
-    description: 'Fast multimodal-capable model suited to mixed document and Q&A workloads.',
+    description:
+      'Fast multimodal-capable model suited to mixed document and Q&A workloads.',
     contextWindow: 128_000,
     strengths: ['Speed', 'Copilot', 'General docs'],
     capabilities: ['extraction', 'copilot'],
@@ -57,7 +60,8 @@ export const LLM_MODEL_CATALOG: LlmModelOption[] = [
     id: 'openai-o3-mini',
     provider: 'openai',
     label: 'OpenAI o3-mini',
-    description: 'Compact reasoning model for structured extraction and risk rationale drafting.',
+    description:
+      'Compact reasoning model for structured extraction and risk rationale drafting.',
     contextWindow: 200_000,
     strengths: ['Reasoning', 'Cost'],
     capabilities: ['extraction', 'risk', 'copilot'],
@@ -68,7 +72,8 @@ export const LLM_MODEL_CATALOG: LlmModelOption[] = [
     id: 'anthropic-claude-sonnet-4',
     provider: 'anthropic',
     label: 'Anthropic Claude Sonnet 4',
-    description: 'Excellent long-document analysis for complex private-asset packs and audit narratives.',
+    description:
+      'Excellent long-document analysis for complex private-asset packs and audit narratives.',
     contextWindow: 200_000,
     strengths: ['Long docs', 'Careful analysis', 'Copilot'],
     capabilities: ['extraction', 'asset_dna', 'copilot'],
@@ -79,7 +84,8 @@ export const LLM_MODEL_CATALOG: LlmModelOption[] = [
     id: 'anthropic-claude-haiku-3.5',
     provider: 'anthropic',
     label: 'Anthropic Claude Haiku 3.5',
-    description: 'Low-latency model for interactive copilot and lightweight extraction assists.',
+    description:
+      'Low-latency model for interactive copilot and lightweight extraction assists.',
     contextWindow: 200_000,
     strengths: ['Latency', 'Cost', 'Copilot'],
     capabilities: ['copilot', 'extraction'],
@@ -112,7 +118,8 @@ export const LLM_MODEL_CATALOG: LlmModelOption[] = [
     id: 'mistral-large',
     provider: 'mistral',
     label: 'Mistral Large',
-    description: 'European-hosted capable model for extraction and analyst Q&A.',
+    description:
+      'European-hosted capable model for extraction and analyst Q&A.',
     contextWindow: 128_000,
     strengths: ['EU option', 'General reasoning'],
     capabilities: ['extraction', 'copilot'],
@@ -123,7 +130,8 @@ export const LLM_MODEL_CATALOG: LlmModelOption[] = [
     id: 'meta-llama-4-maverick',
     provider: 'meta',
     label: 'Meta Llama 4 Maverick',
-    description: 'Open-weight class model for self-hosted or gateway deployments.',
+    description:
+      'Open-weight class model for self-hosted or gateway deployments.',
     contextWindow: 128_000,
     strengths: ['Self-host', 'Open weights'],
     capabilities: ['extraction', 'copilot'],
@@ -170,7 +178,9 @@ export function isLlmModelLive(model: LlmModelOption): boolean {
     return false;
   }
   if (model.provider === 'cursor') {
-    return Boolean(process.env[model.apiKeyEnv]?.trim()) && hasCursorAgentBinary();
+    return (
+      Boolean(process.env[model.apiKeyEnv]?.trim()) && hasCursorAgentBinary()
+    );
   }
   return Boolean(process.env[model.apiKeyEnv]?.trim());
 }
@@ -187,7 +197,9 @@ export function getLlmModelAvailability(model: LlmModelOption): {
   }
 
   if (model.provider === 'cursor') {
-    const hasKey = Boolean(model.apiKeyEnv && process.env[model.apiKeyEnv]?.trim());
+    const hasKey = Boolean(
+      model.apiKeyEnv && process.env[model.apiKeyEnv]?.trim(),
+    );
     const hasBinary = hasCursorAgentBinary();
 
     if (hasKey && hasBinary) {
@@ -230,7 +242,9 @@ export function getLlmModelAvailability(model: LlmModelOption): {
 }
 
 export function getPreferredDefaultLlmModelId(): string {
-  const preferredOpenAi = LLM_MODEL_CATALOG.find((model) => model.id === DEFAULT_OPENAI_MODEL_ID);
+  const preferredOpenAi = LLM_MODEL_CATALOG.find(
+    (model) => model.id === DEFAULT_OPENAI_MODEL_ID,
+  );
   if (preferredOpenAi && isLlmModelLive(preferredOpenAi)) {
     return preferredOpenAi.id;
   }

@@ -26,13 +26,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const organization = this.db.snapshot.organizations.find(
       (item) => item.id === payload.organizationId,
     );
-    const memberships = this.db.snapshot.memberships.filter((item) => item.userId === payload.sub);
+    const memberships = this.db.snapshot.memberships.filter(
+      (item) => item.userId === payload.sub,
+    );
     const scopedMemberships = memberships.filter(
       (item) => item.organizationId === payload.organizationId,
     );
-    const hasPlatformAdmin = memberships.some((item) => item.role === 'PLATFORM_ADMIN');
+    const hasPlatformAdmin = memberships.some(
+      (item) => item.role === 'PLATFORM_ADMIN',
+    );
 
-    if (!user || !organization || (!scopedMemberships.length && !hasPlatformAdmin)) {
+    if (
+      !user ||
+      !organization ||
+      (!scopedMemberships.length && !hasPlatformAdmin)
+    ) {
       throw new UnauthorizedException('Session is no longer valid');
     }
     if (organization.status === 'SUSPENDED' && !hasPlatformAdmin) {

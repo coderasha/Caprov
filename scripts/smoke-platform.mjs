@@ -3,9 +3,13 @@
  * End-to-end smoke test for CAPROV platform features.
  * Usage: node scripts/smoke-platform.mjs
  */
+import http from 'node:http';
+import https from 'node:https';
+
 const API = process.env.API_URL || 'http://127.0.0.1:3001/api';
 const WEB = process.env.WEB_URL || 'http://127.0.0.1:3000';
 const ENGINE = process.env.ENGINE_URL || 'http://127.0.0.1:8000/api';
+const REQUEST_TIMEOUT_MS = Number(process.env.SMOKE_HTTP_TIMEOUT_MS || 120_000);
 
 const results = [];
 
@@ -20,15 +24,16 @@ function fail(name, detail = '') {
 }
 
 async function request(base, path, { method = 'GET', token, body } = {}) {
-  const response = await fetch(`${base}${path}`, {
+  const payload = body ? JSON.stringify(body) : undefined;
+  const response = await sendHttpRequest(`${base}${path}`, {
     method,
     headers: {
       'content-type': 'application/json',
       ...(token ? { authorization: `Bearer ${token}` } : {}),
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: payload,
   });
-  const text = await response.text();
+  const text = response.body;
   let data;
   try {
     data = text ? JSON.parse(text) : null;
@@ -46,7 +51,7 @@ async function main() {
     ['Engine health', `${ENGINE}/health`],
   ]) {
     try {
-      const response = await fetch(url);
+      const response = await sendHttpRequest(url);
       if (response.ok) pass(name, String(response.status));
       else fail(name, `HTTP ${response.status}`);
     } catch (error) {
@@ -255,7 +260,7 @@ async function main() {
     '/audit',
   ]) {
     try {
-      const response = await fetch(`${WEB}${path}`);
+      const response = await sendHttpRequest(`${WEB}${path}`);
       response.ok || response.status === 307 || response.status === 308
         ? pass(`Web ${path}`, String(response.status))
         : fail(`Web ${path}`, `HTTP ${response.status}`);
@@ -277,6 +282,46 @@ function summarize() {
   } else {
     console.log('All platform feature smoke checks passed.');
   }
+}
+
+function sendHttpRequest(
+  rawUrl,
+  { method = 'GET', headers = {}, body, timeoutMs = REQUEST_TIMEOUT_MS } = {},
+) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(rawUrl);
+    const client = url.protocol === 'https:' ? https : http;
+    const request = client.request(
+      url,
+      {
+        method,
+        headers,
+      },
+      (response) => {
+        const chunks = [];
+        response.setEncoding('utf8');
+        response.on('data', (chunk) => chunks.push(chunk));
+        response.on('end', () => {
+          resolve({
+            status: response.statusCode ?? 0,
+            ok:
+              (response.statusCode ?? 0) >= 200 &&
+              (response.statusCode ?? 0) < 300,
+            body: chunks.join(''),
+          });
+        });
+      },
+    );
+
+    request.setTimeout(timeoutMs, () => {
+      request.destroy(new Error(`Request timed out after ${timeoutMs}ms`));
+    });
+    request.on('error', reject);
+    if (body) {
+      request.write(body);
+    }
+    request.end();
+  });
 }
 
 main().catch((error) => {

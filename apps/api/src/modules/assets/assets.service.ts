@@ -1,5 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { AssetClass, AssetStatus, CurrencyCode, OwnershipType } from '@caprov/types';
+import type {
+  AssetClass,
+  AssetStatus,
+  CurrencyCode,
+  OwnershipType,
+} from '@caprov/types';
 import type { AuthUser } from '../../common/types/auth-user';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import { createId } from '../../infrastructure/database/ids';
@@ -92,7 +97,10 @@ export class AssetsService {
         primaryImageUrl: input.primaryImageUrl ?? asset.primaryImageUrl,
         imageUrls:
           input.imageUrls != null || input.primaryImageUrl != null
-            ? normalizeImageUrls(input.imageUrls, input.primaryImageUrl ?? asset.primaryImageUrl)
+            ? normalizeImageUrls(
+                input.imageUrls,
+                input.primaryImageUrl ?? asset.primaryImageUrl,
+              )
             : asset.imageUrls,
         updatedAt: new Date().toISOString(),
       });
@@ -136,7 +144,9 @@ export class AssetsService {
     if (!asset) {
       return null;
     }
-    const ownerships = this.db.snapshot.ownerships.filter((item) => item.assetId === assetId);
+    const ownerships = this.db.snapshot.ownerships.filter(
+      (item) => item.assetId === assetId,
+    );
     const documents = this.db.snapshot.documents.filter(
       (item) => item.assetId === assetId && item.isCurrent !== false,
     );
@@ -149,7 +159,9 @@ export class AssetsService {
     const risk = this.db.snapshot.risks
       .filter((item) => item.assetId === assetId)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
-    const jobs = this.db.snapshot.jobs.filter((item) => item.assetId === assetId);
+    const jobs = this.db.snapshot.jobs.filter(
+      (item) => item.assetId === assetId,
+    );
     return {
       ...asset,
       ownerships,
@@ -162,7 +174,10 @@ export class AssetsService {
   }
 }
 
-function normalizeImageUrls(imageUrls?: string[], primaryImageUrl?: string): string[] {
+function normalizeImageUrls(
+  imageUrls?: string[],
+  primaryImageUrl?: string,
+): string[] {
   const urls = Array.from(
     new Set(
       [primaryImageUrl, ...(imageUrls ?? [])]

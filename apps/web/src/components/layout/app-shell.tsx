@@ -187,6 +187,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
+    const markHydrated = () => useAuthStore.getState().setHasHydrated(true);
+    const unsubscribe = useAuthStore.persist.onFinishHydration(markHydrated);
+    if (useAuthStore.persist.hasHydrated()) markHydrated();
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
     if (!hasHydrated) return;
     if (!token) router.replace('/login');
   }, [hasHydrated, token, router]);

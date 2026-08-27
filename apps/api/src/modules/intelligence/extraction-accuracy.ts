@@ -23,7 +23,8 @@ interface Candidate extends DnaFact {
 
 const DATE_RE =
   /\b(?:\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}|\d{4}-\d{2}-\d{2})\b/gi;
-const AS_OF_RE = /(?:as of|valuation date|effective date|appraisal date|reporting date|date)[:\s]+([^\n]+)/i;
+const AS_OF_RE =
+  /(?:as of|valuation date|effective date|appraisal date|reporting date|date)[:\s]+([^\n]+)/i;
 
 /** Non-market money labels that must never become the primary mark. */
 const NON_MARKET_VALUE_RE =
@@ -54,7 +55,8 @@ const FIELD_SPECS: FieldSpec[] = [
   {
     key: 'legal_ownership',
     label: 'Legal ownership',
-    regex: /(?:legal ownership|registered proprietor ownership)\s*[:\-]?\s*([^\n]+)/gi,
+    regex:
+      /(?:legal ownership|registered proprietor ownership)\s*[:\-]?\s*([^\n]+)/gi,
     baseConfidence: 0.97,
   },
   {
@@ -66,7 +68,8 @@ const FIELD_SPECS: FieldSpec[] = [
   {
     key: 'proprietor',
     label: 'Proprietor',
-    regex: /(?:proprietor|registered proprietor|registered owner)\s*[:\-]?\s*([^\n]+)/gi,
+    regex:
+      /(?:proprietor|registered proprietor|registered owner)\s*[:\-]?\s*([^\n]+)/gi,
     baseConfidence: 0.93,
   },
   {
@@ -138,13 +141,15 @@ const FIELD_SPECS: FieldSpec[] = [
   {
     key: 'cap_rate',
     label: 'Cap rate',
-    regex: /(?:cap(?:itali[sz]ation)? rate|net initial yield|\bniy\b)\s*[:\-]?\s*([^\n]+)/gi,
+    regex:
+      /(?:cap(?:itali[sz]ation)? rate|net initial yield|\bniy\b)\s*[:\-]?\s*([^\n]+)/gi,
     baseConfidence: 0.86,
   },
   {
     key: 'passing_rent',
     label: 'Passing rent',
-    regex: /(?:passing rent|net rental income|annual rent)\s*[:\-]?\s*([^\n]+)/gi,
+    regex:
+      /(?:passing rent|net rental income|annual rent)\s*[:\-]?\s*([^\n]+)/gi,
     baseConfidence: 0.86,
   },
 ];
@@ -183,11 +188,17 @@ export function normalizeExtractionText(raw: string): string {
     .trim();
 }
 
-export function parseAmount(raw: string): { amount: number; currency: CurrencyCode } | null {
-  const cleaned = raw.replace(/\((?:approximately|approx\.?|about)\)/gi, '').trim();
+export function parseAmount(
+  raw: string,
+): { amount: number; currency: CurrencyCode } | null {
+  const cleaned = raw
+    .replace(/\((?:approximately|approx\.?|about)\)/gi, '')
+    .trim();
   const match = /(?:(USD|EUR|GBP|SGD|INR)|(\$)|(£)|(€))/i.exec(cleaned);
   const numberMatch =
-    /([0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(million|billion|bn|m)?\b/i.exec(cleaned);
+    /([0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(million|billion|bn|m)?\b/i.exec(
+      cleaned,
+    );
   if (!numberMatch?.[1]) {
     return null;
   }
@@ -292,7 +303,9 @@ function scoreCandidate(
  * prefer valuation memos / newer as-of dates, consensus-boost agreeing marks,
  * and reject insurance declared values as market marks.
  */
-export function extractFactsAccurate(documents: ExtractionDocument[]): DnaFact[] {
+export function extractFactsAccurate(
+  documents: ExtractionDocument[],
+): DnaFact[] {
   const candidatesByKey = new Map<string, Candidate[]>();
 
   for (const document of documents) {
@@ -302,7 +315,12 @@ export function extractFactsAccurate(documents: ExtractionDocument[]): DnaFact[]
     const asOfMs = documentAsOfMs(text);
 
     for (const spec of FIELD_SPECS) {
-      const regex = new RegExp(spec.regex.source, spec.regex.flags.includes('g') ? spec.regex.flags : `${spec.regex.flags}g`);
+      const regex = new RegExp(
+        spec.regex.source,
+        spec.regex.flags.includes('g')
+          ? spec.regex.flags
+          : `${spec.regex.flags}g`,
+      );
       for (const match of text.matchAll(regex)) {
         const value = (match[1] ?? '').trim();
         if (!value || value.length < 1) continue;
@@ -314,19 +332,29 @@ export function extractFactsAccurate(documents: ExtractionDocument[]): DnaFact[]
         ) {
           continue;
         }
-        if (spec.key === 'nav' && /nav statement/i.test(fragment) && !/nav\s*:/i.test(fragment)) {
+        if (
+          spec.key === 'nav' &&
+          /nav statement/i.test(fragment) &&
+          !/nav\s*:/i.test(fragment)
+        ) {
           continue;
         }
 
         const parsed = parseAmount(value);
-        let confidence = Math.min(0.99, Number((spec.baseConfidence + bonus).toFixed(2)));
+        let confidence = Math.min(
+          0.99,
+          Number((spec.baseConfidence + bonus).toFixed(2)),
+        );
         if (
           ['market_value', 'nav'].includes(spec.key) &&
           !['VALUATION_MEMO', 'FINANCIAL_STATEMENT'].includes(document.type)
         ) {
           confidence = Math.min(confidence, 0.78);
         }
-        if (spec.key === 'purchase_price' && !['SPA', 'TITLE_DEED'].includes(document.type)) {
+        if (
+          spec.key === 'purchase_price' &&
+          !['SPA', 'TITLE_DEED'].includes(document.type)
+        ) {
           confidence = Math.min(confidence, 0.8);
         }
         if (parsed && parsed.amount <= 0) {
@@ -338,9 +366,15 @@ export function extractFactsAccurate(documents: ExtractionDocument[]): DnaFact[]
           key: spec.key,
           label: spec.label,
           value,
-          numericValue: parsed?.amount ?? parsePercent(value) ?? parseYears(value),
+          numericValue:
+            parsed?.amount ?? parsePercent(value) ?? parseYears(value),
           currency: parsed?.currency,
-          unit: parsePercent(value) != null && !parsed ? '%' : parseYears(value) != null ? 'years' : undefined,
+          unit:
+            parsePercent(value) != null && !parsed
+              ? '%'
+              : parseYears(value) != null
+                ? 'years'
+                : undefined,
           confidence,
           provenance: [
             {
@@ -364,19 +398,29 @@ export function extractFactsAccurate(documents: ExtractionDocument[]): DnaFact[]
 
   const best = new Map<string, DnaFact>();
   for (const [key, candidates] of candidatesByKey) {
-    const ranked = [...candidates].sort((a, b) => b.score - a.score || b.confidence - a.confidence);
+    const ranked = [...candidates].sort(
+      (a, b) => b.score - a.score || b.confidence - a.confidence,
+    );
     let winner = ranked[0]!;
 
-    if (['market_value', 'nav', 'purchase_price'].includes(key) && winner.numericValue != null) {
+    if (
+      ['market_value', 'nav', 'purchase_price'].includes(key) &&
+      winner.numericValue != null
+    ) {
       const agreeing = ranked.filter(
         (item) =>
           item.numericValue != null &&
-          Math.abs(item.numericValue - winner.numericValue!) / winner.numericValue! <= 0.02,
+          Math.abs(item.numericValue - winner.numericValue!) /
+            winner.numericValue! <=
+            0.02,
       );
       if (agreeing.length >= 2) {
         winner = {
           ...winner,
-          confidence: Math.min(0.99, Number((winner.confidence + 0.03).toFixed(2))),
+          confidence: Math.min(
+            0.99,
+            Number((winner.confidence + 0.03).toFixed(2)),
+          ),
           provenance: [
             ...winner.provenance,
             ...agreeing.slice(1, 3).flatMap((item) => item.provenance),
@@ -390,7 +434,11 @@ export function extractFactsAccurate(documents: ExtractionDocument[]): DnaFact[]
 
   const ownership = best.get('legal_ownership');
   const proprietor = best.get('proprietor');
-  if (ownership && proprietor && /^\d+(?:\.\d+)?\s*%?$/.test(ownership.value.trim())) {
+  if (
+    ownership &&
+    proprietor &&
+    /^\d+(?:\.\d+)?\s*%?$/.test(ownership.value.trim())
+  ) {
     best.set('legal_ownership', {
       ...ownership,
       value: `${ownership.value.replace(/%/g, '').trim()}% ${proprietor.value}`,
@@ -411,7 +459,9 @@ export function extractFactsAccurate(documents: ExtractionDocument[]): DnaFact[]
 
 export function pickValueFact(facts: DnaFact[]): DnaFact | undefined {
   for (const key of ['market_value', 'nav', 'purchase_price']) {
-    const hit = facts.find((fact) => fact.key === key && fact.numericValue != null);
+    const hit = facts.find(
+      (fact) => fact.key === key && fact.numericValue != null,
+    );
     if (hit) return hit;
   }
   return undefined;
@@ -426,7 +476,9 @@ export function resolveValuationAsOf(
   if (sourceId) {
     const source = documents.find((document) => document.id === sourceId);
     if (source?.extractedText) {
-      const match = AS_OF_RE.exec(normalizeExtractionText(source.extractedText));
+      const match = AS_OF_RE.exec(
+        normalizeExtractionText(source.extractedText),
+      );
       const date = match?.[1]?.match(DATE_RE)?.[0];
       if (date) {
         return toIsoDate(date);
@@ -434,8 +486,14 @@ export function resolveValuationAsOf(
     }
   }
   for (const document of documents) {
-    if (document.type !== 'VALUATION_MEMO' && document.type !== 'FINANCIAL_STATEMENT') continue;
-    const match = AS_OF_RE.exec(normalizeExtractionText(document.extractedText ?? ''));
+    if (
+      document.type !== 'VALUATION_MEMO' &&
+      document.type !== 'FINANCIAL_STATEMENT'
+    )
+      continue;
+    const match = AS_OF_RE.exec(
+      normalizeExtractionText(document.extractedText ?? ''),
+    );
     const date = match?.[1]?.match(DATE_RE)?.[0];
     if (date) return toIsoDate(date);
   }

@@ -29,14 +29,20 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const memberships = this.db.snapshot.memberships.filter((item) => item.userId === user.id);
+    const memberships = this.db.snapshot.memberships.filter(
+      (item) => item.userId === user.id,
+    );
     if (memberships.length === 0) {
-      throw new UnauthorizedException('This account is not linked to an organization');
+      throw new UnauthorizedException(
+        'This account is not linked to an organization',
+      );
     }
 
     const organizationId = memberships[0]?.organizationId;
     if (!organizationId) {
-      throw new UnauthorizedException('This account is not linked to an organization');
+      throw new UnauthorizedException(
+        'This account is not linked to an organization',
+      );
     }
 
     const session = await this.buildSession(user.id, organizationId);
@@ -52,14 +58,20 @@ export class AuthService {
 
   async register(dto: RegisterDto): Promise<RegistrationRequestReceipt> {
     const email = dto.email.toLowerCase();
-    if (this.db.snapshot.users.some((item) => item.email.toLowerCase() === email)) {
+    if (
+      this.db.snapshot.users.some((item) => item.email.toLowerCase() === email)
+    ) {
       throw new ConflictException('An account with this email already exists');
     }
     const existingPending = this.db.snapshot.organizationAccessRequests.find(
-      (item) => item.requesterEmail.toLowerCase() === email && item.status === 'PENDING',
+      (item) =>
+        item.requesterEmail.toLowerCase() === email &&
+        item.status === 'PENDING',
     );
     if (existingPending) {
-      throw new ConflictException('A pending access request already exists for this email');
+      throw new ConflictException(
+        'A pending access request already exists for this email',
+      );
     }
     const slugBase = dto.organizationName
       .toLowerCase()
@@ -89,15 +101,21 @@ export class AuthService {
       status: 'PENDING',
       organizationName: dto.organizationName,
       email,
-      message: 'Access request submitted. A platform admin must approve it before you can sign in.',
+      message:
+        'Access request submitted. A platform admin must approve it before you can sign in.',
     };
   }
 
-  async switchOrganization(user: AuthUser, organizationId: string): Promise<AuthSession> {
+  async switchOrganization(
+    user: AuthUser,
+    organizationId: string,
+  ): Promise<AuthSession> {
     if (!user.roles.includes('PLATFORM_ADMIN')) {
       throw new ForbiddenException('Platform admin access is required');
     }
-    const organization = this.db.snapshot.organizations.find((item) => item.id === organizationId);
+    const organization = this.db.snapshot.organizations.find(
+      (item) => item.id === organizationId,
+    );
     if (!organization) {
       throw new UnauthorizedException('Organization not found');
     }
@@ -112,29 +130,46 @@ export class AuthService {
     return session;
   }
 
-  private async buildSession(userId: string, organizationId: string): Promise<AuthSession> {
+  private async buildSession(
+    userId: string,
+    organizationId: string,
+  ): Promise<AuthSession> {
     const user = this.db.snapshot.users.find((item) => item.id === userId);
-    const organization = this.db.snapshot.organizations.find((item) => item.id === organizationId);
-    const memberships = this.db.snapshot.memberships.filter((item) => item.userId === userId);
+    const organization = this.db.snapshot.organizations.find(
+      (item) => item.id === organizationId,
+    );
+    const memberships = this.db.snapshot.memberships.filter(
+      (item) => item.userId === userId,
+    );
 
     if (!user || !organization || memberships.length === 0) {
-      throw new UnauthorizedException('This account is not linked to an organization');
+      throw new UnauthorizedException(
+        'This account is not linked to an organization',
+      );
     }
 
     const scopedRoles = memberships
       .filter((item) => item.organizationId === organizationId)
       .map((item) => item.role);
-    const hasPlatformAdmin = memberships.some((item) => item.role === 'PLATFORM_ADMIN');
+    const hasPlatformAdmin = memberships.some(
+      (item) => item.role === 'PLATFORM_ADMIN',
+    );
     if (!scopedRoles.length && !hasPlatformAdmin) {
-      throw new UnauthorizedException('This account is not linked to the selected organization');
+      throw new UnauthorizedException(
+        'This account is not linked to the selected organization',
+      );
     }
     if (organization.status === 'SUSPENDED' && !hasPlatformAdmin) {
       throw new ForbiddenException('Organization access is suspended');
     }
 
     const roles: AuthSession['roles'] = Array.from(
-      new Set(hasPlatformAdmin ? (['PLATFORM_ADMIN', ...scopedRoles] as const) : scopedRoles),
-    ) as AuthSession['roles'];
+      new Set(
+        hasPlatformAdmin
+          ? (['PLATFORM_ADMIN', ...scopedRoles] as const)
+          : scopedRoles,
+      ),
+    );
 
     return {
       token: await this.jwt.signAsync({
@@ -142,8 +177,17 @@ export class AuthService {
         email: user.email,
         organizationId: organization.id,
       }),
-      user: { id: user.id, email: user.email, fullName: user.fullName, title: user.title },
-      organization: { id: organization.id, name: organization.name, slug: organization.slug },
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        title: user.title,
+      },
+      organization: {
+        id: organization.id,
+        name: organization.name,
+        slug: organization.slug,
+      },
       roles,
     };
   }

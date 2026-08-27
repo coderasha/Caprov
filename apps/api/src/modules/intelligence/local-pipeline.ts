@@ -40,17 +40,41 @@ export interface PipelineAsset {
 const ENTITY_RE =
   /\b([A-Z][A-Za-z0-9&.’'-]*(?:\s+[A-Z][A-Za-z0-9&.’'-]*){0,5}\s(?:Ltd|Limited|LLP|LLC|LP|Pte Ltd|SARL|Inc|AG|GmbH|Partners|Holdings|Capital|Fund III|Fund II|Fund))\b/g;
 
-export function classifyDocument(name: string, text: string, fallback: DocumentType): DocumentType {
+export function classifyDocument(
+  name: string,
+  text: string,
+  fallback: DocumentType,
+): DocumentType {
   const haystack = `${name} ${normalizeExtractionText(text)}`.toLowerCase();
-  if (/(title|land registry|deed|proprietor|notarial|kadaster|sla title)/.test(haystack)) return 'TITLE_DEED';
-  if (/(share purchase|sale and purchase|bill of sale|spa\b|gallery invoice)/.test(haystack)) return 'SPA';
-  if (/(valuation|appraisal|market value|fair value|nav statement|knightvale|dcf|appraised)/.test(haystack)) {
+  if (
+    /(title|land registry|deed|proprietor|notarial|kadaster|sla title)/.test(
+      haystack,
+    )
+  )
+    return 'TITLE_DEED';
+  if (
+    /(share purchase|sale and purchase|bill of sale|spa\b|gallery invoice)/.test(
+      haystack,
+    )
+  )
+    return 'SPA';
+  if (
+    /(valuation|appraisal|market value|fair value|nav statement|knightvale|dcf|appraised)/.test(
+      haystack,
+    )
+  ) {
     return 'VALUATION_MEMO';
   }
-  if (/(insurance|insured value|hull|sum insured|replacement cost|reinstatement)/.test(haystack)) return 'INSURANCE';
+  if (
+    /(insurance|insured value|hull|sum insured|replacement cost|reinstatement)/.test(
+      haystack,
+    )
+  )
+    return 'INSURANCE';
   if (/(kyc|beneficial ownership|aml)/.test(haystack)) return 'KYC';
   if (/(limited partnership agreement|\blpa\b)/.test(haystack)) return 'LPA';
-  if (/(financial statement|balance sheet|\bnav\b)/.test(haystack)) return 'FINANCIAL_STATEMENT';
+  if (/(financial statement|balance sheet|\bnav\b)/.test(haystack))
+    return 'FINANCIAL_STATEMENT';
   return fallback || 'OTHER';
 }
 
@@ -58,7 +82,10 @@ function extractFacts(documents: PipelineDocument[]): DnaFact[] {
   return extractFactsAccurate(documents);
 }
 
-function extractEntities(asset: PipelineAsset, documents: PipelineDocument[]): DnaEntity[] {
+function extractEntities(
+  asset: PipelineAsset,
+  documents: PipelineDocument[],
+): DnaEntity[] {
   const names = new Map<string, DnaEntity>();
   names.set(asset.name.toLowerCase(), {
     id: createId('ent'),
@@ -115,7 +142,10 @@ function buildRelationships(
       let type = 'RELATED_TO';
       let confidence = 0.7;
       let sourceDocumentId = documents[0]?.id;
-      if (ownership && ownership.value.toLowerCase().includes(org.name.toLowerCase())) {
+      if (
+        ownership &&
+        ownership.value.toLowerCase().includes(org.name.toLowerCase())
+      ) {
         type = 'LEGAL_OWNER_OF';
         confidence = ownership.confidence;
         sourceDocumentId = ownership.provenance[0]?.sourceDocumentId;
@@ -145,13 +175,18 @@ function buildTimeline(documents: PipelineDocument[]): DnaTimelineEvent[] {
       id: createId('evt'),
       date,
       title: document.name.replace(/\.[a-z0-9]+$/i, ''),
-      description: (text.split('\n').find((line) => line.trim().length > 12) ?? document.name).slice(0, 220),
+      description: (
+        text.split('\n').find((line) => line.trim().length > 12) ??
+        document.name
+      ).slice(0, 220),
       category:
         document.type === 'VALUATION_MEMO'
           ? 'VALUATION'
           : document.type === 'SPA' || document.type === 'TITLE_DEED'
             ? 'OWNERSHIP'
-            : document.type === 'INSURANCE' || document.type === 'KYC' || document.type === 'LPA'
+            : document.type === 'INSURANCE' ||
+                document.type === 'KYC' ||
+                document.type === 'LPA'
               ? 'LEGAL'
               : 'DOCUMENT',
       confidence: asOf ? 0.9 : 0.78,
@@ -168,7 +203,7 @@ function estimateValuation(
 ): ValuationSummary {
   const valueFact = pickValueFact(facts);
   const amount = valueFact?.numericValue ?? fallbackValue(asset.assetClass);
-  const currency = (valueFact?.currency ?? asset.currency) as CurrencyCode;
+  const currency = valueFact?.currency ?? asset.currency;
   const asOf = resolveValuationAsOf(facts, documents);
   const method =
     valueFact?.key === 'market_value'
@@ -181,7 +216,9 @@ function estimateValuation(
   const notes: string[] = [];
   if (valueFact?.key === 'market_value') {
     notes.push('Primary mark taken from market value / fair value language.');
-    const purchase = facts.find((fact) => fact.key === 'purchase_price' && fact.numericValue != null);
+    const purchase = facts.find(
+      (fact) => fact.key === 'purchase_price' && fact.numericValue != null,
+    );
     if (purchase) notes.push(`Acquisition price was ${purchase.value}.`);
   } else if (valueFact?.key === 'nav') {
     notes.push('Primary mark taken from latest NAV.');
@@ -201,7 +238,9 @@ function estimateValuation(
       ),
   );
   if (ignoredNonMarket && valueFact?.key === 'market_value') {
-    notes.push('Insurance / replacement / book figures were ignored as market marks.');
+    notes.push(
+      'Insurance / replacement / book figures were ignored as market marks.',
+    );
   }
   return {
     amount,
@@ -241,10 +280,16 @@ function estimateRisk(
 ): RiskSummary {
   const types = new Set(documents.map((item) => item.type));
   const coverageScore = Math.max(10, 80 - types.size * 12);
-  const ownershipClarity = facts.some((fact) => fact.key === 'legal_ownership') ? 18 : 55;
+  const ownershipClarity = facts.some((fact) => fact.key === 'legal_ownership')
+    ? 18
+    : 55;
   const jurisdictionScore = asset.jurisdiction ? 24 : 48;
-  const occupancy = facts.find((fact) => fact.key === 'occupancy' && fact.numericValue != null);
-  const walt = facts.find((fact) => ['walt', 'wale'].includes(fact.key) && fact.numericValue != null);
+  const occupancy = facts.find(
+    (fact) => fact.key === 'occupancy' && fact.numericValue != null,
+  );
+  const walt = facts.find(
+    (fact) => ['walt', 'wale'].includes(fact.key) && fact.numericValue != null,
+  );
   let incomeScore = 30;
   const flags: string[] = [];
   if (occupancy && (occupancy.numericValue ?? 100) < 95) {
@@ -255,14 +300,23 @@ function estimateRisk(
     incomeScore += 10;
     flags.push(`Lease duration ${walt.value} creates roll risk`);
   }
-  if (!types.has('TITLE_DEED')) flags.push('Missing title / ownership evidence');
+  if (!types.has('TITLE_DEED'))
+    flags.push('Missing title / ownership evidence');
   if (!types.has('VALUATION_MEMO') && !types.has('FINANCIAL_STATEMENT')) {
     flags.push('No independent valuation memo / NAV pack');
   }
   if (types.size < 3) flags.push('Thin document coverage');
-  const overall = Math.round((coverageScore + ownershipClarity + jurisdictionScore + incomeScore) / 4);
+  const overall = Math.round(
+    (coverageScore + ownershipClarity + jurisdictionScore + incomeScore) / 4,
+  );
   const rating: RiskSummary['rating'] =
-    overall < 30 ? 'LOW' : overall < 45 ? 'MODERATE' : overall < 60 ? 'ELEVATED' : 'HIGH';
+    overall < 30
+      ? 'LOW'
+      : overall < 45
+        ? 'MODERATE'
+        : overall < 60
+          ? 'ELEVATED'
+          : 'HIGH';
   return {
     overall,
     rating,
@@ -295,7 +349,8 @@ function estimateRisk(
         key: 'income_durability',
         label: 'Income durability',
         score: incomeScore,
-        rationale: 'Derived from occupancy and WALT/WALE extracts where available.',
+        rationale:
+          'Derived from occupancy and WALT/WALE extracts where available.',
       },
     ],
   };
@@ -308,7 +363,11 @@ export function runLocalPipeline(
 ): AssetDnaEnvelope {
   const classified = documents.map((document) => ({
     ...document,
-    type: classifyDocument(document.name, document.extractedText ?? '', document.type),
+    type: classifyDocument(
+      document.name,
+      document.extractedText ?? '',
+      document.type,
+    ),
     extractedText: normalizeExtractionText(document.extractedText ?? ''),
   }));
   const facts = options?.facts ?? extractFacts(classified);
@@ -326,8 +385,14 @@ export function runLocalPipeline(
   const summaryBits = [
     `${asset.name} intelligence envelope from ${classified.length} source document${classified.length === 1 ? '' : 's'}.`,
   ];
-  if (valueFact) summaryBits.push(`Primary mark ${valueFact.value} (${valueFact.label.toLowerCase()}).`);
-  if (risk.flags.length) summaryBits.push(`Risk ${risk.rating.toLowerCase()} with ${risk.flags.length} flag(s).`);
+  if (valueFact)
+    summaryBits.push(
+      `Primary mark ${valueFact.value} (${valueFact.label.toLowerCase()}).`,
+    );
+  if (risk.flags.length)
+    summaryBits.push(
+      `Risk ${risk.rating.toLowerCase()} with ${risk.flags.length} flag(s).`,
+    );
 
   const envelope: AssetDnaEnvelope = {
     assetId: asset.id,
@@ -429,13 +494,20 @@ export function answerCopilot(
     );
   }
 
-  const wantsProjection = /(predict|forecast|future|forward|projected|projection|outlook)/.test(q);
+  const wantsProjection =
+    /(predict|forecast|future|forward|projected|projection|outlook)/.test(q);
   const wantsValue = /(value|valuation|worth|nav|price|mark)/.test(q);
   const wantsRisk = /(risk|concern|flag|lease)/.test(q);
   const wantsOwnership = /(owner|ownership|who owns|title)/.test(q);
   const wantsOccupancy = /occupancy/.test(q);
-  const multi = [wantsProjection, wantsValue, wantsRisk, wantsOwnership, wantsOccupancy].filter(Boolean)
-    .length > 1;
+  const multi =
+    [
+      wantsProjection,
+      wantsValue,
+      wantsRisk,
+      wantsOwnership,
+      wantsOccupancy,
+    ].filter(Boolean).length > 1;
 
   const sections: CopilotSection[] = [];
   let title = 'Intelligence briefing';
@@ -446,7 +518,8 @@ export function answerCopilot(
 
   if (wantsProjection && envelope.projection) {
     const y3 =
-      envelope.projection.horizons.find((item) => item.years === 3) ?? envelope.projection.horizons[0];
+      envelope.projection.horizons.find((item) => item.years === 3) ??
+      envelope.projection.horizons[0];
     if (y3) {
       citations.push({ label: 'Forward valuation model' });
       const valueFact = pickValueFact(envelope.facts);
@@ -489,7 +562,9 @@ export function answerCopilot(
         documentId: valueFact.provenance[0]?.sourceDocumentId,
       });
     }
-    const purchase = envelope.facts.find((fact) => fact.key === 'purchase_price');
+    const purchase = envelope.facts.find(
+      (fact) => fact.key === 'purchase_price',
+    );
     if (purchase && valueFact && valueFact.key !== 'purchase_price') {
       citations.push({
         label: purchase.label,
@@ -499,7 +574,10 @@ export function answerCopilot(
     if (!metric) {
       title = 'Current valuation';
       headline = 'Primary mark taken from the Asset DNA envelope.';
-      metric = formatMoney(envelope.valuation.amount, envelope.valuation.currency);
+      metric = formatMoney(
+        envelope.valuation.amount,
+        envelope.valuation.currency,
+      );
       metricLabel = 'Current mark';
       confidence = envelope.valuation.confidence;
     }
@@ -555,13 +633,17 @@ export function answerCopilot(
     }
     sections.push({
       title: 'Flags',
-      body: envelope.risk.flags.length ? envelope.risk.flags.join('\n') : 'No material flags recorded.',
+      body: envelope.risk.flags.length
+        ? envelope.risk.flags.join('\n')
+        : 'No material flags recorded.',
       kind: 'list',
     });
   }
 
   if (wantsOwnership) {
-    const ownership = envelope.facts.find((fact) => fact.key === 'legal_ownership');
+    const ownership = envelope.facts.find(
+      (fact) => fact.key === 'legal_ownership',
+    );
     if (ownership) {
       citations.push({
         label: ownership.label,
@@ -628,7 +710,10 @@ export function answerCopilot(
     (document.extractedText ?? '').toLowerCase().includes(keyword ?? '___'),
   );
   if (keywordHits[0]) {
-    citations.push({ label: keywordHits[0].name, documentId: keywordHits[0].id });
+    citations.push({
+      label: keywordHits[0].name,
+      documentId: keywordHits[0].id,
+    });
   }
   return replyFromBriefing(
     {
@@ -641,7 +726,8 @@ export function answerCopilot(
           kind: 'note',
         },
       ],
-      disclaimer: 'Briefing derived from Asset DNA facts with source provenance. Not a legal opinion.',
+      disclaimer:
+        'Briefing derived from Asset DNA facts with source provenance. Not a legal opinion.',
     },
     citations,
   );

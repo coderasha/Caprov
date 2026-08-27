@@ -86,20 +86,32 @@ export function projectValuation(input: {
   if (purchase != null && purchase > 0) {
     const holdYears = Math.max(
       0.5,
-      (Date.now() - Date.parse(valuation.asOf || new Date().toISOString())) / (365.25 * 24 * 3600 * 1000) || 1,
+      (Date.now() - Date.parse(valuation.asOf || new Date().toISOString())) /
+        (365.25 * 24 * 3600 * 1000) || 1,
     );
-    const realized = Math.pow(baseAmount / purchase, 1 / Math.max(holdYears, 0.75)) - 1;
+    const realized =
+      Math.pow(baseAmount / purchase, 1 / Math.max(holdYears, 0.75)) - 1;
     const adj = clamp(realized * 0.15, -0.01, 0.015);
     growth += adj;
-    drivers.push(`realized mark drift vs purchase → ${(adj * 100).toFixed(2)} pp`);
+    drivers.push(
+      `realized mark drift vs purchase → ${(adj * 100).toFixed(2)} pp`,
+    );
   }
 
   if (risk) {
     const penalty =
-      risk.rating === 'HIGH' ? 0.02 : risk.rating === 'ELEVATED' ? 0.012 : risk.rating === 'MODERATE' ? 0.005 : 0;
+      risk.rating === 'HIGH'
+        ? 0.02
+        : risk.rating === 'ELEVATED'
+          ? 0.012
+          : risk.rating === 'MODERATE'
+            ? 0.005
+            : 0;
     growth -= penalty;
     if (penalty) {
-      drivers.push(`risk ${risk.rating.toLowerCase()} −${(penalty * 100).toFixed(1)} pp`);
+      drivers.push(
+        `risk ${risk.rating.toLowerCase()} −${(penalty * 100).toFixed(1)} pp`,
+      );
     }
   }
 
@@ -123,7 +135,9 @@ export function projectValuation(input: {
     const bear = roundMoney(baseAmount * Math.pow(1 + bearGrowth, years));
     const bull = roundMoney(baseAmount * Math.pow(1 + bullGrowth, years));
     const band = 0.06 + years * 0.025;
-    const confidence = Number(clamp(baseConfidence - years * 0.08, 0.25, 0.85).toFixed(2));
+    const confidence = Number(
+      clamp(baseConfidence - years * 0.08, 0.25, 0.85).toFixed(2),
+    );
 
     return {
       years,
@@ -156,8 +170,12 @@ export function projectValuation(input: {
     confidence: horizons[0]?.confidence ?? baseConfidence,
     sourceDocumentIds: valuation
       ? facts
-          .filter((fact) => ['market_value', 'nav', 'purchase_price'].includes(fact.key))
-          .flatMap((fact) => fact.provenance.map((item) => item.sourceDocumentId))
+          .filter((fact) =>
+            ['market_value', 'nav', 'purchase_price'].includes(fact.key),
+          )
+          .flatMap((fact) =>
+            fact.provenance.map((item) => item.sourceDocumentId),
+          )
           .filter((id, index, all) => all.indexOf(id) === index)
       : [],
   };

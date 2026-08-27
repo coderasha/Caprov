@@ -35,11 +35,14 @@ As of: 30 June 2026`,
     expect(envelope.projection).toBeDefined();
     expect(envelope.projection?.baseAmount).toBe(92_800_000);
     expect(envelope.projection?.horizons).toHaveLength(3);
-    expect(envelope.projection?.horizons.map((item) => item.years)).toEqual([1, 3, 5]);
+    expect(envelope.projection?.horizons.map((item) => item.years)).toEqual([
+      1, 3, 5,
+    ]);
 
     const y1 = envelope.projection!.horizons[0]!;
     const expected = Math.round(
-      92_800_000 * Math.pow(1 + envelope.projection!.assumptions.annualGrowthRate, 1),
+      92_800_000 *
+        Math.pow(1 + envelope.projection!.assumptions.annualGrowthRate, 1),
     );
     expect(y1.base).toBe(expected);
     expect(y1.bear).toBeLessThan(y1.base);
@@ -57,7 +60,11 @@ As of: 30 June 2026`,
       },
       harbourDocs,
     );
-    const reply = answerCopilot('What is the projected future value?', envelope, harbourDocs);
+    const reply = answerCopilot(
+      'What is the projected future value?',
+      envelope,
+      harbourDocs,
+    );
     expect(reply.briefing.title.toLowerCase()).toContain('forward');
     expect(reply.answer).toContain('92,800,000');
     expect(reply.briefing.metric).toBeTruthy();

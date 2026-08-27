@@ -1,5 +1,8 @@
 import { TokenizationController } from './tokenization.controller';
-import { emptyStore, type CaprovData } from '../../infrastructure/database/models';
+import {
+  emptyStore,
+  type CaprovData,
+} from '../../infrastructure/database/models';
 import type { DatabaseService } from '../../infrastructure/database/database.service';
 import type { AuditService } from '../audit/audit.service';
 import type { EthereumSepoliaTokenService } from '../../infrastructure/blockchain/ethereum-sepolia-token.service';

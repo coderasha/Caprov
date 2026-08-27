@@ -51,7 +51,9 @@ export class UsersController {
       (item) => item.organizationId === user.organizationId,
     );
     return memberships.map((membership) => {
-      const member = this.db.snapshot.users.find((item) => item.id === membership.userId);
+      const member = this.db.snapshot.users.find(
+        (item) => item.id === membership.userId,
+      );
       return {
         id: member?.id,
         email: member?.email,
@@ -67,13 +69,22 @@ export class UsersController {
   @Roles('ORG_ADMIN', 'PLATFORM_ADMIN')
   async invite(@CurrentUser() user: AuthUser, @Body() dto: InviteUserDto) {
     const email = dto.email.toLowerCase();
-    const existing = this.db.snapshot.users.find((item) => item.email.toLowerCase() === email);
+    const existing = this.db.snapshot.users.find(
+      (item) => item.email.toLowerCase() === email,
+    );
     if (existing) {
       const alreadyMember = this.db.snapshot.memberships.some(
-        (item) => item.userId === existing.id && item.organizationId === user.organizationId,
+        (item) =>
+          item.userId === existing.id &&
+          item.organizationId === user.organizationId,
       );
       if (alreadyMember) {
-        return { id: existing.id, email: existing.email, fullName: existing.fullName, role: dto.role };
+        return {
+          id: existing.id,
+          email: existing.email,
+          fullName: existing.fullName,
+          role: dto.role,
+        };
       }
     }
     const now = new Date().toISOString();

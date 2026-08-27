@@ -10,8 +10,19 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Type } from 'class-transformer';
-import { IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
-import type { CollateralPosition, CurrencyCode, LoanFacility } from '@caprov/types';
+import {
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
+import type {
+  CollateralPosition,
+  CurrencyCode,
+  LoanFacility,
+} from '@caprov/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -90,7 +101,8 @@ export class CollateralController {
   @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateCollateralDto) {
     const asset = this.db.snapshot.assets.find(
-      (item) => item.id === dto.assetId && item.organizationId === user.organizationId,
+      (item) =>
+        item.id === dto.assetId && item.organizationId === user.organizationId,
     );
     if (!asset) throw new NotFoundException('Asset not found');
 
@@ -108,7 +120,9 @@ export class CollateralController {
 
     if (dto.tokenId) {
       const token = this.db.snapshot.tokens.find(
-        (item) => item.id === dto.tokenId && item.organizationId === user.organizationId,
+        (item) =>
+          item.id === dto.tokenId &&
+          item.organizationId === user.organizationId,
       );
       if (!token) throw new NotFoundException('Token position not found');
       if (token.assetId !== asset.id) {
@@ -121,7 +135,9 @@ export class CollateralController {
           item.status === 'ACTIVE',
       );
       if (tokenInUse) {
-        throw new BadRequestException('Token is already pledged in an active collateral position');
+        throw new BadRequestException(
+          'Token is already pledged in an active collateral position',
+        );
       }
     }
 
@@ -130,7 +146,9 @@ export class CollateralController {
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
     const pledgedValue = dto.pledgedValue ?? valuation?.payload.amount;
     if (!pledgedValue || pledgedValue <= 0) {
-      throw new BadRequestException('pledgedValue required when the asset has no valuation mark');
+      throw new BadRequestException(
+        'pledgedValue required when the asset has no valuation mark',
+      );
     }
     const haircutBps = dto.haircutBps ?? 1500;
     const now = new Date().toISOString();
@@ -209,7 +227,9 @@ export class CollateralController {
       entityId: id,
       metadata: { pledgedValue: nextPledged, haircutBps: nextHaircut },
     });
-    return this.hydrate(this.db.snapshot.collateralPositions.find((item) => item.id === id)!);
+    return this.hydrate(
+      this.db.snapshot.collateralPositions.find((item) => item.id === id)!,
+    );
   }
 
   @Post(':id/release')
@@ -242,7 +262,9 @@ export class CollateralController {
       entityType: 'Collateral',
       entityId: id,
     });
-    return this.hydrate(this.db.snapshot.collateralPositions.find((item) => item.id === id)!);
+    return this.hydrate(
+      this.db.snapshot.collateralPositions.find((item) => item.id === id)!,
+    );
   }
 
   private advanceable(pledgedValue: number, haircutBps: number): number {
@@ -256,13 +278,21 @@ export class CollateralController {
   }
 
   private utilizedAmount(collateralId: string): number {
-    return this.activeLoans(collateralId).reduce((sum, loan) => sum + loan.outstanding, 0);
+    return this.activeLoans(collateralId).reduce(
+      (sum, loan) => sum + loan.outstanding,
+      0,
+    );
   }
 
   private hydrate(position: CollateralPosition) {
     const loans = this.activeLoans(position.id);
-    const utilizedAmount = loans.reduce((sum, loan) => sum + loan.outstanding, 0);
-    const availableAmount = Number(Math.max(0, position.advanceableValue - utilizedAmount).toFixed(2));
+    const utilizedAmount = loans.reduce(
+      (sum, loan) => sum + loan.outstanding,
+      0,
+    );
+    const availableAmount = Number(
+      Math.max(0, position.advanceableValue - utilizedAmount).toFixed(2),
+    );
     return {
       ...position,
       utilizedAmount,
@@ -270,9 +300,13 @@ export class CollateralController {
       canRelease: position.status === 'ACTIVE' && loans.length === 0,
       activeLoanCount: loans.length,
       loans,
-      asset: this.db.snapshot.assets.find((item) => item.id === position.assetId) ?? null,
+      asset:
+        this.db.snapshot.assets.find((item) => item.id === position.assetId) ??
+        null,
       token: position.tokenId
-        ? this.db.snapshot.tokens.find((item) => item.id === position.tokenId) ?? null
+        ? (this.db.snapshot.tokens.find(
+            (item) => item.id === position.tokenId,
+          ) ?? null)
         : null,
       valuation:
         this.db.snapshot.valuations

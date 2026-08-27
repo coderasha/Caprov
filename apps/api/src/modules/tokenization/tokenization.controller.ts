@@ -63,7 +63,8 @@ export class TokenizationController {
   @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
   async tokenize(@CurrentUser() user: AuthUser, @Body() dto: TokenizeDto) {
     const asset = this.db.snapshot.assets.find(
-      (item) => item.id === dto.assetId && item.organizationId === user.organizationId,
+      (item) =>
+        item.id === dto.assetId && item.organizationId === user.organizationId,
     );
     if (!asset) throw new NotFoundException('Asset not found');
     if (dto.supply > 1_000_000_000) {
@@ -83,7 +84,12 @@ export class TokenizationController {
       id: pendingId,
       organizationId: user.organizationId,
       assetId: asset.id,
-      status: mint.status === 'CONFIRMED' ? 'CONFIRMED' : mint.status === 'FAILED' ? 'FAILED' : 'SIMULATED',
+      status:
+        mint.status === 'CONFIRMED'
+          ? 'CONFIRMED'
+          : mint.status === 'FAILED'
+            ? 'FAILED'
+            : 'SIMULATED',
       chainId: mint.chainId,
       chainName: mint.chainName,
       contractAddress: mint.contractAddress,
@@ -120,7 +126,9 @@ export class TokenizationController {
   private hydrate(token: TokenPosition) {
     return {
       ...token,
-      asset: this.db.snapshot.assets.find((item) => item.id === token.assetId) ?? null,
+      asset:
+        this.db.snapshot.assets.find((item) => item.id === token.assetId) ??
+        null,
       valuation:
         this.db.snapshot.valuations
           .filter((item) => item.assetId === token.assetId)

@@ -20,7 +20,10 @@ export class LlmModelsService {
     const selectedModelId = this.getSelectedModelId(organizationId);
     const selected = getLlmModel(selectedModelId);
     const availability = Object.fromEntries(
-      LLM_MODEL_CATALOG.map((model) => [model.id, getLlmModelAvailability(model)]),
+      LLM_MODEL_CATALOG.map((model) => [
+        model.id,
+        getLlmModelAvailability(model),
+      ]),
     );
     return {
       selectedModelId,
@@ -31,7 +34,9 @@ export class LlmModelsService {
   }
 
   getSelectedModelId(organizationId: string): string {
-    const organization = this.db.snapshot.organizations.find((item) => item.id === organizationId);
+    const organization = this.db.snapshot.organizations.find(
+      (item) => item.id === organizationId,
+    );
     return organization?.llmModelId || getPreferredDefaultLlmModelId();
   }
 
@@ -39,13 +44,19 @@ export class LlmModelsService {
     return getLlmModel(this.getSelectedModelId(organizationId));
   }
 
-  select(organizationId: string, actorUserId: string, modelId: string): LlmModelSelection {
+  select(
+    organizationId: string,
+    actorUserId: string,
+    modelId: string,
+  ): LlmModelSelection {
     const model = LLM_MODEL_CATALOG.find((item) => item.id === modelId);
     if (!model) {
       throw new BadRequestException(`Unknown model: ${modelId}`);
     }
     this.db.mutate((draft) => {
-      const organization = draft.organizations.find((item) => item.id === organizationId);
+      const organization = draft.organizations.find(
+        (item) => item.id === organizationId,
+      );
       if (!organization) {
         return;
       }

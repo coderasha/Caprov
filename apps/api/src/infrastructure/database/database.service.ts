@@ -87,7 +87,9 @@ export class DatabaseService implements OnModuleInit {
       }
     }
     for (const document of this.data.documents) {
-      const groupKey = document.assetId ? `${document.assetId}:${document.type}` : `standalone:${document.id}`;
+      const groupKey = document.assetId
+        ? `${document.assetId}:${document.type}`
+        : `standalone:${document.id}`;
       if (!document.groupKey) {
         document.groupKey = groupKey;
         changed = true;
@@ -148,9 +150,13 @@ export class DatabaseService implements OnModuleInit {
         changed = true;
       }
     }
-    const holdingsByPortfolio = new Map<string, Array<{ id: string; weight?: number }>>();
+    const holdingsByPortfolio = new Map<
+      string,
+      Array<{ id: string; weight?: number }>
+    >();
     for (const holding of this.data.holdings) {
-      const portfolioHoldings = holdingsByPortfolio.get(holding.portfolioId) ?? [];
+      const portfolioHoldings =
+        holdingsByPortfolio.get(holding.portfolioId) ?? [];
       portfolioHoldings.push(holding);
       holdingsByPortfolio.set(holding.portfolioId, portfolioHoldings);
     }
@@ -164,9 +170,13 @@ export class DatabaseService implements OnModuleInit {
         }
       }
     }
-    const seededPlatformOrg = seeded.organizations.find((item) => item.id === 'org_caprov');
+    const seededPlatformOrg = seeded.organizations.find(
+      (item) => item.id === 'org_caprov',
+    );
     if (seededPlatformOrg) {
-      const existingPlatformOrg = this.data.organizations.find((item) => item.id === seededPlatformOrg.id);
+      const existingPlatformOrg = this.data.organizations.find(
+        (item) => item.id === seededPlatformOrg.id,
+      );
       if (!existingPlatformOrg) {
         this.data.organizations.unshift(seededPlatformOrg);
         changed = true;
@@ -189,11 +199,16 @@ export class DatabaseService implements OnModuleInit {
         }
       }
     }
-    const seededPlatformAdmin = seeded.users.find((item) => item.id === 'usr_caprov_admin');
+    const seededPlatformAdmin = seeded.users.find(
+      (item) => item.id === 'usr_caprov_admin',
+    );
     if (seededPlatformAdmin) {
-      const legacyPlatformAdmin = this.data.users.find((item) => item.email.toLowerCase() === 'admin@caprov.io');
+      const legacyPlatformAdmin = this.data.users.find(
+        (item) => item.email.toLowerCase() === 'admin@caprov.io',
+      );
       const existingPlatformAdmin =
-        this.data.users.find((item) => item.id === seededPlatformAdmin.id) ?? legacyPlatformAdmin;
+        this.data.users.find((item) => item.id === seededPlatformAdmin.id) ??
+        legacyPlatformAdmin;
       if (!existingPlatformAdmin) {
         this.data.users.unshift(seededPlatformAdmin);
         changed = true;
@@ -214,13 +229,18 @@ export class DatabaseService implements OnModuleInit {
           existingPlatformAdmin.title = seededPlatformAdmin.title;
           changed = true;
         }
-        if (existingPlatformAdmin.passwordHash !== seededPlatformAdmin.passwordHash) {
+        if (
+          existingPlatformAdmin.passwordHash !==
+          seededPlatformAdmin.passwordHash
+        ) {
           existingPlatformAdmin.passwordHash = seededPlatformAdmin.passwordHash;
           changed = true;
         }
       }
     }
-    const seededPlatformMembership = seeded.memberships.find((item) => item.id === 'mem_caprov_admin');
+    const seededPlatformMembership = seeded.memberships.find(
+      (item) => item.id === 'mem_caprov_admin',
+    );
     if (seededPlatformMembership) {
       const hasPlatformMembership = this.data.memberships.some(
         (item) =>

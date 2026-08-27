@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
 import type { IntelligenceJobType } from '@caprov/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -96,7 +104,11 @@ export class IntelligenceController {
     @Param('assetId') assetId: string,
     @Body() dto: RunPipelineDto,
   ) {
-    return this.intelligence.runPipeline(user, assetId, dto.type ?? 'FULL_PIPELINE');
+    return this.intelligence.runPipeline(
+      user,
+      assetId,
+      dto.type ?? 'FULL_PIPELINE',
+    );
   }
 
   @Get('copilot/threads')

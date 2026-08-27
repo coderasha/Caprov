@@ -19,7 +19,11 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import type { CurrencyCode, MarketplaceListing, TokenPosition } from '@caprov/types';
+import type {
+  CurrencyCode,
+  MarketplaceListing,
+  TokenPosition,
+} from '@caprov/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -106,7 +110,8 @@ export class MarketplaceController {
     return {
       listings: this.list(user),
       openCount: this.db.snapshot.listings.filter(
-        (item) => item.organizationId === user.organizationId && item.status === 'OPEN',
+        (item) =>
+          item.organizationId === user.organizationId && item.status === 'OPEN',
       ).length,
     };
   }
@@ -131,7 +136,8 @@ export class MarketplaceController {
   @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
   async create(@CurrentUser() user: AuthUser, @Body() dto: CreateListingDto) {
     const asset = this.db.snapshot.assets.find(
-      (item) => item.id === dto.assetId && item.organizationId === user.organizationId,
+      (item) =>
+        item.id === dto.assetId && item.organizationId === user.organizationId,
     );
     if (!asset) throw new NotFoundException('Asset not found');
     const valuation = this.db.snapshot.valuations
@@ -139,10 +145,12 @@ export class MarketplaceController {
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
     const now = new Date().toISOString();
     const offeringType = dto.offeringType ?? 'SALE';
-    const quantityBps = offeringType === 'LEASE' ? 10_000 : (dto.quantityBps ?? 10_000);
-    let token: TokenPosition | null = this.db.snapshot.tokens
-      .filter((item) => item.assetId === asset.id)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null;
+    const quantityBps =
+      offeringType === 'LEASE' ? 10_000 : (dto.quantityBps ?? 10_000);
+    let token: TokenPosition | null =
+      this.db.snapshot.tokens
+        .filter((item) => item.assetId === asset.id)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null;
     let mintedToken: TokenPosition | null = null;
 
     if (dto.tokenizeOnCreate) {
@@ -158,7 +166,11 @@ export class MarketplaceController {
         organizationId: user.organizationId,
         assetId: asset.id,
         status:
-          mint.status === 'CONFIRMED' ? 'CONFIRMED' : mint.status === 'FAILED' ? 'FAILED' : 'SIMULATED',
+          mint.status === 'CONFIRMED'
+            ? 'CONFIRMED'
+            : mint.status === 'FAILED'
+              ? 'FAILED'
+              : 'SIMULATED',
         chainId: mint.chainId,
         chainName: mint.chainName,
         contractAddress: mint.contractAddress,
@@ -176,21 +188,26 @@ export class MarketplaceController {
 
     const askPrice =
       offeringType === 'LEASE'
-        ? dto.leaseRate ?? dto.askPrice ?? 0
-        : dto.askPrice ?? valuation?.payload.amount ?? 0;
+        ? (dto.leaseRate ?? dto.askPrice ?? 0)
+        : (dto.askPrice ?? valuation?.payload.amount ?? 0);
     const listing: MarketplaceListing = {
       id: createId('lst'),
       organizationId: user.organizationId,
       assetId: asset.id,
-      title: dto.title ?? `${asset.name} ${offeringType === 'LEASE' ? 'lease' : 'interest'}`,
+      title:
+        dto.title ??
+        `${asset.name} ${offeringType === 'LEASE' ? 'lease' : 'interest'}`,
       offeringType,
       status: 'OPEN',
       summary: dto.summary?.trim(),
-      imageUrl: dto.imageUrl?.trim() || asset.primaryImageUrl || asset.imageUrls?.[0],
+      imageUrl:
+        dto.imageUrl?.trim() || asset.primaryImageUrl || asset.imageUrls?.[0],
       askPrice,
       currency: dto.currency ?? valuation?.payload.currency ?? asset.currency,
-      leaseRate: offeringType === 'LEASE' ? dto.leaseRate ?? dto.askPrice : undefined,
-      leaseTermMonths: offeringType === 'LEASE' ? dto.leaseTermMonths : undefined,
+      leaseRate:
+        offeringType === 'LEASE' ? (dto.leaseRate ?? dto.askPrice) : undefined,
+      leaseTermMonths:
+        offeringType === 'LEASE' ? dto.leaseTermMonths : undefined,
       tokenPositionId: token?.id,
       tokenizationMode: token?.mode,
       quantityBps,
@@ -199,10 +216,14 @@ export class MarketplaceController {
       updatedAt: now,
     };
     if (offeringType === 'SALE' && !listing.askPrice) {
-      throw new BadRequestException('Ask price required when asset has no valuation mark');
+      throw new BadRequestException(
+        'Ask price required when asset has no valuation mark',
+      );
     }
     if (offeringType === 'LEASE' && !listing.leaseRate) {
-      throw new BadRequestException('Lease rate is required for lease listings');
+      throw new BadRequestException(
+        'Lease rate is required for lease listings',
+      );
     }
     this.db.mutate((draft) => {
       if (mintedToken) {
@@ -251,7 +272,9 @@ export class MarketplaceController {
   }
 
   private hydrate(listing: MarketplaceListing) {
-    const asset = this.db.snapshot.assets.find((item) => item.id === listing.assetId) ?? null;
+    const asset =
+      this.db.snapshot.assets.find((item) => item.id === listing.assetId) ??
+      null;
     const valuation =
       this.db.snapshot.valuations
         .filter((item) => item.assetId === listing.assetId)
@@ -261,7 +284,9 @@ export class MarketplaceController {
         .filter((item) => item.assetId === listing.assetId)
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null;
     const token =
-      this.db.snapshot.tokens.find((item) => item.id === listing.tokenPositionId) ??
+      this.db.snapshot.tokens.find(
+        (item) => item.id === listing.tokenPositionId,
+      ) ??
       this.db.snapshot.tokens
         .filter((item) => item.assetId === listing.assetId)
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ??

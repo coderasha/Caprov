@@ -22,7 +22,10 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('switch-organization')
-  switchOrganization(@CurrentUser() user: AuthUser, @Body() dto: SwitchOrganizationDto) {
+  switchOrganization(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: SwitchOrganizationDto,
+  ) {
     return this.auth.switchOrganization(user, dto.organizationId);
   }
 

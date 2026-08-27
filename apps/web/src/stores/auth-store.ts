@@ -44,8 +44,8 @@ export const useAuthStore = create<AuthState>()(
         organization: state.organization,
         roles: state.roles,
       }),
-      onRehydrateStorage: () => () => {
-        useAuthStore.getState().setHasHydrated(true);
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
       },
     },
   ),

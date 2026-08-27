@@ -19,7 +19,10 @@ export interface DocumentVersionAnchorRequest {
 }
 
 export interface DocumentVersionAnchorResult {
-  status: Extract<DocumentAnchorStatus, 'BLOCKCHAIN_ANCHORED' | 'SIMULATED' | 'ANCHOR_FAILED'>;
+  status: Extract<
+    DocumentAnchorStatus,
+    'BLOCKCHAIN_ANCHORED' | 'SIMULATED' | 'ANCHOR_FAILED'
+  >;
   mode: DocumentAnchorMode;
   chainId: number;
   chainName: string;
@@ -60,8 +63,13 @@ export interface BlockchainAdapterNetworkStatus {
 
 export interface BlockchainAdapter {
   getDocumentNetworkStatus(): BlockchainAdapterNetworkStatus;
-  buildDocumentBlockchainReference(assetId: string, documentType: string): string;
-  anchorDocumentVersion(request: DocumentVersionAnchorRequest): Promise<DocumentVersionAnchorResult>;
+  buildDocumentBlockchainReference(
+    assetId: string,
+    documentType: string,
+  ): string;
+  anchorDocumentVersion(
+    request: DocumentVersionAnchorRequest,
+  ): Promise<DocumentVersionAnchorResult>;
   getAnchoredDocumentVersion(
     blockchainReference: string,
     version: number,

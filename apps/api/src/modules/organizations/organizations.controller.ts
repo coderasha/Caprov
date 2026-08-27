@@ -9,7 +9,13 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { IsEmail, IsIn, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsIn,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 import type { OrganizationStatus } from '@caprov/types';
 import { hash } from 'bcryptjs';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -135,7 +141,10 @@ export class OrganizationsController {
 
   @Post()
   @Roles('PLATFORM_ADMIN')
-  async create(@CurrentUser() user: AuthUser, @Body() dto: CreateOrganizationDto) {
+  async create(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: CreateOrganizationDto,
+  ) {
     const created = await this.createOrganizationAndAdmin(dto);
     this.audit.log({
       organizationId: user.organizationId,
@@ -155,7 +164,9 @@ export class OrganizationsController {
     @Param('id') id: string,
     @Body() dto: ReviewAccessRequestDto,
   ) {
-    const request = this.db.snapshot.organizationAccessRequests.find((item) => item.id === id);
+    const request = this.db.snapshot.organizationAccessRequests.find(
+      (item) => item.id === id,
+    );
     if (!request) {
       return null;
     }
@@ -177,7 +188,9 @@ export class OrganizationsController {
 
     const reviewedAt = new Date().toISOString();
     this.db.mutate((draft) => {
-      const current = draft.organizationAccessRequests.find((item) => item.id === id);
+      const current = draft.organizationAccessRequests.find(
+        (item) => item.id === id,
+      );
       if (current) {
         current.status = 'APPROVED';
         current.reviewedAt = reviewedAt;
@@ -213,7 +226,9 @@ export class OrganizationsController {
   ) {
     const reviewedAt = new Date().toISOString();
     const updated = this.db.mutate((draft) => {
-      const request = draft.organizationAccessRequests.find((item) => item.id === id);
+      const request = draft.organizationAccessRequests.find(
+        (item) => item.id === id,
+      );
       if (!request) {
         return null;
       }
@@ -256,7 +271,9 @@ export class OrganizationsController {
     return this.db.snapshot.memberships
       .filter((item) => item.organizationId === id)
       .map((membership) => {
-        const member = this.db.snapshot.users.find((item) => item.id === membership.userId);
+        const member = this.db.snapshot.users.find(
+          (item) => item.id === membership.userId,
+        );
         return {
           id: member?.id,
           email: member?.email,
@@ -276,7 +293,9 @@ export class OrganizationsController {
     @Body() dto: UpdateOrganizationStatusDto,
   ) {
     if (id === 'org_caprov' && dto.status === 'SUSPENDED') {
-      throw new ForbiddenException('The platform organization cannot be suspended');
+      throw new ForbiddenException(
+        'The platform organization cannot be suspended',
+      );
     }
     const now = new Date().toISOString();
     const updated = this.db.mutate((draft) => {
@@ -288,7 +307,8 @@ export class OrganizationsController {
       organization.updatedAt = now;
       if (dto.status === 'SUSPENDED') {
         organization.suspendedAt = now;
-        organization.suspensionNote = dto.note?.trim() || 'Suspended by platform admin';
+        organization.suspensionNote =
+          dto.note?.trim() || 'Suspended by platform admin';
       } else {
         organization.suspendedAt = undefined;
         organization.suspensionNote = undefined;
@@ -301,7 +321,10 @@ export class OrganizationsController {
     this.audit.log({
       organizationId: user.organizationId,
       actorUserId: user.id,
-      action: dto.status === 'SUSPENDED' ? 'organization.suspended' : 'organization.reactivated',
+      action:
+        dto.status === 'SUSPENDED'
+          ? 'organization.suspended'
+          : 'organization.reactivated',
       entityType: 'Organization',
       entityId: id,
       metadata: { note: dto.note?.trim() || undefined },
@@ -316,12 +339,16 @@ export class OrganizationsController {
     @Param('id') id: string,
     @Body() dto: AssignOrganizationAdminDto,
   ) {
-    const organization = this.db.snapshot.organizations.find((item) => item.id === id);
+    const organization = this.db.snapshot.organizations.find(
+      (item) => item.id === id,
+    );
     if (!organization) {
       return null;
     }
     const email = dto.email.toLowerCase();
-    const existing = this.db.snapshot.users.find((item) => item.email.toLowerCase() === email);
+    const existing = this.db.snapshot.users.find(
+      (item) => item.email.toLowerCase() === email,
+    );
     const passwordHash = await hash(dto.password, 10);
     const now = new Date().toISOString();
     const userId = existing?.id ?? createId('usr');
@@ -373,7 +400,9 @@ export class OrganizationsController {
     this.audit.log({
       organizationId: user.organizationId,
       actorUserId: user.id,
-      action: existing ? 'organization.org_admin_reset' : 'organization.org_admin_created',
+      action: existing
+        ? 'organization.org_admin_reset'
+        : 'organization.org_admin_created',
       entityType: 'Organization',
       entityId: id,
       metadata: { email },
@@ -385,7 +414,9 @@ export class OrganizationsController {
   @Roles('ORG_ADMIN', 'PLATFORM_ADMIN')
   update(@CurrentUser() user: AuthUser, @Body() dto: UpdateOrganizationDto) {
     const updated = this.db.mutate((draft) => {
-      const organization = draft.organizations.find((item) => item.id === user.organizationId);
+      const organization = draft.organizations.find(
+        (item) => item.id === user.organizationId,
+      );
       if (!organization) {
         return null;
       }
@@ -409,7 +440,9 @@ export class OrganizationsController {
     requestedSlug?: string,
   ) {
     const email = input.email.toLowerCase();
-    if (this.db.snapshot.users.some((item) => item.email.toLowerCase() === email)) {
+    if (
+      this.db.snapshot.users.some((item) => item.email.toLowerCase() === email)
+    ) {
       throw new ConflictException('An account with this email already exists');
     }
     const normalizedBase = (requestedSlug ?? input.organizationName)
@@ -421,7 +454,8 @@ export class OrganizationsController {
     const now = new Date().toISOString();
     const organizationId = createId('org');
     const userId = createId('usr');
-    const passwordHash = passwordHashOverride ?? (await hash(input.password, 10));
+    const passwordHash =
+      passwordHashOverride ?? (await hash(input.password, 10));
 
     return this.db.mutate((draft) => {
       const organization = {
@@ -466,7 +500,9 @@ export class OrganizationsController {
   private ensureUniqueSlug(base: string) {
     let attempt = base;
     let i = 1;
-    while (this.db.snapshot.organizations.some((item) => item.slug === attempt)) {
+    while (
+      this.db.snapshot.organizations.some((item) => item.slug === attempt)
+    ) {
       i += 1;
       attempt = `${base}-${i}`;
     }
@@ -474,16 +510,28 @@ export class OrganizationsController {
   }
 
   private toPlatformOrganizationRow(id: string) {
-    const organization = this.db.snapshot.organizations.find((item) => item.id === id);
+    const organization = this.db.snapshot.organizations.find(
+      (item) => item.id === id,
+    );
     if (!organization) {
       return null;
     }
-    const memberships = this.db.snapshot.memberships.filter((item) => item.organizationId === id);
+    const memberships = this.db.snapshot.memberships.filter(
+      (item) => item.organizationId === id,
+    );
     const memberCount = memberships.length;
-    const orgAdminCount = memberships.filter((item) => item.role === 'ORG_ADMIN').length;
-    const assetCount = this.db.snapshot.assets.filter((item) => item.organizationId === id).length;
-    const documentCount = this.db.snapshot.documents.filter((item) => item.organizationId === id).length;
-    const portfolioCount = this.db.snapshot.portfolios.filter((item) => item.organizationId === id).length;
+    const orgAdminCount = memberships.filter(
+      (item) => item.role === 'ORG_ADMIN',
+    ).length;
+    const assetCount = this.db.snapshot.assets.filter(
+      (item) => item.organizationId === id,
+    ).length;
+    const documentCount = this.db.snapshot.documents.filter(
+      (item) => item.organizationId === id,
+    ).length;
+    const portfolioCount = this.db.snapshot.portfolios.filter(
+      (item) => item.organizationId === id,
+    ).length;
     return {
       ...organization,
       memberCount,

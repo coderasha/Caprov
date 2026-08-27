@@ -26,7 +26,8 @@ interface ProviderErrorPayload {
   };
 }
 
-const CURSOR_AGENT_BINARY = process.env.CURSOR_AGENT_BIN?.trim() || 'cursor-agent';
+const CURSOR_AGENT_BINARY =
+  process.env.CURSOR_AGENT_BIN?.trim() || 'cursor-agent';
 const CURSOR_AGENT_WORKDIR = process.env.CURSOR_AGENT_WORKDIR?.trim() || '/tmp';
 
 const REMOTE_ENDPOINTS: Record<string, ProviderEndpoint> = {
@@ -126,7 +127,8 @@ export async function resolveCopilotAnswer(options: {
         live: true,
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Cursor call failed';
+      const message =
+        error instanceof Error ? error.message : 'Cursor call failed';
       return {
         answer: localAnswer,
         mode: 'deterministic',
@@ -163,7 +165,8 @@ export async function resolveCopilotAnswer(options: {
       live: true,
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Remote call failed';
+    const message =
+      error instanceof Error ? error.message : 'Remote call failed';
     return {
       answer: localAnswer,
       mode: 'deterministic',
@@ -219,7 +222,12 @@ async function callRemoteModel(
         model: endpoint.model,
         max_tokens: 800,
         system,
-        messages: [{ role: 'user', content: `Context:\n${context}\n\nQuestion: ${question}` }],
+        messages: [
+          {
+            role: 'user',
+            content: `Context:\n${context}\n\nQuestion: ${question}`,
+          },
+        ],
       }),
       signal: AbortSignal.timeout(20_000),
     });
@@ -241,7 +249,11 @@ async function callRemoteModel(
         contents: [
           {
             role: 'user',
-            parts: [{ text: `${system}\n\nContext:\n${context}\n\nQuestion: ${question}` }],
+            parts: [
+              {
+                text: `${system}\n\nContext:\n${context}\n\nQuestion: ${question}`,
+              },
+            ],
           },
         ],
       }),
@@ -253,7 +265,11 @@ async function callRemoteModel(
     const payload = (await response.json()) as {
       candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
     };
-    return payload.candidates?.[0]?.content?.parts?.map((part) => part.text ?? '').join('\n') ?? '';
+    return (
+      payload.candidates?.[0]?.content?.parts
+        ?.map((part) => part.text ?? '')
+        .join('\n') ?? ''
+    );
   }
 
   const response = await fetch(endpoint.url, {
@@ -268,7 +284,10 @@ async function callRemoteModel(
       temperature: 0.2,
       messages: [
         { role: 'system', content: system },
-        { role: 'user', content: `Context:\n${context}\n\nQuestion: ${question}` },
+        {
+          role: 'user',
+          content: `Context:\n${context}\n\nQuestion: ${question}`,
+        },
       ],
     }),
     signal: AbortSignal.timeout(20_000),
@@ -282,7 +301,10 @@ async function callRemoteModel(
   return payload.choices?.[0]?.message?.content ?? '';
 }
 
-async function callCursorAgentModel(question: string, context: string): Promise<string> {
+async function callCursorAgentModel(
+  question: string,
+  context: string,
+): Promise<string> {
   const apiKey = process.env.CURSOR_API_KEY?.trim();
   if (!apiKey) {
     throw new Error('Missing CURSOR_API_KEY');
@@ -301,11 +323,17 @@ async function callCursorAgentModel(question: string, context: string): Promise<
     `Question: ${question}`,
   ].join('\n');
 
-  const stdout = await execCursorAgent(['--print', '--output-format', 'text', prompt], apiKey);
+  const stdout = await execCursorAgent(
+    ['--print', '--output-format', 'text', prompt],
+    apiKey,
+  );
   return stdout.trim();
 }
 
-async function execCursorAgent(args: string[], apiKey: string): Promise<string> {
+async function execCursorAgent(
+  args: string[],
+  apiKey: string,
+): Promise<string> {
   return await new Promise((resolve, reject) => {
     execFile(
       CURSOR_AGENT_BINARY,

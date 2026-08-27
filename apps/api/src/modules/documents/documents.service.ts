@@ -15,7 +15,10 @@ import { createId } from '../../infrastructure/database/ids';
 import type { DocumentRecord } from '../../infrastructure/database/models';
 import { StorageService } from '../../infrastructure/storage/storage.service';
 import { AuditService } from '../audit/audit.service';
-import { extractFactsAccurate, normalizeExtractionText } from '../intelligence/extraction-accuracy';
+import {
+  extractFactsAccurate,
+  normalizeExtractionText,
+} from '../intelligence/extraction-accuracy';
 
 @Injectable()
 export class DocumentsService {
@@ -54,10 +57,16 @@ export class DocumentsService {
 
   get(organizationId: string, documentId: string) {
     const document = this.requireDocument(organizationId, documentId);
-    const facts = [...this.db.snapshot.facts.filter((item) => item.documentId === documentId)]
+    const facts = [
+      ...this.db.snapshot.facts.filter(
+        (item) => item.documentId === documentId,
+      ),
+    ]
       .sort((a, b) => b.confidence - a.confidence)
       .filter((fact, index, all) => {
-        const first = all.findIndex((item) => item.key === fact.key && item.value === fact.value);
+        const first = all.findIndex(
+          (item) => item.key === fact.key && item.value === fact.value,
+        );
         return first === index;
       });
     return { ...document, facts };
@@ -66,7 +75,11 @@ export class DocumentsService {
   history(organizationId: string, documentId: string) {
     const document = this.requireDocument(organizationId, documentId);
     return this.db.snapshot.documents
-      .filter((item) => item.organizationId === organizationId && item.groupKey === document.groupKey)
+      .filter(
+        (item) =>
+          item.organizationId === organizationId &&
+          item.groupKey === document.groupKey,
+      )
       .sort((a, b) => b.version - a.version);
   }
 
@@ -84,11 +97,18 @@ export class DocumentsService {
     const recalculatedHash = content ? sha256(content) : undefined;
     const storedHash = current.documentHash?.toLowerCase();
     const onChain = current.blockchainReference
-      ? await this.blockchain.getAnchoredDocumentVersion(current.blockchainReference, current.version)
+      ? await this.blockchain.getAnchoredDocumentVersion(
+          current.blockchainReference,
+          current.version,
+        )
       : null;
     const onChainHash = onChain?.documentHash?.toLowerCase();
-    const matchesStored = Boolean(recalculatedHash && storedHash && recalculatedHash === storedHash);
-    const matchesOnChain = Boolean(recalculatedHash && onChainHash && recalculatedHash === onChainHash);
+    const matchesStored = Boolean(
+      recalculatedHash && storedHash && recalculatedHash === storedHash,
+    );
+    const matchesOnChain = Boolean(
+      recalculatedHash && onChainHash && recalculatedHash === onChainHash,
+    );
 
     return {
       documentId: current.id,
@@ -135,12 +155,18 @@ export class DocumentsService {
     },
   ) {
     const text = this.extractText(input);
-    const payload = input.buffer ?? (text ? Buffer.from(text, 'utf8') : undefined);
+    const payload =
+      input.buffer ?? (text ? Buffer.from(text, 'utf8') : undefined);
     const mimeType =
-      input.mimeType ?? (input.buffer ? 'application/octet-stream' : 'text/plain');
+      input.mimeType ??
+      (input.buffer ? 'application/octet-stream' : 'text/plain');
     const stored = payload
       ? this.storage.save(input.name, payload, mimeType)
-      : { storageKey: `inline/${createId('txt')}.txt`, mimeType: 'text/plain', uri: '' };
+      : {
+          storageKey: `inline/${createId('txt')}.txt`,
+          mimeType: 'text/plain',
+          uri: '',
+        };
     const now = new Date().toISOString();
     const documentId = createId('doc');
     const previous = input.assetId
@@ -181,7 +207,9 @@ export class DocumentsService {
       storageKey: stored.storageKey,
       sizeBytes: payload?.byteLength ?? text?.length ?? 0,
       extractedText: text,
-      groupKey: input.assetId ? `${input.assetId}:${input.type}` : `standalone:${documentId}`,
+      groupKey: input.assetId
+        ? `${input.assetId}:${input.type}`
+        : `standalone:${documentId}`,
       version,
       isCurrent: true,
       previousDocumentId: previous?.id,
@@ -211,7 +239,9 @@ export class DocumentsService {
 
     this.db.mutate((draft) => {
       if (previous) {
-        const previousCurrent = draft.documents.find((item) => item.id === previous.id);
+        const previousCurrent = draft.documents.find(
+          (item) => item.id === previous.id,
+        );
         if (previousCurrent) {
           previousCurrent.isCurrent = false;
         }
@@ -258,7 +288,9 @@ export class DocumentsService {
   }
 
   private requireDocument(organizationId: string, documentId: string) {
-    const document = this.db.snapshot.documents.find((item) => item.id === documentId);
+    const document = this.db.snapshot.documents.find(
+      (item) => item.id === documentId,
+    );
     if (!document || document.organizationId !== organizationId) {
       throw new NotFoundException('Document not found');
     }
@@ -297,7 +329,8 @@ export class DocumentsService {
       return this.extractPdfText(input.buffer, input.name);
     }
     if (
-      mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      mimeType ===
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
       lowerName.endsWith('.docx')
     ) {
       return this.extractDocxText(input.buffer, input.name);
@@ -323,10 +356,14 @@ export class DocumentsService {
   private extractDocxText(buffer: Buffer, name: string): string | undefined {
     return this.withTempFile(name, buffer, (filePath) => {
       try {
-        const xml = execFileSync('unzip', ['-p', filePath, 'word/document.xml'], {
-          encoding: 'utf8',
-          stdio: ['ignore', 'pipe', 'ignore'],
-        });
+        const xml = execFileSync(
+          'unzip',
+          ['-p', filePath, 'word/document.xml'],
+          {
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'ignore'],
+          },
+        );
         const text = normalizeExtractionText(this.stripOfficeXml(xml));
         return text || undefined;
       } catch {
@@ -335,7 +372,11 @@ export class DocumentsService {
     });
   }
 
-  private withTempFile<T>(name: string, buffer: Buffer, fn: (filePath: string) => T): T {
+  private withTempFile<T>(
+    name: string,
+    buffer: Buffer,
+    fn: (filePath: string) => T,
+  ): T {
     const suffix = name.replace(/[^a-zA-Z0-9._-]+/g, '-');
     const filePath = join(tmpdir(), `${createId('tmp')}-${suffix}`);
     writeFileSync(filePath, buffer);

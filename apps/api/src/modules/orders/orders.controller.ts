@@ -12,6 +12,8 @@ export class OrdersController {
 
   @Get()
   list(@CurrentUser() user: AuthUser) {
-    return this.db.snapshot.orders.filter((item) => item.organizationId === user.organizationId);
+    return this.db.snapshot.orders.filter(
+      (item) => item.organizationId === user.organizationId,
+    );
   }
 }
