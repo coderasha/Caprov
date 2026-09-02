@@ -59,7 +59,7 @@
     {
       "id": "usr_caprov_admin",
       "email": "priya@caprov.io",
-      "passwordHash": "$2b$10$.qcyC9CDkRhHgFABzjMECuEn0GBtGVRWcGfRNVPQ9q2AjZzZQkmbG",
+      "passwordHash": "$2b$10$VAAF5yBT5.CxE54pG7GOLeQE0Xgu3WMWiFXWl72mEY0.UgctgYJwy",
       "fullName": "Priya Nair",
       "title": "Platform Administrator",
       "createdAt": "2020-01-06T09:00:00.000Z",
@@ -462,6 +462,122 @@
   ],
   "documents": [
     {
+      "id": "doc_b53c9607d9c04eeb",
+      "organizationId": "org_meridian",
+      "assetId": "ast_1529002524454748",
+      "name": "Unity-Suggestion",
+      "type": "TITLE_DEED",
+      "status": "READY",
+      "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "storageKey": "ast_1529002524454748/Title Deed/bin_a3b5b73e42ff42c9-Unity-Suggestions.docx",
+      "sizeBytes": 18904,
+      "extractedText": "PoC's for Unity Bank\n Collateral management + small lending\n T hough I am looking at from the fraud angle but this can be flipped (where Unity can say RBI has a common ledger), and we can pitch this as the Inveniam + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuation, change in status/nature so on and so forth. The double-pledging / duplicate collateral fraud (the same warehouse receipt, gold, or invoice pledged to multiple lenders , is behind India's biggest banking frauds).\n What it looks like: A shared, permissioned ledger where every pledged asset such as gold, warehouse receipts, invoices, property gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based registries with lag time that fraudsters exploit.\n Real precedent, adapted small: blockchain turns collateral management from a static, periodic process into a dynamic one , margin requirements can be monitored continuously, and smart contracts can automatically trigger a margin call or even a liquidation sequence the moment collateral value drops below a threshold, instead of a credit officer manually checking valuations weekly.\n On the lending side: smart-contract-based automation of loan agreements typically brings a 15-60% reduction in operational cost , real money for a small bank's back office. Bank of China Hong Kong is a good proof point: it cut property valuation time for mortgage deals from days to seconds using blockchain-verified data, and now 85% of its mortgage-related valuations run through that system.\n India-specific hook: SBI already ran a live example combining CBDC + trade collateral . A State Bank of India consortium completed a $50 million trade finance transaction with a UAE bank using programmable e₹-W tokens that automatically released payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral , for something as simple as gold loans or agri -warehouse receipt financing (which ties nicely into India's WDRA e-NWR system, already digital, and a natural blockchain candidate).\n Why this combo is a strong pitch internally: it's not \"blockchain for blockchain's sake\" , it directly reduces fraud risk (a board-level concern), cuts loan processing cost and doesn't require RBI sign-of f , so Unity Bank could pilot it faster and on its own timeline.\n Blockchain-based trade finance (digitizing letters of credit & bills of lading) (I am very hopeful about our existing TF solution to be expanded/repurposed to do this).\n If Unity Bank serves any SME exporters/importers (textiles, agri -commodities, pharma, gems & jewellery in India), this is a direct pain-point solver.\n What it looks like: Replace paper LCs and bills of lading , which today involve manual verification, couriers, and multi-day reconciliation , with a shared digital ledger that all parties (bank, exporter, importer, shipping line) can trust instantly.\n Why it's exciting for them: operational cost reduction in banking trade operations reaches thirty to forty-five percent through automation of reconciliation, compliance checks, and multi-party coordination processes. That's a real, measurable cost story to take to the board. It also cuts fraud ; permissioned networks let a bank financing a trade see shipment status while sensitive pricing and customer data stay confidential to the relevant parties, which matters a lot for SME clients worried about competitors seeing their deals.\n Momentum: as of early 2026, legislation recognizing electronic trade records as legally equivalent to paper documents had been adopted in 13 jurisdictions , the legal groundwork is being laid globally, so a small bank moving now would be ahead of the curve rather than betting on unproven tech\n Where they say Adverse (apologies if I forgot the name) can give them the data points, as I was explaining, what we bring is like the OS of iPhone. While on the surface everyone can give the features, we give both the features and the protection of the data layer.",
+      "originalFilename": "Unity-Suggestions.docx",
+      "groupKey": "ast_1529002524454748:TITLE_DEED:unity-suggestion",
+      "version": 2,
+      "isCurrent": true,
+      "previousDocumentId": "doc_4cd19ab43bb54fe9",
+      "uploadedByUserId": "usr_elena",
+      "previousVersionHash": "0x7e1bf0fe856d318b1b8eb12ce96f0d0459ff18209af6ffc410d3e0a0cbe69074",
+      "documentHash": "0x7e1bf0fe856d318b1b8eb12ce96f0d0459ff18209af6ffc410d3e0a0cbe69074",
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/ast_1529002524454748/Title Deed/bin_a3b5b73e42ff42c9-Unity-Suggestions.docx",
+      "anchorStatus": "BLOCKCHAIN_ANCHORED",
+      "anchorMode": "LIVE",
+      "anchorChainId": 11155111,
+      "anchorChainName": "Ethereum Sepolia",
+      "anchorContractAddress": "0x2fD1939Ba8a09D50d32BC8F9161bbA69C355A206",
+      "anchorTxHash": "0x5f9684ad1dbac82205ba65af8ea3123f00c910b0edc99b8e02af9665fa0324da",
+      "anchorExplorerUrl": "https://sepolia.etherscan.io/tx/0x5f9684ad1dbac82205ba65af8ea3123f00c910b0edc99b8e02af9665fa0324da",
+      "anchoredAt": "2026-09-02T07:26:13.557Z",
+      "blockchainReference": "0xda20b101b4759eec40bfa683e7f5417525b0929fb0b3e768a2cab748198f5488",
+      "createdAt": "2026-09-02T07:26:13.162Z"
+    },
+    {
+      "id": "doc_4cd19ab43bb54fe9",
+      "organizationId": "org_meridian",
+      "assetId": "ast_1529002524454748",
+      "name": "Unity-Suggestion",
+      "type": "TITLE_DEED",
+      "status": "READY",
+      "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "storageKey": "ast_1529002524454748/Title Deed/bin_e298813594524bc2-Unity-Suggestions.docx",
+      "sizeBytes": 18904,
+      "extractedText": "PoC's for Unity Bank\n Collateral management + small lending\n T hough I am looking at from the fraud angle but this can be flipped (where Unity can say RBI has a common ledger), and we can pitch this as the Inveniam + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuation, change in status/nature so on and so forth. The double-pledging / duplicate collateral fraud (the same warehouse receipt, gold, or invoice pledged to multiple lenders , is behind India's biggest banking frauds).\n What it looks like: A shared, permissioned ledger where every pledged asset such as gold, warehouse receipts, invoices, property gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based registries with lag time that fraudsters exploit.\n Real precedent, adapted small: blockchain turns collateral management from a static, periodic process into a dynamic one , margin requirements can be monitored continuously, and smart contracts can automatically trigger a margin call or even a liquidation sequence the moment collateral value drops below a threshold, instead of a credit officer manually checking valuations weekly.\n On the lending side: smart-contract-based automation of loan agreements typically brings a 15-60% reduction in operational cost , real money for a small bank's back office. Bank of China Hong Kong is a good proof point: it cut property valuation time for mortgage deals from days to seconds using blockchain-verified data, and now 85% of its mortgage-related valuations run through that system.\n India-specific hook: SBI already ran a live example combining CBDC + trade collateral . A State Bank of India consortium completed a $50 million trade finance transaction with a UAE bank using programmable e₹-W tokens that automatically released payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral , for something as simple as gold loans or agri -warehouse receipt financing (which ties nicely into India's WDRA e-NWR system, already digital, and a natural blockchain candidate).\n Why this combo is a strong pitch internally: it's not \"blockchain for blockchain's sake\" , it directly reduces fraud risk (a board-level concern), cuts loan processing cost and doesn't require RBI sign-of f , so Unity Bank could pilot it faster and on its own timeline.\n Blockchain-based trade finance (digitizing letters of credit & bills of lading) (I am very hopeful about our existing TF solution to be expanded/repurposed to do this).\n If Unity Bank serves any SME exporters/importers (textiles, agri -commodities, pharma, gems & jewellery in India), this is a direct pain-point solver.\n What it looks like: Replace paper LCs and bills of lading , which today involve manual verification, couriers, and multi-day reconciliation , with a shared digital ledger that all parties (bank, exporter, importer, shipping line) can trust instantly.\n Why it's exciting for them: operational cost reduction in banking trade operations reaches thirty to forty-five percent through automation of reconciliation, compliance checks, and multi-party coordination processes. That's a real, measurable cost story to take to the board. It also cuts fraud ; permissioned networks let a bank financing a trade see shipment status while sensitive pricing and customer data stay confidential to the relevant parties, which matters a lot for SME clients worried about competitors seeing their deals.\n Momentum: as of early 2026, legislation recognizing electronic trade records as legally equivalent to paper documents had been adopted in 13 jurisdictions , the legal groundwork is being laid globally, so a small bank moving now would be ahead of the curve rather than betting on unproven tech\n Where they say Adverse (apologies if I forgot the name) can give them the data points, as I was explaining, what we bring is like the OS of iPhone. While on the surface everyone can give the features, we give both the features and the protection of the data layer.",
+      "originalFilename": "Unity-Suggestions.docx",
+      "groupKey": "ast_1529002524454748:TITLE_DEED:unity-suggestion",
+      "version": 1,
+      "isCurrent": false,
+      "uploadedByUserId": "usr_elena",
+      "documentHash": "0x7e1bf0fe856d318b1b8eb12ce96f0d0459ff18209af6ffc410d3e0a0cbe69074",
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/ast_1529002524454748/Title Deed/bin_e298813594524bc2-Unity-Suggestions.docx",
+      "anchorStatus": "PENDING",
+      "anchorMode": "LIVE",
+      "anchorChainId": 11155111,
+      "anchorChainName": "Ethereum Sepolia",
+      "anchorContractAddress": "0x2fD1939Ba8a09D50d32BC8F9161bbA69C355A206",
+      "blockchainReference": "0xda20b101b4759eec40bfa683e7f5417525b0929fb0b3e768a2cab748198f5488",
+      "createdAt": "2026-09-02T07:25:46.196Z"
+    },
+    {
+      "id": "doc_02b214885b0044bb",
+      "organizationId": "org_meridian",
+      "assetId": "ast_1529002524454748",
+      "name": "LMN_Asset_KYC_Ownership",
+      "type": "KYC",
+      "status": "READY",
+      "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "storageKey": "ast_1529002524454748/KYC/bin_552e0178170c4f42-LMN_Asset_KYC_Ownership_Document_Illustrative.docx",
+      "sizeBytes": 43392,
+      "extractedText": "KYC / OWNERSHIP DOCUMENT\n Commercial Office Asset - Andheri East, Mumbai\n Prepared for the LMN Asset Platform Asset Reference: LMN-AST-MUM-000017 As-of Date: 30 September 2026\n Record\n Verified / Recorded Value\n Asset Owner / Seller\n Apex Industrial Assets Private Limited\n Proposed Purchaser\n LMN Asset Pvt. Ltd.\n Asset\n Office Unit 7B, Western Business Centre\n Location\n Andheri East, Mumbai, Maharashtra 400069\n Approx. Area\n 3,250 sq. ft.\n Proposed Acquisition Value\n ₹12,50,00,000\n Ownership Status\n Seller-owned; proposed transfer to LMN Asset Pvt. Ltd.\n Encumbrance Status\n Nil subsisting encumbrance - subject to official verification\n KYC Status\n Illustrative - documentation checklist completed for transaction file\n 1. PURPOSE AND SCOPE\n This KYC / Ownership Document (\"KYC Record\") forms part of the asset due-diligence record maintained for the LMN Asset platform. It is intended to establish, in a structured form, the identity of the relevant parties, ownership of the underlying asset, source and chain of title, beneficial ownership, authority to transact, and status of historical encumbrances.\n The information in this document is illustrative and uses dummy transaction data consistent with the previously prepared Purchase Agreement, Sale Agreement, Valuation Memorandum and Encumbrance Search Report.\n 2. ASSET KYC / IDENTIFICATION\n Particular\n Recorded Information\n Platform Asset ID\n LMN-AST-MUM-000017\n Asset Type\n Commercial office premises\n Building\n Western Business Centre\n Unit\n Office Unit 7B\n Address\n Western Business Centre, Andheri East, Mumbai, Maharashtra 400069\n CTS / Survey Reference\n CTS No. 118/3A, Andheri East\n Approximate Area\n 3,250 sq. ft.\n Permitted / Intended Use\n Commercial office\n Current Registered Owner\n Apex Industrial Assets Private Limited\n Acquisition Entity\n LMN Asset Pvt. Ltd.\n Proposed Purchase Price\n ₹12,50,00,000\n Valuation Reference\n ₹12.50 crore indicative Market Value as at 30 September 2026\n 3. SELLER KYC - APEX INDUSTRIAL ASSETS PRIVATE LIMITED\n KYC Field\n Illustrative Record\n Legal Name\n Apex Industrial Assets Private Limited\n Entity Type\n Private Limited Company\n Country of Incorporation\n India\n State of Registration\n Maharashtra\n Registered Office\n 201, Western Business Centre, Andheri East, Mumbai, Maharashtra 400069\n CIN\n U70100MH2014PTC251847\n PAN\n AAECA4821K\n GSTIN\n 27AAECA4821K1Z5\n Date of Incorporation\n 18 July 2014\n Business Activity\n Real estate holding, commercial property investment and asset management\n KYC Status\n Illustrative - identity and corporate records to be independently verified\n 3.1 Seller Authorised Representatives\n Name\n Role\n Authority\n KYC Status\n Rohan Mehta\n Director\n Authorised to approve sale\n Illustrative\n Priya Nair\n Director & CFO\n Authorised to execute transaction documents\n Illustrative\n Arjun Shah\n Company Secretary\n Corporate filings / certification\n Illustrative\n 3.2 Seller Corporate Documents\n Certificate of Incorporation - copy retained in transaction file.\n Memorandum and Articles of Association - latest version.\n PAN card / PAN allotment record.\n GST registration certificate.\n Board Resolution dated 12 September 2026 approving sale of the Property.\n Authorisation letter for execution and registration.\n Latest available corporate master-data extract.\n Director and beneficial ownership declaration.\n 4. BENEFICIAL OWNERSHIP / CONTROL\n For the purposes of this illustrative KYC record, the following persons are treated as the ultimate beneficial owners / controllers of the Seller. The percentages below are dummy data and must be replaced by verified statutory records and beneficial ownership declarations.\n Beneficial Owner / Controller\n Relationship\n Ownership / Control\n Status\n Rohan Mehta\n Promoter / Director\n 52% equity\n Illustrative\n Priya Nair\n Promoter / Director\n 28% equity\n Illustrative\n Mehta Family Holdings Pvt. Ltd.\n Promoter holding entity\n 20% equity\n Illustrative\n The Seller is assumed to have no nominee, trust, undisclosed beneficial owner or other person exercising control outside the ownership/control structure disclosed above, subject to independent KYC verification.\n 5. PURCHASER KYC - LMN ASSET PVT. LTD.\n KYC Field\n Illustrative Record\n Legal Name\n LMN Asset Pvt. Ltd.\n Entity Type\n Private Limited Company\n Country of Incorporation\n India\n Registered Office\n 501, Business Tower, Andheri East, Mumbai, Maharashtra 400069\n CIN\n U68200MH2022PTC392615\n PAN\n AAGCL7814P\n GSTIN\n 27AAGCL7814P1Z8\n Date of Incorporation\n 9 November 2022\n Business Activity\n Asset acquisition, investment management and asset-backed platform operations\n Authorised Signatory\n Vikram Desai, Managing Director\n KYC Status\n Illustrative - identity and corporate records to be independently verified\n 5.1 Purchaser Ownership / Control\n Owner / Controller\n Role\n Ownership / Control\n Status\n Vikram Desai\n Founder / Managing Director\n 40%\n Illustrative\n Neha Kapoor\n Director / Investor\n 35%\n Illustrative\n LMN Ventures Holdings Pvt. Ltd.\n Institutional holding entity\n 25%\n Illustrative\n 6. OWNERSHIP / TITLE CHAIN\n The following chain is an illustrative title history for the Property. The dates and document numbers are dummy values designed to demonstrate a complete ownership trail.\n Date\n Transaction / Instrument\n Transferor\n Transferee / Result\n 14 Aug 2016\n Conveyance Deed\n Maharashtra Commercial Estates Ltd.\n Apex Industrial Assets Pvt. Ltd.\n 15 Jun 2018\n Mortgage created\n Apex Industrial Assets Pvt. Ltd.\n HDFC Bank Ltd. - security interest\n 20 Dec 2021\n Loan repayment\n Apex Industrial Assets Pvt. Ltd.\n Mortgage released\n 14 Oct 2022\n Settlement / title dispute closure\n Former claimant\n Claim withdrawn / title confirmed\n 31 Aug 2023\n Charge discharge\n Apex Industrial Assets Pvt. Ltd.\n ICICI Bank charge released\n 18 May 2025\n Residual bank facility repaid\n Apex Industrial Assets Pvt. Ltd.\n HDFC charge released\n 30 Sep 2026\n Proposed Sale Agreement\n Apex Industrial Assets Pvt. Ltd.\n LMN Asset Pvt. Ltd.\n 6.1 Current Ownership Conclusion\n Subject to verification against the official land/property records and the executed registered conveyance, Apex Industrial Assets Private Limited is recorded in this illustrative transaction file as the current legal owner with authority to sell the Property to LMN Asset Pvt. Ltd.\n 7. ENCUMBRANCE / CLAIM STATUS\n Historical Matter\n Original Exposure\n Resolution\n Current Status\n HDFC mortgage\n ₹4.50 crore\n Loan repaid; release deed registered\n Cleared\n ICICI working capital charge\n ₹2.25 crore\n Facility discharged; bank release\n Cleared\n Civil title dispute\n Unquantified\n Settlement and withdrawal\n Resolved\n Municipal tax demand\n ₹18.75 lakh\n Paid and closed\n Resolved\n Contractor claim\n ₹42 lakh\n Full & final settlement/release\n Resolved\n HDFC residual charge\n ₹1.10 crore\n Repaid; release recorded\n Cleared\n Current illustrative status: NIL SUBSISTING ENCUMBRANCE\n 8. SOURCE OF FUNDS / TRANSACTION KYC\n For this illustrative transaction, the Purchase Price of ₹12.50 crore is assumed to be funded through a combination of LMN Asset Pvt. Ltd.'s internal funds and a secured acquisition facility. The following is a transaction-level source-of-funds illustration.\n Funding Source\n Amount\n % of Purchase Price\n Status\n LMN internal accruals / cash reserves\n ₹7.50 crore\n 60%\n Illustrative\n Acquisition finance facility\n ₹5.00 crore\n 40%\n Illustrative\n Total\n ₹12.50 crore\n 100%\n Matches consideration\n The actual source-of-funds evidence should include bank statements, lender sanction letter, facility agreement, proof of equity contribution and other documents required under the platform's AML/KYC policy.\n 9. KYC DOCUMENT CHECKLIST\n Document\n Seller\n Purchaser\n Status\n Certificate of Incorporation\n Yes\n Yes\n Illustrative copy / to verify\n PAN\n Yes\n Yes\n Illustrative copy / to verify\n GST Certificate\n Yes\n Yes\n Illustrative copy / to verify\n Constitutional documents\n Yes\n Yes\n To verify\n Board Resolution\n Yes\n Yes\n To verify\n Authorised Signatory KYC\n Yes\n Yes\n To verify\n Beneficial Ownership Declaration\n Yes\n Yes\n To verify\n Registered Office Proof\n Yes\n Yes\n To verify\n Bank Account / Source of Funds\n Yes\n Yes\n To verify\n Title Deeds\n Yes\n N/A\n To verify\n Encumbrance Search / EC\n Yes\n N/A\n To verify\n Property Tax / No-Dues\n Yes\n N/A\n To verify\n Valuation Memorandum\n N/A\n Yes\n Available in transaction file\n Purchase / Sale Agreement\n Yes\n Yes\n Available in transaction file\n 10. KYC DECLARATIONS\n The Seller declares, for this illustrative record, that it is the lawful owner of the Property and has authority to sell it.\n The Seller declares that the historical loans and claims disclosed in the Encumbrance Search Report have been repaid, discharged or resolved.\n The Seller declares that no undisclosed beneficial owner or third-party claimant has an ownership interest in the Property.\n The Purchaser declares that it is acquiring the Property for lawful business and investment purposes.\n The Parties declare that the transaction consideration and funding sources shall be supported by appropriate banking and corporate records.\n The Parties agree that all KYC, AML, sanctions and beneficial ownership checks required under the applicable platform policy shall be completed before final onboarding / settlement.\n 11. PLATFORM ASSET-ONBOARDING RECORD\n Field\n Platform Record\n Asset ID\n LMN-AST-MUM-000017\n Asset Class\n Commercial Real Estate\n Ownership Verification Status\n Pending final independent verification\n KYC Status\n Documentation compiled; final verification required\n Encumbrance Status\n Nil subsisting encumbrance - illustrative\n Valuation Status\n Indicative value ₹12.50 crore\n Purchase Price\n ₹12.50 crore\n Seller Verification\n Illustrative / pending source-document verification\n Beneficial Ownership Verification\n Illustrative / pending source-document verification\n Eligible for Final Asset Onboarding\n Subject to completion of legal/KYC checks\n 12. DOCUMENT CONTROL / AUDIT TRAIL\n Version\n Date\n Action\n Record\n 1.0\n 30 Sep 2026\n Initial KYC record\n Created for transaction file\n 1.1\n 30 Sep 2026\n Ownership review\n Title and encumbrance data consolidated\n 1.2\n 30 Sep 2026\n Final illustrative review\n Prepared for platform onboarding\n 13. CERTIFICATION / SIGN-OFF\n This KYC / Ownership Document records the illustrative ownership, KYC and due-diligence position of the Property for the LMN Asset platform as at 30 September 2026.\n Prepared For\n LMN Asset Pvt. Ltd.\n Prepared By\n Asset Due-Diligence / KYC Team\n Reviewed By\n Legal & Compliance\n Date\n 30 September 2026\n Approval\n Name: ____________________ Designation: ____________________ Signature: ____________________\n IMPORTANT NOTICE: All corporate identifiers, names, addresses, ownership percentages, document references, registration numbers, dates and transaction details in this document are illustrative/dummy data. This document is not evidence of actual KYC completion or legal title. Actual onboarding must rely on original/certified documents and independent verification.",
+      "originalFilename": "LMN_Asset_KYC_Ownership_Document_Illustrative.docx",
+      "groupKey": "ast_1529002524454748:KYC:lmn_asset_kyc_ownership",
+      "version": 1,
+      "isCurrent": true,
+      "uploadedByUserId": "usr_elena",
+      "documentHash": "0x381f7b8f43310a48bacad99556ce587cfad9bb1e7e939db38b1c183f1281a661",
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/ast_1529002524454748/KYC/bin_552e0178170c4f42-LMN_Asset_KYC_Ownership_Document_Illustrative.docx",
+      "anchorStatus": "BLOCKCHAIN_ANCHORED",
+      "anchorMode": "LIVE",
+      "anchorChainId": 11155111,
+      "anchorChainName": "Ethereum Sepolia",
+      "anchorContractAddress": "0x2fD1939Ba8a09D50d32BC8F9161bbA69C355A206",
+      "blockchainReference": "0xbb73d1d5bda8034d1dd581df9db3c8ab3603169cca1818952cfd42a270f0f735",
+      "createdAt": "2026-09-02T07:18:18.971Z",
+      "anchorTxHash": "0xb150c5b25dfab369d608f75f6f4f951779426aeea1450add0887aecf7db92fa8",
+      "anchorExplorerUrl": "https://sepolia.etherscan.io/tx/0xb150c5b25dfab369d608f75f6f4f951779426aeea1450add0887aecf7db92fa8",
+      "anchoredAt": "2026-09-02T07:18:41.112Z"
+    },
+    {
+      "id": "doc_d66a0a9299cf419c",
+      "organizationId": "org_meridian",
+      "assetId": "ast_25687abc39614427",
+      "name": "LMN_Asset_Pvt_Ltd-Title_Deed",
+      "type": "INSURANCE",
+      "status": "READY",
+      "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "storageKey": "ast_25687abc39614427/Insurance/bin_02b62df181594075-LMN_Asset_Pvt_Ltd_Title_Deed_Filled.docx",
+      "sizeBytes": 40659,
+      "extractedText": "TITLE DEED\n ASSET OWNERSHIP & TITLE RECORD\n LMN Asset Pvt Ltd\n Document No.\n LMN-TD-2026-001\n Date of Issue\n 31 August 2026\n Asset ID\n LMN-RE-001\n Version\n 1.0\n Jurisdiction\n Kolkata, West Bengal, India\n Currency\n INR\n Status\n EXECUTED RECORD\n Record Reference\n LMN/PROP/2026/001\n This Title Deed records the title and ownership particulars of the immovable property held by LMN Asset Pvt Ltd. The values below are illustrative but internally consistent and are intended for demonstration, asset-tokenization, workflow or prototype purposes. They should not be treated as evidence of actual legal title.\n 1. PARTIES\n Registered / Legal Owner\n LMN Asset Pvt Ltd\n Corporate Identification Number (CIN)\n U70109WB2021PTC245678\n Registered Office\n 18 Camac Street, 5th Floor, Kolkata, West Bengal 700017, India\n Authorised Signatory\n Arindam Sen, Director\n 2. ASSET PARTICULARS\n Asset Name\n LMN Commercial Property - Park Street\n Asset Type\n Commercial Office Property\n Asset Identification No.\n PSK/COMM/1147\n Location\n 114 Park Street, Kolkata, West Bengal 700016, India\n Plot / Premises No.\n Premises No. 114, Block B\n Land Area\n 2,400 sq. ft. (approx. 222.97 sq. m.)\n Built-up Area\n 8,750 sq. ft. (approx. 812.90 sq. m.)\n Floor / Unit\n 3rd & 4th Floors, Block B\n Tenure\n Freehold\n Current Use\n Commercial office space\n 3. TITLE & OWNERSHIP HISTORY\n Sl.\n Instrument / Event\n Date\n Transferor / Grantor\n Transferee / Holder\n 1\n Original Conveyance Deed\n 14 Mar 2018\n Eastern Commercial Estates LLP\n LMN Asset Pvt Ltd\n 2\n Registration of Conveyance\n 20 Mar 2018\n Office of Sub-Registrar, Kolkata\n LMN Asset Pvt Ltd\n 3\n Mutation / Municipal Record Update\n 12 Apr 2018\n Kolkata Municipal Authority\n LMN Asset Pvt Ltd\n 4\n Latest Title Verification\n 18 Aug 2026\n Independent Legal Counsel\n LMN Asset Pvt Ltd\n 4. REGISTRATION & GOVERNMENT RECORDS\n Registration Authority\n Office of the Sub-Registrar, Kolkata\n Registration No.\n Book I, Volume 48, Pages 112-139, Deed No. 3842/2018\n Registration Date\n 20 March 2018\n Mutation / Municipal Record No.\n KMC/MUT/2018/09174\n Property Tax Assessment No.\n KMC/PS/114/2018\n Latest Tax Status\n Paid through FY 2025-26; no recorded arrears as of 31 July 2026\n 5. ENCUMBRANCES, CHARGES & LIENS\n Particular\n Status\n Details / Reference\n Mortgage / Charge\n None recorded\n Title search report dated 18 Aug 2026\n Lien / Attachment\n None recorded\n No attachment disclosed in available records\n Lease / Tenancy\n Existing\n Office lease to ABC Consulting Services Pvt Ltd; term 01 Apr 2025-31 Mar 2028\n Litigation\n None disclosed\n Owner's declaration dated 25 Aug 2026\n 6. DECLARED ASSET VALUE\n Indicative Market Value\n ₹18,50,00,000 (Rupees Eighteen Crore Fifty Lakh only)\n Valuation Date\n 31 July 2026\n Valuation Method\n Comparable market approach with income cross-check\n Valuer\n S. Mukherjee & Associates, Registered Valuation Firm\n Valuation Reference\n SMA/VAL/KOL/2026/077\n 7. SUPPORTING TITLE DOCUMENTS\n Sl.\n Document\n Reference / No.\n Date\n 1\n Registered Conveyance Deed\n Deed No. 3842/2018\n 20 Mar 2018\n 2\n Mutation Certificate\n KMC/MUT/2018/09174\n 12 Apr 2018\n 3\n Property Tax Record\n KMC/PS/114/2018\n 31 Jul 2026\n 4\n Encumbrance / Title Search Report\n TSR/KOL/2026/418\n 18 Aug 2026\n 5\n Independent Valuation Report\n SMA/VAL/KOL/2026/077\n 31 Jul 2026\n 6\n Board Resolution authorising holding of asset\n LMN/BR/2018/07\n 16 Mar 2018\n 8. TITLE REPRESENTATIONS\n LMN Asset Pvt Ltd is recorded as the owner of the Asset under the title instruments identified in this Deed.\n The Asset is described as freehold commercial property and the title search referenced above records no mortgage, charge or attachment as of the stated search date.\n Any subsequent transfer, mortgage, lease, charge, court order or other encumbrance shall be recorded against the Asset and supported by the relevant instrument.\n The declared valuation is indicative and does not itself establish legal ownership or create a security interest.\n 9. DECLARATION\n The authorised signatory of LMN Asset Pvt Ltd declares that the particulars stated in this record are based on the illustrative title and supporting records identified above. This document is prepared as a structured title-record specimen and must be replaced or validated against official registration records before use as a legal instrument.\n 10. EXECUTION\n For / On behalf of\n LMN Asset Pvt Ltd\n Authorised Signatory\n Arindam Sen, Director\n Signature\n ____________________________\n Date & Place\n 31 August 2026, Kolkata\n Company Seal\n ____________________________\n SCHEDULE A - DETAILED ASSET DESCRIPTION\n The Asset comprises approximately 2,400 sq. ft. of freehold land together with the commercial office premises constructed thereon, having approximately 8,750 sq. ft. of built-up area across the 3rd and 4th floors of Block B at 114 Park Street, Kolkata. The legal boundaries and exact measurements shall be as recorded in the registered conveyance deed and survey/municipal records.\n North\n Premises No. 113, Block B\n South\n Park Street frontage / access corridor\n East\n Premises No. 115, Block B\n West\n Common service passage and adjoining commercial premises",
+      "originalFilename": "LMN_Asset_Pvt_Ltd_Title_Deed_Filled.docx",
+      "groupKey": "ast_25687abc39614427:INSURANCE:lmn_asset_pvt_ltd-title_deed",
+      "version": 1,
+      "isCurrent": true,
+      "uploadedByUserId": "usr_elena",
+      "documentHash": "0xbf0a70a331ce3b511dd418c6f9cd873a740dfcde47161a4636af7f0fa83622df",
+      "hashAlgorithm": "sha256",
+      "offChainUri": "caprov://storage/ast_25687abc39614427/Insurance/bin_02b62df181594075-LMN_Asset_Pvt_Ltd_Title_Deed_Filled.docx",
+      "anchorStatus": "PENDING",
+      "anchorMode": "LIVE",
+      "anchorChainId": 11155111,
+      "anchorChainName": "Ethereum Sepolia",
+      "anchorContractAddress": "0x2fD1939Ba8a09D50d32BC8F9161bbA69C355A206",
+      "blockchainReference": "0x69b15081c2f145c3c72fa809ba6113e81434494518148c57ea0d903b325c15c7",
+      "createdAt": "2026-09-02T07:12:23.728Z"
+    },
+    {
       "id": "doc_9c645c2c29204bd3",
       "organizationId": "org_meridian",
       "assetId": "ast_25687abc39614427",
@@ -588,9 +704,13 @@
       "documentHash": "0xbf0a70a331ce3b511dd418c6f9cd873a740dfcde47161a4636af7f0fa83622df",
       "hashAlgorithm": "sha256",
       "offChainUri": "caprov://storage/ast_25687abc39614427/Purchase Agreement/bin_a737dfeee8c2419d-LMN_Asset_Pvt_Ltd_Title_Deed_Filled.docx",
-      "anchorStatus": "PENDING",
+      "anchorStatus": "BLOCKCHAIN_ANCHORED",
       "blockchainReference": "0x678ab9af6fbe563289f1b4fb6135626886b303aa9e008d6e637480af28e68e97",
-      "createdAt": "2026-09-02T04:43:04.060Z"
+      "createdAt": "2026-09-02T04:43:04.060Z",
+      "anchorMode": "LIVE",
+      "anchorTxHash": "0x1903537a19441fdd68ddc55cc35dc14936423efe22f4ed03105cc37bc93d026d",
+      "anchorExplorerUrl": "https://sepolia.etherscan.io/tx/0x1903537a19441fdd68ddc55cc35dc14936423efe22f4ed03105cc37bc93d026d",
+      "anchoredAt": "2026-09-02T04:43:04.128Z"
     },
     {
       "id": "doc_af4bf30daeb74ef3",
@@ -741,9 +861,13 @@
       "previousVersionHash": "0xbf0a70a331ce3b511dd418c6f9cd873a740dfcde47161a4636af7f0fa83622df",
       "hashAlgorithm": "sha256",
       "offChainUri": "caprov://storage/inline/txt_775da66bc0a146d1.txt",
-      "anchorStatus": "PENDING",
+      "anchorStatus": "BLOCKCHAIN_ANCHORED",
       "createdAt": "2026-09-01T10:25:54.059Z",
-      "originalFilename": "LMN_Asset_Pvt_Ltd-Title_Deed"
+      "originalFilename": "LMN_Asset_Pvt_Ltd-Title_Deed",
+      "anchorMode": "LIVE",
+      "anchorTxHash": "0x97fb19ed0fd80c1e2706818f1c3c1c8674766959f9b140750822f70ec01b7624",
+      "anchorExplorerUrl": "https://sepolia.etherscan.io/tx/0x97fb19ed0fd80c1e2706818f1c3c1c8674766959f9b140750822f70ec01b7624",
+      "anchoredAt": "2026-09-01T10:25:54.148Z"
     },
     {
       "id": "doc_79fe247398474ab7",
@@ -1912,13 +2036,22 @@
   ],
   "portfolios": [
     {
+      "id": "ptf_51300196bf38458b",
+      "organizationId": "org_meridian",
+      "name": "Government Bonds",
+      "description": "",
+      "baseCurrency": "USD",
+      "createdAt": "2026-09-02T07:28:52.409Z",
+      "updatedAt": "2026-09-02T07:28:52.409Z"
+    },
+    {
       "id": "ptf_core",
       "organizationId": "org_meridian",
       "name": "Core Real Assets",
       "description": "Stabilized real estate and industrial infrastructure.",
       "baseCurrency": "GBP",
       "createdAt": "2024-04-01T09:00:00.000Z",
-      "updatedAt": "2026-08-10T10:00:00.000Z"
+      "updatedAt": "2026-09-02T07:29:15.039Z"
     },
     {
       "id": "ptf_alts",
@@ -1944,7 +2077,7 @@
       "id": "hld_1",
       "portfolioId": "ptf_core",
       "assetId": "ast_harbourview",
-      "weight": 100
+      "weight": 90
     },
     {
       "id": "hld_3",
@@ -1969,9 +2102,208 @@
       "portfolioId": "ptf_collect",
       "assetId": "ast_kline",
       "weight": 20
+    },
+    {
+      "id": "hld_bc3330d9affe43fe",
+      "portfolioId": "ptf_core",
+      "assetId": "ast_1529002524454748",
+      "weight": 10
     }
   ],
   "auditEvents": [
+    {
+      "id": "aud_e4ea6376e7444704",
+      "createdAt": "2026-09-02T07:34:48.460Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "lending.loan_repaid",
+      "entityType": "Loan",
+      "entityId": "loan_544c5236f0784594"
+    },
+    {
+      "id": "aud_fa5e57b4a08746d8",
+      "createdAt": "2026-09-02T07:34:40.144Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "lending.loan_disbursed",
+      "entityType": "Loan",
+      "entityId": "loan_544c5236f0784594",
+      "metadata": {
+        "principal": 100000,
+        "currency": "SGD"
+      }
+    },
+    {
+      "id": "aud_4f5b88a92055450d",
+      "createdAt": "2026-09-02T07:34:36.190Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "lending.loan_opened",
+      "entityType": "Loan",
+      "entityId": "loan_544c5236f0784594",
+      "metadata": {
+        "collateralId": "col_cedar_1",
+        "principal": 100000,
+        "ltvBps": 16
+      }
+    },
+    {
+      "id": "aud_ddab70604c0747dc",
+      "createdAt": "2026-09-02T07:33:51.129Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "collateral.pledged",
+      "entityType": "Collateral",
+      "entityId": "col_d8015bc5b6d849da",
+      "metadata": {
+        "assetId": "ast_25687abc39614427",
+        "tokenId": "tok_9d7a51d1cf2a423f",
+        "advanceableValue": 12.75
+      }
+    },
+    {
+      "id": "aud_ec33fa79a9f943d9",
+      "createdAt": "2026-09-02T07:29:15.039Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "portfolio.holding_added",
+      "entityType": "Portfolio",
+      "entityId": "ptf_core",
+      "metadata": {
+        "assetId": "ast_1529002524454748",
+        "weight": 10,
+        "rebalanced": true
+      }
+    },
+    {
+      "id": "aud_1aafd48d0381463d",
+      "createdAt": "2026-09-02T07:28:52.410Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "portfolio.created",
+      "entityType": "Portfolio",
+      "entityId": "ptf_51300196bf38458b"
+    },
+    {
+      "id": "aud_9ae1958fc0494cc7",
+      "createdAt": "2026-09-02T07:26:16.487Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "intelligence.pipeline_completed",
+      "entityType": "Asset",
+      "entityId": "ast_1529002524454748",
+      "metadata": {
+        "jobId": "job_8a5ef4e129244ee4",
+        "version": 5,
+        "type": "FULL_PIPELINE"
+      }
+    },
+    {
+      "id": "aud_5e5b0d9dac754870",
+      "createdAt": "2026-09-02T07:26:13.569Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "intelligence.pipeline_completed",
+      "entityType": "Asset",
+      "entityId": "ast_1529002524454748",
+      "metadata": {
+        "jobId": "job_b142a19129664cec",
+        "version": 4,
+        "type": "FULL_PIPELINE"
+      }
+    },
+    {
+      "id": "aud_66513d1c16d548ac",
+      "createdAt": "2026-09-02T07:26:13.171Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "document.uploaded",
+      "entityType": "Document",
+      "entityId": "doc_b53c9607d9c04eeb",
+      "metadata": {
+        "assetId": "ast_1529002524454748",
+        "type": "TITLE_DEED",
+        "version": 2,
+        "anchorStatus": "PENDING",
+        "blockchainReference": "0xda20b101b4759eec40bfa683e7f5417525b0929fb0b3e768a2cab748198f5488"
+      }
+    },
+    {
+      "id": "aud_4b4a6fb5aee04213",
+      "createdAt": "2026-09-02T07:25:46.205Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "document.uploaded",
+      "entityType": "Document",
+      "entityId": "doc_4cd19ab43bb54fe9",
+      "metadata": {
+        "assetId": "ast_1529002524454748",
+        "type": "TITLE_DEED",
+        "version": 1,
+        "anchorStatus": "PENDING",
+        "blockchainReference": "0xda20b101b4759eec40bfa683e7f5417525b0929fb0b3e768a2cab748198f5488"
+      }
+    },
+    {
+      "id": "aud_35539156181c4135",
+      "createdAt": "2026-09-02T07:18:41.122Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "intelligence.pipeline_completed",
+      "entityType": "Asset",
+      "entityId": "ast_1529002524454748",
+      "metadata": {
+        "jobId": "job_18e701e7a7ec48b3",
+        "version": 3,
+        "type": "FULL_PIPELINE"
+      }
+    },
+    {
+      "id": "aud_4ab8694a39264b3c",
+      "createdAt": "2026-09-02T07:18:18.981Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "document.uploaded",
+      "entityType": "Document",
+      "entityId": "doc_02b214885b0044bb",
+      "metadata": {
+        "assetId": "ast_1529002524454748",
+        "type": "KYC",
+        "version": 1,
+        "anchorStatus": "PENDING",
+        "blockchainReference": "0xbb73d1d5bda8034d1dd581df9db3c8ab3603169cca1818952cfd42a270f0f735"
+      }
+    },
+    {
+      "id": "aud_d3ea3bca40d54f0e",
+      "createdAt": "2026-09-02T07:12:52.675Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "intelligence.pipeline_completed",
+      "entityType": "Asset",
+      "entityId": "ast_25687abc39614427",
+      "metadata": {
+        "jobId": "job_d579254df30a42f5",
+        "version": 13,
+        "type": "FULL_PIPELINE"
+      }
+    },
+    {
+      "id": "aud_a40cd04aa8b044db",
+      "createdAt": "2026-09-02T07:12:23.736Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "document.uploaded",
+      "entityType": "Document",
+      "entityId": "doc_d66a0a9299cf419c",
+      "metadata": {
+        "assetId": "ast_25687abc39614427",
+        "type": "INSURANCE",
+        "version": 1,
+        "anchorStatus": "PENDING",
+        "blockchainReference": "0x69b15081c2f145c3c72fa809ba6113e81434494518148c57ea0d903b325c15c7"
+      }
+    },
     {
       "id": "aud_d707cacfab624f4e",
       "createdAt": "2026-09-02T07:04:15.761Z",
@@ -4367,6 +4699,86 @@
     }
   ],
   "jobs": [
+    {
+      "id": "job_8a5ef4e129244ee4",
+      "organizationId": "org_meridian",
+      "assetId": "ast_1529002524454748",
+      "type": "FULL_PIPELINE",
+      "status": "COMPLETED",
+      "createdAt": "2026-09-02T07:26:16.432Z",
+      "completedAt": "2026-09-02T07:26:16.476Z",
+      "result": {
+        "dnaVersion": 5,
+        "confidence": {
+          "overall": 0.84,
+          "coverage": 0.7,
+          "provenance": 0.94
+        },
+        "llmModelId": "caprov-deterministic",
+        "llmModelLabel": "CAPROV Deterministic Extractor",
+        "extractionEngine": "caprov-deterministic"
+      }
+    },
+    {
+      "id": "job_b142a19129664cec",
+      "organizationId": "org_meridian",
+      "assetId": "ast_1529002524454748",
+      "type": "FULL_PIPELINE",
+      "status": "COMPLETED",
+      "createdAt": "2026-09-02T07:26:13.512Z",
+      "completedAt": "2026-09-02T07:26:13.557Z",
+      "result": {
+        "dnaVersion": 4,
+        "confidence": {
+          "overall": 0.84,
+          "coverage": 0.7,
+          "provenance": 0.94
+        },
+        "llmModelId": "caprov-deterministic",
+        "llmModelLabel": "CAPROV Deterministic Extractor",
+        "extractionEngine": "caprov-deterministic"
+      }
+    },
+    {
+      "id": "job_18e701e7a7ec48b3",
+      "organizationId": "org_meridian",
+      "assetId": "ast_1529002524454748",
+      "type": "FULL_PIPELINE",
+      "status": "COMPLETED",
+      "createdAt": "2026-09-02T07:18:41.081Z",
+      "completedAt": "2026-09-02T07:18:41.112Z",
+      "result": {
+        "dnaVersion": 3,
+        "confidence": {
+          "overall": 0.8,
+          "coverage": 0.6,
+          "provenance": 0.93
+        },
+        "llmModelId": "caprov-deterministic",
+        "llmModelLabel": "CAPROV Deterministic Extractor",
+        "extractionEngine": "caprov-deterministic"
+      }
+    },
+    {
+      "id": "job_d579254df30a42f5",
+      "organizationId": "org_meridian",
+      "assetId": "ast_25687abc39614427",
+      "type": "FULL_PIPELINE",
+      "status": "COMPLETED",
+      "createdAt": "2026-09-02T07:12:52.623Z",
+      "completedAt": "2026-09-02T07:12:52.662Z",
+      "result": {
+        "dnaVersion": 13,
+        "confidence": {
+          "overall": 0.95,
+          "coverage": 0.98,
+          "provenance": 0.93
+        },
+        "llmModelId": "caprov-deterministic",
+        "llmModelLabel": "CAPROV Deterministic Extractor",
+        "extractionEngine": "caprov-deterministic"
+      }
+    },
     {
       "id": "job_875588cdaadb4ac2",
       "organizationId": "org_meridian",
@@ -18115,6 +18527,1884 @@
       "contentHash": "1cb1f2754fc8df027c56e994d87ba1438578d7883f36f348e5330a2709448213",
       "hashAlgorithm": "sha256",
       "createdAt": "2026-09-02T07:04:15.750Z"
+    },
+    {
+      "id": "dna_aa256a4cc4564605",
+      "assetId": "ast_25687abc39614427",
+      "version": 13,
+      "envelope": {
+        "assetId": "ast_25687abc39614427",
+        "version": 13,
+        "generatedAt": "2026-09-02T07:12:52.635Z",
+        "summary": "OPQ asset  intelligence envelope from 12 source documents. Primary mark as at 30 September 2026 (market value). Forward mark (3y base): USD 34 at 4.0% p.a. model growth. (local intelligence fallback)",
+        "facts": [
+          {
+            "id": "fact_4f5305f6d9ab4381",
+            "key": "market_value",
+            "label": "Market value",
+            "value": "as at 30 September 2026",
+            "numericValue": 30,
+            "currency": "USD",
+            "confidence": 0.81,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_b578222aefc14324",
+                "sourceFragment": "Market Value as at 30 September 2026",
+                "confidence": 0.78,
+                "observedAt": "2026-09-02T07:12:52.629Z"
+              },
+              {
+                "sourceDocumentId": "doc_125c4d2cb4d94020",
+                "sourceFragment": "Market Value of the commercial office premises as at 30 September 2026 is assessed at:",
+                "confidence": 0.78,
+                "observedAt": "2026-09-02T07:12:52.630Z"
+              },
+              {
+                "sourceDocumentId": "doc_844d70f7dd4a4402",
+                "sourceFragment": "Market Value as at 30 September 2026",
+                "confidence": 0.78,
+                "observedAt": "2026-09-02T07:12:52.630Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 86.17907264
+          },
+          {
+            "id": "fact_947102b0767a4aa3",
+            "key": "purchase_price",
+            "label": "Purchase price",
+            "value": "₹12,50,00,000 (Rupees Twelve Crore Fifty Lakh Only).",
+            "numericValue": 12,
+            "currency": "USD",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_2617138e6ecd478f",
+                "sourceFragment": "Purchase Price\n ₹12,50,00,000 (Rupees Twelve Crore Fifty Lakh Only).",
+                "confidence": 0.99,
+                "observedAt": "2026-09-02T07:12:52.628Z"
+              },
+              {
+                "sourceDocumentId": "doc_2617138e6ecd478f",
+                "sourceFragment": "Purchase Price\n ₹12,50,00,000",
+                "confidence": 0.99,
+                "observedAt": "2026-09-02T07:12:52.628Z"
+              },
+              {
+                "sourceDocumentId": "doc_b578222aefc14324",
+                "sourceFragment": "Purchase Price\n ₹12,50,00,000",
+                "confidence": 0.99,
+                "observedAt": "2026-09-02T07:12:52.629Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 107
+          },
+          {
+            "id": "fact_4cc57b3fd1ce458b",
+            "key": "legal_ownership",
+            "label": "Legal ownership",
+            "value": "or create a security interest.",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_d66a0a9299cf419c",
+                "sourceFragment": "legal ownership or create a security interest.",
+                "confidence": 0.99,
+                "observedAt": "2026-09-02T07:12:52.626Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 0,
+            "score": 132
+          },
+          {
+            "id": "fact_a33831e79c464a95",
+            "key": "proprietor",
+            "label": "Proprietor",
+            "value": "Apex Industrial Assets Private Limited",
+            "confidence": 0.96,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_b578222aefc14324",
+                "sourceFragment": "Registered Owner\n Apex Industrial Assets Private Limited",
+                "confidence": 0.96,
+                "observedAt": "2026-09-02T07:12:52.629Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 104
+          },
+          {
+            "id": "fact_f459c8e387614262",
+            "key": "location",
+            "label": "Location",
+            "value": "gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based registries with lag time that fraudsters exploit.",
+            "confidence": 0.95,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_9c645c2c29204bd3",
+                "sourceFragment": "property gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based regis",
+                "confidence": 0.95,
+                "observedAt": "2026-09-02T07:12:52.626Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 0,
+            "score": 135
+          },
+          {
+            "id": "fact_fd54ba412b1f4352",
+            "key": "occupancy",
+            "label": "Occupancy",
+            "value": "payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral , for something as simple as gold loans or agri -warehouse receipt financing (which ties nicely into India's WDRA e-NWR system, already digital, and a natural blockchain candidate).",
+            "confidence": 0.95,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_9c645c2c29204bd3",
+                "sourceFragment": "leased payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral ,",
+                "confidence": 0.95,
+                "observedAt": "2026-09-02T07:12:52.626Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 0,
+            "score": 135
+          },
+          {
+            "id": "fact_93831575fa764824",
+            "key": "nia",
+            "label": "Net internal area",
+            "value": "m + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuation, change in status/nature so on and so forth. The double-pledging / duplicate collateral fraud (the same warehouse receipt, gold, or invoice pledged to multiple lenders , is behind India's biggest banking frauds).",
+            "confidence": 0.93,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_9c645c2c29204bd3",
+                "sourceFragment": "niam + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuat",
+                "confidence": 0.93,
+                "observedAt": "2026-09-02T07:12:52.626Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 0,
+            "score": 133
+          },
+          {
+            "id": "fact_b65470e4d6244f78",
+            "key": "commitment",
+            "label": "Commitment",
+            "value": "s.",
+            "confidence": 0.93,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_b02fb0c7741f499b",
+                "sourceFragment": "commitments.",
+                "confidence": 0.93,
+                "observedAt": "2026-09-02T07:12:52.627Z"
+              }
+            ],
+            "documentType": "SALE_AGREEMENT",
+            "documentAsOfMs": 0,
+            "score": 93
+          },
+          {
+            "id": "fact_17281877f6a04faf",
+            "key": "cap_rate",
+            "label": "Cap rate",
+            "value": "of 6.0%.",
+            "numericValue": 6,
+            "currency": "USD",
+            "confidence": 0.89,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_125c4d2cb4d94020",
+                "sourceFragment": "capitalization rate of 6.0%.",
+                "confidence": 0.89,
+                "observedAt": "2026-09-02T07:12:52.630Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 97
+          }
+        ],
+        "entities": [
+          {
+            "id": "ent_d45c5e93d37e44e9",
+            "name": "OPQ asset ",
+            "canonicalName": "OPQ asset ",
+            "type": "ASSET",
+            "aliases": [],
+            "confidence": 0.99
+          },
+          {
+            "id": "ent_a612d6f1982846fd",
+            "name": "New- USA",
+            "canonicalName": "New- USA",
+            "type": "LOCATION",
+            "aliases": [],
+            "confidence": 0.9
+          },
+          {
+            "id": "ent_d8c88c37d90c4cc7",
+            "name": "TITLE RECORD LMN Asset Pvt Ltd",
+            "canonicalName": "TITLE RECORD LMN Asset Pvt Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_5d117f9121154ab6",
+            "name": "LMN Asset Pvt Ltd",
+            "canonicalName": "LMN Asset Pvt Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_8e64cb1357284a9d",
+            "name": "Legal Owner LMN Asset Pvt Ltd",
+            "canonicalName": "Legal Owner LMN Asset Pvt Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_87202fadb43c4bc3",
+            "name": "Eastern Commercial Estates LLP",
+            "canonicalName": "Eastern Commercial Estates LLP",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_a7e2a54f6e7b472b",
+            "name": "Kolkata LMN Asset Pvt Ltd",
+            "canonicalName": "Kolkata LMN Asset Pvt Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_d460144b3cbb48d2",
+            "name": "Kolkata Municipal Authority LMN Asset Pvt Ltd",
+            "canonicalName": "Kolkata Municipal Authority LMN Asset Pvt Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_f752eebbf9104646",
+            "name": "Independent Legal Counsel LMN Asset Pvt Ltd",
+            "canonicalName": "Independent Legal Counsel LMN Asset Pvt Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_66827ce80fcf4b4f",
+            "name": "ABC Consulting Services Pvt Ltd",
+            "canonicalName": "ABC Consulting Services Pvt Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_11ea8b8942bc4849",
+            "name": "TITLE REPRESENTATIONS LMN Asset Pvt Ltd",
+            "canonicalName": "TITLE REPRESENTATIONS LMN Asset Pvt Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_dec202dcd31c43a6",
+            "name": "India Limited",
+            "canonicalName": "India Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_7140ef2e65bf4298",
+            "name": "Seller Apex Industrial Assets Private Limited",
+            "canonicalName": "Seller Apex Industrial Assets Private Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_d0ef8f7fe7ec4cd0",
+            "name": "Purchaser LMN Asset Pvt. Ltd",
+            "canonicalName": "Purchaser LMN Asset Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_a7d875773ab04192",
+            "name": "Apex Industrial Assets Private Limited",
+            "canonicalName": "Apex Industrial Assets Private Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_d7c5a224b21b4dee",
+            "name": "LMN Asset Pvt. Ltd",
+            "canonicalName": "LMN Asset Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_ee74003d61514661",
+            "fromEntityId": "ent_d8c88c37d90c4cc7",
+            "toEntityId": "ent_d45c5e93d37e44e9",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_d66a0a9299cf419c"
+          },
+          {
+            "id": "rel_e0e6da1f1d8c4f09",
+            "fromEntityId": "ent_5d117f9121154ab6",
+            "toEntityId": "ent_d45c5e93d37e44e9",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_d66a0a9299cf419c"
+          },
+          {
+            "id": "rel_745f64aff7ad412c",
+            "fromEntityId": "ent_8e64cb1357284a9d",
+            "toEntityId": "ent_d45c5e93d37e44e9",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_d66a0a9299cf419c"
+          },
+          {
+            "id": "rel_690ff1251fe344a5",
+            "fromEntityId": "ent_87202fadb43c4bc3",
+            "toEntityId": "ent_d45c5e93d37e44e9",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_d66a0a9299cf419c"
+          },
+          {
+            "id": "rel_7a5e8a2e73d5487c",
+            "fromEntityId": "ent_a7e2a54f6e7b472b",
+            "toEntityId": "ent_d45c5e93d37e44e9",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_d66a0a9299cf419c"
+          }
+        ],
+        "timeline": [
+          {
+            "id": "evt_5313d5ae7b674ef5",
+            "date": "30 September 2026",
+            "title": "LMN_Asset_Sale1",
+            "description": "SALE AGREEMENT",
+            "category": "OWNERSHIP",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_2617138e6ecd478f"
+          },
+          {
+            "id": "evt_634747f973bf4682",
+            "date": "30 September 2026",
+            "title": "LMN_Asset_KYC",
+            "description": "KYC / OWNERSHIP DOCUMENT",
+            "category": "OWNERSHIP",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_b578222aefc14324"
+          },
+          {
+            "id": "evt_fd834df117a0470f",
+            "date": "30 September 2026",
+            "title": "LMN_Asset_Valuation",
+            "description": "VALUATION MEMORANDUM",
+            "category": "OWNERSHIP",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_125c4d2cb4d94020"
+          },
+          {
+            "id": "evt_28e1e0e878704ed7",
+            "date": "30 September 2026",
+            "title": "LMN_Asset_KYC_Ownership",
+            "description": "KYC / OWNERSHIP DOCUMENT",
+            "category": "OWNERSHIP",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_844d70f7dd4a4402"
+          },
+          {
+            "id": "evt_3023d699b2d34ae3",
+            "date": "30 September 2026",
+            "title": "LMN_Asset_Valuation_Memorandum",
+            "description": "VALUATION MEMORANDUM",
+            "category": "OWNERSHIP",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_d7319109c142446c"
+          },
+          {
+            "id": "evt_3e65b728cf424777",
+            "date": "30 September 2026",
+            "title": "LMN_Asset_Sale_Agreement",
+            "description": "SALE AGREEMENT",
+            "category": "OWNERSHIP",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_8eb1607ea4b342a2"
+          }
+        ],
+        "valuation": {
+          "amount": 30,
+          "currency": "USD",
+          "method": "Independent valuation memo / appraisal extract",
+          "asOf": "2026-09-30T00:00:00.000Z",
+          "low": 28,
+          "high": 32,
+          "confidence": 0.81,
+          "notes": [
+            "Primary mark taken from market value / fair value language.",
+            "Acquisition price was ₹12,50,00,000 (Rupees Twelve Crore Fifty Lakh Only)..",
+            "Mark corroborated across multiple source fragments."
+          ]
+        },
+        "risk": {
+          "overall": 29,
+          "rating": "LOW",
+          "confidence": 0.88,
+          "flags": [],
+          "dimensions": [
+            {
+              "key": "document_coverage",
+              "label": "Document coverage",
+              "score": 44,
+              "rationale": "3 distinct document types ingested for this asset."
+            },
+            {
+              "key": "ownership_clarity",
+              "label": "Ownership clarity",
+              "score": 18,
+              "rationale": "Legal ownership language extracted."
+            },
+            {
+              "key": "jurisdiction",
+              "label": "Jurisdiction & legal",
+              "score": 24,
+              "rationale": "Jurisdiction recorded as USA."
+            },
+            {
+              "key": "income_durability",
+              "label": "Income durability",
+              "score": 30,
+              "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+            }
+          ]
+        },
+        "confidence": {
+          "overall": 0.95,
+          "coverage": 0.98,
+          "provenance": 0.93
+        },
+        "sourceDocumentIds": [
+          "doc_d66a0a9299cf419c",
+          "doc_9c645c2c29204bd3",
+          "doc_b02fb0c7741f499b",
+          "doc_2617138e6ecd478f",
+          "doc_b578222aefc14324",
+          "doc_1306eefbacb84327",
+          "doc_af4bf30daeb74ef3",
+          "doc_125c4d2cb4d94020",
+          "doc_844d70f7dd4a4402",
+          "doc_d7319109c142446c",
+          "doc_8eb1607ea4b342a2",
+          "doc_77c4f2f49c524d7f"
+        ],
+        "projection": {
+          "assetId": "ast_25687abc39614427",
+          "currency": "USD",
+          "baseAmount": 30,
+          "baseAsOf": "2026-09-30T00:00:00.000Z",
+          "baseMethod": "Independent valuation memo / appraisal extract",
+          "model": "caprov-forward-mark-v1",
+          "generatedAt": "2026-09-02T07:12:52.635Z",
+          "assumptions": {
+            "annualGrowthRate": 0.04,
+            "drivers": [
+              "real estate base growth 2.5%",
+              "cap rate 6% → 0.00 pp",
+              "realized mark drift vs purchase → 1.50 pp"
+            ],
+            "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+          },
+          "horizons": [
+            {
+              "years": 1,
+              "asOf": "2027-09-30",
+              "base": 31,
+              "bear": 31,
+              "bull": 32,
+              "low": 28,
+              "high": 34,
+              "annualGrowthRate": 0.04,
+              "confidence": 0.61
+            },
+            {
+              "years": 3,
+              "asOf": "2029-09-30",
+              "base": 34,
+              "bear": 32,
+              "bull": 36,
+              "low": 29,
+              "high": 39,
+              "annualGrowthRate": 0.04,
+              "confidence": 0.45
+            },
+            {
+              "years": 5,
+              "asOf": "2031-09-30",
+              "base": 36,
+              "bear": 33,
+              "bull": 40,
+              "low": 29,
+              "high": 43,
+              "annualGrowthRate": 0.04,
+              "confidence": 0.29
+            }
+          ],
+          "confidence": 0.61,
+          "sourceDocumentIds": [
+            "doc_b578222aefc14324",
+            "doc_125c4d2cb4d94020",
+            "doc_844d70f7dd4a4402",
+            "doc_2617138e6ecd478f"
+          ]
+        }
+      },
+      "contentHash": "66ac665b2400fce0d733259578105847a0883f67cacf9b7b73e53c6e068e5bf7",
+      "hashAlgorithm": "sha256",
+      "createdAt": "2026-09-02T07:12:52.662Z"
+    },
+    {
+      "id": "dna_31431fcce0e545a7",
+      "assetId": "ast_1529002524454748",
+      "version": 3,
+      "envelope": {
+        "assetId": "ast_1529002524454748",
+        "version": 3,
+        "generatedAt": "2026-09-02T07:18:41.084Z",
+        "summary": "PVR Downtown intelligence envelope from 2 source documents. Primary mark as at 30 September 2026 (market value). Risk moderate with 3 flag(s). Forward mark (3y base): USD 32 at 2.0% p.a. model growth. (local intelligence fallback)",
+        "facts": [
+          {
+            "id": "fact_e80bdaaab4874548",
+            "key": "market_value",
+            "label": "Market value",
+            "value": "as at 30 September 2026",
+            "numericValue": 30,
+            "currency": "USD",
+            "confidence": 0.78,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_02b214885b0044bb",
+                "sourceFragment": "Market Value as at 30 September 2026",
+                "confidence": 0.78,
+                "observedAt": "2026-09-02T07:18:41.082Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 86.17907264
+          },
+          {
+            "id": "fact_8e1ec17eeaaf4a86",
+            "key": "purchase_price",
+            "label": "Purchase price",
+            "value": "₹12,50,00,000",
+            "numericValue": 12,
+            "currency": "USD",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_02b214885b0044bb",
+                "sourceFragment": "Purchase Price\n ₹12,50,00,000",
+                "confidence": 0.99,
+                "observedAt": "2026-09-02T07:18:41.082Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 107
+          },
+          {
+            "id": "fact_bce97062ee124a8d",
+            "key": "legal_ownership",
+            "label": "Legal ownership",
+            "value": "or create a security interest.",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_0f78c3f2c3be46a4",
+                "sourceFragment": "legal ownership or create a security interest.",
+                "confidence": 0.99,
+                "observedAt": "2026-09-02T07:18:41.083Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 0,
+            "score": 132
+          },
+          {
+            "id": "fact_8c2e4e29b7844b81",
+            "key": "proprietor",
+            "label": "Proprietor",
+            "value": "Apex Industrial Assets Private Limited",
+            "confidence": 0.96,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_02b214885b0044bb",
+                "sourceFragment": "Registered Owner\n Apex Industrial Assets Private Limited",
+                "confidence": 0.96,
+                "observedAt": "2026-09-02T07:18:41.082Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 104
+          },
+          {
+            "id": "fact_1153e6618343414e",
+            "key": "location",
+            "label": "Location",
+            "value": "Andheri East, Mumbai, Maharashtra 400069",
+            "numericValue": 400069,
+            "currency": "USD",
+            "confidence": 0.93,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_02b214885b0044bb",
+                "sourceFragment": "Location\n Andheri East, Mumbai, Maharashtra 400069",
+                "confidence": 0.93,
+                "observedAt": "2026-09-02T07:18:41.082Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 101
+          },
+          {
+            "id": "fact_5144aade467e43f1",
+            "key": "occupancy",
+            "label": "Occupancy",
+            "value": "14 Oct 2022",
+            "numericValue": 14,
+            "currency": "USD",
+            "confidence": 0.93,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_02b214885b0044bb",
+                "sourceFragment": "leased\n 14 Oct 2022",
+                "confidence": 0.93,
+                "observedAt": "2026-09-02T07:18:41.082Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 101
+          }
+        ],
+        "entities": [
+          {
+            "id": "ent_c86c8ea91ad54683",
+            "name": "PVR Downtown",
+            "canonicalName": "PVR Downtown",
+            "type": "ASSET",
+            "aliases": [],
+            "confidence": 0.99
+          },
+          {
+            "id": "ent_a827d7a1f6994611",
+            "name": "NEw- USA",
+            "canonicalName": "NEw- USA",
+            "type": "LOCATION",
+            "aliases": [],
+            "confidence": 0.9
+          },
+          {
+            "id": "ent_e1978fc3f4c543dd",
+            "name": "Seller Apex Industrial Assets Private Limited",
+            "canonicalName": "Seller Apex Industrial Assets Private Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_34bd917b969d444b",
+            "name": "Proposed Purchaser LMN Asset Pvt. Ltd",
+            "canonicalName": "Proposed Purchaser LMN Asset Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_7dd59e17d1e94ab9",
+            "name": "LMN Asset Pvt. Ltd",
+            "canonicalName": "LMN Asset Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_796b32fae2434c5c",
+            "name": "Registered Owner Apex Industrial Assets Private Limited",
+            "canonicalName": "Registered Owner Apex Industrial Assets Private Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_77826c5c15c146c0",
+            "name": "Acquisition Entity LMN Asset Pvt. Ltd",
+            "canonicalName": "Acquisition Entity LMN Asset Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_9566436993724257",
+            "name": "Legal Name Apex Industrial Assets Private Limited",
+            "canonicalName": "Legal Name Apex Industrial Assets Private Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_f5c2d003133c4f77",
+            "name": "Entity Type Private Limited",
+            "canonicalName": "Entity Type Private Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_9f8eb79737da43b0",
+            "name": "Illustrative Mehta Family Holdings Pvt. Ltd",
+            "canonicalName": "Illustrative Mehta Family Holdings Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_999e5a0af1284804",
+            "name": "Record Legal Name LMN Asset Pvt. Ltd",
+            "canonicalName": "Record Legal Name LMN Asset Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_2aff09428ec44c66",
+            "name": "Illustrative LMN Ventures Holdings Pvt. Ltd",
+            "canonicalName": "Illustrative LMN Ventures Holdings Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_3ffb2673751f47d7",
+            "name": "Conveyance Deed Maharashtra Commercial Estates Ltd",
+            "canonicalName": "Conveyance Deed Maharashtra Commercial Estates Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_ba3b998b37724753",
+            "name": "Apex Industrial Assets Pvt. Ltd",
+            "canonicalName": "Apex Industrial Assets Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_e2f40779528a4efd",
+            "name": "HDFC Bank Ltd",
+            "canonicalName": "HDFC Bank Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_5eeed12f9acd42af",
+            "name": "Sale Agreement Apex Industrial Assets Pvt. Ltd",
+            "canonicalName": "Sale Agreement Apex Industrial Assets Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_3e1fbeda23b64a1f",
+            "fromEntityId": "ent_e1978fc3f4c543dd",
+            "toEntityId": "ent_c86c8ea91ad54683",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_02b214885b0044bb"
+          },
+          {
+            "id": "rel_b4d2118f1909439a",
+            "fromEntityId": "ent_34bd917b969d444b",
+            "toEntityId": "ent_c86c8ea91ad54683",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_02b214885b0044bb"
+          },
+          {
+            "id": "rel_3c0d0147dcac4fc7",
+            "fromEntityId": "ent_7dd59e17d1e94ab9",
+            "toEntityId": "ent_c86c8ea91ad54683",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_02b214885b0044bb"
+          },
+          {
+            "id": "rel_02d2c6d22e604e55",
+            "fromEntityId": "ent_796b32fae2434c5c",
+            "toEntityId": "ent_c86c8ea91ad54683",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_02b214885b0044bb"
+          },
+          {
+            "id": "rel_261a10ae417b4aad",
+            "fromEntityId": "ent_77826c5c15c146c0",
+            "toEntityId": "ent_c86c8ea91ad54683",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_02b214885b0044bb"
+          }
+        ],
+        "timeline": [
+          {
+            "id": "evt_482ed015a96144a6",
+            "date": "30 September 2026",
+            "title": "LMN_Asset_KYC_Ownership",
+            "description": "KYC / OWNERSHIP DOCUMENT",
+            "category": "OWNERSHIP",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_02b214885b0044bb"
+          }
+        ],
+        "valuation": {
+          "amount": 30,
+          "currency": "USD",
+          "method": "Independent valuation memo / appraisal extract",
+          "asOf": "2026-09-30T00:00:00.000Z",
+          "low": 28,
+          "high": 32,
+          "confidence": 0.78,
+          "notes": [
+            "Primary mark taken from market value / fair value language.",
+            "Acquisition price was ₹12,50,00,000."
+          ]
+        },
+        "risk": {
+          "overall": 37,
+          "rating": "MODERATE",
+          "confidence": 0.88,
+          "flags": [
+            "Occupancy at 14 Oct 2022",
+            "No independent valuation memo / NAV pack",
+            "Thin document coverage"
+          ],
+          "dimensions": [
+            {
+              "key": "document_coverage",
+              "label": "Document coverage",
+              "score": 68,
+              "rationale": "1 distinct document types ingested for this asset."
+            },
+            {
+              "key": "ownership_clarity",
+              "label": "Ownership clarity",
+              "score": 18,
+              "rationale": "Legal ownership language extracted."
+            },
+            {
+              "key": "jurisdiction",
+              "label": "Jurisdiction & legal",
+              "score": 24,
+              "rationale": "Jurisdiction recorded as USA."
+            },
+            {
+              "key": "income_durability",
+              "label": "Income durability",
+              "score": 38,
+              "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+            }
+          ]
+        },
+        "confidence": {
+          "overall": 0.8,
+          "coverage": 0.6,
+          "provenance": 0.93
+        },
+        "sourceDocumentIds": [
+          "doc_02b214885b0044bb",
+          "doc_0f78c3f2c3be46a4"
+        ],
+        "projection": {
+          "assetId": "ast_1529002524454748",
+          "currency": "USD",
+          "baseAmount": 30,
+          "baseAsOf": "2026-09-30T00:00:00.000Z",
+          "baseMethod": "Independent valuation memo / appraisal extract",
+          "model": "caprov-forward-mark-v1",
+          "generatedAt": "2026-09-02T07:18:41.084Z",
+          "assumptions": {
+            "annualGrowthRate": 0.02,
+            "drivers": [
+              "real estate base growth 2.5%",
+              "occupancy 14% → -1.50 pp",
+              "realized mark drift vs purchase → 1.50 pp",
+              "risk moderate −0.5 pp"
+            ],
+            "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+          },
+          "horizons": [
+            {
+              "years": 1,
+              "asOf": "2027-09-30",
+              "base": 31,
+              "bear": 30,
+              "bull": 31,
+              "low": 28,
+              "high": 34,
+              "annualGrowthRate": 0.02,
+              "confidence": 0.58
+            },
+            {
+              "years": 3,
+              "asOf": "2029-09-30",
+              "base": 32,
+              "bear": 30,
+              "bull": 34,
+              "low": 28,
+              "high": 36,
+              "annualGrowthRate": 0.02,
+              "confidence": 0.42
+            },
+            {
+              "years": 5,
+              "asOf": "2031-09-30",
+              "base": 33,
+              "bear": 30,
+              "bull": 36,
+              "low": 27,
+              "high": 39,
+              "annualGrowthRate": 0.02,
+              "confidence": 0.26
+            }
+          ],
+          "confidence": 0.58,
+          "sourceDocumentIds": [
+            "doc_02b214885b0044bb"
+          ]
+        }
+      },
+      "contentHash": "97a112cf4474d6fc5f22611912d2adca6d02b3d8b6c75d698ab055c341147cad",
+      "hashAlgorithm": "sha256",
+      "createdAt": "2026-09-02T07:18:41.112Z"
+    },
+    {
+      "id": "dna_e4f5f52e86c14d46",
+      "assetId": "ast_1529002524454748",
+      "version": 4,
+      "envelope": {
+        "assetId": "ast_1529002524454748",
+        "version": 4,
+        "generatedAt": "2026-09-02T07:26:13.517Z",
+        "summary": "PVR Downtown intelligence envelope from 3 source documents. Primary mark as at 30 September 2026 (market value). Risk moderate with 1 flag(s). Forward mark (3y base): USD 33 at 3.5% p.a. model growth. (local intelligence fallback)",
+        "facts": [
+          {
+            "id": "fact_8219cf368d41445d",
+            "key": "market_value",
+            "label": "Market value",
+            "value": "as at 30 September 2026",
+            "numericValue": 30,
+            "currency": "USD",
+            "confidence": 0.78,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_02b214885b0044bb",
+                "sourceFragment": "Market Value as at 30 September 2026",
+                "confidence": 0.78,
+                "observedAt": "2026-09-02T07:26:13.514Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 86.17907264
+          },
+          {
+            "id": "fact_60ce7473a66b4524",
+            "key": "purchase_price",
+            "label": "Purchase price",
+            "value": "₹12,50,00,000",
+            "numericValue": 12,
+            "currency": "USD",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_02b214885b0044bb",
+                "sourceFragment": "Purchase Price\n ₹12,50,00,000",
+                "confidence": 0.99,
+                "observedAt": "2026-09-02T07:26:13.514Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 107
+          },
+          {
+            "id": "fact_5fb2c13ab4d84a21",
+            "key": "legal_ownership",
+            "label": "Legal ownership",
+            "value": "or create a security interest.",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_0f78c3f2c3be46a4",
+                "sourceFragment": "legal ownership or create a security interest.",
+                "confidence": 0.99,
+                "observedAt": "2026-09-02T07:26:13.515Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 0,
+            "score": 132
+          },
+          {
+            "id": "fact_939a0d20f9214e77",
+            "key": "proprietor",
+            "label": "Proprietor",
+            "value": "Apex Industrial Assets Private Limited",
+            "confidence": 0.96,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_02b214885b0044bb",
+                "sourceFragment": "Registered Owner\n Apex Industrial Assets Private Limited",
+                "confidence": 0.96,
+                "observedAt": "2026-09-02T07:26:13.514Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 104
+          },
+          {
+            "id": "fact_cbf5c46e2afd45e6",
+            "key": "location",
+            "label": "Location",
+            "value": "gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based registries with lag time that fraudsters exploit.",
+            "confidence": 0.95,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_b53c9607d9c04eeb",
+                "sourceFragment": "property gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based regis",
+                "confidence": 0.95,
+                "observedAt": "2026-09-02T07:26:13.513Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 0,
+            "score": 135
+          },
+          {
+            "id": "fact_8b35dadef8724b37",
+            "key": "occupancy",
+            "label": "Occupancy",
+            "value": "payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral , for something as simple as gold loans or agri -warehouse receipt financing (which ties nicely into India's WDRA e-NWR system, already digital, and a natural blockchain candidate).",
+            "confidence": 0.95,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_b53c9607d9c04eeb",
+                "sourceFragment": "leased payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral ,",
+                "confidence": 0.95,
+                "observedAt": "2026-09-02T07:26:13.513Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 0,
+            "score": 135
+          },
+          {
+            "id": "fact_48decbb7704843d6",
+            "key": "nia",
+            "label": "Net internal area",
+            "value": "m + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuation, change in status/nature so on and so forth. The double-pledging / duplicate collateral fraud (the same warehouse receipt, gold, or invoice pledged to multiple lenders , is behind India's biggest banking frauds).",
+            "confidence": 0.93,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_b53c9607d9c04eeb",
+                "sourceFragment": "niam + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuat",
+                "confidence": 0.93,
+                "observedAt": "2026-09-02T07:26:13.513Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 0,
+            "score": 133
+          }
+        ],
+        "entities": [
+          {
+            "id": "ent_8c47c946dede4ed0",
+            "name": "PVR Downtown",
+            "canonicalName": "PVR Downtown",
+            "type": "ASSET",
+            "aliases": [],
+            "confidence": 0.99
+          },
+          {
+            "id": "ent_8f942065b4874716",
+            "name": "NEw- USA",
+            "canonicalName": "NEw- USA",
+            "type": "LOCATION",
+            "aliases": [],
+            "confidence": 0.9
+          },
+          {
+            "id": "ent_28d4addfa5b64a5d",
+            "name": "Seller Apex Industrial Assets Private Limited",
+            "canonicalName": "Seller Apex Industrial Assets Private Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_2be4146a85e3457b",
+            "name": "Proposed Purchaser LMN Asset Pvt. Ltd",
+            "canonicalName": "Proposed Purchaser LMN Asset Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_c915e1d6a27740f8",
+            "name": "LMN Asset Pvt. Ltd",
+            "canonicalName": "LMN Asset Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_eb463d2efb784ce3",
+            "name": "Registered Owner Apex Industrial Assets Private Limited",
+            "canonicalName": "Registered Owner Apex Industrial Assets Private Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_b45772d1e4994be8",
+            "name": "Acquisition Entity LMN Asset Pvt. Ltd",
+            "canonicalName": "Acquisition Entity LMN Asset Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_8880ba09fae146af",
+            "name": "Legal Name Apex Industrial Assets Private Limited",
+            "canonicalName": "Legal Name Apex Industrial Assets Private Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_a7c868e7166143e6",
+            "name": "Entity Type Private Limited",
+            "canonicalName": "Entity Type Private Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_3942fb1cb6074327",
+            "name": "Illustrative Mehta Family Holdings Pvt. Ltd",
+            "canonicalName": "Illustrative Mehta Family Holdings Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_ab28fdbc67ca42cf",
+            "name": "Record Legal Name LMN Asset Pvt. Ltd",
+            "canonicalName": "Record Legal Name LMN Asset Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_0836c895d2db45be",
+            "name": "Illustrative LMN Ventures Holdings Pvt. Ltd",
+            "canonicalName": "Illustrative LMN Ventures Holdings Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_d449ce7f81ec4926",
+            "name": "Conveyance Deed Maharashtra Commercial Estates Ltd",
+            "canonicalName": "Conveyance Deed Maharashtra Commercial Estates Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_02eb65c0b6274c28",
+            "name": "Apex Industrial Assets Pvt. Ltd",
+            "canonicalName": "Apex Industrial Assets Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_9a37efc801554d23",
+            "name": "HDFC Bank Ltd",
+            "canonicalName": "HDFC Bank Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_911f143b0b864a9d",
+            "name": "Sale Agreement Apex Industrial Assets Pvt. Ltd",
+            "canonicalName": "Sale Agreement Apex Industrial Assets Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_b049c19208444b34",
+            "fromEntityId": "ent_28d4addfa5b64a5d",
+            "toEntityId": "ent_8c47c946dede4ed0",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_b53c9607d9c04eeb"
+          },
+          {
+            "id": "rel_22b2b69477e54ca8",
+            "fromEntityId": "ent_2be4146a85e3457b",
+            "toEntityId": "ent_8c47c946dede4ed0",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_b53c9607d9c04eeb"
+          },
+          {
+            "id": "rel_3c4d8133504a422c",
+            "fromEntityId": "ent_c915e1d6a27740f8",
+            "toEntityId": "ent_8c47c946dede4ed0",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_b53c9607d9c04eeb"
+          },
+          {
+            "id": "rel_80dc3d489db4471f",
+            "fromEntityId": "ent_eb463d2efb784ce3",
+            "toEntityId": "ent_8c47c946dede4ed0",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_b53c9607d9c04eeb"
+          },
+          {
+            "id": "rel_cb5b7c83c00b4be4",
+            "fromEntityId": "ent_b45772d1e4994be8",
+            "toEntityId": "ent_8c47c946dede4ed0",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_b53c9607d9c04eeb"
+          }
+        ],
+        "timeline": [
+          {
+            "id": "evt_ff797cf1d5444197",
+            "date": "30 September 2026",
+            "title": "LMN_Asset_KYC_Ownership",
+            "description": "KYC / OWNERSHIP DOCUMENT",
+            "category": "OWNERSHIP",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_02b214885b0044bb"
+          }
+        ],
+        "valuation": {
+          "amount": 30,
+          "currency": "USD",
+          "method": "Independent valuation memo / appraisal extract",
+          "asOf": "2026-09-30T00:00:00.000Z",
+          "low": 28,
+          "high": 32,
+          "confidence": 0.78,
+          "notes": [
+            "Primary mark taken from market value / fair value language.",
+            "Acquisition price was ₹12,50,00,000."
+          ]
+        },
+        "risk": {
+          "overall": 32,
+          "rating": "MODERATE",
+          "confidence": 0.88,
+          "flags": [
+            "Thin document coverage"
+          ],
+          "dimensions": [
+            {
+              "key": "document_coverage",
+              "label": "Document coverage",
+              "score": 56,
+              "rationale": "2 distinct document types ingested for this asset."
+            },
+            {
+              "key": "ownership_clarity",
+              "label": "Ownership clarity",
+              "score": 18,
+              "rationale": "Legal ownership language extracted."
+            },
+            {
+              "key": "jurisdiction",
+              "label": "Jurisdiction & legal",
+              "score": 24,
+              "rationale": "Jurisdiction recorded as USA."
+            },
+            {
+              "key": "income_durability",
+              "label": "Income durability",
+              "score": 30,
+              "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+            }
+          ]
+        },
+        "confidence": {
+          "overall": 0.84,
+          "coverage": 0.7,
+          "provenance": 0.94
+        },
+        "sourceDocumentIds": [
+          "doc_b53c9607d9c04eeb",
+          "doc_02b214885b0044bb",
+          "doc_0f78c3f2c3be46a4"
+        ],
+        "projection": {
+          "assetId": "ast_1529002524454748",
+          "currency": "USD",
+          "baseAmount": 30,
+          "baseAsOf": "2026-09-30T00:00:00.000Z",
+          "baseMethod": "Independent valuation memo / appraisal extract",
+          "model": "caprov-forward-mark-v1",
+          "generatedAt": "2026-09-02T07:26:13.517Z",
+          "assumptions": {
+            "annualGrowthRate": 0.035,
+            "drivers": [
+              "real estate base growth 2.5%",
+              "realized mark drift vs purchase → 1.50 pp",
+              "risk moderate −0.5 pp"
+            ],
+            "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+          },
+          "horizons": [
+            {
+              "years": 1,
+              "asOf": "2027-09-30",
+              "base": 31,
+              "bear": 30,
+              "bull": 32,
+              "low": 28,
+              "high": 34,
+              "annualGrowthRate": 0.035,
+              "confidence": 0.58
+            },
+            {
+              "years": 3,
+              "asOf": "2029-09-30",
+              "base": 33,
+              "bear": 31,
+              "bull": 35,
+              "low": 29,
+              "high": 37,
+              "annualGrowthRate": 0.035,
+              "confidence": 0.42
+            },
+            {
+              "years": 5,
+              "asOf": "2031-09-30",
+              "base": 36,
+              "bear": 32,
+              "bull": 39,
+              "low": 29,
+              "high": 43,
+              "annualGrowthRate": 0.035,
+              "confidence": 0.26
+            }
+          ],
+          "confidence": 0.58,
+          "sourceDocumentIds": [
+            "doc_02b214885b0044bb"
+          ]
+        }
+      },
+      "contentHash": "6600f5707451c9a483cdf0619013141845e44419dc9f9d6fffcf63dde77e7f92",
+      "hashAlgorithm": "sha256",
+      "createdAt": "2026-09-02T07:26:13.557Z"
+    },
+    {
+      "id": "dna_e1558a581d264614",
+      "assetId": "ast_1529002524454748",
+      "version": 5,
+      "envelope": {
+        "assetId": "ast_1529002524454748",
+        "version": 5,
+        "generatedAt": "2026-09-02T07:26:16.434Z",
+        "summary": "PVR Downtown intelligence envelope from 3 source documents. Primary mark as at 30 September 2026 (market value). Risk moderate with 1 flag(s). Forward mark (3y base): USD 33 at 3.5% p.a. model growth. (local intelligence fallback)",
+        "facts": [
+          {
+            "id": "fact_2c86989ae426424f",
+            "key": "market_value",
+            "label": "Market value",
+            "value": "as at 30 September 2026",
+            "numericValue": 30,
+            "currency": "USD",
+            "confidence": 0.78,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_02b214885b0044bb",
+                "sourceFragment": "Market Value as at 30 September 2026",
+                "confidence": 0.78,
+                "observedAt": "2026-09-02T07:26:16.432Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 86.17907264
+          },
+          {
+            "id": "fact_aa4117353120438b",
+            "key": "purchase_price",
+            "label": "Purchase price",
+            "value": "₹12,50,00,000",
+            "numericValue": 12,
+            "currency": "USD",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_02b214885b0044bb",
+                "sourceFragment": "Purchase Price\n ₹12,50,00,000",
+                "confidence": 0.99,
+                "observedAt": "2026-09-02T07:26:16.433Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 107
+          },
+          {
+            "id": "fact_dde15f6840da466b",
+            "key": "legal_ownership",
+            "label": "Legal ownership",
+            "value": "or create a security interest.",
+            "confidence": 0.99,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_0f78c3f2c3be46a4",
+                "sourceFragment": "legal ownership or create a security interest.",
+                "confidence": 0.99,
+                "observedAt": "2026-09-02T07:26:16.433Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 0,
+            "score": 132
+          },
+          {
+            "id": "fact_2d7de0e98e904f6a",
+            "key": "proprietor",
+            "label": "Proprietor",
+            "value": "Apex Industrial Assets Private Limited",
+            "confidence": 0.96,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_02b214885b0044bb",
+                "sourceFragment": "Registered Owner\n Apex Industrial Assets Private Limited",
+                "confidence": 0.96,
+                "observedAt": "2026-09-02T07:26:16.433Z"
+              }
+            ],
+            "documentType": "TITLE_DEED",
+            "documentAsOfMs": 1790726400000,
+            "score": 104
+          },
+          {
+            "id": "fact_ace4bec773bd4cc9",
+            "key": "location",
+            "label": "Location",
+            "value": "gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based registries with lag time that fraudsters exploit.",
+            "confidence": 0.95,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_b53c9607d9c04eeb",
+                "sourceFragment": "property gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based regis",
+                "confidence": 0.95,
+                "observedAt": "2026-09-02T07:26:16.432Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 0,
+            "score": 135
+          },
+          {
+            "id": "fact_4ebe7576827b449c",
+            "key": "occupancy",
+            "label": "Occupancy",
+            "value": "payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral , for something as simple as gold loans or agri -warehouse receipt financing (which ties nicely into India's WDRA e-NWR system, already digital, and a natural blockchain candidate).",
+            "confidence": 0.95,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_b53c9607d9c04eeb",
+                "sourceFragment": "leased payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral ,",
+                "confidence": 0.95,
+                "observedAt": "2026-09-02T07:26:16.432Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 0,
+            "score": 135
+          },
+          {
+            "id": "fact_a51b7523b303458c",
+            "key": "nia",
+            "label": "Net internal area",
+            "value": "m + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuation, change in status/nature so on and so forth. The double-pledging / duplicate collateral fraud (the same warehouse receipt, gold, or invoice pledged to multiple lenders , is behind India's biggest banking frauds).",
+            "confidence": 0.93,
+            "provenance": [
+              {
+                "sourceDocumentId": "doc_b53c9607d9c04eeb",
+                "sourceFragment": "niam + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuat",
+                "confidence": 0.93,
+                "observedAt": "2026-09-02T07:26:16.432Z"
+              }
+            ],
+            "documentType": "VALUATION_MEMO",
+            "documentAsOfMs": 0,
+            "score": 133
+          }
+        ],
+        "entities": [
+          {
+            "id": "ent_661f6216c6ae42a9",
+            "name": "PVR Downtown",
+            "canonicalName": "PVR Downtown",
+            "type": "ASSET",
+            "aliases": [],
+            "confidence": 0.99
+          },
+          {
+            "id": "ent_2632a7a60c7b4379",
+            "name": "NEw- USA",
+            "canonicalName": "NEw- USA",
+            "type": "LOCATION",
+            "aliases": [],
+            "confidence": 0.9
+          },
+          {
+            "id": "ent_c426e6cb8b6446ee",
+            "name": "Seller Apex Industrial Assets Private Limited",
+            "canonicalName": "Seller Apex Industrial Assets Private Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_2e9ddad6553f4102",
+            "name": "Proposed Purchaser LMN Asset Pvt. Ltd",
+            "canonicalName": "Proposed Purchaser LMN Asset Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_e8abacce2e7e4482",
+            "name": "LMN Asset Pvt. Ltd",
+            "canonicalName": "LMN Asset Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_1d3e8076761344e5",
+            "name": "Registered Owner Apex Industrial Assets Private Limited",
+            "canonicalName": "Registered Owner Apex Industrial Assets Private Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_df5e2ad005a14546",
+            "name": "Acquisition Entity LMN Asset Pvt. Ltd",
+            "canonicalName": "Acquisition Entity LMN Asset Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_8131a32ba3d2443e",
+            "name": "Legal Name Apex Industrial Assets Private Limited",
+            "canonicalName": "Legal Name Apex Industrial Assets Private Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_865b7c8dfbda494f",
+            "name": "Entity Type Private Limited",
+            "canonicalName": "Entity Type Private Limited",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_02753a8708fa4f7e",
+            "name": "Illustrative Mehta Family Holdings Pvt. Ltd",
+            "canonicalName": "Illustrative Mehta Family Holdings Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_41b6816d965045c2",
+            "name": "Record Legal Name LMN Asset Pvt. Ltd",
+            "canonicalName": "Record Legal Name LMN Asset Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_c0ee9517b3c541f2",
+            "name": "Illustrative LMN Ventures Holdings Pvt. Ltd",
+            "canonicalName": "Illustrative LMN Ventures Holdings Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_a6e614b24da747c3",
+            "name": "Conveyance Deed Maharashtra Commercial Estates Ltd",
+            "canonicalName": "Conveyance Deed Maharashtra Commercial Estates Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_2b4f93d12dbd4408",
+            "name": "Apex Industrial Assets Pvt. Ltd",
+            "canonicalName": "Apex Industrial Assets Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_07b6186d2920436d",
+            "name": "HDFC Bank Ltd",
+            "canonicalName": "HDFC Bank Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          },
+          {
+            "id": "ent_350e5a2d62354624",
+            "name": "Sale Agreement Apex Industrial Assets Pvt. Ltd",
+            "canonicalName": "Sale Agreement Apex Industrial Assets Pvt. Ltd",
+            "type": "ORGANIZATION",
+            "aliases": [],
+            "confidence": 0.86
+          }
+        ],
+        "relationships": [
+          {
+            "id": "rel_a8ba0d8429d64aa0",
+            "fromEntityId": "ent_c426e6cb8b6446ee",
+            "toEntityId": "ent_661f6216c6ae42a9",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_b53c9607d9c04eeb"
+          },
+          {
+            "id": "rel_746d6cef8a53412e",
+            "fromEntityId": "ent_2e9ddad6553f4102",
+            "toEntityId": "ent_661f6216c6ae42a9",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_b53c9607d9c04eeb"
+          },
+          {
+            "id": "rel_a21660d37fd141ef",
+            "fromEntityId": "ent_e8abacce2e7e4482",
+            "toEntityId": "ent_661f6216c6ae42a9",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_b53c9607d9c04eeb"
+          },
+          {
+            "id": "rel_37ecb3c2a76147c9",
+            "fromEntityId": "ent_1d3e8076761344e5",
+            "toEntityId": "ent_661f6216c6ae42a9",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_b53c9607d9c04eeb"
+          },
+          {
+            "id": "rel_b021a1846ce94186",
+            "fromEntityId": "ent_df5e2ad005a14546",
+            "toEntityId": "ent_661f6216c6ae42a9",
+            "type": "RELATED_TO",
+            "confidence": 0.7,
+            "sourceDocumentId": "doc_b53c9607d9c04eeb"
+          }
+        ],
+        "timeline": [
+          {
+            "id": "evt_cd2e7970b4c9468f",
+            "date": "30 September 2026",
+            "title": "LMN_Asset_KYC_Ownership",
+            "description": "KYC / OWNERSHIP DOCUMENT",
+            "category": "OWNERSHIP",
+            "confidence": 0.9,
+            "sourceDocumentId": "doc_02b214885b0044bb"
+          }
+        ],
+        "valuation": {
+          "amount": 30,
+          "currency": "USD",
+          "method": "Independent valuation memo / appraisal extract",
+          "asOf": "2026-09-30T00:00:00.000Z",
+          "low": 28,
+          "high": 32,
+          "confidence": 0.78,
+          "notes": [
+            "Primary mark taken from market value / fair value language.",
+            "Acquisition price was ₹12,50,00,000."
+          ]
+        },
+        "risk": {
+          "overall": 32,
+          "rating": "MODERATE",
+          "confidence": 0.88,
+          "flags": [
+            "Thin document coverage"
+          ],
+          "dimensions": [
+            {
+              "key": "document_coverage",
+              "label": "Document coverage",
+              "score": 56,
+              "rationale": "2 distinct document types ingested for this asset."
+            },
+            {
+              "key": "ownership_clarity",
+              "label": "Ownership clarity",
+              "score": 18,
+              "rationale": "Legal ownership language extracted."
+            },
+            {
+              "key": "jurisdiction",
+              "label": "Jurisdiction & legal",
+              "score": 24,
+              "rationale": "Jurisdiction recorded as USA."
+            },
+            {
+              "key": "income_durability",
+              "label": "Income durability",
+              "score": 30,
+              "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+            }
+          ]
+        },
+        "confidence": {
+          "overall": 0.84,
+          "coverage": 0.7,
+          "provenance": 0.94
+        },
+        "sourceDocumentIds": [
+          "doc_b53c9607d9c04eeb",
+          "doc_02b214885b0044bb",
+          "doc_0f78c3f2c3be46a4"
+        ],
+        "projection": {
+          "assetId": "ast_1529002524454748",
+          "currency": "USD",
+          "baseAmount": 30,
+          "baseAsOf": "2026-09-30T00:00:00.000Z",
+          "baseMethod": "Independent valuation memo / appraisal extract",
+          "model": "caprov-forward-mark-v1",
+          "generatedAt": "2026-09-02T07:26:16.434Z",
+          "assumptions": {
+            "annualGrowthRate": 0.035,
+            "drivers": [
+              "real estate base growth 2.5%",
+              "realized mark drift vs purchase → 1.50 pp",
+              "risk moderate −0.5 pp"
+            ],
+            "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+          },
+          "horizons": [
+            {
+              "years": 1,
+              "asOf": "2027-09-30",
+              "base": 31,
+              "bear": 30,
+              "bull": 32,
+              "low": 28,
+              "high": 34,
+              "annualGrowthRate": 0.035,
+              "confidence": 0.58
+            },
+            {
+              "years": 3,
+              "asOf": "2029-09-30",
+              "base": 33,
+              "bear": 31,
+              "bull": 35,
+              "low": 29,
+              "high": 37,
+              "annualGrowthRate": 0.035,
+              "confidence": 0.42
+            },
+            {
+              "years": 5,
+              "asOf": "2031-09-30",
+              "base": 36,
+              "bear": 32,
+              "bull": 39,
+              "low": 29,
+              "high": 43,
+              "annualGrowthRate": 0.035,
+              "confidence": 0.26
+            }
+          ],
+          "confidence": 0.58,
+          "sourceDocumentIds": [
+            "doc_02b214885b0044bb"
+          ]
+        }
+      },
+      "contentHash": "d8513eafdb7ece5ad586f869436cd2af7026ce5c77e45430fec3f9d71851f753",
+      "hashAlgorithm": "sha256",
+      "createdAt": "2026-09-02T07:26:16.476Z"
     }
   ],
   "valuations": [
@@ -18861,6 +21151,79 @@
         ]
       },
       "createdAt": "2026-09-02T07:04:15.750Z"
+    },
+    {
+      "id": "val_48da61880db543c0",
+      "assetId": "ast_25687abc39614427",
+      "payload": {
+        "amount": 30,
+        "currency": "USD",
+        "method": "Independent valuation memo / appraisal extract",
+        "asOf": "2026-09-30T00:00:00.000Z",
+        "low": 28,
+        "high": 32,
+        "confidence": 0.81,
+        "notes": [
+          "Primary mark taken from market value / fair value language.",
+          "Acquisition price was ₹12,50,00,000 (Rupees Twelve Crore Fifty Lakh Only)..",
+          "Mark corroborated across multiple source fragments."
+        ]
+      },
+      "createdAt": "2026-09-02T07:12:52.662Z"
+    },
+    {
+      "id": "val_654811f32e7f4055",
+      "assetId": "ast_1529002524454748",
+      "payload": {
+        "amount": 30,
+        "currency": "USD",
+        "method": "Independent valuation memo / appraisal extract",
+        "asOf": "2026-09-30T00:00:00.000Z",
+        "low": 28,
+        "high": 32,
+        "confidence": 0.78,
+        "notes": [
+          "Primary mark taken from market value / fair value language.",
+          "Acquisition price was ₹12,50,00,000."
+        ]
+      },
+      "createdAt": "2026-09-02T07:18:41.112Z"
+    },
+    {
+      "id": "val_776c3d9ec1724b93",
+      "assetId": "ast_1529002524454748",
+      "payload": {
+        "amount": 30,
+        "currency": "USD",
+        "method": "Independent valuation memo / appraisal extract",
+        "asOf": "2026-09-30T00:00:00.000Z",
+        "low": 28,
+        "high": 32,
+        "confidence": 0.78,
+        "notes": [
+          "Primary mark taken from market value / fair value language.",
+          "Acquisition price was ₹12,50,00,000."
+        ]
+      },
+      "createdAt": "2026-09-02T07:26:13.557Z"
+    },
+    {
+      "id": "val_94f99a928be84640",
+      "assetId": "ast_1529002524454748",
+      "payload": {
+        "amount": 30,
+        "currency": "USD",
+        "method": "Independent valuation memo / appraisal extract",
+        "asOf": "2026-09-30T00:00:00.000Z",
+        "low": 28,
+        "high": 32,
+        "confidence": 0.78,
+        "notes": [
+          "Primary mark taken from market value / fair value language.",
+          "Acquisition price was ₹12,50,00,000."
+        ]
+      },
+      "createdAt": "2026-09-02T07:26:16.476Z"
     }
   ],
   "projections": [
@@ -21136,6 +23499,258 @@
         ]
       },
       "createdAt": "2026-09-02T07:04:15.750Z"
+    },
+    {
+      "id": "prj_5a544d324b1748a7",
+      "assetId": "ast_25687abc39614427",
+      "payload": {
+        "assetId": "ast_25687abc39614427",
+        "currency": "USD",
+        "baseAmount": 30,
+        "baseAsOf": "2026-09-30T00:00:00.000Z",
+        "baseMethod": "Independent valuation memo / appraisal extract",
+        "model": "caprov-forward-mark-v1",
+        "generatedAt": "2026-09-02T07:12:52.635Z",
+        "assumptions": {
+          "annualGrowthRate": 0.04,
+          "drivers": [
+            "real estate base growth 2.5%",
+            "cap rate 6% → 0.00 pp",
+            "realized mark drift vs purchase → 1.50 pp"
+          ],
+          "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+        },
+        "horizons": [
+          {
+            "years": 1,
+            "asOf": "2027-09-30",
+            "base": 31,
+            "bear": 31,
+            "bull": 32,
+            "low": 28,
+            "high": 34,
+            "annualGrowthRate": 0.04,
+            "confidence": 0.61
+          },
+          {
+            "years": 3,
+            "asOf": "2029-09-30",
+            "base": 34,
+            "bear": 32,
+            "bull": 36,
+            "low": 29,
+            "high": 39,
+            "annualGrowthRate": 0.04,
+            "confidence": 0.45
+          },
+          {
+            "years": 5,
+            "asOf": "2031-09-30",
+            "base": 36,
+            "bear": 33,
+            "bull": 40,
+            "low": 29,
+            "high": 43,
+            "annualGrowthRate": 0.04,
+            "confidence": 0.29
+          }
+        ],
+        "confidence": 0.61,
+        "sourceDocumentIds": [
+          "doc_b578222aefc14324",
+          "doc_125c4d2cb4d94020",
+          "doc_844d70f7dd4a4402",
+          "doc_2617138e6ecd478f"
+        ]
+      },
+      "createdAt": "2026-09-02T07:12:52.662Z"
+    },
+    {
+      "id": "prj_c5083d3bcdf84a7d",
+      "assetId": "ast_1529002524454748",
+      "payload": {
+        "assetId": "ast_1529002524454748",
+        "currency": "USD",
+        "baseAmount": 30,
+        "baseAsOf": "2026-09-30T00:00:00.000Z",
+        "baseMethod": "Independent valuation memo / appraisal extract",
+        "model": "caprov-forward-mark-v1",
+        "generatedAt": "2026-09-02T07:18:41.084Z",
+        "assumptions": {
+          "annualGrowthRate": 0.02,
+          "drivers": [
+            "real estate base growth 2.5%",
+            "occupancy 14% → -1.50 pp",
+            "realized mark drift vs purchase → 1.50 pp",
+            "risk moderate −0.5 pp"
+          ],
+          "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+        },
+        "horizons": [
+          {
+            "years": 1,
+            "asOf": "2027-09-30",
+            "base": 31,
+            "bear": 30,
+            "bull": 31,
+            "low": 28,
+            "high": 34,
+            "annualGrowthRate": 0.02,
+            "confidence": 0.58
+          },
+          {
+            "years": 3,
+            "asOf": "2029-09-30",
+            "base": 32,
+            "bear": 30,
+            "bull": 34,
+            "low": 28,
+            "high": 36,
+            "annualGrowthRate": 0.02,
+            "confidence": 0.42
+          },
+          {
+            "years": 5,
+            "asOf": "2031-09-30",
+            "base": 33,
+            "bear": 30,
+            "bull": 36,
+            "low": 27,
+            "high": 39,
+            "annualGrowthRate": 0.02,
+            "confidence": 0.26
+          }
+        ],
+        "confidence": 0.58,
+        "sourceDocumentIds": [
+          "doc_02b214885b0044bb"
+        ]
+      },
+      "createdAt": "2026-09-02T07:18:41.112Z"
+    },
+    {
+      "id": "prj_341532e255fe4619",
+      "assetId": "ast_1529002524454748",
+      "payload": {
+        "assetId": "ast_1529002524454748",
+        "currency": "USD",
+        "baseAmount": 30,
+        "baseAsOf": "2026-09-30T00:00:00.000Z",
+        "baseMethod": "Independent valuation memo / appraisal extract",
+        "model": "caprov-forward-mark-v1",
+        "generatedAt": "2026-09-02T07:26:13.517Z",
+        "assumptions": {
+          "annualGrowthRate": 0.035,
+          "drivers": [
+            "real estate base growth 2.5%",
+            "realized mark drift vs purchase → 1.50 pp",
+            "risk moderate −0.5 pp"
+          ],
+          "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+        },
+        "horizons": [
+          {
+            "years": 1,
+            "asOf": "2027-09-30",
+            "base": 31,
+            "bear": 30,
+            "bull": 32,
+            "low": 28,
+            "high": 34,
+            "annualGrowthRate": 0.035,
+            "confidence": 0.58
+          },
+          {
+            "years": 3,
+            "asOf": "2029-09-30",
+            "base": 33,
+            "bear": 31,
+            "bull": 35,
+            "low": 29,
+            "high": 37,
+            "annualGrowthRate": 0.035,
+            "confidence": 0.42
+          },
+          {
+            "years": 5,
+            "asOf": "2031-09-30",
+            "base": 36,
+            "bear": 32,
+            "bull": 39,
+            "low": 29,
+            "high": 43,
+            "annualGrowthRate": 0.035,
+            "confidence": 0.26
+          }
+        ],
+        "confidence": 0.58,
+        "sourceDocumentIds": [
+          "doc_02b214885b0044bb"
+        ]
+      },
+      "createdAt": "2026-09-02T07:26:13.557Z"
+    },
+    {
+      "id": "prj_b08cf5d7547b4ac4",
+      "assetId": "ast_1529002524454748",
+      "payload": {
+        "assetId": "ast_1529002524454748",
+        "currency": "USD",
+        "baseAmount": 30,
+        "baseAsOf": "2026-09-30T00:00:00.000Z",
+        "baseMethod": "Independent valuation memo / appraisal extract",
+        "model": "caprov-forward-mark-v1",
+        "generatedAt": "2026-09-02T07:26:16.434Z",
+        "assumptions": {
+          "annualGrowthRate": 0.035,
+          "drivers": [
+            "real estate base growth 2.5%",
+            "realized mark drift vs purchase → 1.50 pp",
+            "risk moderate −0.5 pp"
+          ],
+          "disclaimer": "Model-based forward marks from the current DNA valuation and operating facts. Not a market quote, appraisal, or guarantee of future value."
+        },
+        "horizons": [
+          {
+            "years": 1,
+            "asOf": "2027-09-30",
+            "base": 31,
+            "bear": 30,
+            "bull": 32,
+            "low": 28,
+            "high": 34,
+            "annualGrowthRate": 0.035,
+            "confidence": 0.58
+          },
+          {
+            "years": 3,
+            "asOf": "2029-09-30",
+            "base": 33,
+            "bear": 31,
+            "bull": 35,
+            "low": 29,
+            "high": 37,
+            "annualGrowthRate": 0.035,
+            "confidence": 0.42
+          },
+          {
+            "years": 5,
+            "asOf": "2031-09-30",
+            "base": 36,
+            "bear": 32,
+            "bull": 39,
+            "low": 29,
+            "high": 43,
+            "annualGrowthRate": 0.035,
+            "confidence": 0.26
+          }
+        ],
+        "confidence": 0.58,
+        "sourceDocumentIds": [
+          "doc_02b214885b0044bb"
+        ]
+      },
+      "createdAt": "2026-09-02T07:26:16.476Z"
     }
   ],
   "risks": [
@@ -22795,6 +25410,162 @@
         ]
       },
       "createdAt": "2026-09-02T07:04:15.750Z"
+    },
+    {
+      "id": "rsk_8ac1e5e016ff4ca8",
+      "assetId": "ast_25687abc39614427",
+      "payload": {
+        "overall": 29,
+        "rating": "LOW",
+        "confidence": 0.88,
+        "flags": [],
+        "dimensions": [
+          {
+            "key": "document_coverage",
+            "label": "Document coverage",
+            "score": 44,
+            "rationale": "3 distinct document types ingested for this asset."
+          },
+          {
+            "key": "ownership_clarity",
+            "label": "Ownership clarity",
+            "score": 18,
+            "rationale": "Legal ownership language extracted."
+          },
+          {
+            "key": "jurisdiction",
+            "label": "Jurisdiction & legal",
+            "score": 24,
+            "rationale": "Jurisdiction recorded as USA."
+          },
+          {
+            "key": "income_durability",
+            "label": "Income durability",
+            "score": 30,
+            "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+          }
+        ]
+      },
+      "createdAt": "2026-09-02T07:12:52.662Z"
+    },
+    {
+      "id": "rsk_b5be4d9b02984a18",
+      "assetId": "ast_1529002524454748",
+      "payload": {
+        "overall": 37,
+        "rating": "MODERATE",
+        "confidence": 0.88,
+        "flags": [
+          "Occupancy at 14 Oct 2022",
+          "No independent valuation memo / NAV pack",
+          "Thin document coverage"
+        ],
+        "dimensions": [
+          {
+            "key": "document_coverage",
+            "label": "Document coverage",
+            "score": 68,
+            "rationale": "1 distinct document types ingested for this asset."
+          },
+          {
+            "key": "ownership_clarity",
+            "label": "Ownership clarity",
+            "score": 18,
+            "rationale": "Legal ownership language extracted."
+          },
+          {
+            "key": "jurisdiction",
+            "label": "Jurisdiction & legal",
+            "score": 24,
+            "rationale": "Jurisdiction recorded as USA."
+          },
+          {
+            "key": "income_durability",
+            "label": "Income durability",
+            "score": 38,
+            "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+          }
+        ]
+      },
+      "createdAt": "2026-09-02T07:18:41.112Z"
+    },
+    {
+      "id": "rsk_d5038218c9de4eef",
+      "assetId": "ast_1529002524454748",
+      "payload": {
+        "overall": 32,
+        "rating": "MODERATE",
+        "confidence": 0.88,
+        "flags": [
+          "Thin document coverage"
+        ],
+        "dimensions": [
+          {
+            "key": "document_coverage",
+            "label": "Document coverage",
+            "score": 56,
+            "rationale": "2 distinct document types ingested for this asset."
+          },
+          {
+            "key": "ownership_clarity",
+            "label": "Ownership clarity",
+            "score": 18,
+            "rationale": "Legal ownership language extracted."
+          },
+          {
+            "key": "jurisdiction",
+            "label": "Jurisdiction & legal",
+            "score": 24,
+            "rationale": "Jurisdiction recorded as USA."
+          },
+          {
+            "key": "income_durability",
+            "label": "Income durability",
+            "score": 30,
+            "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+          }
+        ]
+      },
+      "createdAt": "2026-09-02T07:26:13.557Z"
+    },
+    {
+      "id": "rsk_61fa9abe36354db7",
+      "assetId": "ast_1529002524454748",
+      "payload": {
+        "overall": 32,
+        "rating": "MODERATE",
+        "confidence": 0.88,
+        "flags": [
+          "Thin document coverage"
+        ],
+        "dimensions": [
+          {
+            "key": "document_coverage",
+            "label": "Document coverage",
+            "score": 56,
+            "rationale": "2 distinct document types ingested for this asset."
+          },
+          {
+            "key": "ownership_clarity",
+            "label": "Ownership clarity",
+            "score": 18,
+            "rationale": "Legal ownership language extracted."
+          },
+          {
+            "key": "jurisdiction",
+            "label": "Jurisdiction & legal",
+            "score": 24,
+            "rationale": "Jurisdiction recorded as USA."
+          },
+          {
+            "key": "income_durability",
+            "label": "Income durability",
+            "score": 30,
+            "rationale": "Derived from occupancy and WALT/WALE extracts where available."
+          }
+        ]
+      },
+      "createdAt": "2026-09-02T07:26:16.476Z"
     }
   ],
   "facts": [
@@ -25317,6 +28088,384 @@
       "confidence": 0.89,
       "fragment": "capitalization rate of 6.0%.",
       "observedAt": "2026-09-02T07:04:15.750Z"
+    },
+    {
+      "id": "fact_6664241f5bfc4749",
+      "documentId": "doc_d66a0a9299cf419c",
+      "key": "legal_ownership",
+      "value": "or create a security interest.",
+      "confidence": 0.98,
+      "fragment": "legal ownership or create a security interest.",
+      "observedAt": "2026-09-02T07:12:23.735Z"
+    },
+    {
+      "id": "fact_824ea38a7819408c",
+      "documentId": "doc_d66a0a9299cf419c",
+      "key": "location",
+      "value": "held by LMN Asset Pvt Ltd. The values below are illustrative but internally consistent and are intended for demonstration, asset-tokenization, workflow or prototype purposes. They should not be treated as evidence of actual legal title.",
+      "confidence": 0.91,
+      "fragment": "property held by LMN Asset Pvt Ltd. The values below are illustrative but internally consistent and are intended for demonstration, asset-tokenization, workflow or prototype purpos",
+      "observedAt": "2026-09-02T07:12:23.735Z"
+    },
+    {
+      "id": "fact_4f5305f6d9ab4381",
+      "documentId": "doc_b578222aefc14324",
+      "key": "market_value",
+      "value": "as at 30 September 2026",
+      "confidence": 0.81,
+      "fragment": "Market Value as at 30 September 2026",
+      "observedAt": "2026-09-02T07:12:52.662Z"
+    },
+    {
+      "id": "fact_947102b0767a4aa3",
+      "documentId": "doc_2617138e6ecd478f",
+      "key": "purchase_price",
+      "value": "₹12,50,00,000 (Rupees Twelve Crore Fifty Lakh Only).",
+      "confidence": 0.99,
+      "fragment": "Purchase Price\n ₹12,50,00,000 (Rupees Twelve Crore Fifty Lakh Only).",
+      "observedAt": "2026-09-02T07:12:52.662Z"
+    },
+    {
+      "id": "fact_4cc57b3fd1ce458b",
+      "documentId": "doc_d66a0a9299cf419c",
+      "key": "legal_ownership",
+      "value": "or create a security interest.",
+      "confidence": 0.99,
+      "fragment": "legal ownership or create a security interest.",
+      "observedAt": "2026-09-02T07:12:52.662Z"
+    },
+    {
+      "id": "fact_a33831e79c464a95",
+      "documentId": "doc_b578222aefc14324",
+      "key": "proprietor",
+      "value": "Apex Industrial Assets Private Limited",
+      "confidence": 0.96,
+      "fragment": "Registered Owner\n Apex Industrial Assets Private Limited",
+      "observedAt": "2026-09-02T07:12:52.662Z"
+    },
+    {
+      "id": "fact_f459c8e387614262",
+      "documentId": "doc_9c645c2c29204bd3",
+      "key": "location",
+      "value": "gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based registries with lag time that fraudsters exploit.",
+      "confidence": 0.95,
+      "fragment": "property gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based regis",
+      "observedAt": "2026-09-02T07:12:52.662Z"
+    },
+    {
+      "id": "fact_fd54ba412b1f4352",
+      "documentId": "doc_9c645c2c29204bd3",
+      "key": "occupancy",
+      "value": "payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral , for something as simple as gold loans or agri -warehouse receipt financing (which ties nicely into India's WDRA e-NWR system, already digital, and a natural blockchain candidate).",
+      "confidence": 0.95,
+      "fragment": "leased payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral ,",
+      "observedAt": "2026-09-02T07:12:52.662Z"
+    },
+    {
+      "id": "fact_93831575fa764824",
+      "documentId": "doc_9c645c2c29204bd3",
+      "key": "nia",
+      "value": "m + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuation, change in status/nature so on and so forth. The double-pledging / duplicate collateral fraud (the same warehouse receipt, gold, or invoice pledged to multiple lenders , is behind India's biggest banking frauds).",
+      "confidence": 0.93,
+      "fragment": "niam + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuat",
+      "observedAt": "2026-09-02T07:12:52.662Z"
+    },
+    {
+      "id": "fact_b65470e4d6244f78",
+      "documentId": "doc_b02fb0c7741f499b",
+      "key": "commitment",
+      "value": "s.",
+      "confidence": 0.93,
+      "fragment": "commitments.",
+      "observedAt": "2026-09-02T07:12:52.662Z"
+    },
+    {
+      "id": "fact_17281877f6a04faf",
+      "documentId": "doc_125c4d2cb4d94020",
+      "key": "cap_rate",
+      "value": "of 6.0%.",
+      "confidence": 0.89,
+      "fragment": "capitalization rate of 6.0%.",
+      "observedAt": "2026-09-02T07:12:52.662Z"
+    },
+    {
+      "id": "fact_74dc2b1a9be44d79",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "market_value",
+      "value": "as at 30 September 2026",
+      "confidence": 0.78,
+      "fragment": "Market Value as at 30 September 2026",
+      "observedAt": "2026-09-02T07:18:18.980Z"
+    },
+    {
+      "id": "fact_691a4da95d8340e7",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "purchase_price",
+      "value": "₹12,50,00,000",
+      "confidence": 0.8,
+      "fragment": "Purchase Price\n ₹12,50,00,000",
+      "observedAt": "2026-09-02T07:18:18.980Z"
+    },
+    {
+      "id": "fact_88f862f4adb24f0c",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "proprietor",
+      "value": "Apex Industrial Assets Private Limited",
+      "confidence": 0.94,
+      "fragment": "Registered Owner\n Apex Industrial Assets Private Limited",
+      "observedAt": "2026-09-02T07:18:18.981Z"
+    },
+    {
+      "id": "fact_f0b6aa5200254062",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "location",
+      "value": "Andheri East, Mumbai, Maharashtra 400069",
+      "confidence": 0.91,
+      "fragment": "Location\n Andheri East, Mumbai, Maharashtra 400069",
+      "observedAt": "2026-09-02T07:18:18.981Z"
+    },
+    {
+      "id": "fact_28b94480827543ba",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "occupancy",
+      "value": "14 Oct 2022",
+      "confidence": 0.91,
+      "fragment": "leased\n 14 Oct 2022",
+      "observedAt": "2026-09-02T07:18:18.981Z"
+    },
+    {
+      "id": "fact_e80bdaaab4874548",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "market_value",
+      "value": "as at 30 September 2026",
+      "confidence": 0.78,
+      "fragment": "Market Value as at 30 September 2026",
+      "observedAt": "2026-09-02T07:18:41.112Z"
+    },
+    {
+      "id": "fact_8e1ec17eeaaf4a86",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "purchase_price",
+      "value": "₹12,50,00,000",
+      "confidence": 0.99,
+      "fragment": "Purchase Price\n ₹12,50,00,000",
+      "observedAt": "2026-09-02T07:18:41.112Z"
+    },
+    {
+      "id": "fact_bce97062ee124a8d",
+      "documentId": "doc_0f78c3f2c3be46a4",
+      "key": "legal_ownership",
+      "value": "or create a security interest.",
+      "confidence": 0.99,
+      "fragment": "legal ownership or create a security interest.",
+      "observedAt": "2026-09-02T07:18:41.112Z"
+    },
+    {
+      "id": "fact_8c2e4e29b7844b81",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "proprietor",
+      "value": "Apex Industrial Assets Private Limited",
+      "confidence": 0.96,
+      "fragment": "Registered Owner\n Apex Industrial Assets Private Limited",
+      "observedAt": "2026-09-02T07:18:41.112Z"
+    },
+    {
+      "id": "fact_1153e6618343414e",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "location",
+      "value": "Andheri East, Mumbai, Maharashtra 400069",
+      "confidence": 0.93,
+      "fragment": "Location\n Andheri East, Mumbai, Maharashtra 400069",
+      "observedAt": "2026-09-02T07:18:41.112Z"
+    },
+    {
+      "id": "fact_5144aade467e43f1",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "occupancy",
+      "value": "14 Oct 2022",
+      "confidence": 0.93,
+      "fragment": "leased\n 14 Oct 2022",
+      "observedAt": "2026-09-02T07:18:41.112Z"
+    },
+    {
+      "id": "fact_1c5c396bcd294af3",
+      "documentId": "doc_4cd19ab43bb54fe9",
+      "key": "location",
+      "value": "gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based registries with lag time that fraudsters exploit.",
+      "confidence": 0.93,
+      "fragment": "property gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based regis",
+      "observedAt": "2026-09-02T07:25:46.205Z"
+    },
+    {
+      "id": "fact_88394ec0cdb64ec7",
+      "documentId": "doc_4cd19ab43bb54fe9",
+      "key": "occupancy",
+      "value": "payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral , for something as simple as gold loans or agri -warehouse receipt financing (which ties nicely into India's WDRA e-NWR system, already digital, and a natural blockchain candidate).",
+      "confidence": 0.93,
+      "fragment": "leased payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral ,",
+      "observedAt": "2026-09-02T07:25:46.205Z"
+    },
+    {
+      "id": "fact_5fc9bcc5cc1c4796",
+      "documentId": "doc_4cd19ab43bb54fe9",
+      "key": "nia",
+      "value": "m + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuation, change in status/nature so on and so forth. The double-pledging / duplicate collateral fraud (the same warehouse receipt, gold, or invoice pledged to multiple lenders , is behind India's biggest banking frauds).",
+      "confidence": 0.91,
+      "fragment": "niam + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuat",
+      "observedAt": "2026-09-02T07:25:46.205Z"
+    },
+    {
+      "id": "fact_556d274c58d14cee",
+      "documentId": "doc_b53c9607d9c04eeb",
+      "key": "location",
+      "value": "gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based registries with lag time that fraudsters exploit.",
+      "confidence": 0.93,
+      "fragment": "property gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based regis",
+      "observedAt": "2026-09-02T07:26:13.171Z"
+    },
+    {
+      "id": "fact_61455c5aafaa49a4",
+      "documentId": "doc_b53c9607d9c04eeb",
+      "key": "occupancy",
+      "value": "payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral , for something as simple as gold loans or agri -warehouse receipt financing (which ties nicely into India's WDRA e-NWR system, already digital, and a natural blockchain candidate).",
+      "confidence": 0.93,
+      "fragment": "leased payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral ,",
+      "observedAt": "2026-09-02T07:26:13.171Z"
+    },
+    {
+      "id": "fact_7d23f79a69b84c4a",
+      "documentId": "doc_b53c9607d9c04eeb",
+      "key": "nia",
+      "value": "m + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuation, change in status/nature so on and so forth. The double-pledging / duplicate collateral fraud (the same warehouse receipt, gold, or invoice pledged to multiple lenders , is behind India's biggest banking frauds).",
+      "confidence": 0.91,
+      "fragment": "niam + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuat",
+      "observedAt": "2026-09-02T07:26:13.171Z"
+    },
+    {
+      "id": "fact_8219cf368d41445d",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "market_value",
+      "value": "as at 30 September 2026",
+      "confidence": 0.78,
+      "fragment": "Market Value as at 30 September 2026",
+      "observedAt": "2026-09-02T07:26:13.557Z"
+    },
+    {
+      "id": "fact_60ce7473a66b4524",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "purchase_price",
+      "value": "₹12,50,00,000",
+      "confidence": 0.99,
+      "fragment": "Purchase Price\n ₹12,50,00,000",
+      "observedAt": "2026-09-02T07:26:13.557Z"
+    },
+    {
+      "id": "fact_5fb2c13ab4d84a21",
+      "documentId": "doc_0f78c3f2c3be46a4",
+      "key": "legal_ownership",
+      "value": "or create a security interest.",
+      "confidence": 0.99,
+      "fragment": "legal ownership or create a security interest.",
+      "observedAt": "2026-09-02T07:26:13.557Z"
+    },
+    {
+      "id": "fact_939a0d20f9214e77",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "proprietor",
+      "value": "Apex Industrial Assets Private Limited",
+      "confidence": 0.96,
+      "fragment": "Registered Owner\n Apex Industrial Assets Private Limited",
+      "observedAt": "2026-09-02T07:26:13.557Z"
+    },
+    {
+      "id": "fact_cbf5c46e2afd45e6",
+      "documentId": "doc_b53c9607d9c04eeb",
+      "key": "location",
+      "value": "gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based registries with lag time that fraudsters exploit.",
+      "confidence": 0.95,
+      "fragment": "property gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based regis",
+      "observedAt": "2026-09-02T07:26:13.557Z"
+    },
+    {
+      "id": "fact_8b35dadef8724b37",
+      "documentId": "doc_b53c9607d9c04eeb",
+      "key": "occupancy",
+      "value": "payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral , for something as simple as gold loans or agri -warehouse receipt financing (which ties nicely into India's WDRA e-NWR system, already digital, and a natural blockchain candidate).",
+      "confidence": 0.95,
+      "fragment": "leased payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral ,",
+      "observedAt": "2026-09-02T07:26:13.557Z"
+    },
+    {
+      "id": "fact_48decbb7704843d6",
+      "documentId": "doc_b53c9607d9c04eeb",
+      "key": "nia",
+      "value": "m + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuation, change in status/nature so on and so forth. The double-pledging / duplicate collateral fraud (the same warehouse receipt, gold, or invoice pledged to multiple lenders , is behind India's biggest banking frauds).",
+      "confidence": 0.93,
+      "fragment": "niam + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuat",
+      "observedAt": "2026-09-02T07:26:13.557Z"
+    },
+    {
+      "id": "fact_2c86989ae426424f",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "market_value",
+      "value": "as at 30 September 2026",
+      "confidence": 0.78,
+      "fragment": "Market Value as at 30 September 2026",
+      "observedAt": "2026-09-02T07:26:16.476Z"
+    },
+    {
+      "id": "fact_aa4117353120438b",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "purchase_price",
+      "value": "₹12,50,00,000",
+      "confidence": 0.99,
+      "fragment": "Purchase Price\n ₹12,50,00,000",
+      "observedAt": "2026-09-02T07:26:16.476Z"
+    },
+    {
+      "id": "fact_dde15f6840da466b",
+      "documentId": "doc_0f78c3f2c3be46a4",
+      "key": "legal_ownership",
+      "value": "or create a security interest.",
+      "confidence": 0.99,
+      "fragment": "legal ownership or create a security interest.",
+      "observedAt": "2026-09-02T07:26:16.476Z"
+    },
+    {
+      "id": "fact_2d7de0e98e904f6a",
+      "documentId": "doc_02b214885b0044bb",
+      "key": "proprietor",
+      "value": "Apex Industrial Assets Private Limited",
+      "confidence": 0.96,
+      "fragment": "Registered Owner\n Apex Industrial Assets Private Limited",
+      "observedAt": "2026-09-02T07:26:16.476Z"
+    },
+    {
+      "id": "fact_ace4bec773bd4cc9",
+      "documentId": "doc_b53c9607d9c04eeb",
+      "key": "location",
+      "value": "gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based registries with lag time that fraudsters exploit.",
+      "confidence": 0.95,
+      "fragment": "property gets a single digital fingerprint the moment it's pledged. Any other bank or NBFC checking that asset instantly sees it's already collateralized. No more paper-based regis",
+      "observedAt": "2026-09-02T07:26:16.476Z"
+    },
+    {
+      "id": "fact_4ebe7576827b449c",
+      "documentId": "doc_b53c9607d9c04eeb",
+      "key": "occupancy",
+      "value": "payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral , for something as simple as gold loans or agri -warehouse receipt financing (which ties nicely into India's WDRA e-NWR system, already digital, and a natural blockchain candidate).",
+      "confidence": 0.95,
+      "fragment": "leased payment upon shipping document verification. Unity Bank doesn't need SBI's scale to copy the idea , automatic, condition-based release of funds against verified collateral ,",
+      "observedAt": "2026-09-02T07:26:16.476Z"
+    },
+    {
+      "id": "fact_a51b7523b303458c",
+      "documentId": "doc_b53c9607d9c04eeb",
+      "key": "nia",
+      "value": "m + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuation, change in status/nature so on and so forth. The double-pledging / duplicate collateral fraud (the same warehouse receipt, gold, or invoice pledged to multiple lenders , is behind India's biggest banking frauds).",
+      "confidence": 0.93,
+      "fragment": "niam + Zanbato proposition (without naming them) . Where I say digital footprint to protect from fraud, they can be also pitched as the digital footprint of an asset for its valuat",
+      "observedAt": "2026-09-02T07:26:16.476Z"
     }
   ],
   "copilotThreads": [
@@ -26768,6 +29917,20 @@
   ],
   "collateralPositions": [
     {
+      "id": "col_d8015bc5b6d849da",
+      "organizationId": "org_meridian",
+      "assetId": "ast_25687abc39614427",
+      "tokenId": "tok_9d7a51d1cf2a423f",
+      "status": "PENDING_APPROVAL",
+      "requestedByUserId": "usr_elena",
+      "pledgedValue": 15,
+      "currency": "USD",
+      "haircutBps": 1500,
+      "advanceableValue": 12.75,
+      "createdAt": "2026-09-02T07:33:51.129Z",
+      "updatedAt": "2026-09-02T07:33:51.129Z"
+    },
+    {
       "id": "col_88eebf01e58e4591",
       "organizationId": "org_meridian",
       "assetId": "ast_513be945dd504cb8",
@@ -26821,6 +29984,25 @@
     }
   ],
   "loans": [
+    {
+      "id": "loan_544c5236f0784594",
+      "organizationId": "org_meridian",
+      "collateralId": "col_cedar_1",
+      "assetId": "ast_cedar",
+      "status": "REPAID",
+      "requestedByUserId": "usr_elena",
+      "principal": 100000,
+      "currency": "SGD",
+      "interestRateBps": 650,
+      "termDays": 365,
+      "outstanding": 0,
+      "ltvBps": 16,
+      "createdAt": "2026-09-02T07:34:36.190Z",
+      "updatedAt": "2026-09-02T07:34:48.460Z",
+      "approvedByUserId": "usr_elena",
+      "disbursedAt": "2026-09-02T07:34:40.144Z",
+      "repaidAt": "2026-09-02T07:34:48.460Z"
+    },
     {
       "id": "loan_a559e4fdf63f4f25",
       "organizationId": "org_meridian",
@@ -28177,8 +31359,165 @@
       "metadata": {
         "scope": "asset-dna"
       }
+    },
+    {
+      "id": "anc_eb55b0ae106a49ba",
+      "organizationId": "org_meridian",
+      "assetId": "ast_25687abc39614427",
+      "documentId": "doc_d66a0a9299cf419c",
+      "kind": "DOCUMENT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "9e9e0a26522e0aeb52a2e09319703710191c2fc3454da94ed37bb822c1aff7ff",
+      "status": "SIMULATED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0xb9cf99feb2608570fee63e97a0333a3acc75756cce0d21ef30d10301fbe7a17f",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0xb9cf99feb2608570fee63e97a0333a3acc75756cce0d21ef30d10301fbe7a17f",
+      "mode": "SIMULATED",
+      "anchoredAt": "2026-09-02T07:12:52.662Z",
+      "metadata": {
+        "sourceName": "LMN_Asset_Pvt_Ltd-Title_Deed",
+        "sourceType": "INSURANCE"
+      }
+    },
+    {
+      "id": "anc_da7a2bc69da84a30",
+      "organizationId": "org_meridian",
+      "assetId": "ast_25687abc39614427",
+      "dnaSnapshotId": "dna_aa256a4cc4564605",
+      "kind": "DNA_SNAPSHOT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "66ac665b2400fce0d733259578105847a0883f67cacf9b7b73e53c6e068e5bf7",
+      "status": "SIMULATED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0x9b89260a46e7bc2428a334af9fd4ba3b72980836c8b8de5647a167d04797e718",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0x9b89260a46e7bc2428a334af9fd4ba3b72980836c8b8de5647a167d04797e718",
+      "mode": "SIMULATED",
+      "anchoredAt": "2026-09-02T07:12:52.662Z",
+      "metadata": {
+        "scope": "asset-dna"
+      }
+    },
+    {
+      "id": "anc_2a12d4bf5a71439b",
+      "organizationId": "org_meridian",
+      "assetId": "ast_1529002524454748",
+      "documentId": "doc_02b214885b0044bb",
+      "kind": "DOCUMENT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "024a39f5c9f1a1765d81efaeda4af8325b0d4174154d4eff5ee1c9cb21235a2d",
+      "status": "SIMULATED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0xb150c5b25dfab369d608f75f6f4f951779426aeea1450add0887aecf7db92fa8",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0xb150c5b25dfab369d608f75f6f4f951779426aeea1450add0887aecf7db92fa8",
+      "mode": "SIMULATED",
+      "anchoredAt": "2026-09-02T07:18:41.112Z",
+      "metadata": {
+        "sourceName": "LMN_Asset_KYC_Ownership",
+        "sourceType": "KYC"
+      }
+    },
+    {
+      "id": "anc_8cc9ee47bfda4718",
+      "organizationId": "org_meridian",
+      "assetId": "ast_1529002524454748",
+      "dnaSnapshotId": "dna_31431fcce0e545a7",
+      "kind": "DNA_SNAPSHOT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "97a112cf4474d6fc5f22611912d2adca6d02b3d8b6c75d698ab055c341147cad",
+      "status": "SIMULATED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0x6e6a5b66ee253a437108094167cfb49de69f67d7c0e7c500901565bafd1419cb",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0x6e6a5b66ee253a437108094167cfb49de69f67d7c0e7c500901565bafd1419cb",
+      "mode": "SIMULATED",
+      "anchoredAt": "2026-09-02T07:18:41.112Z",
+      "metadata": {
+        "scope": "asset-dna"
+      }
+    },
+    {
+      "id": "anc_07bd82eb187d4976",
+      "organizationId": "org_meridian",
+      "assetId": "ast_1529002524454748",
+      "documentId": "doc_b53c9607d9c04eeb",
+      "kind": "DOCUMENT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "12d7a5d93254bd21e1880865209182582f99bebe81ccdd58e8fc71a26cd46de1",
+      "status": "SIMULATED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0x5f9684ad1dbac82205ba65af8ea3123f00c910b0edc99b8e02af9665fa0324da",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0x5f9684ad1dbac82205ba65af8ea3123f00c910b0edc99b8e02af9665fa0324da",
+      "mode": "SIMULATED",
+      "anchoredAt": "2026-09-02T07:26:13.557Z",
+      "metadata": {
+        "sourceName": "Unity-Suggestion",
+        "sourceType": "TITLE_DEED"
+      }
+    },
+    {
+      "id": "anc_40d30a094d904656",
+      "organizationId": "org_meridian",
+      "assetId": "ast_1529002524454748",
+      "dnaSnapshotId": "dna_e4f5f52e86c14d46",
+      "kind": "DNA_SNAPSHOT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "6600f5707451c9a483cdf0619013141845e44419dc9f9d6fffcf63dde77e7f92",
+      "status": "SIMULATED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0xa95a38f5a0ed0dda7fbb61223e07e408918d76b25233e440e2c6ae6dd63935fb",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0xa95a38f5a0ed0dda7fbb61223e07e408918d76b25233e440e2c6ae6dd63935fb",
+      "mode": "SIMULATED",
+      "anchoredAt": "2026-09-02T07:26:13.557Z",
+      "metadata": {
+        "scope": "asset-dna"
+      }
+    },
+    {
+      "id": "anc_17bf5514bc314e04",
+      "organizationId": "org_meridian",
+      "assetId": "ast_1529002524454748",
+      "dnaSnapshotId": "dna_e1558a581d264614",
+      "kind": "DNA_SNAPSHOT",
+      "hashAlgorithm": "sha256",
+      "hashValue": "d8513eafdb7ece5ad586f869436cd2af7026ce5c77e45430fec3f9d71851f753",
+      "status": "SIMULATED",
+      "chainId": 11155111,
+      "chainName": "Ethereum Sepolia",
+      "txHash": "0x2f5ac9ee85572e061d75fe002175dd8110fed68a35fb6b26cb1ade35d72c9009",
+      "explorerUrl": "https://sepolia.etherscan.io/tx/0x2f5ac9ee85572e061d75fe002175dd8110fed68a35fb6b26cb1ade35d72c9009",
+      "mode": "SIMULATED",
+      "anchoredAt": "2026-09-02T07:26:16.476Z",
+      "metadata": {
+        "scope": "asset-dna"
+      }
     }
   ],
-  "wallets": [],
-  "walletTransactions": []
+  "wallets": [
+    {
+      "organizationId": "org_meridian",
+      "currency": "SGD",
+      "balance": 100000,
+      "updatedAt": "2026-09-02T07:34:40.144Z"
+    }
+  ],
+  "walletTransactions": [
+    {
+      "id": "wtx_c4f64e9ca31f45f4",
+      "organizationId": "org_meridian",
+      "direction": "CREDIT",
+      "type": "LOAN_DISBURSAL",
+      "amount": 100000,
+      "currency": "SGD",
+      "description": "Disbursal credited for loan loan_544c5236f0784594",
+      "referenceType": "Loan",
+      "referenceId": "loan_544c5236f0784594",
+      "createdAt": "2026-09-02T07:34:40.144Z",
+      "createdByUserId": "usr_elena"
+    }
+  ]
 }

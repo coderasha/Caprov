@@ -113,13 +113,33 @@ export default function DocumentDetailPage() {
   const transactionId = verify?.transactionHash ?? document.anchorTxHash;
   const explorerUrl = verify?.explorerUrl ?? document.anchorExplorerUrl;
   const anchoredAt = verify?.anchoredAt ?? document.anchoredAt;
+  const transactionDisplay =
+    transactionId ??
+    (effectiveAnchorStatus === 'PENDING' ? 'Pending Sepolia anchor' : undefined);
+  const anchoredAtDisplay =
+    anchoredAt
+      ? formatDateTime(anchoredAt)
+      : effectiveAnchorStatus === 'PENDING'
+        ? 'Awaiting confirmation'
+        : undefined;
   const verificationTone = verify
     ? verify.authentic
       ? 'ok'
-      : verify.matchesStored || verify.matchesOnChain
+      : effectiveAnchorStatus === 'PENDING'
+        ? 'muted'
+        : verify.matchesStored || verify.matchesOnChain
         ? 'warn'
         : 'danger'
     : 'muted';
+  const verificationLabel = verify
+    ? verify.authentic
+      ? 'Verified'
+      : effectiveAnchorStatus === 'PENDING'
+        ? 'Pending anchor'
+        : verify.matchesStored || verify.matchesOnChain
+          ? 'Partial match'
+          : 'Mismatch'
+    : 'Checking';
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -183,21 +203,13 @@ export default function DocumentDetailPage() {
               Anchor status, transaction id, and the explorer link for this document version.
             </p>
           </div>
-          <Badge tone={verificationTone}>
-            {verify
-              ? verify.authentic
-                ? 'Verified'
-                : verify.matchesStored || verify.matchesOnChain
-                  ? 'Partial match'
-                  : 'Mismatch'
-              : 'Checking'}
-          </Badge>
+          <Badge tone={verificationTone}>{verificationLabel}</Badge>
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <MetadataRow label="Anchor status" value={effectiveAnchorStatus?.replaceAll('_', ' ')} />
           <MetadataRow label="Anchor mode" value={effectiveAnchorMode} />
-          <MetadataRow label="Transaction id" value={transactionId} />
-          <MetadataRow label="Anchored at" value={anchoredAt ? formatDateTime(anchoredAt) : undefined} />
+          <MetadataRow label="Transaction id" value={transactionDisplay} />
+          <MetadataRow label="Anchored at" value={anchoredAtDisplay} />
           <MetadataRow label="Document hash" value={verify?.storedHash ?? document.documentHash} />
           <MetadataRow label="Blockchain reference" value={verify?.blockchainReference ?? document.blockchainReference} />
         </div>

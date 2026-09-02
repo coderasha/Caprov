@@ -18,7 +18,10 @@ import {
 } from '../../infrastructure/blockchain/blockchain.adapter';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import { createId } from '../../infrastructure/database/ids';
-import type { DocumentRecord } from '../../infrastructure/database/models';
+import type {
+  DocumentRecord,
+  ProvenanceAnchorRecord,
+} from '../../infrastructure/database/models';
 import { StorageService } from '../../infrastructure/storage/storage.service';
 import { AuditService } from '../audit/audit.service';
 import {
@@ -168,6 +171,10 @@ export class DocumentsService {
     const content = this.storage.readBuffer(document.storageKey);
     const recalculatedHash = content ? sha256(content) : undefined;
     const storedHash = document.documentHash?.toLowerCase();
+    const provenanceAnchor = this.findLatestDocumentAnchor(
+      organizationId,
+      document.id,
+    );
     const onChain = document.blockchainReference
       ? await this.blockchain.getAnchoredDocumentVersion(
           document.blockchainReference,
@@ -181,17 +188,49 @@ export class DocumentsService {
     const matchesOnChain = Boolean(
       recalculatedHash && onChainHash && recalculatedHash === onChainHash,
     );
+    const resolvedAnchor = this.resolveBestAnchorEvidence(document, {
+      provenanceAnchor,
+      onChain,
+    });
     const effectiveAnchorStatus =
       matchesOnChain
         ? 'BLOCKCHAIN_ANCHORED'
+        : resolvedAnchor.transactionHash
+          ? 'BLOCKCHAIN_ANCHORED'
         : document.anchorStatus;
     const effectiveAnchorMode =
       matchesOnChain
         ? 'LIVE'
+        : resolvedAnchor.mode === 'LIVE'
+          ? 'LIVE'
         : document.anchorMode;
-    const effectiveTransactionHash = onChain?.transactionHash ?? document.anchorTxHash;
-    const effectiveExplorerUrl = onChain?.explorerUrl ?? document.anchorExplorerUrl;
+    const effectiveTransactionHash = resolvedAnchor.transactionHash;
+    const effectiveExplorerUrl = resolvedAnchor.explorerUrl;
+    const effectiveAnchoredAt = resolvedAnchor.anchoredAt;
     const transactionRecorded = Boolean(effectiveTransactionHash);
+    if (
+      (matchesOnChain || effectiveTransactionHash) &&
+      (document.anchorStatus !== 'BLOCKCHAIN_ANCHORED' ||
+        document.anchorTxHash !== effectiveTransactionHash ||
+        document.anchorExplorerUrl !== effectiveExplorerUrl ||
+        document.anchoredAt !== effectiveAnchoredAt)
+    ) {
+      this.db.mutate((draft) => {
+        const target = draft.documents.find((item) => item.id === document.id);
+        if (!target) {
+          return;
+        }
+        target.anchorStatus = 'BLOCKCHAIN_ANCHORED';
+        target.anchorMode = 'LIVE';
+        target.anchorChainId = onChain?.chainId ?? target.anchorChainId;
+        target.anchorChainName = onChain?.chainName ?? target.anchorChainName;
+        target.anchorContractAddress =
+          onChain?.contractAddress ?? target.anchorContractAddress;
+        target.anchorTxHash = effectiveTransactionHash;
+        target.anchorExplorerUrl = effectiveExplorerUrl;
+        target.anchoredAt = effectiveAnchoredAt;
+      });
+    }
 
     return {
       documentId: document.id,
@@ -215,7 +254,7 @@ export class DocumentsService {
       effectiveAnchorStatus,
       effectiveAnchorMode,
       transactionRecorded,
-      anchoredAt: onChain?.anchoredAt ?? document.anchoredAt,
+      anchoredAt: effectiveAnchoredAt,
       onChainRecord: onChain,
       history: this.history(organizationId, document.id),
     };
@@ -468,6 +507,77 @@ export class DocumentsService {
       throw new NotFoundException('Document not found');
     }
     return document;
+  }
+
+  private findLatestDocumentAnchor(
+    organizationId: string,
+    documentId: string,
+  ): ProvenanceAnchorRecord | undefined {
+    return this.db.snapshot.provenanceAnchors
+      .filter(
+        (item) =>
+          item.organizationId === organizationId &&
+          item.kind === 'DOCUMENT' &&
+          item.documentId === documentId,
+      )
+      .sort((a, b) => b.anchoredAt.localeCompare(a.anchoredAt))[0];
+  }
+
+  private resolveBestAnchorEvidence(
+    document: DocumentRecord,
+    input: {
+      provenanceAnchor?: ProvenanceAnchorRecord;
+      onChain?: {
+        transactionHash?: string;
+        explorerUrl?: string;
+        anchoredAt: string;
+      } | null;
+    },
+  ): {
+    transactionHash?: string;
+    explorerUrl?: string;
+    anchoredAt?: string;
+    mode?: 'LIVE' | 'SIMULATED';
+  } {
+    const candidates: Array<{
+      transactionHash?: string;
+      explorerUrl?: string;
+      anchoredAt?: string;
+      mode?: 'LIVE' | 'SIMULATED';
+    }> = [];
+
+    if (input.onChain) {
+      candidates.push({
+        transactionHash: input.onChain.transactionHash,
+        explorerUrl: input.onChain.explorerUrl,
+        anchoredAt: input.onChain.anchoredAt,
+        mode: 'LIVE',
+      });
+    }
+    if (document.anchorTxHash || document.anchorExplorerUrl || document.anchoredAt) {
+      candidates.push({
+        transactionHash: document.anchorTxHash,
+        explorerUrl: document.anchorExplorerUrl,
+        anchoredAt: document.anchoredAt,
+        mode: document.anchorMode,
+      });
+    }
+    if (input.provenanceAnchor) {
+      candidates.push({
+        transactionHash: input.provenanceAnchor.txHash,
+        explorerUrl: input.provenanceAnchor.explorerUrl,
+        anchoredAt: input.provenanceAnchor.anchoredAt,
+        mode: input.provenanceAnchor.mode,
+      });
+    }
+
+    candidates.sort((a, b) => {
+      const left = a.anchoredAt ? Date.parse(a.anchoredAt) : 0;
+      const right = b.anchoredAt ? Date.parse(b.anchoredAt) : 0;
+      return right - left;
+    });
+
+    return candidates[0] ?? {};
   }
 
   private isText(mimeType: string, name: string): boolean {

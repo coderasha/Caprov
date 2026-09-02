@@ -305,7 +305,7 @@ export default function AssetDetailPage() {
     );
     setWalletMessage(`Transaction submitted: ${tx.hash}`);
     const receipt = await tx.wait();
-    if (!receipt || receipt.status !== 1n) {
+    if (!receipt || Number(receipt.status ?? 0) !== 1) {
       throw new Error(`Sepolia anchor transaction failed: ${tx.hash}`);
     }
 
