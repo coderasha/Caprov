@@ -95,12 +95,13 @@ export class LendingController {
       organizationId: user.organizationId,
       collateralId: collateral.id,
       assetId: collateral.assetId,
-      status: 'ACTIVE',
+      status: 'PENDING_APPROVAL',
+      requestedByUserId: user.id,
       principal: dto.principal,
       currency: dto.currency ?? collateral.currency,
       interestRateBps: dto.interestRateBps ?? 650,
       termDays: dto.termDays ?? 365,
-      outstanding: dto.principal,
+      outstanding: 0,
       ltvBps,
       createdAt: now,
       updatedAt: now,
@@ -121,6 +122,93 @@ export class LendingController {
       },
     });
     return this.hydrate(loan);
+  }
+
+  @Post(':id/disburse')
+  @Roles('COMPLIANCE', 'ORG_ADMIN', 'PLATFORM_ADMIN')
+  disburse(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    const loan = this.db.snapshot.loans.find(
+      (item) => item.id === id && item.organizationId === user.organizationId,
+    );
+    if (!loan) throw new NotFoundException('Loan not found');
+    if (loan.status !== 'PENDING_APPROVAL') {
+      throw new BadRequestException('Loan is not pending disbursal approval');
+    }
+
+    const collateral = this.db.snapshot.collateralPositions.find(
+      (item) =>
+        item.id === loan.collateralId &&
+        item.organizationId === user.organizationId,
+    );
+    if (!collateral || collateral.status !== 'ACTIVE') {
+      throw new NotFoundException('Approved collateral position not found');
+    }
+
+    const available = Number(
+      Math.max(0, collateral.advanceableValue - this.utilizedAmount(collateral.id))
+        .toFixed(2),
+    );
+    if (loan.principal > available) {
+      throw new BadRequestException(
+        `Principal exceeds available collateral capacity ${available} ${collateral.currency}`,
+      );
+    }
+
+    const now = new Date().toISOString();
+    this.db.mutate((draft) => {
+      const target = draft.loans.find((item) => item.id === id)!;
+      target.status = 'ACTIVE';
+      target.outstanding = target.principal;
+      target.approvedByUserId = user.id;
+      target.disbursedAt = now;
+      target.updatedAt = now;
+
+      const wallet =
+        draft.wallets.find(
+          (item) =>
+            item.organizationId === user.organizationId &&
+            item.currency === target.currency,
+        ) ??
+        (() => {
+          const created = {
+            organizationId: user.organizationId,
+            currency: target.currency,
+            balance: 0,
+            updatedAt: now,
+          };
+          draft.wallets.push(created);
+          return created;
+        })();
+
+      wallet.balance = Number((wallet.balance + target.principal).toFixed(2));
+      wallet.updatedAt = now;
+
+      draft.walletTransactions.unshift({
+        id: createId('wtx'),
+        organizationId: user.organizationId,
+        direction: 'CREDIT',
+        type: 'LOAN_DISBURSAL',
+        amount: target.principal,
+        currency: target.currency,
+        description: `Disbursal credited for loan ${target.id}`,
+        referenceType: 'Loan',
+        referenceId: target.id,
+        createdAt: now,
+        createdByUserId: user.id,
+      });
+    });
+    this.audit.log({
+      organizationId: user.organizationId,
+      actorUserId: user.id,
+      action: 'lending.loan_disbursed',
+      entityType: 'Loan',
+      entityId: id,
+      metadata: {
+        principal: loan.principal,
+        currency: loan.currency,
+      },
+    });
+    return this.hydrate(this.db.snapshot.loans.find((item) => item.id === id)!);
   }
 
   @Post(':id/repay')

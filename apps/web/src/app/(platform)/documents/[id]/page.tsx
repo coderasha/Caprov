@@ -2,9 +2,8 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { FactSummaryTable } from '@/components/intelligence/fact-summary-table';
 import { api } from '@/lib/api';
-import { documentTypeLabel, formatDate } from '@/lib/format';
+import { documentTypeLabel, formatDate, formatDateTime } from '@/lib/format';
 import type { DocumentType } from '@caprov/types';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
@@ -14,12 +13,17 @@ interface DocumentDetail {
   id: string;
   assetId?: string;
   name: string;
+  originalFilename?: string;
   type: DocumentType;
   status: string;
   createdAt: string;
   version: number;
   isCurrent: boolean;
+  versionStatus?: 'CURRENT' | 'PREVIOUS';
   previousDocumentId?: string;
+  uploadedBy?: string | null;
+  uploadedByUserId?: string;
+  storageKey?: string;
   documentHash?: string;
   anchorStatus?: string;
   anchorMode?: 'LIVE' | 'SIMULATED';
@@ -42,6 +46,12 @@ interface DocumentHistoryItem {
   version: number;
   isCurrent: boolean;
   createdAt: string;
+  originalFilename?: string;
+  uploadedBy?: string | null;
+  uploadedByUserId?: string;
+  storageKey?: string;
+  versionStatus?: 'CURRENT' | 'PREVIOUS';
+  status: string;
   anchorStatus?: string;
   anchorMode?: 'LIVE' | 'SIMULATED';
   anchorChainName?: string;
@@ -66,6 +76,10 @@ interface DocumentVerifyResult {
   recalculatedHash?: string;
   storedHash?: string;
   onChainHash?: string;
+  effectiveAnchorStatus?: string;
+  effectiveAnchorMode?: 'LIVE' | 'SIMULATED';
+  transactionRecorded?: boolean;
+  anchoredAt?: string;
   matchesStored: boolean;
   matchesOnChain: boolean;
   authentic: boolean;
@@ -92,6 +106,13 @@ export default function DocumentDetailPage() {
   }
   const history = historyQuery.data ?? [];
   const verify = verifyQuery.data;
+  const effectiveAnchorStatus =
+    verify?.effectiveAnchorStatus ?? document.anchorStatus;
+  const effectiveAnchorMode =
+    verify?.effectiveAnchorMode ?? document.anchorMode;
+  const transactionId = verify?.transactionHash ?? document.anchorTxHash;
+  const explorerUrl = verify?.explorerUrl ?? document.anchorExplorerUrl;
+  const anchoredAt = verify?.anchoredAt ?? document.anchoredAt;
   const verificationTone = verify
     ? verify.authentic
       ? 'ok'
@@ -114,16 +135,16 @@ export default function DocumentDetailPage() {
           {document.anchorStatus ? (
             <Badge
               tone={
-                document.anchorStatus === 'BLOCKCHAIN_ANCHORED'
+                effectiveAnchorStatus === 'BLOCKCHAIN_ANCHORED'
                   ? 'ok'
-                  : document.anchorStatus === 'SIMULATED'
+                  : effectiveAnchorStatus === 'SIMULATED'
                     ? 'warn'
-                    : document.anchorStatus === 'ANCHOR_FAILED'
+                    : effectiveAnchorStatus === 'ANCHOR_FAILED'
                       ? 'danger'
                       : 'muted'
               }
             >
-              {document.anchorStatus.replaceAll('_', ' ')}
+              {effectiveAnchorStatus?.replaceAll('_', ' ') ?? '—'}
             </Badge>
           ) : null}
           {document.assetId ? (
@@ -135,31 +156,31 @@ export default function DocumentDetailPage() {
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="p-5">
-          <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Current version</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Version</p>
           <p className="mt-3 text-2xl font-semibold">v{document.version}</p>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            {document.previousDocumentId ? `Supersedes ${document.previousDocumentId}` : 'First version in this lineage'}
+            {document.versionStatus === 'CURRENT' ? 'Current version' : 'Previous version'}
           </p>
         </Card>
         <Card className="p-5">
-          <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Anchor mode</p>
-          <p className="mt-3 text-2xl font-semibold">{document.anchorMode ?? '—'}</p>
-          <p className="mt-2 text-sm text-[var(--muted)]">{document.anchorChainName ?? 'Not linked to chain'}</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Uploaded by</p>
+          <p className="mt-3 text-2xl font-semibold">{document.uploadedBy ?? '—'}</p>
+          <p className="mt-2 text-sm text-[var(--muted)]">{document.uploadedByUserId ?? 'Uploader id not recorded'}</p>
         </Card>
         <Card className="p-5">
-          <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Anchored at</p>
-          <p className="mt-3 text-2xl font-semibold">{formatDate(document.anchoredAt ?? document.createdAt)}</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Uploaded at</p>
+          <p className="mt-3 text-2xl font-semibold">{formatDate(document.createdAt)}</p>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            {document.anchoredAt ? 'Anchor timestamp recorded' : 'No blockchain anchor timestamp yet'}
+            {formatDateTime(document.createdAt)}
           </p>
         </Card>
       </div>
       <Card className="p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold">Verification and blockchain details</h2>
+            <h2 className="text-lg font-semibold">Blockchain details</h2>
             <p className="mt-2 text-sm text-[var(--muted)]">
-              CAPROV stores the version hash, transaction id, and verification result for this document lineage.
+              Anchor status, transaction id, and the explorer link for this document version.
             </p>
           </div>
           <Badge tone={verificationTone}>
@@ -173,40 +194,46 @@ export default function DocumentDetailPage() {
           </Badge>
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
+          <MetadataRow label="Anchor status" value={effectiveAnchorStatus?.replaceAll('_', ' ')} />
+          <MetadataRow label="Anchor mode" value={effectiveAnchorMode} />
+          <MetadataRow label="Transaction id" value={transactionId} />
+          <MetadataRow label="Anchored at" value={anchoredAt ? formatDateTime(anchoredAt) : undefined} />
+          <MetadataRow label="Document hash" value={verify?.storedHash ?? document.documentHash} />
           <MetadataRow label="Blockchain reference" value={verify?.blockchainReference ?? document.blockchainReference} />
-          <MetadataRow label="Transaction id" value={verify?.transactionHash ?? document.anchorTxHash} />
-          <MetadataRow label="Stored hash" value={verify?.storedHash ?? document.documentHash} />
-          <MetadataRow label="Recalculated hash" value={verify?.recalculatedHash} />
-          <MetadataRow label="On-chain hash" value={verify?.onChainHash} />
-          <MetadataRow label="Contract" value={document.anchorContractAddress} />
         </div>
-        <div className="mt-4 flex flex-wrap gap-3 text-sm">
-          <StatusChip label="Stored hash matches file" ok={Boolean(verify?.matchesStored)} />
-          <StatusChip label="On-chain hash matches file" ok={Boolean(verify?.matchesOnChain)} />
-        </div>
-        <div className="mt-4 flex flex-wrap gap-4 text-sm">
-          {document.anchorExplorerUrl ? (
-            <a href={document.anchorExplorerUrl} target="_blank" rel="noreferrer" className="underline">
+        <div className="mt-5 flex flex-wrap gap-3">
+          {explorerUrl ? (
+            <a
+              href={explorerUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center rounded-full border border-[var(--line)] px-4 py-2 text-sm font-medium underline"
+            >
               View transaction on explorer
             </a>
           ) : null}
-          {document.offChainUri ? <span className="text-[var(--muted)]">Off-chain URI: {document.offChainUri}</span> : null}
+        </div>
+      </Card>
+      <Card className="p-6">
+        <h2 className="text-lg font-semibold">Document details</h2>
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
+          <MetadataRow label="Original filename" value={document.originalFilename} />
+          <MetadataRow label="Supersedes" value={document.previousDocumentId} />
+          <MetadataRow label="Contract" value={document.anchorContractAddress} />
+          <MetadataRow label="Storage location" value={document.storageKey} />
         </div>
       </Card>
       <Card className="p-6">
         <h2 className="text-lg font-semibold">Version history</h2>
-        <p className="mt-2 text-sm text-[var(--muted)]">
-          Each upload for the same asset and document type creates a new immutable version.
-        </p>
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[680px] text-left text-sm">
+          <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
               <tr>
                 <th className="pb-3 pr-4 font-medium">Version</th>
-                <th className="pb-3 pr-4 font-medium">Status</th>
+                <th className="pb-3 pr-4 font-medium">Filename</th>
                 <th className="pb-3 pr-4 font-medium">Anchor</th>
                 <th className="pb-3 pr-4 font-medium">Transaction</th>
-                <th className="pb-3 font-medium">Created</th>
+                <th className="pb-3 font-medium">Uploaded</th>
               </tr>
             </thead>
             <tbody>
@@ -215,14 +242,10 @@ export default function DocumentDetailPage() {
                   <td className="py-3 pr-4">
                     <div className="font-medium">v{item.version}</div>
                     <div className="mt-1 text-xs text-[var(--muted)]">
-                      {item.isCurrent ? 'Current version' : `Document ${item.id}`}
+                      {item.isCurrent ? 'Current version' : 'Previous version'}
                     </div>
                   </td>
-                  <td className="py-3 pr-4">
-                    <Badge tone={item.isCurrent ? 'ink' : 'muted'}>
-                      {item.isCurrent ? 'Current' : 'Archived'}
-                    </Badge>
-                  </td>
+                  <td className="py-3 pr-4 text-xs text-[var(--muted)]">{item.originalFilename ?? item.name}</td>
                   <td className="py-3 pr-4">
                     <div>{item.anchorStatus?.replaceAll('_', ' ') ?? '—'}</div>
                     <div className="mt-1 text-xs text-[var(--muted)]">
@@ -248,25 +271,13 @@ export default function DocumentDetailPage() {
                       <span className="text-[var(--muted)]">—</span>
                     )}
                   </td>
-                  <td className="py-3">{formatDate(item.createdAt)}</td>
+                  <td className="py-3">{formatDateTime(item.createdAt)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </Card>
-      <Card className="p-6">
-        <h2 className="text-lg font-semibold">Extracted text</h2>
-        <p className="mt-2 text-xs text-[var(--muted)]">Ingested {formatDate(document.createdAt)}</p>
-        <pre className="mt-4 whitespace-pre-wrap rounded-2xl bg-[var(--paper)] p-4 text-sm leading-7">
-          {document.extractedText || 'No text extracted for this file yet.'}
-        </pre>
-      </Card>
-      <FactSummaryTable
-        title="Extracted details"
-        facts={document.facts}
-        emptyMessage="No structured details were extracted yet. If this document is linked to an asset, rebuild DNA for a fuller asset-level summary."
-      />
     </div>
   );
 }
@@ -278,8 +289,4 @@ function MetadataRow({ label, value }: { label: string; value?: string }) {
       <p className="mt-2 break-all font-mono text-sm">{value ?? '—'}</p>
     </div>
   );
-}
-
-function StatusChip({ label, ok }: { label: string; ok: boolean }) {
-  return <Badge tone={ok ? 'ok' : 'warn'}>{label}</Badge>;
 }

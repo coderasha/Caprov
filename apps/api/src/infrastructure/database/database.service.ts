@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { dirname, isAbsolute, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { emptyStore, type CaprovData } from './models';
@@ -12,10 +12,7 @@ import {
 @Injectable()
 export class DatabaseService implements OnModuleInit {
   private data: CaprovData = emptyStore();
-  private readonly filePath = resolve(
-    process.cwd(),
-    process.env.DATA_FILE ?? 'data/store.json',
-  );
+  private readonly filePath = resolveDataFilePath();
   private writeChain: Promise<void> = Promise.resolve();
 
   onModuleInit(): void {
@@ -65,6 +62,8 @@ export class DatabaseService implements OnModuleInit {
       'trades',
       'settlements',
       'tokens',
+      'wallets',
+      'walletTransactions',
       'collateralPositions',
       'loans',
     ];
@@ -87,19 +86,8 @@ export class DatabaseService implements OnModuleInit {
       }
     }
     for (const document of this.data.documents) {
-      const groupKey = document.assetId
-        ? `${document.assetId}:${document.type}`
-        : `standalone:${document.id}`;
-      if (!document.groupKey) {
-        document.groupKey = groupKey;
-        changed = true;
-      }
-      if (!document.version) {
-        document.version = 1;
-        changed = true;
-      }
-      if (document.isCurrent == null) {
-        document.isCurrent = true;
+      if (!document.originalFilename) {
+        document.originalFilename = document.name;
         changed = true;
       }
       if (!document.hashAlgorithm) {
@@ -114,6 +102,43 @@ export class DatabaseService implements OnModuleInit {
         document.anchorStatus = 'NOT_APPLICABLE';
         changed = true;
       }
+    }
+    const groupedDocuments = new Map<string, typeof this.data.documents>();
+    for (const document of this.data.documents) {
+      const groupKey = document.assetId
+        ? `${document.assetId}:${document.type}:${document.name.trim().toLowerCase()}`
+        : `standalone:${document.id}`;
+      const bucket = groupedDocuments.get(groupKey) ?? [];
+      bucket.push(document);
+      groupedDocuments.set(groupKey, bucket);
+      if (document.groupKey !== groupKey) {
+        document.groupKey = groupKey;
+        changed = true;
+      }
+    }
+    for (const documents of groupedDocuments.values()) {
+      documents.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+      documents.forEach((document, index) => {
+        const nextVersion = index + 1;
+        const previous = index > 0 ? documents[index - 1] : undefined;
+        const nextIsCurrent = index === documents.length - 1;
+        if (document.version !== nextVersion) {
+          document.version = nextVersion;
+          changed = true;
+        }
+        if (document.isCurrent !== nextIsCurrent) {
+          document.isCurrent = nextIsCurrent;
+          changed = true;
+        }
+        if (document.previousDocumentId !== previous?.id) {
+          document.previousDocumentId = previous?.id;
+          changed = true;
+        }
+        if (document.previousVersionHash !== previous?.documentHash) {
+          document.previousVersionHash = previous?.documentHash;
+          changed = true;
+        }
+      });
     }
     for (const asset of this.data.assets) {
       const legacy = asset as typeof asset & { acquisitionDate?: string };
@@ -285,6 +310,33 @@ export class DatabaseService implements OnModuleInit {
         event.organizationId === organizationId &&
         event.action === 'intelligence.llm_model_selected',
     );
+  }
+}
+
+function resolveDataFilePath(): string {
+  const configuredPath = process.env.DATA_FILE;
+  if (configuredPath) {
+    return isAbsolute(configuredPath)
+      ? configuredPath
+      : resolve(findProjectRoot(), configuredPath);
+  }
+  return resolve(findProjectRoot(), 'data/store.json');
+}
+
+function findProjectRoot(): string {
+  let current = process.cwd();
+  while (true) {
+    if (
+      existsSync(resolve(current, 'pnpm-workspace.yaml')) ||
+      existsSync(resolve(current, '.git'))
+    ) {
+      return current;
+    }
+    const parent = resolve(current, '..');
+    if (parent === current) {
+      return process.cwd();
+    }
+    current = parent;
   }
 }
 

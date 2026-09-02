@@ -3,11 +3,17 @@ import { execFileSync } from 'node:child_process';
 import { rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { DocumentType } from '@caprov/types';
 import type { AuthUser } from '../../common/types/auth-user';
 import {
   DOCUMENT_BLOCKCHAIN_ADAPTER,
+  type BlockchainAdapterNetworkStatus,
   type BlockchainAdapter,
 } from '../../infrastructure/blockchain/blockchain.adapter';
 import { DatabaseService } from '../../infrastructure/database/database.service';
@@ -52,7 +58,72 @@ export class DocumentsService {
           return b.version - a.version;
         }
         return b.createdAt.localeCompare(a.createdAt);
-      });
+      })
+      .map((document) => this.toDocumentRow(document));
+  }
+
+  getNetworkStatus(): BlockchainAdapterNetworkStatus {
+    return this.blockchain.getDocumentNetworkStatus();
+  }
+
+  folders(organizationId: string, assetId: string) {
+    const asset = this.db.snapshot.assets.find(
+      (item) => item.id === assetId && item.organizationId === organizationId,
+    );
+    if (!asset) {
+      throw new NotFoundException('Asset not found');
+    }
+
+    const documents = this.db.snapshot.documents.filter(
+      (item) => item.organizationId === organizationId && item.assetId === assetId,
+    );
+
+    const folders = documentTypeOrder.map((type) => {
+      const inCategory = documents.filter((item) => item.type === type);
+      const currentDocuments = inCategory.filter((item) => item.isCurrent);
+      const lineages = new Map<string, DocumentRecord[]>();
+      for (const document of inCategory) {
+        const bucket = lineages.get(document.groupKey) ?? [];
+        bucket.push(document);
+        lineages.set(document.groupKey, bucket);
+      }
+      const entries = Array.from(lineages.values())
+        .map((versions) => versions.sort((a, b) => b.version - a.version))
+        .map((versions) => {
+          const current = versions[0]!;
+          return {
+            id: current.id,
+            name: current.name,
+            originalFilename: current.originalFilename,
+            currentVersion: current.version,
+            versionCount: versions.length,
+            uploadedAt: current.createdAt,
+            uploadedByUserId: current.uploadedByUserId,
+            uploadedBy:
+              this.db.snapshot.users.find((user) => user.id === current.uploadedByUserId)
+                ?.fullName ?? null,
+            status: current.isCurrent ? 'CURRENT' : 'PREVIOUS',
+            documentStatus: current.status,
+            anchorStatus: current.anchorStatus,
+            storageKey: current.storageKey,
+            versions: versions.map((version) => this.toDocumentRow(version)),
+          };
+        })
+        .sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt));
+
+      return {
+        type,
+        folderName: documentFolderName(type),
+        documentCount: currentDocuments.length,
+        totalVersions: inCategory.length,
+        entries,
+      };
+    });
+
+    return {
+      asset: { id: asset.id, name: asset.name },
+      folders,
+    };
   }
 
   get(organizationId: string, documentId: string) {
@@ -69,7 +140,14 @@ export class DocumentsService {
         );
         return first === index;
       });
-    return { ...document, facts };
+    return {
+      ...document,
+      uploadedBy:
+        this.db.snapshot.users.find((item) => item.id === document.uploadedByUserId)
+          ?.fullName ?? null,
+      versionStatus: document.isCurrent ? 'CURRENT' : 'PREVIOUS',
+      facts,
+    };
   }
 
   history(organizationId: string, documentId: string) {
@@ -80,26 +158,20 @@ export class DocumentsService {
           item.organizationId === organizationId &&
           item.groupKey === document.groupKey,
       )
-      .sort((a, b) => b.version - a.version);
+      .sort((a, b) => b.version - a.version)
+      .map((item) => this.toDocumentRow(item));
   }
 
   async verify(organizationId: string, documentId: string) {
-    const requested = this.requireDocument(organizationId, documentId);
-    const current =
-      this.db.snapshot.documents.find(
-        (item) =>
-          item.organizationId === organizationId &&
-          item.groupKey === requested.groupKey &&
-          item.isCurrent,
-      ) ?? requested;
+    const document = this.requireDocument(organizationId, documentId);
 
-    const content = this.storage.readBuffer(current.storageKey);
+    const content = this.storage.readBuffer(document.storageKey);
     const recalculatedHash = content ? sha256(content) : undefined;
-    const storedHash = current.documentHash?.toLowerCase();
-    const onChain = current.blockchainReference
+    const storedHash = document.documentHash?.toLowerCase();
+    const onChain = document.blockchainReference
       ? await this.blockchain.getAnchoredDocumentVersion(
-          current.blockchainReference,
-          current.version,
+          document.blockchainReference,
+          document.version,
         )
       : null;
     const onChainHash = onChain?.documentHash?.toLowerCase();
@@ -109,29 +181,115 @@ export class DocumentsService {
     const matchesOnChain = Boolean(
       recalculatedHash && onChainHash && recalculatedHash === onChainHash,
     );
+    const effectiveAnchorStatus =
+      matchesOnChain
+        ? 'BLOCKCHAIN_ANCHORED'
+        : document.anchorStatus;
+    const effectiveAnchorMode =
+      matchesOnChain
+        ? 'LIVE'
+        : document.anchorMode;
+    const effectiveTransactionHash = onChain?.transactionHash ?? document.anchorTxHash;
+    const effectiveExplorerUrl = onChain?.explorerUrl ?? document.anchorExplorerUrl;
+    const transactionRecorded = Boolean(effectiveTransactionHash);
 
     return {
-      documentId: current.id,
-      assetId: current.assetId,
-      documentType: current.type,
-      version: current.version,
-      isCurrent: current.isCurrent,
-      offChainUri: current.offChainUri,
-      storageKey: current.storageKey,
-      anchorStatus: current.anchorStatus,
-      anchorMode: current.anchorMode,
-      transactionHash: current.anchorTxHash,
-      explorerUrl: current.anchorExplorerUrl,
-      blockchainReference: current.blockchainReference,
+      documentId: document.id,
+      assetId: document.assetId,
+      documentType: document.type,
+      version: document.version,
+      isCurrent: document.isCurrent,
+      offChainUri: document.offChainUri,
+      storageKey: document.storageKey,
+      anchorStatus: document.anchorStatus,
+      anchorMode: document.anchorMode,
+      transactionHash: effectiveTransactionHash,
+      explorerUrl: effectiveExplorerUrl,
+      blockchainReference: document.blockchainReference,
       recalculatedHash,
       storedHash,
       onChainHash,
       matchesStored,
       matchesOnChain,
       authentic: matchesStored && matchesOnChain,
+      effectiveAnchorStatus,
+      effectiveAnchorMode,
+      transactionRecorded,
+      anchoredAt: onChain?.anchoredAt ?? document.anchoredAt,
       onChainRecord: onChain,
-      history: this.history(organizationId, current.id),
+      history: this.history(organizationId, document.id),
     };
+  }
+
+  async recordWalletAnchor(
+    user: AuthUser,
+    documentId: string,
+    input: {
+      transactionHash: string;
+      walletAddress: string;
+    },
+  ) {
+    const document = this.requireDocument(user.organizationId, documentId);
+    if (!document.assetId || !document.documentHash || !document.blockchainReference) {
+      throw new BadRequestException(
+        'This document version is missing blockchain anchor metadata.',
+      );
+    }
+
+    const network = this.blockchain.getDocumentNetworkStatus();
+    if (!network.contractAddress) {
+      throw new BadRequestException(
+        'Ethereum Sepolia document registry contract is not configured.',
+      );
+    }
+
+    const onChain = await this.blockchain.getAnchoredDocumentVersion(
+      document.blockchainReference,
+      document.version,
+    );
+    if (!onChain) {
+      throw new BadRequestException(
+        'The document version could not be found on Ethereum Sepolia.',
+      );
+    }
+    if (onChain.documentHash.toLowerCase() !== normalizeStoredHash(document.documentHash)) {
+      throw new BadRequestException(
+        'The on-chain document hash does not match the stored document hash.',
+      );
+    }
+
+    this.db.mutate((draft) => {
+      const target = draft.documents.find((item) => item.id === document.id);
+      if (!target) {
+        return;
+      }
+      target.anchorStatus = 'BLOCKCHAIN_ANCHORED';
+      target.anchorMode = 'LIVE';
+      target.anchorChainId = network.chainId;
+      target.anchorChainName = network.chainName;
+      target.anchorContractAddress = network.contractAddress;
+      target.anchorTxHash = input.transactionHash;
+      target.anchorExplorerUrl = `${network.explorerBase}/tx/${input.transactionHash}`;
+      target.anchoredAt = onChain.anchoredAt;
+      target.blockchainReference = document.blockchainReference;
+    });
+
+    this.audit.log({
+      organizationId: user.organizationId,
+      actorUserId: user.id,
+      action: 'document.anchor.recorded',
+      entityType: 'Document',
+      entityId: document.id,
+      metadata: {
+        assetId: document.assetId,
+        version: document.version,
+        walletAddress: input.walletAddress,
+        transactionHash: input.transactionHash,
+        blockchainReference: document.blockchainReference,
+      },
+    });
+
+    return this.get(user.organizationId, document.id);
   }
 
   getCurrentAssetDocuments(organizationId: string, assetId: string) {
@@ -152,8 +310,19 @@ export class DocumentsService {
       mimeType?: string;
       buffer?: Buffer;
       extractedText?: string;
+      originalFilename?: string;
     },
   ) {
+    if (!input.assetId) {
+      throw new NotFoundException('An asset is required for document upload');
+    }
+    const asset = this.db.snapshot.assets.find(
+      (item) => item.id === input.assetId && item.organizationId === user.organizationId,
+    );
+    if (!asset) {
+      throw new NotFoundException('Asset not found');
+    }
+
     const text = this.extractText(input);
     const payload =
       input.buffer ?? (text ? Buffer.from(text, 'utf8') : undefined);
@@ -161,39 +330,38 @@ export class DocumentsService {
       input.mimeType ??
       (input.buffer ? 'application/octet-stream' : 'text/plain');
     const stored = payload
-      ? this.storage.save(input.name, payload, mimeType)
+      ? this.storage.save(
+          input.originalFilename || input.name,
+          payload,
+          mimeType,
+          `${input.assetId}/${documentFolderName(input.type)}`,
+        )
       : {
-          storageKey: `inline/${createId('txt')}.txt`,
+          storageKey: `${input.assetId}/${documentFolderName(input.type)}/inline/${createId('txt')}.txt`,
           mimeType: 'text/plain',
           uri: '',
         };
     const now = new Date().toISOString();
     const documentId = createId('doc');
-    const previous = input.assetId
-      ? this.db.snapshot.documents
-          .filter(
-            (item) =>
-              item.organizationId === user.organizationId &&
-              item.assetId === input.assetId &&
-              item.type === input.type &&
-              item.isCurrent,
-          )
-          .sort((a, b) => b.version - a.version)[0]
-      : undefined;
+    const lineageKey = buildDocumentGroupKey(input.assetId, input.type, input.name);
+    const previous = this.db.snapshot.documents
+      .filter(
+        (item) =>
+          item.organizationId === user.organizationId &&
+          item.groupKey === lineageKey &&
+          item.isCurrent,
+      )
+      .sort((a, b) => b.version - a.version)[0];
     const version = previous ? previous.version + 1 : 1;
     const documentHash = payload ? sha256(payload) : undefined;
-    const anchorResult =
+    const network = this.blockchain.getDocumentNetworkStatus();
+    const blockchainReference =
       input.assetId && documentHash
-        ? await this.blockchain.anchorDocumentVersion({
-            assetId: input.assetId,
-            documentId,
-            documentType: input.type,
-            version,
-            documentHash,
-            previousVersionHash: previous?.documentHash,
-            offChainUri: stored.uri,
-            timestamp: now,
-          })
+        ? this.blockchain.buildDocumentBlockchainReference(
+            input.assetId,
+            input.type,
+            input.name,
+          )
         : undefined;
 
     const document: DocumentRecord = {
@@ -207,33 +375,27 @@ export class DocumentsService {
       storageKey: stored.storageKey,
       sizeBytes: payload?.byteLength ?? text?.length ?? 0,
       extractedText: text,
-      groupKey: input.assetId
-        ? `${input.assetId}:${input.type}`
-        : `standalone:${documentId}`,
+      originalFilename: input.originalFilename || input.name,
+      groupKey: lineageKey,
       version,
       isCurrent: true,
       previousDocumentId: previous?.id,
+      uploadedByUserId: user.id,
       previousVersionHash: previous?.documentHash,
       documentHash,
       hashAlgorithm: 'sha256',
       offChainUri: stored.uri,
       anchorStatus: input.assetId
-        ? anchorResult?.status === 'BLOCKCHAIN_ANCHORED'
-          ? 'BLOCKCHAIN_ANCHORED'
-          : anchorResult?.status === 'SIMULATED'
-            ? 'SIMULATED'
-            : anchorResult?.status === 'ANCHOR_FAILED'
-              ? 'ANCHOR_FAILED'
-              : 'PENDING'
+        ? 'PENDING'
         : 'NOT_APPLICABLE',
-      anchorMode: anchorResult?.mode,
-      anchorChainId: anchorResult?.chainId,
-      anchorChainName: anchorResult?.chainName,
-      anchorContractAddress: anchorResult?.contractAddress,
-      anchorTxHash: anchorResult?.transactionHash,
-      anchorExplorerUrl: anchorResult?.explorerUrl,
-      anchoredAt: anchorResult?.anchoredAt,
-      blockchainReference: anchorResult?.blockchainReference,
+      anchorMode: network.contractAddress ? 'LIVE' : undefined,
+      anchorChainId: network.contractAddress ? network.chainId : undefined,
+      anchorChainName: network.contractAddress ? network.chainName : undefined,
+      anchorContractAddress: network.contractAddress,
+      anchorTxHash: undefined,
+      anchorExplorerUrl: undefined,
+      anchoredAt: undefined,
+      blockchainReference,
       createdAt: now,
     };
 
@@ -281,10 +443,21 @@ export class DocumentsService {
         type: input.type,
         version: document.version,
         anchorStatus: document.anchorStatus,
-        transactionHash: document.anchorTxHash,
+        blockchainReference: document.blockchainReference,
       },
     });
     return document;
+  }
+
+  private toDocumentRow(document: DocumentRecord) {
+    return {
+      ...document,
+      uploadedBy:
+        this.db.snapshot.users.find((item) => item.id === document.uploadedByUserId)
+          ?.fullName ?? null,
+      versionStatus: document.isCurrent ? 'CURRENT' : 'PREVIOUS',
+      folderName: documentFolderName(document.type),
+    };
   }
 
   private requireDocument(organizationId: string, documentId: string) {
@@ -398,6 +571,58 @@ export class DocumentsService {
       .replace(/&quot;/g, '"')
       .replace(/&apos;/g, "'")
       .replace(/\s+\n/g, '\n');
+  }
+}
+
+const documentTypeOrder: DocumentType[] = [
+  'TITLE_DEED',
+  'SPA',
+  'PURCHASE_AGREEMENT',
+  'VALUATION_MEMO',
+  'SALE_AGREEMENT',
+  'ENCUMBRANCE_CERTIFICATE',
+  'KYC',
+  'INSURANCE',
+  'FINANCIAL_STATEMENT',
+  'CAP_TABLE',
+  'LPA',
+  'OTHER',
+];
+
+function buildDocumentGroupKey(assetId: string, type: DocumentType, name: string) {
+  return `${assetId}:${type}:${name.trim().toLowerCase()}`;
+}
+
+function normalizeStoredHash(value: string) {
+  return value.startsWith('0x') ? value.toLowerCase() : `0x${value.toLowerCase()}`;
+}
+
+export function documentFolderName(type: DocumentType) {
+  switch (type) {
+    case 'TITLE_DEED':
+      return 'Title Deed';
+    case 'SPA':
+      return 'SPA';
+    case 'PURCHASE_AGREEMENT':
+      return 'Purchase Agreement';
+    case 'VALUATION_MEMO':
+      return 'Valuation Memo';
+    case 'SALE_AGREEMENT':
+      return 'Sale Agreement';
+    case 'ENCUMBRANCE_CERTIFICATE':
+      return 'Encumbrance Certificate';
+    case 'KYC':
+      return 'KYC';
+    case 'INSURANCE':
+      return 'Insurance';
+    case 'FINANCIAL_STATEMENT':
+      return 'Financial Statement';
+    case 'CAP_TABLE':
+      return 'Cap Table';
+    case 'LPA':
+      return 'LPA';
+    default:
+      return 'Other Documents';
   }
 }
 

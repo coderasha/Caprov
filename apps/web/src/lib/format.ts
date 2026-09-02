@@ -37,6 +37,23 @@ export function formatDate(value?: string | null) {
   }).format(date);
 }
 
+export function formatDateTime(value?: string | null) {
+  if (!value) {
+    return '—';
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+}
+
 export function confidenceLabel(value?: number) {
   if (value == null) {
     return '—';
@@ -77,6 +94,10 @@ export const documentTypeLabel: Record<DocumentType, string> = {
   LPA: 'LPA',
   OTHER: 'Other',
 };
+
+export const documentTypeOptions = (
+  Object.entries(documentTypeLabel) as Array<[DocumentType, string]>
+).filter(([value]) => value !== 'SPA');
 
 export const roleLabel: Record<MembershipRole, string> = {
   PLATFORM_ADMIN: 'Platform admin',

@@ -18,9 +18,11 @@ export class StorageService {
     originalName: string,
     buffer: Buffer,
     mimeType: string,
+    directory?: string,
   ): { storageKey: string; mimeType: string; uri: string } {
     const safeName = originalName.replace(/[^a-zA-Z0-9._-]+/g, '-');
-    const storageKey = `${new Date().toISOString().slice(0, 10)}/${createId('bin')}-${safeName}`;
+    const prefix = directory?.replace(/^\/+|\/+$/g, '') || new Date().toISOString().slice(0, 10);
+    const storageKey = `${prefix}/${createId('bin')}-${safeName}`;
     const fullPath = resolve(this.root, storageKey);
     mkdirSync(dirname(fullPath), { recursive: true });
     writeFileSync(fullPath, buffer);

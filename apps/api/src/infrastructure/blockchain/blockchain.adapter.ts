@@ -11,6 +11,7 @@ export interface DocumentVersionAnchorRequest {
   assetId: string;
   documentId: string;
   documentType: string;
+  documentName: string;
   version: number;
   documentHash: string;
   previousVersionHash?: string;
@@ -27,8 +28,8 @@ export interface DocumentVersionAnchorResult {
   chainId: number;
   chainName: string;
   contractAddress?: string;
-  transactionHash: string;
-  explorerUrl: string;
+  transactionHash?: string;
+  explorerUrl?: string;
   anchoredAt: string;
   blockchainReference: string;
   error?: string;
@@ -38,6 +39,7 @@ export interface AnchoredDocumentVersionRecord {
   assetId: string;
   documentId: string;
   documentType: string;
+  documentName: string;
   version: number;
   documentHash: string;
   previousVersionHash?: string;
@@ -47,6 +49,8 @@ export interface AnchoredDocumentVersionRecord {
   chainId: number;
   chainName: string;
   contractAddress?: string;
+  transactionHash?: string;
+  explorerUrl?: string;
 }
 
 export interface BlockchainAdapterNetworkStatus {
@@ -56,6 +60,7 @@ export interface BlockchainAdapterNetworkStatus {
   explorerBase: string;
   contractAddress?: string;
   walletAddress?: string;
+  serverSignerReady?: boolean;
   mode: DocumentAnchorMode;
   liveReady: boolean;
   message: string;
@@ -66,6 +71,7 @@ export interface BlockchainAdapter {
   buildDocumentBlockchainReference(
     assetId: string,
     documentType: string,
+    documentName: string,
   ): string;
   anchorDocumentVersion(
     request: DocumentVersionAnchorRequest,

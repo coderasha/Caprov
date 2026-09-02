@@ -22,8 +22,9 @@ export const DEFAULT_ETHEREUM_SEPOLIA_RPC =
   'https://ethereum-sepolia-rpc.publicnode.com';
 
 const DOCUMENT_REGISTRY_ABI = [
-  'function anchorDocumentVersion(string assetId, string documentId, string documentType, uint256 version, bytes32 documentHash, bytes32 previousVersionHash, string offChainUri)',
-  'function getDocumentVersion(bytes32 lineageKey, uint256 version) view returns (string assetId, string documentId, string documentType, uint256 storedVersion, bytes32 documentHash, uint256 anchoredAt, bytes32 previousVersionHash, string offChainUri, bool exists)',
+  'function anchorDocumentVersion(string assetId, string documentId, string documentType, string documentName, uint256 version, bytes32 documentHash, bytes32 previousVersionHash, string offChainUri)',
+  'function getDocumentVersion(bytes32 lineageKey, uint256 version) view returns (string assetId, string documentId, string documentType, string documentName, uint256 storedVersion, bytes32 documentHash, uint256 anchoredAt, bytes32 previousVersionHash, string offChainUri, bool exists)',
+  'event DocumentVersionAnchored(bytes32 indexed lineageKey, string assetId, string documentId, string documentType, string documentName, uint256 version, bytes32 documentHash, bytes32 previousVersionHash, string offChainUri, uint256 anchoredAt)',
 ] as const;
 
 @Injectable()
@@ -49,6 +50,9 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
       }
     }
     const liveReady = Boolean(
+      contractAddress,
+    );
+    const serverSignerReady = Boolean(
       (privateKey || mnemonic) && contractAddress && walletAddress,
     );
     return {
@@ -58,19 +62,23 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
       explorerBase: ETHEREUM_SEPOLIA_EXPLORER,
       contractAddress,
       walletAddress,
+      serverSignerReady,
       mode: liveReady ? 'LIVE' : 'SIMULATED',
       liveReady,
       message: liveReady
-        ? 'Live document anchoring enabled against Ethereum Sepolia.'
-        : 'Simulated Sepolia document anchoring active. Set ETHEREUM_SEPOLIA_PRIVATE_KEY and ETHEREUM_DOCUMENT_REGISTRY_CONTRACT for live on-chain anchoring.',
+        ? serverSignerReady
+          ? 'Live document anchoring is enabled against Ethereum Sepolia.'
+          : 'Live wallet-signed document anchoring is ready on Ethereum Sepolia. Org admins can connect MetaMask and sign the anchor transaction in the browser.'
+        : 'Document anchoring is not ready. Set ETHEREUM_DOCUMENT_REGISTRY_CONTRACT to verify and anchor document versions on Ethereum Sepolia.',
     };
   }
 
   buildDocumentBlockchainReference(
     assetId: string,
     documentType: string,
+    documentName: string,
   ): string {
-    return ethId(`${assetId}|${documentType}`);
+    return ethId(`${assetId}|${documentType}|${documentName.trim().toLowerCase()}`);
   }
 
   async anchorDocumentVersion(
@@ -80,24 +88,19 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
     const blockchainReference = this.buildDocumentBlockchainReference(
       request.assetId,
       request.documentType,
+      request.documentName,
     );
 
-    if (!status.liveReady) {
-      const transactionHash = `0x${createHash('sha256')
-        .update(
-          `sepolia-doc-anchor:${request.assetId}:${request.documentType}:${request.version}:${request.documentHash}:${Date.now()}`,
-        )
-        .digest('hex')}`;
+    if (!status.serverSignerReady || !status.contractAddress) {
       return {
-        status: 'SIMULATED',
-        mode: 'SIMULATED',
+        status: 'ANCHOR_FAILED',
+        mode: status.liveReady ? 'LIVE' : 'SIMULATED',
         chainId: status.chainId,
         chainName: status.chainName,
         contractAddress: status.contractAddress,
-        transactionHash,
-        explorerUrl: `${status.explorerBase}/tx/${transactionHash}`,
         anchoredAt: request.timestamp,
         blockchainReference,
+        error: status.message,
       };
     }
 
@@ -114,6 +117,7 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
         request.assetId,
         request.documentId,
         request.documentType,
+        request.documentName,
         BigInt(request.version),
         normalizeHash(request.documentHash),
         normalizeHash(request.previousVersionHash),
@@ -121,6 +125,27 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
       );
       const receipt = await tx.wait();
       const transactionHash = receipt?.hash ?? tx.hash;
+      if (!receipt || receipt.status !== 1) {
+        throw new Error(
+          `Sepolia document anchor transaction was not confirmed successfully (${transactionHash})`,
+        );
+      }
+      const anchoredRecord = await this.getAnchoredDocumentVersion(
+        blockchainReference,
+        request.version,
+      );
+      if (
+        !anchoredRecord ||
+        anchoredRecord.documentHash.toLowerCase() !==
+          normalizeHash(request.documentHash).toLowerCase()
+      ) {
+        throw new Error(
+          `Sepolia anchor verification failed after tx ${transactionHash}`,
+        );
+      }
+      const anchoredAt = receipt.blockNumber
+        ? await this.resolveBlockTimestamp(provider, receipt.blockNumber)
+        : request.timestamp;
       this.logger.log(
         `Anchored document version on Sepolia tx=${transactionHash} asset=${request.assetId} type=${request.documentType} v=${request.version}`,
       );
@@ -132,28 +157,21 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
         contractAddress: status.contractAddress,
         transactionHash,
         explorerUrl: `${status.explorerBase}/tx/${transactionHash}`,
-        anchoredAt: request.timestamp,
+        anchoredAt,
         blockchainReference,
       };
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'document anchor failed';
       this.logger.warn(
-        `Live Sepolia document anchoring failed, recording simulated anchor: ${message}`,
+        `Live Sepolia document anchoring failed: ${message}`,
       );
-      const transactionHash = `0x${createHash('sha256')
-        .update(
-          `sepolia-doc-anchor-fallback:${request.assetId}:${request.documentType}:${request.version}:${request.documentHash}:${message}:${Date.now()}`,
-        )
-        .digest('hex')}`;
       return {
         status: 'ANCHOR_FAILED',
-        mode: 'SIMULATED',
+        mode: 'LIVE',
         chainId: status.chainId,
         chainName: status.chainName,
         contractAddress: status.contractAddress,
-        transactionHash,
-        explorerUrl: `${status.explorerBase}/tx/${transactionHash}`,
         anchoredAt: request.timestamp,
         blockchainReference,
         error: message,
@@ -166,7 +184,7 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
     version: number,
   ): Promise<AnchoredDocumentVersionRecord | null> {
     const status = this.getDocumentNetworkStatus();
-    if (!status.liveReady || !status.contractAddress) {
+    if (!status.contractAddress) {
       return null;
     }
 
@@ -185,6 +203,7 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
         string,
         string,
         string,
+        string,
         bigint,
         string,
         bigint,
@@ -192,28 +211,92 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
         string,
         boolean,
       ];
-      if (!record[8]) {
+      if (!record[9]) {
         return null;
       }
       return {
         assetId: record[0],
         documentId: record[1],
         documentType: record[2],
-        version: Number(record[3]),
-        documentHash: normalizeReturnedHash(record[4]) ?? `0x${'0'.repeat(64)}`,
-        anchoredAt: new Date(Number(record[5]) * 1000).toISOString(),
-        previousVersionHash: normalizeReturnedHash(record[6]),
-        offChainUri: record[7],
+        documentName: record[3],
+        version: Number(record[4]),
+        documentHash: normalizeReturnedHash(record[5]) ?? `0x${'0'.repeat(64)}`,
+        anchoredAt: new Date(Number(record[6]) * 1000).toISOString(),
+        previousVersionHash: normalizeReturnedHash(record[7]),
+        offChainUri: record[8],
         blockchainReference,
         chainId: status.chainId,
         chainName: status.chainName,
         contractAddress: status.contractAddress,
+        ...(await this.findAnchorTransaction({
+          contract,
+          blockchainReference,
+          assetId: record[0],
+          documentId: record[1],
+          documentType: record[2],
+          documentName: record[3],
+          version: Number(record[4]),
+          documentHash: record[5],
+        })),
       };
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'on-chain lookup failed';
       this.logger.warn(`Sepolia document version lookup failed: ${message}`);
       return null;
+    }
+  }
+
+  private async findAnchorTransaction(input: {
+    contract: Contract;
+    blockchainReference: string;
+    assetId: string;
+    documentId: string;
+    documentType: string;
+    documentName: string;
+    version: number;
+    documentHash: string;
+  }): Promise<{ transactionHash?: string; explorerUrl?: string }> {
+    try {
+      const event = input.contract.getEvent('DocumentVersionAnchored');
+      const logs = await input.contract.queryFilter(
+        event,
+        -10_000,
+        'latest',
+      );
+      const expectedHash = normalizeHash(input.documentHash).toLowerCase();
+      const match = [...logs]
+        .reverse()
+        .find((log) => {
+          const args = 'args' in log ? log.args : undefined;
+          if (!args) {
+            return false;
+          }
+          return (
+            String(args.lineageKey).toLowerCase() ===
+              input.blockchainReference.toLowerCase() &&
+            String(args.assetId) === input.assetId &&
+            String(args.documentId) === input.documentId &&
+            String(args.documentType) === input.documentType &&
+            String(args.documentName) === input.documentName &&
+            Number(args.version) === input.version &&
+            String(args.documentHash).toLowerCase() === expectedHash
+          );
+        });
+
+      if (!match) {
+        return {};
+      }
+
+      return {
+        transactionHash: match.transactionHash,
+        explorerUrl: `${ETHEREUM_SEPOLIA_EXPLORER}/tx/${match.transactionHash}`,
+      };
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'anchor event lookup failed';
+      this.logger.warn(`Sepolia anchor event lookup failed: ${message}`);
+      return {};
     }
   }
 
@@ -233,6 +316,17 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
       );
     }
     return new Wallet(privateKey, provider);
+  }
+
+  private async resolveBlockTimestamp(
+    provider: JsonRpcProvider,
+    blockNumber: number,
+  ): Promise<string> {
+    const block = await provider.getBlock(blockNumber);
+    if (!block?.timestamp) {
+      return new Date().toISOString();
+    }
+    return new Date(block.timestamp * 1000).toISOString();
   }
 }
 

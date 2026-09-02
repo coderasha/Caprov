@@ -102,6 +102,7 @@ function event(
 
 type SeedDocument = Omit<
   DocumentRecord,
+  | 'originalFilename'
   | 'groupKey'
   | 'version'
   | 'isCurrent'
@@ -124,8 +125,9 @@ type SeedDocument = Omit<
 function withDocumentVersioning(documents: SeedDocument[]): DocumentRecord[] {
   return documents.map((document) => ({
     ...document,
+    originalFilename: document.name,
     groupKey: document.assetId
-      ? `${document.assetId}:${document.type}`
+      ? `${document.assetId}:${document.type}:${document.name.trim().toLowerCase()}`
       : `standalone:${document.id}`,
     version: 1,
     isCurrent: true,
@@ -1926,6 +1928,29 @@ export function buildSeedData(): CaprovData {
         updatedAt: '2026-07-25T10:00:00.000Z',
       },
     ],
+    wallets: [
+      {
+        organizationId: orgId,
+        currency: 'SGD',
+        balance: 25_000_000,
+        updatedAt: '2026-07-26T10:00:00.000Z',
+      },
+    ],
+    walletTransactions: [
+      {
+        id: 'wtx_cedar_1',
+        organizationId: orgId,
+        direction: 'CREDIT',
+        type: 'LOAN_DISBURSAL',
+        amount: 25_000_000,
+        currency: 'SGD',
+        description: 'Initial demo loan disbursal for Cedar Ridge',
+        referenceType: 'Loan',
+        referenceId: 'loan_cedar_1',
+        createdAt: '2026-07-26T10:00:00.000Z',
+        createdByUserId: arjunId,
+      },
+    ],
     collateralPositions: [
       {
         id: 'col_cedar_1',
@@ -1933,6 +1958,9 @@ export function buildSeedData(): CaprovData {
         assetId: cedarId,
         tokenId: 'tok_cedar_1',
         status: 'ACTIVE',
+        requestedByUserId: arjunId,
+        approvedAt: '2026-07-26T09:00:00.000Z',
+        approvedByUserId: sofiaId,
         pledgedValue: 64_200_000,
         currency: 'SGD',
         haircutBps: 1500,
@@ -1948,12 +1976,15 @@ export function buildSeedData(): CaprovData {
         collateralId: 'col_cedar_1',
         assetId: cedarId,
         status: 'ACTIVE',
+        requestedByUserId: arjunId,
+        approvedByUserId: sofiaId,
         principal: 25_000_000,
         currency: 'SGD',
         interestRateBps: 650,
         termDays: 365,
         outstanding: 25_000_000,
         ltvBps: 3894,
+        disbursedAt: '2026-07-26T10:00:00.000Z',
         createdAt: '2026-07-26T10:00:00.000Z',
         updatedAt: '2026-07-26T10:00:00.000Z',
       },

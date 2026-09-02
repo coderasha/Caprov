@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Field, Input, Select } from '@/components/ui/input';
 import { LlmModelPicker } from '@/components/intelligence/llm-model-picker';
 import { api } from '@/lib/api';
-import { formatDate, roleLabel } from '@/lib/format';
+import { formatDate, money, roleLabel } from '@/lib/format';
 import type { MemberRow } from '@/lib/types';
 import type { MembershipRole } from '@caprov/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -20,6 +20,18 @@ interface OrgSummary {
   memberCount: number;
   assetCount: number;
   roles: MembershipRole[];
+  walletBalances: Array<{
+    currency: string;
+    balance: number;
+    updatedAt: string;
+  }>;
+  walletTransactions: Array<{
+    id: string;
+    amount: number;
+    currency: string;
+    description: string;
+    createdAt: string;
+  }>;
 }
 
 export default function OrganizationPage() {
@@ -64,6 +76,8 @@ export default function OrganizationPage() {
   });
 
   const org = orgQuery.data;
+  const walletBalances = org?.walletBalances ?? [];
+  const walletTransactions = org?.walletTransactions ?? [];
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -133,6 +147,36 @@ export default function OrganizationPage() {
           </form>
         </Card>
       </div>
+      <Card className="p-6">
+        <h2 className="font-display text-lg font-semibold tracking-[-0.02em]">Asset-owner wallet</h2>
+        <div className="mt-5 grid gap-3 md:grid-cols-3">
+          {walletBalances.length ? (
+            walletBalances.map((wallet) => (
+              <div key={wallet.currency} className="rounded-2xl border border-[var(--line)] px-4 py-4">
+                <p className="text-xs uppercase tracking-[0.14em] text-[var(--muted)]">{wallet.currency}</p>
+                <p className="mt-2 font-display text-2xl font-semibold text-[var(--ink)]">
+                  {money(wallet.balance, wallet.currency)}
+                </p>
+                <p className="mt-1 text-xs text-[var(--muted)]">Updated {formatDate(wallet.updatedAt)}</p>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-[var(--muted)]">No wallet credits have been posted yet.</p>
+          )}
+        </div>
+        {walletTransactions.length ? (
+          <div className="mt-6 space-y-3">
+            {walletTransactions.map((entry) => (
+              <div key={entry.id} className="rounded-2xl border border-[var(--line)] px-4 py-3">
+                <p className="font-medium text-[var(--ink)]">{entry.description}</p>
+                <p className="mt-1 text-sm text-[var(--muted)]">
+                  {money(entry.amount, entry.currency)} · {formatDate(entry.createdAt)}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </Card>
       <Card className="p-6">
         <LlmModelPicker />
       </Card>

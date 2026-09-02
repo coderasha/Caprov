@@ -8,6 +8,7 @@ import { Field, Input, Select } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { money } from '@/lib/format';
 import type { HydratedAsset } from '@/lib/types';
+import { useAuthStore } from '@/stores/auth-store';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import Link from 'next/link';
@@ -24,6 +25,7 @@ interface CollateralRow {
   id: string;
   assetId: string;
   status: string;
+  approvedAt?: string;
   pledgedValue: number;
   advanceableValue: number;
   utilizedAmount: number;
@@ -36,7 +38,16 @@ interface CollateralRow {
   asset?: { name: string } | null;
   token?: { id: string; mode: string; supply?: number } | null;
   loans?: LoanSummary[];
-  valuation?: { payload: { amount: number; currency: string } } | null;
+  valuation?: {
+    payload: {
+      amount: number;
+      currency: string;
+      asOf?: string;
+      method?: string;
+      low?: number;
+      high?: number;
+    };
+  } | null;
 }
 
 interface TokenOption {
@@ -57,6 +68,7 @@ function errorMessage(error: unknown): string {
 
 export default function CollateralPage() {
   const queryClient = useQueryClient();
+  const roles = useAuthStore((state) => state.roles);
   const [assetId, setAssetId] = useState('');
   const [tokenId, setTokenId] = useState('');
   const [haircutBps, setHaircutBps] = useState('1500');
@@ -81,11 +93,16 @@ export default function CollateralPage() {
       (await api.get<{ tokens: TokenOption[] }>('/tokenization')).data.tokens,
   });
 
+  const canManageCollateral =
+    roles.includes('ORG_ADMIN') || roles.includes('ANALYST') || roles.includes('PLATFORM_ADMIN');
+  const canApproveCollateral =
+    roles.includes('COMPLIANCE') || roles.includes('ORG_ADMIN') || roles.includes('PLATFORM_ADMIN');
+
   const activeAssetIds = useMemo(
     () =>
       new Set(
         (collateral.data ?? [])
-          .filter((item) => item.status === 'ACTIVE')
+          .filter((item) => item.status === 'ACTIVE' || item.status === 'PENDING_APPROVAL')
           .map((item) => item.assetId),
       ),
     [collateral.data],
@@ -94,7 +111,11 @@ export default function CollateralPage() {
     () =>
       new Set(
         (collateral.data ?? [])
-          .filter((item) => item.status === 'ACTIVE' && item.tokenId)
+          .filter(
+            (item) =>
+              (item.status === 'ACTIVE' || item.status === 'PENDING_APPROVAL') &&
+              item.tokenId,
+          )
           .map((item) => item.tokenId as string),
       ),
     [collateral.data],
@@ -156,6 +177,15 @@ export default function CollateralPage() {
     onError: (error) => setActionError(errorMessage(error)),
   });
 
+  const approve = useMutation({
+    mutationFn: async (id: string) => api.post(`/collateral/${id}/approve`),
+    onSuccess: async () => {
+      setActionError(null);
+      await refresh();
+    },
+    onError: (error) => setActionError(errorMessage(error)),
+  });
+
   const update = useMutation({
     mutationFn: async (id: string) =>
       api.patch(`/collateral/${id}`, {
@@ -175,11 +205,11 @@ export default function CollateralPage() {
       <PageHeader
         eyebrow="Collateral"
         title="Pledge DNA-backed assets"
-        description="Lock asset or tokenized positions as collateral. Advanceable value applies the haircut; active loans reduce available capacity."
+        description="Submit assets or tokenized positions for bank review. Approvers can inspect valuation details before activating collateral for lending."
       />
       <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
         <Card className="p-6">
-          <h2 className="font-display text-lg font-semibold tracking-[-0.02em]">Pledge collateral</h2>
+          <h2 className="font-display text-lg font-semibold tracking-[-0.02em]">Submit collateral</h2>
           <form
             className="mt-4 grid gap-3"
             onSubmit={(event) => {
@@ -211,8 +241,8 @@ export default function CollateralPage() {
             </Field>
             {!pledgeableAssets.length ? (
               <p className="text-sm text-[var(--muted)]">
-                All assets with available marks already have an active pledge. Release one to pledge
-                again.
+                All assets with available marks already have an active or pending pledge. Release one
+                to pledge again.
               </p>
             ) : null}
             <Field label="Token position (optional)">
@@ -256,8 +286,8 @@ export default function CollateralPage() {
               </p>
             ) : null}
             {formError ? <p className="text-sm text-red-700">{formError}</p> : null}
-            <Button type="submit" disabled={!assetId || create.isPending}>
-              {create.isPending ? 'Pledging…' : 'Pledge'}
+            <Button type="submit" disabled={!assetId || create.isPending || !canManageCollateral}>
+              {create.isPending ? 'Submitting…' : 'Submit pledge for review'}
             </Button>
           </form>
         </Card>
@@ -292,9 +322,49 @@ export default function CollateralPage() {
                     {money(item.availableAmount ?? item.advanceableValue, item.currency)}
                     {item.token ? ` · token ${item.token.mode}` : ''}
                   </p>
+                  {item.valuation?.payload ? (
+                    <div className="mt-3 rounded-xl border border-[var(--line)] bg-[var(--paper)]/60 px-3 py-3 text-sm text-[var(--muted)]">
+                      <p className="font-medium text-[var(--ink)]">
+                        Valuation {money(item.valuation.payload.amount, item.valuation.payload.currency)}
+                      </p>
+                      <p className="mt-1">{item.valuation.payload.method ?? 'Method not recorded'}</p>
+                      <p className="mt-1">
+                        As of {item.valuation.payload.asOf?.slice(0, 10) ?? 'n/a'}
+                        {item.valuation.payload.low != null && item.valuation.payload.high != null
+                          ? ` · Range ${money(item.valuation.payload.low, item.valuation.payload.currency)} to ${money(
+                              item.valuation.payload.high,
+                              item.valuation.payload.currency,
+                            )}`
+                          : ''}
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
                 <Badge>{item.status}</Badge>
               </div>
+
+              {item.status === 'PENDING_APPROVAL' ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {canApproveCollateral ? (
+                    <Button onClick={() => approve.mutate(item.id)} disabled={approve.isPending}>
+                      Approve for lending
+                    </Button>
+                  ) : null}
+                  {canManageCollateral ? (
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        setEditingId(editingId === item.id ? null : item.id);
+                        setEditHaircut(String(item.haircutBps));
+                        setEditPledged(String(item.pledgedValue));
+                        setActionError(null);
+                      }}
+                    >
+                      Adjust request
+                    </Button>
+                  ) : null}
+                </div>
+              ) : null}
 
               {(item.loans?.length ?? 0) > 0 ? (
                 <div className="mt-3 rounded-xl border border-[var(--line)] bg-[var(--paper)]/60 px-3 py-2 text-sm">
@@ -326,22 +396,29 @@ export default function CollateralPage() {
                   >
                     {item.canRelease ? 'Release' : 'Release blocked'}
                   </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      setEditingId(editingId === item.id ? null : item.id);
-                      setEditHaircut(String(item.haircutBps));
-                      setEditPledged(String(item.pledgedValue));
-                      setActionError(null);
-                    }}
-                  >
-                    Adjust
-                  </Button>
+                  {canManageCollateral ? (
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        setEditingId(editingId === item.id ? null : item.id);
+                        setEditHaircut(String(item.haircutBps));
+                        setEditPledged(String(item.pledgedValue));
+                        setActionError(null);
+                      }}
+                    >
+                      Adjust
+                    </Button>
+                  ) : null}
                 </div>
               ) : null}
               {!item.canRelease && item.status === 'ACTIVE' ? (
                 <p className="mt-2 text-xs text-[var(--muted)]">
                   Repay linked loans before releasing this collateral.
+                </p>
+              ) : null}
+              {item.status === 'ACTIVE' && item.approvedAt ? (
+                <p className="mt-2 text-xs text-[var(--muted)]">
+                  Approved on {item.approvedAt.slice(0, 10)} for lending use.
                 </p>
               ) : null}
 

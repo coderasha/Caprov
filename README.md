@@ -72,7 +72,7 @@ pnpm --filter web dev
 
 The Nest API calls the Python engine for Asset DNA. If the engine is down, it falls back to the same deterministic extractor locally.
 
-Demo data is seeded to `apps/api/data/store.json` (or `DATA_FILE`). Delete that file or set `RESET_DEMO=true` to reseed.
+Demo data is seeded to `data/store.json` by default (or `DATA_FILE` if overridden). Delete that file or set `RESET_DEMO=true` to reseed.
 
 Open [http://localhost:3000](http://localhost:3000), sign in, then use Overview, Assets, Documents, Intelligence, Copilot, Portfolios, Marketplace, Trading, Settlement, Tokenization, Collateral, Lending, Organization, Platform Admin, and Audit.
 

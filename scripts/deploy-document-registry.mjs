@@ -9,6 +9,8 @@ import { resolve } from 'node:path';
 import solc from 'solc';
 import { ContractFactory, JsonRpcProvider, Wallet, HDNodeWallet } from 'ethers';
 
+loadLocalEnv(resolve(process.cwd(), 'apps/api/.env'));
+
 const RPC = process.env.ETHEREUM_SEPOLIA_RPC_URL || 'https://ethereum-sepolia-rpc.publicnode.com';
 const KEY = process.env.ETHEREUM_SEPOLIA_PRIVATE_KEY;
 const MNEMONIC = process.env.ETHEREUM_SEPOLIA_MNEMONIC;
@@ -56,3 +58,23 @@ const address = await contract.getAddress();
 console.log(`CaprovDocumentRegistry deployed: ${address}`);
 console.log(`Explorer: https://sepolia.etherscan.io/address/${address}`);
 console.log(`Set ETHEREUM_DOCUMENT_REGISTRY_CONTRACT=${address} in apps/api/.env`);
+
+function loadLocalEnv(filePath) {
+  const source = readFileSync(filePath, 'utf8');
+  for (const line of source.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) {
+      continue;
+    }
+    const separator = trimmed.indexOf('=');
+    if (separator === -1) {
+      continue;
+    }
+    const key = trimmed.slice(0, separator).trim();
+    if (!key || process.env[key]) {
+      continue;
+    }
+    const value = trimmed.slice(separator + 1);
+    process.env[key] = value;
+  }
+}

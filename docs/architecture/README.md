@@ -24,7 +24,7 @@ Shared contracts live in `packages/types`. The Sepolia token contract lives in `
 
 ## Local demo persistence
 
-The demo API uses a **file-backed store** (`DATA_FILE`, default `apps/api/data/store.json`) with in-process mutations and audit events. Prisma / PostgreSQL, Redis, and object storage modules exist as Phase-2 boundaries; they are not required to run the local demo.
+The demo API uses a **file-backed store** (`DATA_FILE`, default `data/store.json` at the monorepo root) with in-process mutations and audit events. Prisma / PostgreSQL, Redis, and object storage modules exist as Phase-2 boundaries; they are not required to run the local demo.
 
 Reset demo data by deleting the store file or starting with `RESET_DEMO=true`.
 

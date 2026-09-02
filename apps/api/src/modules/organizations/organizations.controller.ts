@@ -136,7 +136,20 @@ export class OrganizationsController {
     const assetCount = this.db.snapshot.assets.filter(
       (item) => item.organizationId === user.organizationId,
     ).length;
-    return { ...organization, memberCount, assetCount, roles: user.roles };
+    const walletBalances = this.db.snapshot.wallets
+      .filter((item) => item.organizationId === user.organizationId)
+      .sort((a, b) => a.currency.localeCompare(b.currency));
+    const walletTransactions = this.db.snapshot.walletTransactions
+      .filter((item) => item.organizationId === user.organizationId)
+      .slice(0, 10);
+    return {
+      ...organization,
+      memberCount,
+      assetCount,
+      roles: user.roles,
+      walletBalances,
+      walletTransactions,
+    };
   }
 
   @Post()

@@ -323,9 +323,39 @@ export type SettlementStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED
 
 export type TokenizationStatus = 'PENDING' | 'SUBMITTED' | 'CONFIRMED' | 'SIMULATED' | 'FAILED';
 
-export type CollateralStatus = 'ACTIVE' | 'RELEASED' | 'LIQUIDATED';
+export type CollateralStatus =
+  | 'PENDING_APPROVAL'
+  | 'ACTIVE'
+  | 'RELEASED'
+  | 'LIQUIDATED';
 
-export type LoanStatus = 'ACTIVE' | 'REPAID' | 'DEFAULTED' | 'CLOSED';
+export type LoanStatus =
+  | 'PENDING_APPROVAL'
+  | 'ACTIVE'
+  | 'REPAID'
+  | 'DEFAULTED'
+  | 'CLOSED';
+
+export interface OrganizationWallet {
+  organizationId: EntityId;
+  currency: CurrencyCode;
+  balance: number;
+  updatedAt: IsoTimestamp;
+}
+
+export interface WalletTransaction {
+  id: EntityId;
+  organizationId: EntityId;
+  direction: 'CREDIT' | 'DEBIT';
+  type: 'LOAN_DISBURSAL';
+  amount: number;
+  currency: CurrencyCode;
+  description: string;
+  referenceType?: 'Loan' | 'Collateral';
+  referenceId?: EntityId;
+  createdAt: IsoTimestamp;
+  createdByUserId?: EntityId;
+}
 
 export interface MarketplaceListing {
   id: EntityId;
@@ -417,6 +447,9 @@ export interface CollateralPosition {
   assetId: EntityId;
   tokenId?: EntityId;
   status: CollateralStatus;
+  requestedByUserId?: EntityId;
+  approvedAt?: IsoTimestamp;
+  approvedByUserId?: EntityId;
   pledgedValue: number;
   currency: CurrencyCode;
   haircutBps: number;
@@ -431,12 +464,15 @@ export interface LoanFacility {
   collateralId: EntityId;
   assetId: EntityId;
   status: LoanStatus;
+  requestedByUserId?: EntityId;
+  approvedByUserId?: EntityId;
   principal: number;
   currency: CurrencyCode;
   interestRateBps: number;
   termDays: number;
   outstanding: number;
   ltvBps: number;
+  disbursedAt?: IsoTimestamp;
   createdAt: IsoTimestamp;
   updatedAt: IsoTimestamp;
   repaidAt?: IsoTimestamp;

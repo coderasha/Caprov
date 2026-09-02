@@ -48,6 +48,7 @@ export interface DocumentRow {
   id: string;
   assetId?: string;
   name: string;
+  originalFilename?: string;
   type: DocumentType;
   status: string;
   sizeBytes: number;
@@ -55,8 +56,15 @@ export interface DocumentRow {
   extractedText?: string;
   version?: number;
   isCurrent?: boolean;
+  versionStatus?: 'CURRENT' | 'PREVIOUS';
   previousDocumentId?: string;
+  uploadedByUserId?: string;
+  uploadedBy?: string | null;
+  storageKey?: string;
+  offChainUri?: string;
+  folderName?: string;
   documentHash?: string;
+  previousVersionHash?: string;
   anchorStatus?: string;
   anchorMode?: 'LIVE' | 'SIMULATED';
   anchorChainId?: number;
@@ -66,6 +74,33 @@ export interface DocumentRow {
   anchorExplorerUrl?: string;
   anchoredAt?: string;
   blockchainReference?: string;
+}
+
+export interface AssetDocumentFolder {
+  type: DocumentType;
+  folderName: string;
+  documentCount: number;
+  totalVersions: number;
+  entries: Array<{
+    id: string;
+    name: string;
+    originalFilename: string;
+    currentVersion: number;
+    versionCount: number;
+    uploadedAt: string;
+    uploadedByUserId?: string;
+    uploadedBy: string | null;
+    status: 'CURRENT' | 'PREVIOUS';
+    documentStatus: string;
+    anchorStatus?: string;
+    storageKey: string;
+    versions: DocumentRow[];
+  }>;
+}
+
+export interface AssetDocumentsTree {
+  asset: { id: string; name: string };
+  folders: AssetDocumentFolder[];
 }
 
 export interface JobRow {

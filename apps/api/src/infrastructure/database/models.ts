@@ -17,11 +17,13 @@ import type {
   ProvenanceAnchor,
   RiskSummary,
   SettlementRecord,
+  OrganizationWallet,
   TokenPosition,
   TradeRecord,
   TradingOrder,
   ValuationProjection,
   ValuationSummary,
+  WalletTransaction,
 } from '@caprov/types';
 
 export interface OrganizationRecord {
@@ -101,6 +103,7 @@ export interface DocumentRecord {
   organizationId: string;
   assetId?: string;
   name: string;
+  originalFilename: string;
   type: DocumentType;
   status: DocumentStatus;
   mimeType: string;
@@ -111,6 +114,7 @@ export interface DocumentRecord {
   version: number;
   isCurrent: boolean;
   previousDocumentId?: string;
+  uploadedByUserId?: string;
   previousVersionHash?: string;
   documentHash?: string;
   hashAlgorithm?: 'sha256';
@@ -274,6 +278,8 @@ export interface CaprovData {
   trades: TradeRecord[];
   settlements: SettlementRecord[];
   tokens: TokenPosition[];
+  wallets: OrganizationWallet[];
+  walletTransactions: WalletTransaction[];
   collateralPositions: CollateralPosition[];
   loans: LoanFacility[];
 }
@@ -304,6 +310,8 @@ export function emptyStore(): CaprovData {
     trades: [],
     settlements: [],
     tokens: [],
+    wallets: [],
+    walletTransactions: [],
     collateralPositions: [],
     loans: [],
   };

@@ -157,7 +157,8 @@ export class CollateralController {
       organizationId: user.organizationId,
       assetId: asset.id,
       tokenId: dto.tokenId,
-      status: 'ACTIVE',
+      status: 'PENDING_APPROVAL',
+      requestedByUserId: user.id,
       pledgedValue,
       currency: dto.currency ?? valuation?.payload.currency ?? asset.currency,
       haircutBps,
@@ -183,6 +184,37 @@ export class CollateralController {
     return this.hydrate(position);
   }
 
+  @Post(':id/approve')
+  @Roles('COMPLIANCE', 'ORG_ADMIN', 'PLATFORM_ADMIN')
+  approve(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    const position = this.db.snapshot.collateralPositions.find(
+      (item) => item.id === id && item.organizationId === user.organizationId,
+    );
+    if (!position) throw new NotFoundException('Collateral not found');
+    if (position.status !== 'PENDING_APPROVAL') {
+      throw new BadRequestException('Collateral is not pending approval');
+    }
+
+    const now = new Date().toISOString();
+    this.db.mutate((draft) => {
+      const target = draft.collateralPositions.find((item) => item.id === id)!;
+      target.status = 'ACTIVE';
+      target.approvedAt = now;
+      target.approvedByUserId = user.id;
+      target.updatedAt = now;
+    });
+    this.audit.log({
+      organizationId: user.organizationId,
+      actorUserId: user.id,
+      action: 'collateral.approved',
+      entityType: 'Collateral',
+      entityId: id,
+    });
+    return this.hydrate(
+      this.db.snapshot.collateralPositions.find((item) => item.id === id)!,
+    );
+  }
+
   @Patch(':id')
   @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
   update(
@@ -194,8 +226,10 @@ export class CollateralController {
       (item) => item.id === id && item.organizationId === user.organizationId,
     );
     if (!position) throw new NotFoundException('Collateral not found');
-    if (position.status !== 'ACTIVE') {
-      throw new BadRequestException('Only active collateral can be updated');
+    if (!['PENDING_APPROVAL', 'ACTIVE'].includes(position.status)) {
+      throw new BadRequestException(
+        'Only pending or active collateral can be updated',
+      );
     }
     if (dto.pledgedValue == null && dto.haircutBps == null) {
       throw new BadRequestException('Provide pledgedValue and/or haircutBps');

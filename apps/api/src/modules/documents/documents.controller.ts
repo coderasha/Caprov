@@ -51,10 +51,25 @@ class IngestDocumentDto {
   extractedText?: string;
 }
 
+class RecordWalletAnchorDto {
+  @IsString()
+  @MinLength(10)
+  transactionHash!: string;
+
+  @IsString()
+  @MinLength(10)
+  walletAddress!: string;
+}
+
 @Controller('documents')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class DocumentsController {
   constructor(private readonly documents: DocumentsService) {}
+
+  @Get('network-status')
+  networkStatus() {
+    return this.documents.getNetworkStatus();
+  }
 
   @Get()
   list(
@@ -67,6 +82,11 @@ export class DocumentsController {
       assetId,
       currentOnly === 'true',
     );
+  }
+
+  @Get('assets/:assetId/folders')
+  folders(@CurrentUser() user: AuthUser, @Param('assetId') assetId: string) {
+    return this.documents.folders(user.organizationId, assetId);
   }
 
   @Get(':id')
@@ -82,6 +102,16 @@ export class DocumentsController {
   @Get(':id/verify')
   verify(@CurrentUser() user: AuthUser, @Param('id') id: string) {
     return this.documents.verify(user.organizationId, id);
+  }
+
+  @Post(':id/anchor')
+  @Roles('ORG_ADMIN', 'PLATFORM_ADMIN')
+  recordAnchor(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Body() dto: RecordWalletAnchorDto,
+  ) {
+    return this.documents.recordWalletAnchor(user, id, dto);
   }
 
   @Post()
@@ -113,6 +143,7 @@ export class DocumentsController {
       assetId: body.assetId,
       mimeType: file?.mimetype || 'application/octet-stream',
       buffer: file?.buffer,
+      originalFilename: file?.originalname || body.name || 'Untitled document',
       extractedText: body.extractedText,
     });
   }
