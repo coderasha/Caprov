@@ -23,6 +23,7 @@ import type {
   ProvenanceAnchorRecord,
 } from '../../infrastructure/database/models';
 import { StorageService } from '../../infrastructure/storage/storage.service';
+import { sepoliaTxExplorerUrl } from '../../infrastructure/blockchain/explorer';
 import { AuditService } from '../audit/audit.service';
 import {
   extractFactsAccurate,
@@ -205,7 +206,9 @@ export class DocumentsService {
           ? 'LIVE'
         : document.anchorMode;
     const effectiveTransactionHash = resolvedAnchor.transactionHash;
-    const effectiveExplorerUrl = resolvedAnchor.explorerUrl;
+    const effectiveExplorerUrl =
+      sepoliaTxExplorerUrl(effectiveTransactionHash) ??
+      sepoliaTxExplorerUrl(resolvedAnchor.explorerUrl);
     const effectiveAnchoredAt = resolvedAnchor.anchoredAt;
     const transactionRecorded = Boolean(effectiveTransactionHash);
     if (
@@ -297,6 +300,13 @@ export class DocumentsService {
       );
     }
 
+    const transactionHash =
+      onChain.transactionHash ?? input.transactionHash;
+    const explorerUrl =
+      sepoliaTxExplorerUrl(transactionHash) ??
+      sepoliaTxExplorerUrl(onChain.explorerUrl) ??
+      `${network.explorerBase}/tx/${transactionHash}`;
+
     this.db.mutate((draft) => {
       const target = draft.documents.find((item) => item.id === document.id);
       if (!target) {
@@ -307,8 +317,8 @@ export class DocumentsService {
       target.anchorChainId = network.chainId;
       target.anchorChainName = network.chainName;
       target.anchorContractAddress = network.contractAddress;
-      target.anchorTxHash = input.transactionHash;
-      target.anchorExplorerUrl = `${network.explorerBase}/tx/${input.transactionHash}`;
+      target.anchorTxHash = transactionHash;
+      target.anchorExplorerUrl = explorerUrl;
       target.anchoredAt = onChain.anchoredAt;
       target.blockchainReference = document.blockchainReference;
     });
@@ -323,7 +333,7 @@ export class DocumentsService {
         assetId: document.assetId,
         version: document.version,
         walletAddress: input.walletAddress,
-        transactionHash: input.transactionHash,
+        transactionHash: transactionHash,
         blockchainReference: document.blockchainReference,
       },
     });
@@ -572,6 +582,12 @@ export class DocumentsService {
     }
 
     candidates.sort((a, b) => {
+      const txScore = (item: { transactionHash?: string; explorerUrl?: string }) =>
+        item.transactionHash || item.explorerUrl ? 1 : 0;
+      const txDelta = txScore(b) - txScore(a);
+      if (txDelta !== 0) {
+        return txDelta;
+      }
       const left = a.anchoredAt ? Date.parse(a.anchoredAt) : 0;
       const right = b.anchoredAt ? Date.parse(b.anchoredAt) : 0;
       return right - left;

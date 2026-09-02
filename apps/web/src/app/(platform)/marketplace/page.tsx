@@ -8,6 +8,7 @@ import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { readFileAsDataUrl } from '@/lib/files';
 import { money } from '@/lib/format';
+import { sepoliaTxExplorerUrl } from '@/lib/explorer';
 import type { HydratedAsset } from '@/lib/types';
 import { useAuthStore } from '@/stores/auth-store';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -506,14 +507,14 @@ function ListingCard({
                   </p>
                 </>
               )}
-              {listing.token?.explorerUrl ? (
+              {sepoliaTxExplorerUrl(listing.token?.txHash ?? listing.token?.explorerUrl) ? (
                 <a
-                  href={listing.token.explorerUrl}
+                  href={sepoliaTxExplorerUrl(listing.token?.txHash ?? listing.token?.explorerUrl)}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-block text-[12px] underline"
                 >
-                  View token tx on Etherscan
+                  View on transaction explorer
                 </a>
               ) : null}
             </div>

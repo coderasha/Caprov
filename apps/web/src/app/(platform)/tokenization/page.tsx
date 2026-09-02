@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Field, Input, Select } from '@/components/ui/input';
 import { api } from '@/lib/api';
+import { sepoliaTxExplorerUrl } from '@/lib/explorer';
 import type { HydratedAsset } from '@/lib/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -143,14 +144,14 @@ export default function TokenizationPage() {
                 </Badge>
               </div>
               <p className="mt-3 break-anywhere text-xs text-[var(--muted)]">{token.recipientAddress}</p>
-              {token.explorerUrl ? (
+              {sepoliaTxExplorerUrl(token.txHash ?? token.explorerUrl) ? (
                 <a
                   className="mt-3 inline-block text-sm text-[var(--ink)] underline"
-                  href={token.explorerUrl}
+                  href={sepoliaTxExplorerUrl(token.txHash ?? token.explorerUrl)}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  View on Etherscan Sepolia
+                  View on transaction explorer
                 </a>
               ) : null}
             </Card>

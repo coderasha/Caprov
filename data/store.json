@@ -59,7 +59,7 @@
     {
       "id": "usr_caprov_admin",
       "email": "priya@caprov.io",
-      "passwordHash": "$2b$10$VAAF5yBT5.CxE54pG7GOLeQE0Xgu3WMWiFXWl72mEY0.UgctgYJwy",
+      "passwordHash": "$2b$10$beToukUHbGJ6UtDBH1cFRO9nIFtUPhgjRWsGo78KdaZ8WS8Ll2v0i",
       "fullName": "Priya Nair",
       "title": "Platform Administrator",
       "createdAt": "2020-01-06T09:00:00.000Z",
@@ -113,6 +113,26 @@
     }
   ],
   "assets": [
+    {
+      "id": "ast_034df6e630864199",
+      "organizationId": "org_meridian",
+      "name": "Test Asset",
+      "assetClass": "REAL_ESTATE",
+      "status": "DRAFT",
+      "currency": "USD",
+      "jurisdiction": "US",
+      "location": "Boston",
+      "description": "Test asset",
+      "creationDate": "2024-01-01",
+      "primaryImageUrl": "https://example.com/image.png",
+      "imageUrls": [
+        "https://example.com/image.png",
+        "https://example.com/a.png",
+        "https://example.com/b.png"
+      ],
+      "createdAt": "2026-09-02T09:26:37.978Z",
+      "updatedAt": "2026-09-02T09:26:37.978Z"
+    },
     {
       "id": "ast_25687abc39614427",
       "organizationId": "org_meridian",
@@ -2111,6 +2131,69 @@
     }
   ],
   "auditEvents": [
+    {
+      "id": "aud_5dbf8d5cbb744aca",
+      "createdAt": "2026-09-02T09:33:42.299Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_70666f9449764612",
+      "createdAt": "2026-09-02T09:26:37.979Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "asset.created",
+      "entityType": "Asset",
+      "entityId": "ast_034df6e630864199"
+    },
+    {
+      "id": "aud_b46217d874e3483b",
+      "createdAt": "2026-09-02T09:26:37.954Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_b895d887c3484c4f",
+      "createdAt": "2026-09-02T09:26:23.411Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_45c179482828473e",
+      "createdAt": "2026-09-02T09:26:09.503Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_arjun",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_arjun"
+    },
+    {
+      "id": "aud_fd8287fbc63b4a7e",
+      "createdAt": "2026-09-02T07:48:51.425Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_elena"
+    },
+    {
+      "id": "aud_376bf35402594ec1",
+      "createdAt": "2026-09-02T07:43:09.512Z",
+      "organizationId": "org_meridian",
+      "actorUserId": "usr_elena",
+      "action": "auth.login",
+      "entityType": "User",
+      "entityId": "usr_elena"
+    },
     {
       "id": "aud_e4ea6376e7444704",
       "createdAt": "2026-09-02T07:34:48.460Z",

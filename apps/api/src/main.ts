@@ -17,8 +17,9 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bodyParser: false,
   });
-  app.useBodyParser('json', { limit: '15mb' });
-  app.useBodyParser('urlencoded', { limit: '15mb', extended: true });
+  const maxPayloadBytes = '50mb';
+  app.useBodyParser('json', { limit: maxPayloadBytes });
+  app.useBodyParser('urlencoded', { limit: maxPayloadBytes, extended: true });
   app.use(helmet({ contentSecurityPolicy: false }));
   app.use(compression());
   app.enableCors({

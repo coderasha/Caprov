@@ -8,6 +8,7 @@ import {
   id as ethId,
   getAddress,
 } from 'ethers';
+import { sepoliaTxExplorerUrl } from './explorer';
 
 export const ETHEREUM_SEPOLIA_CHAIN_ID = 11155111;
 export const ETHEREUM_SEPOLIA_NAME = 'Ethereum Sepolia';
@@ -147,7 +148,7 @@ export class EthereumSepoliaTokenService {
         supply: request.supply,
         recipientAddress: to,
         txHash,
-        explorerUrl: `${status.explorerBase}/tx/${txHash}`,
+        explorerUrl: sepoliaTxExplorerUrl(txHash) ?? `${status.explorerBase}/tx/${txHash}`,
         status: 'SIMULATED',
       };
     }
@@ -176,7 +177,7 @@ export class EthereumSepoliaTokenService {
         supply: request.supply,
         recipientAddress: to,
         txHash,
-        explorerUrl: `${status.explorerBase}/tx/${txHash}`,
+        explorerUrl: sepoliaTxExplorerUrl(txHash) ?? `${status.explorerBase}/tx/${txHash}`,
         status: 'CONFIRMED',
       };
     } catch (error) {
@@ -194,7 +195,7 @@ export class EthereumSepoliaTokenService {
         supply: request.supply,
         recipientAddress: normalizeAddress(recipient),
         txHash,
-        explorerUrl: `${status.explorerBase}/tx/${txHash}`,
+        explorerUrl: sepoliaTxExplorerUrl(txHash) ?? `${status.explorerBase}/tx/${txHash}`,
         status: 'SIMULATED',
         error: message,
       };
@@ -214,7 +215,7 @@ export class EthereumSepoliaTokenService {
         chainId: status.chainId,
         chainName: status.chainName,
         txHash,
-        explorerUrl: `${status.explorerBase}/tx/${txHash}`,
+        explorerUrl: sepoliaTxExplorerUrl(txHash) ?? `${status.explorerBase}/tx/${txHash}`,
         status: 'SIMULATED',
       };
     }
@@ -235,7 +236,7 @@ export class EthereumSepoliaTokenService {
         chainId: status.chainId,
         chainName: status.chainName,
         txHash,
-        explorerUrl: `${status.explorerBase}/tx/${txHash}`,
+        explorerUrl: sepoliaTxExplorerUrl(txHash) ?? `${status.explorerBase}/tx/${txHash}`,
         status: 'CONFIRMED',
       };
     } catch (error) {
@@ -253,7 +254,7 @@ export class EthereumSepoliaTokenService {
         chainId: status.chainId,
         chainName: status.chainName,
         txHash,
-        explorerUrl: `${status.explorerBase}/tx/${txHash}`,
+        explorerUrl: sepoliaTxExplorerUrl(txHash) ?? `${status.explorerBase}/tx/${txHash}`,
         status: 'SIMULATED',
         error: message,
       };

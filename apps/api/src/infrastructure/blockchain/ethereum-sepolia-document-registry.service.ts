@@ -7,6 +7,7 @@ import {
   HDNodeWallet,
   id as ethId,
 } from 'ethers';
+import { sepoliaTxExplorerUrl } from './explorer';
 import type {
   AnchoredDocumentVersionRecord,
   BlockchainAdapter,
@@ -156,7 +157,7 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
         chainName: status.chainName,
         contractAddress: status.contractAddress,
         transactionHash,
-        explorerUrl: `${status.explorerBase}/tx/${transactionHash}`,
+        explorerUrl: sepoliaTxExplorerUrl(transactionHash) ?? `${status.explorerBase}/tx/${transactionHash}`,
         anchoredAt,
         blockchainReference,
       };
@@ -290,7 +291,7 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
 
       return {
         transactionHash: match.transactionHash,
-        explorerUrl: `${ETHEREUM_SEPOLIA_EXPLORER}/tx/${match.transactionHash}`,
+        explorerUrl: sepoliaTxExplorerUrl(match.transactionHash),
       };
     } catch (error) {
       const message =

@@ -305,20 +305,21 @@ export default function AssetDetailPage() {
     );
     setWalletMessage(`Transaction submitted: ${tx.hash}`);
     const receipt = await tx.wait();
+    const transactionHash = receipt?.hash ?? tx.hash;
     if (!receipt || Number(receipt.status ?? 0) !== 1) {
-      throw new Error(`Sepolia anchor transaction failed: ${tx.hash}`);
+      throw new Error(`Sepolia anchor transaction failed: ${transactionHash}`);
     }
 
     await recordAnchor.mutateAsync({
       documentId: document.id,
-      transactionHash: tx.hash,
+      transactionHash,
       walletAddress: signerAddress,
     });
     setWalletSession({
       ...session,
       account: signerAddress,
     });
-    setWalletMessage(`Anchored on Sepolia: ${tx.hash}`);
+    setWalletMessage(`Anchored on Sepolia: ${transactionHash}`);
   }
 
   async function handleDocumentSubmit(event: React.FormEvent<HTMLFormElement>) {

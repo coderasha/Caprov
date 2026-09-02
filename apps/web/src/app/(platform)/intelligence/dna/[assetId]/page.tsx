@@ -7,6 +7,7 @@ import { ConfidenceBar } from '@/components/ui/confidence';
 import { FactSummaryTable } from '@/components/intelligence/fact-summary-table';
 import { api } from '@/lib/api';
 import { confidenceLabel, formatDate, money, riskTone } from '@/lib/format';
+import { sepoliaTxExplorerUrl } from '@/lib/explorer';
 import type { TrustedAssetDnaSnapshot } from '@caprov/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
@@ -99,14 +100,18 @@ export default function DnaExplorerPage() {
                   {latest?.trust.anchoredDocumentCount ?? 0} of {envelope.sourceDocumentIds.length} source documents
                   anchored
                 </p>
-                {latest?.trust.snapshotAnchor?.explorerUrl ? (
+                {sepoliaTxExplorerUrl(
+                  latest?.trust.snapshotAnchor?.txHash ?? latest?.trust.snapshotAnchor?.explorerUrl,
+                ) ? (
                   <a
-                    href={latest.trust.snapshotAnchor.explorerUrl}
+                    href={sepoliaTxExplorerUrl(
+                      latest?.trust.snapshotAnchor?.txHash ?? latest?.trust.snapshotAnchor?.explorerUrl,
+                    )}
                     target="_blank"
                     rel="noreferrer"
                     className="mt-2 inline-block text-xs underline"
                   >
-                    View snapshot anchor transaction
+                    View on transaction explorer
                   </a>
                 ) : (
                   <p className="mt-2 text-xs text-[var(--muted)]">
