@@ -19,6 +19,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
+import { getAddress, isAddress } from 'ethers';
 import type {
   CurrencyCode,
   MarketplaceListing,
@@ -30,6 +31,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import type { AuthUser } from '../../common/types/auth-user';
 import { EthereumSepoliaTokenService } from '../../infrastructure/blockchain/ethereum-sepolia-token.service';
+import { EthereumSepoliaMarketplaceService } from '../../infrastructure/blockchain/ethereum-sepolia-marketplace.service';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import { createId } from '../../infrastructure/database/ids';
 import { AuditService } from '../audit/audit.service';
@@ -96,6 +98,19 @@ class CreateListingDto {
   recipientAddress?: string;
 }
 
+class RegisterOnChainListingDto {
+  @IsString() assetId!: string;
+  @IsString() @MinLength(1) tokenPositionId!: string;
+  @IsString() @MinLength(1) onChainListingId!: string;
+  @IsString() @MinLength(66) onChainTxHash!: string;
+  @IsString() @MinLength(42) listerWalletAddress!: string;
+  @IsInt() @Min(1) availableTokenUnits!: number;
+  @IsString() @MinLength(1) pricePerTokenWei!: string;
+  @IsOptional() @IsString() @MinLength(2) title?: string;
+  @IsOptional() @IsString() summary?: string;
+  @IsOptional() @IsString() imageUrl?: string;
+}
+
 @Controller('marketplace')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class MarketplaceController {
@@ -103,6 +118,7 @@ export class MarketplaceController {
     private readonly db: DatabaseService,
     private readonly audit: AuditService,
     private readonly sepolia: EthereumSepoliaTokenService,
+    private readonly marketplace: EthereumSepoliaMarketplaceService,
   ) {}
 
   @Get()
@@ -111,7 +127,7 @@ export class MarketplaceController {
       listings: this.list(user),
       openCount: this.db.snapshot.listings.filter(
         (item) =>
-          item.organizationId === user.organizationId && item.status === 'OPEN',
+          item.status === 'OPEN',
       ).length,
     };
   }
@@ -119,17 +135,73 @@ export class MarketplaceController {
   @Get('listings')
   list(@CurrentUser() user: AuthUser) {
     return this.db.snapshot.listings
-      .filter((item) => item.organizationId === user.organizationId)
       .map((listing) => this.hydrate(listing));
   }
 
   @Get('listings/:id')
   get(@CurrentUser() user: AuthUser, @Param('id') id: string) {
     const listing = this.db.snapshot.listings.find(
-      (item) => item.id === id && item.organizationId === user.organizationId,
+      (item) => item.id === id,
     );
     if (!listing) throw new NotFoundException('Listing not found');
     return this.hydrate(listing);
+  }
+
+  /** Records a listing only after the browser has escrowed units in the contract. */
+  @Post('on-chain-listings')
+  @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
+  async registerOnChainListing(@CurrentUser() user: AuthUser, @Body() dto: RegisterOnChainListingDto) {
+    if (!isAddress(dto.listerWalletAddress) || !/^\d+$/.test(dto.onChainListingId) || !/^\d+$/.test(dto.pricePerTokenWei)) {
+      throw new BadRequestException('Invalid wallet, listing id, or token price.');
+    }
+    const asset = this.db.snapshot.assets.find((item) => item.id === dto.assetId && item.organizationId === user.organizationId);
+    const token = this.db.snapshot.tokens.find((item) => item.id === dto.tokenPositionId && item.assetId === dto.assetId && item.organizationId === user.organizationId && item.status === 'CONFIRMED');
+    if (!asset || !token) throw new NotFoundException('A confirmed tokenized asset is required before listing.');
+    if (this.db.snapshot.listings.some((item) => item.onChainListingId === dto.onChainListingId && item.marketplaceContractAddress === this.marketplace.contractAddress())) {
+      throw new BadRequestException('This on-chain listing has already been registered.');
+    }
+    if (!this.marketplace.isConfigured()) throw new BadRequestException('The Sepolia marketplace and CAPROV payment token are not configured.');
+    if (dto.availableTokenUnits > token.supply) throw new BadRequestException('Listing quantity exceeds the asset token supply.');
+    const valid = await this.marketplace.verifyListingTransaction({
+      txHash: dto.onChainTxHash,
+      listingId: dto.onChainListingId,
+      seller: dto.listerWalletAddress,
+      assetTokenId: token.tokenId,
+      units: String(dto.availableTokenUnits),
+      pricePerTokenWei: dto.pricePerTokenWei,
+    });
+    if (!valid) throw new BadRequestException('The submitted transaction is not a confirmed matching Caprov marketplace listing.');
+    const now = new Date().toISOString();
+    const listing: MarketplaceListing = {
+      id: createId('lst'), organizationId: user.organizationId, assetId: asset.id,
+      title: dto.title?.trim() || `${asset.name} token units`, offeringType: 'SALE', status: 'OPEN',
+      summary: dto.summary?.trim(), imageUrl: dto.imageUrl?.trim() || asset.primaryImageUrl || asset.imageUrls?.[0],
+      askPrice: 0, currency: 'USD', quantityBps: 0, remainingBps: 0,
+      tokenPositionId: token.id, tokenizationMode: token.mode, assetTokenId: token.tokenId,
+      totalTokenSupply: token.supply, availableTokenUnits: dto.availableTokenUnits,
+      pricePerTokenWei: dto.pricePerTokenWei,
+      paymentTokenAddress: process.env.ETHEREUM_PAYMENT_TOKEN_CONTRACT?.trim(),
+      marketplaceContractAddress: this.marketplace.contractAddress(),
+      onChainListingId: dto.onChainListingId, listerWalletAddress: getAddress(dto.listerWalletAddress),
+      onChainListingTxHash: dto.onChainTxHash, createdAt: now, updatedAt: now,
+    };
+    this.db.mutate((draft) => draft.listings.unshift(listing));
+    this.audit.log({ organizationId: user.organizationId, actorUserId: user.id, action: 'marketplace.on_chain_listing_registered', entityType: 'Listing', entityId: listing.id, metadata: { onChainListingId: dto.onChainListingId, tokenId: token.tokenId } });
+    return this.hydrate(listing);
+  }
+
+  /** Syncs the UI record to contract state after a buyer purchase or seller close. */
+  @Post('on-chain-listings/:id/sync')
+  async syncOnChainListing(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    const listing = this.db.snapshot.listings.find((item) => item.id === id && item.onChainListingId);
+    if (!listing) throw new NotFoundException('On-chain listing not found');
+    const chain = await this.marketplace.getListing(listing.onChainListingId!);
+    if (!chain) throw new BadRequestException('Marketplace contract is not configured.');
+    this.db.mutate((draft) => {
+      const target = draft.listings.find((item) => item.id === id);
+      if (target) { target.availableTokenUnits = Number(chain.remaining); target.status = !chain.active ? 'CLOSED' : chain.remaining === '0' ? 'FILLED' : Number(chain.remaining) < (target.availableTokenUnits ?? 0) ? 'PARTIALLY_FILLED' : 'OPEN'; target.updatedAt = new Date().toISOString(); }
+    });
+    return this.get(user, id);
   }
 
   @Post('listings')

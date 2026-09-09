@@ -2,14 +2,12 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { ConfidenceBar } from '@/components/ui/confidence';
 
 type FactRow = {
   id: string;
   key: string;
   label?: string;
   value: string;
-  confidence: number;
   fragment?: string;
 };
 
@@ -78,7 +76,6 @@ export function FactSummaryTable({
               <tr>
                 <th className="px-4 py-3.5 font-medium sm:px-5">Field</th>
                 <th className="px-3 py-3.5 font-medium">Value</th>
-                <th className="px-3 py-3.5 font-medium">Confidence</th>
                 <th className="px-4 py-3.5 font-medium sm:px-5">Source excerpt</th>
               </tr>
             </thead>
@@ -91,9 +88,6 @@ export function FactSummaryTable({
                   </td>
                   <td className="px-3 py-4">
                     <Badge tone="accent">{fact.value}</Badge>
-                  </td>
-                  <td className="px-3 py-4 min-w-32">
-                    <ConfidenceBar value={fact.confidence} />
                   </td>
                   <td className="px-4 py-4 text-[var(--muted)] sm:px-5">
                     {fact.fragment ? fact.fragment : '—'}

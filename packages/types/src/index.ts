@@ -375,6 +375,16 @@ export interface MarketplaceListing {
   /** Basis points of economic interest offered (10000 = 100%). */
   quantityBps: number;
   remainingBps: number;
+  /** ERC-1155 marketplace fields. Present for live token-unit listings. */
+  assetTokenId?: string;
+  totalTokenSupply?: number;
+  availableTokenUnits?: number;
+  pricePerTokenWei?: string;
+  paymentTokenAddress?: string;
+  marketplaceContractAddress?: string;
+  onChainListingId?: string;
+  listerWalletAddress?: string;
+  onChainListingTxHash?: string;
   createdAt: IsoTimestamp;
   updatedAt: IsoTimestamp;
 }

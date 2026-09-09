@@ -1,4 +1,4 @@
-import { BrowserProvider, Contract, type Eip1193Provider, formatUnits } from 'ethers';
+import { BrowserProvider, Contract, Interface, type Eip1193Provider, formatUnits, parseUnits } from 'ethers';
 
 const assetAbi = [
   'function setApprovalForAll(address operator, bool approved)',
@@ -13,6 +13,8 @@ const paymentAbi = [
 const marketplaceAbi = [
   'function createListing(uint256 assetId, uint256 amount, uint256 pricePerUnit) returns (uint256)',
   'function buy(uint256 listingId, uint256 amount)',
+  'function closeListing(uint256 listingId)',
+  'event Listed(uint256 indexed listingId, address indexed seller, uint256 indexed assetId, uint256 amount, uint256 pricePerUnit)',
 ] as const;
 
 type WalletWindow = Window & { ethereum?: Eip1193Provider };
@@ -45,7 +47,7 @@ export async function connectSepoliaWallet() {
 }
 
 /** Seller signs approval and escrow creation; the browser wallet is the token holder. */
-export async function createOnChainListing(input: { assetTokenId: string; units: string; pricePerUnitWei: string }) {
+export async function createOnChainListing(input: { assetTokenId: string; units: string; pricePerToken: string }) {
   const connectedSigner = await signer();
   const { assetToken, marketplace } = addresses();
   const asset = new Contract(assetToken, assetAbi, connectedSigner);
@@ -54,8 +56,14 @@ export async function createOnChainListing(input: { assetTokenId: string; units:
     await (await asset.getFunction('setApprovalForAll')(marketplace, true)).wait();
   }
   const market = new Contract(marketplace, marketplaceAbi, connectedSigner);
-  const tx = await market.getFunction('createListing')(BigInt(input.assetTokenId), BigInt(input.units), BigInt(input.pricePerUnitWei));
-  return tx.wait();
+  const pricePerUnitWei = parseUnits(input.pricePerToken, 18);
+  const tx = await market.getFunction('createListing')(BigInt(input.assetTokenId), BigInt(input.units), pricePerUnitWei);
+  const receipt = await tx.wait();
+  const iface = new Interface(marketplaceAbi);
+  const event = receipt?.logs.map((log: { topics: readonly string[]; data: string }) => { try { return iface.parseLog(log); } catch { return null; } })
+    .find((log: ReturnType<Interface['parseLog']> | null) => log?.name === 'Listed');
+  if (!receipt || !event) throw new Error('Listing transaction confirmed but its Listed event was not found.');
+  return { receipt, listingId: event.args.listingId.toString(), txHash: receipt.hash, pricePerTokenWei: pricePerUnitWei.toString() };
 }
 
 /** Buyer approves CAPROV then signs an atomic buy transaction. */
@@ -70,6 +78,13 @@ export async function buyOnChainListing(input: { listingId: string; units: strin
   }
   const market = new Contract(marketplace, marketplaceAbi, connectedSigner);
   return (await market.getFunction('buy')(BigInt(input.listingId), BigInt(input.units))).wait();
+}
+
+export async function closeOnChainListing(listingId: string) {
+  const connectedSigner = await signer();
+  const { marketplace } = addresses();
+  const market = new Contract(marketplace, marketplaceAbi, connectedSigner);
+  return (await market.getFunction('closeListing')(BigInt(listingId))).wait();
 }
 
 export { formatUnits };

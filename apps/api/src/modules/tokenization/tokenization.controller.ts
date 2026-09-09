@@ -67,8 +67,15 @@ export class TokenizationController {
         item.id === dto.assetId && item.organizationId === user.organizationId,
     );
     if (!asset) throw new NotFoundException('Asset not found');
+    const network = this.sepolia.getNetworkStatus();
+    // Tokens minted on a retired contract cannot be escrowed by the active
+    // marketplace. They are retained as history but do not block a one-time
+    // mint on the currently configured ERC-1155 contract.
     const existing = this.db.snapshot.tokens.find(
-      (item) => item.assetId === asset.id && item.status === 'CONFIRMED',
+      (item) =>
+        item.assetId === asset.id &&
+        item.status === 'CONFIRMED' &&
+        item.contractAddress?.toLowerCase() === network.contractAddress?.toLowerCase(),
     );
     if (existing) {
       throw new BadRequestException(
@@ -78,7 +85,6 @@ export class TokenizationController {
     if (dto.supply > 1_000_000_000) {
       throw new BadRequestException('Supply too large');
     }
-    const network = this.sepolia.getNetworkStatus();
     if (!network.liveMintReady) {
       throw new BadRequestException(
         'Live Ethereum Sepolia tokenization is not configured. Set ETHEREUM_SEPOLIA_PRIVATE_KEY (or ETHEREUM_SEPOLIA_MNEMONIC) and ETHEREUM_TOKEN_CONTRACT before minting.',

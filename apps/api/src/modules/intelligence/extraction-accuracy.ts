@@ -35,6 +35,16 @@ const FIELD_SPECS: FieldSpec[] = [
   {
     key: 'market_value',
     label: 'Market value',
+    // Valuation conclusions often put the date and amount on separate lines.
+    // Require an explicit money marker so "30 September 2026" is never read
+    // as a USD 30 valuation.
+    regex:
+      /(?:indicative\s+)?market\s+value[\s\S]{0,120}?(?:assessed\s+at|is\s+assessed\s+at|concluded\s+at|:)\s*((?:₹\s*|INR\s*)[0-9][0-9,]*(?:\.[0-9]+)?(?:\s*(?:crore|lakh|million|billion|bn|m))?)/gi,
+    baseConfidence: 0.94,
+  },
+  {
+    key: 'market_value',
+    label: 'Market value',
     regex:
       /(?:open market valuation|open market value|fair market value|current market value|estimated market value|appraised value|appraisal value|appraisal figure|gross asset value|\bgav\b|\bomv\b|market value|fair value)\s*[:\-]?\s*([^\n]+)/gi,
     baseConfidence: 0.94,
@@ -194,27 +204,30 @@ export function parseAmount(
   const cleaned = raw
     .replace(/\((?:approximately|approx\.?|about)\)/gi, '')
     .trim();
-  const match = /(?:(USD|EUR|GBP|SGD|INR)|(\$)|(£)|(€))/i.exec(cleaned);
-  const numberMatch =
-    /([0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]+)?|[0-9]+(?:\.[0-9]+)?)\s*(million|billion|bn|m)?\b/i.exec(
+  const moneyMatch =
+    /(?:(USD|EUR|GBP|SGD|INR)|(\$)|(£)|(€)|(₹))\s*([0-9][0-9,]*(?:\.[0-9]+)?)\s*(crore|lakh|million|billion|bn|m)?\b/i.exec(
       cleaned,
     );
-  if (!numberMatch?.[1]) {
+  if (!moneyMatch?.[6]) {
     return null;
   }
-  let amount = Number(numberMatch[1].replace(/,/g, ''));
-  const suffix = (numberMatch[2] ?? '').toLowerCase();
+  let amount = Number(moneyMatch[6].replace(/,/g, ''));
+  const suffix = (moneyMatch[7] ?? '').toLowerCase();
+  if (suffix === 'crore') amount *= 10_000_000;
+  if (suffix === 'lakh') amount *= 100_000;
   if (suffix === 'million' || suffix === 'm') amount *= 1_000_000;
   if (suffix === 'billion' || suffix === 'bn') amount *= 1_000_000_000;
   if (!suffix && /\bmillion\b/i.test(cleaned)) amount *= 1_000_000;
   if (!suffix && /\bbillion\b|\bbn\b/i.test(cleaned)) amount *= 1_000_000_000;
-  const currency: CurrencyCode = match?.[1]
-    ? (match[1].toUpperCase() as CurrencyCode)
-    : match?.[3]
+  const currency: CurrencyCode = moneyMatch[1]
+    ? (moneyMatch[1].toUpperCase() as CurrencyCode)
+    : moneyMatch[3]
       ? 'GBP'
-      : match?.[4]
+      : moneyMatch[4]
         ? 'EUR'
-        : 'USD';
+        : moneyMatch[5]
+          ? 'INR'
+          : 'USD';
   return { amount, currency };
 }
 
@@ -341,6 +354,12 @@ export function extractFactsAccurate(
         }
 
         const parsed = parseAmount(value);
+        if (
+          ['market_value', 'nav', 'purchase_price'].includes(spec.key) &&
+          !parsed
+        ) {
+          continue;
+        }
         let confidence = Math.min(
           0.99,
           Number((spec.baseConfidence + bonus).toFixed(2)),

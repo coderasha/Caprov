@@ -3,14 +3,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ConfidenceBar } from '@/components/ui/confidence';
 import { FactSummaryTable } from '@/components/intelligence/fact-summary-table';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import {
   assetClassLabel,
   assetStatusLabel,
-  confidenceLabel,
   documentTypeLabel,
   documentTypeOptions,
   formatDate,
@@ -376,7 +374,7 @@ export default function AssetDetailPage() {
         </div>
       </div>
 
-      <section className="grid gap-4 md:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-3">
         <Card className="p-5">
           <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Marked value</p>
           <p className="mt-3 text-2xl font-semibold">
@@ -386,10 +384,6 @@ export default function AssetDetailPage() {
         <Card className="p-5">
           <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">DNA version</p>
           <p className="mt-3 text-2xl font-semibold">{asset.latestDna ? `v${asset.latestDna.version}` : '—'}</p>
-        </Card>
-        <Card className="p-5">
-          <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Confidence</p>
-          <p className="mt-3 text-2xl font-semibold">{confidenceLabel(dna?.confidence.overall)}</p>
         </Card>
         <Card className="p-5">
           <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Documents</p>
@@ -426,11 +420,6 @@ export default function AssetDetailPage() {
             <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
               {dna?.summary ?? 'No Asset DNA snapshot yet. Ingest documents and run the pipeline.'}
             </p>
-            {dna ? (
-              <div className="mt-6">
-                <ConfidenceBar value={dna.confidence.overall} label="Overall" />
-              </div>
-            ) : null}
             <Link href={`/intelligence/dna/${asset.id}`} className="mt-4 inline-block text-sm underline">
               Open DNA explorer
             </Link>
@@ -452,7 +441,6 @@ export default function AssetDetailPage() {
               key: fact.key,
               label: fact.label,
               value: fact.value,
-              confidence: fact.confidence,
               fragment: fact.provenance[0]?.sourceFragment,
             }))}
             emptyMessage="No extracted facts yet."
@@ -727,7 +715,6 @@ export default function AssetDetailPage() {
                 </p>
                 <p className="text-[var(--muted)]">{asset.latestValuation.payload.method}</p>
                 <p>As of {formatDate(asset.latestValuation.payload.asOf)}</p>
-                <ConfidenceBar value={asset.latestValuation.payload.confidence} />
                 <ul className="list-disc pl-5 text-[var(--muted)]">
                   {asset.latestValuation.payload.notes.map((note) => (
                     <li key={note}>{note}</li>

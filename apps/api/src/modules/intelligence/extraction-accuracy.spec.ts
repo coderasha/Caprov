@@ -17,6 +17,9 @@ describe('extraction accuracy optimizations', () => {
   it('parses million suffixes without false multipliers', () => {
     expect(parseAmount('SGD 112 million')?.amount).toBe(112_000_000);
     expect(parseAmount('GBP 92.8m')?.amount).toBe(92_800_000);
+    expect(parseAmount('₹12,50,00,000')?.amount).toBe(125_000_000);
+    expect(parseAmount('₹12.5 crore')?.currency).toBe('INR');
+    expect(parseAmount('as at 30 September 2026')).toBeNull();
   });
 
   it('prefers valuation memo over insurance declared value', () => {

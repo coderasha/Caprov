@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { connectSepoliaWallet } from '@/lib/sepolia-marketplace';
 import { useState } from 'react';
 
-export function WalletConnect() {
+export function WalletConnect({ onConnected }: { onConnected?: (address: string) => void }) {
   const [address, setAddress] = useState<string>();
   const [error, setError] = useState<string>();
   return (
@@ -17,7 +17,7 @@ export function WalletConnect() {
       </div>
       <Button className="ml-auto" variant="secondary" onClick={async () => {
         setError(undefined);
-        try { setAddress(await connectSepoliaWallet()); } catch (reason) { setError(reason instanceof Error ? reason.message : 'Could not connect wallet.'); }
+        try { const nextAddress = await connectSepoliaWallet(); setAddress(nextAddress); onConnected?.(nextAddress); } catch (reason) { setError(reason instanceof Error ? reason.message : 'Could not connect wallet.'); }
       }}>
         {address ? 'Wallet connected' : 'Connect MetaMask'}
       </Button>
