@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { id as ethId } from 'ethers';
 import {
   BadRequestException,
   Inject,
@@ -176,12 +177,7 @@ export class DocumentsService {
       organizationId,
       document.id,
     );
-    const onChain = document.blockchainReference
-      ? await this.blockchain.getAnchoredDocumentVersion(
-          document.blockchainReference,
-          document.version,
-        )
-      : null;
+    const onChain = await this.findOnChainDocumentVersion(document);
     const onChainHash = onChain?.documentHash?.toLowerCase();
     const matchesStored = Boolean(
       recalculatedHash && storedHash && recalculatedHash === storedHash,
@@ -193,12 +189,13 @@ export class DocumentsService {
       provenanceAnchor,
       onChain,
     });
-    const effectiveAnchorStatus =
-      matchesOnChain
+    const effectiveAnchorStatus = matchesOnChain
+      ? 'BLOCKCHAIN_ANCHORED'
+      : resolvedAnchor.mode === 'LIVE' && resolvedAnchor.transactionHash
         ? 'BLOCKCHAIN_ANCHORED'
-        : resolvedAnchor.transactionHash
-          ? 'BLOCKCHAIN_ANCHORED'
-        : document.anchorStatus;
+        : resolvedAnchor.mode === 'SIMULATED'
+          ? 'SIMULATED'
+          : document.anchorStatus;
     const effectiveAnchorMode =
       matchesOnChain
         ? 'LIVE'
@@ -232,6 +229,16 @@ export class DocumentsService {
         target.anchorTxHash = effectiveTransactionHash;
         target.anchorExplorerUrl = effectiveExplorerUrl;
         target.anchoredAt = effectiveAnchoredAt;
+        target.blockchainReference =
+          onChain?.blockchainReference ?? target.blockchainReference;
+        this.syncDocumentProvenanceAnchor(target, draft, {
+          transactionHash: effectiveTransactionHash,
+          explorerUrl: effectiveExplorerUrl,
+          anchoredAt: effectiveAnchoredAt,
+          chainId: onChain?.chainId ?? target.anchorChainId,
+          chainName: onChain?.chainName ?? target.anchorChainName,
+          mode: effectiveAnchorMode ?? 'LIVE',
+        });
       });
     }
 
@@ -285,10 +292,7 @@ export class DocumentsService {
       );
     }
 
-    const onChain = await this.blockchain.getAnchoredDocumentVersion(
-      document.blockchainReference,
-      document.version,
-    );
+    const onChain = await this.findOnChainDocumentVersion(document);
     if (!onChain) {
       throw new BadRequestException(
         'The document version could not be found on Ethereum Sepolia.',
@@ -300,18 +304,41 @@ export class DocumentsService {
       );
     }
 
-    const transactionHash =
-      onChain.transactionHash ?? input.transactionHash;
-    const explorerUrl =
-      sepoliaTxExplorerUrl(transactionHash) ??
-      sepoliaTxExplorerUrl(onChain.explorerUrl) ??
-      `${network.explorerBase}/tx/${transactionHash}`;
+    // CRITICAL FIX: Use ONLY the on-chain verified transaction hash, never fall back to unverified input
+    const transactionHash = onChain.transactionHash;
+    if (!transactionHash) {
+      throw new BadRequestException(
+        'Ethereum Sepolia transaction hash could not be verified. Please anchor the document again.',
+      );
+    }
+    if (input.transactionHash.toLowerCase() !== transactionHash.toLowerCase()) {
+      throw new BadRequestException(
+        'The submitted transaction hash does not match the verified Ethereum Sepolia anchor transaction.',
+      );
+    }
 
-    this.db.mutate((draft) => {
+    const explorerUrl = sepoliaTxExplorerUrl(transactionHash);
+    if (!explorerUrl) {
+      throw new BadRequestException(
+        'Transaction hash format is invalid.',
+      );
+    }
+
+    // CRITICAL FIX: Use document-level locking to prevent race conditions
+    await this.db.mutateWithDocumentLock(document.id, (draft) => {
+      // Re-read the document inside the lock to ensure we have the latest state
       const target = draft.documents.find((item) => item.id === document.id);
       if (!target) {
-        return;
+        throw new BadRequestException('Document was deleted.');
       }
+
+      // Prevent duplicate anchoring of the same document
+      if (target.anchorStatus === 'BLOCKCHAIN_ANCHORED' && target.anchorTxHash) {
+        throw new BadRequestException(
+          'This document version has already been anchored on Ethereum Sepolia.',
+        );
+      }
+
       target.anchorStatus = 'BLOCKCHAIN_ANCHORED';
       target.anchorMode = 'LIVE';
       target.anchorChainId = network.chainId;
@@ -320,7 +347,15 @@ export class DocumentsService {
       target.anchorTxHash = transactionHash;
       target.anchorExplorerUrl = explorerUrl;
       target.anchoredAt = onChain.anchoredAt;
-      target.blockchainReference = document.blockchainReference;
+      target.blockchainReference = onChain.blockchainReference;
+      this.syncDocumentProvenanceAnchor(target, draft, {
+        transactionHash,
+        explorerUrl,
+        anchoredAt: onChain.anchoredAt,
+        chainId: network.chainId,
+        chainName: network.chainName,
+        mode: 'LIVE',
+      });
     });
 
     this.audit.log({
@@ -435,12 +470,14 @@ export class DocumentsService {
       hashAlgorithm: 'sha256',
       offChainUri: stored.uri,
       anchorStatus: input.assetId
-        ? 'PENDING'
+        ? network.liveReady
+          ? 'PENDING'
+          : 'NOT_APPLICABLE'
         : 'NOT_APPLICABLE',
-      anchorMode: network.contractAddress ? 'LIVE' : undefined,
-      anchorChainId: network.contractAddress ? network.chainId : undefined,
-      anchorChainName: network.contractAddress ? network.chainName : undefined,
-      anchorContractAddress: network.contractAddress,
+      anchorMode: network.liveReady ? 'LIVE' : undefined,
+      anchorChainId: network.liveReady ? network.chainId : undefined,
+      anchorChainName: network.liveReady ? network.chainName : undefined,
+      anchorContractAddress: network.liveReady ? network.contractAddress : undefined,
       anchorTxHash: undefined,
       anchorExplorerUrl: undefined,
       anchoredAt: undefined,
@@ -519,6 +556,46 @@ export class DocumentsService {
     return document;
   }
 
+  private async findOnChainDocumentVersion(document: DocumentRecord) {
+    for (const reference of this.buildBlockchainReferenceCandidates(document)) {
+      const onChain = await this.blockchain.getAnchoredDocumentVersion(
+        reference,
+        document.version,
+      );
+      if (onChain) {
+        return {
+          ...onChain,
+          blockchainReference: reference,
+        };
+      }
+    }
+    return null;
+  }
+
+  private buildBlockchainReferenceCandidates(document: DocumentRecord): string[] {
+    const references = new Set<string>();
+    if (document.blockchainReference) {
+      references.add(document.blockchainReference);
+    }
+    if (document.assetId) {
+      references.add(
+        this.blockchain.buildDocumentBlockchainReference(
+          document.assetId,
+          document.type,
+          document.name,
+        ),
+      );
+      references.add(
+        legacyDocumentBlockchainReference(
+          document.assetId,
+          document.type,
+          document.name,
+        ),
+      );
+    }
+    return [...references];
+  }
+
   private findLatestDocumentAnchor(
     organizationId: string,
     documentId: string,
@@ -549,51 +626,61 @@ export class DocumentsService {
     anchoredAt?: string;
     mode?: 'LIVE' | 'SIMULATED';
   } {
-    const candidates: Array<{
-      transactionHash?: string;
-      explorerUrl?: string;
-      anchoredAt?: string;
-      mode?: 'LIVE' | 'SIMULATED';
-    }> = [];
-
     if (input.onChain) {
-      candidates.push({
+      return {
         transactionHash: input.onChain.transactionHash,
         explorerUrl: input.onChain.explorerUrl,
         anchoredAt: input.onChain.anchoredAt,
         mode: 'LIVE',
-      });
+      };
     }
     if (document.anchorTxHash || document.anchorExplorerUrl || document.anchoredAt) {
-      candidates.push({
+      return {
         transactionHash: document.anchorTxHash,
         explorerUrl: document.anchorExplorerUrl,
         anchoredAt: document.anchoredAt,
         mode: document.anchorMode,
-      });
+      };
     }
     if (input.provenanceAnchor) {
-      candidates.push({
-        transactionHash: input.provenanceAnchor.txHash,
-        explorerUrl: input.provenanceAnchor.explorerUrl,
+      return {
         anchoredAt: input.provenanceAnchor.anchoredAt,
         mode: input.provenanceAnchor.mode,
-      });
+      };
     }
+    return {};
+  }
 
-    candidates.sort((a, b) => {
-      const txScore = (item: { transactionHash?: string; explorerUrl?: string }) =>
-        item.transactionHash || item.explorerUrl ? 1 : 0;
-      const txDelta = txScore(b) - txScore(a);
-      if (txDelta !== 0) {
-        return txDelta;
-      }
-      const left = a.anchoredAt ? Date.parse(a.anchoredAt) : 0;
-      const right = b.anchoredAt ? Date.parse(b.anchoredAt) : 0;
-      return right - left;
-    });
-
-    return candidates[0] ?? {};
+  private syncDocumentProvenanceAnchor(
+    document: DocumentRecord,
+    draft: { provenanceAnchors: ProvenanceAnchorRecord[] },
+    input: {
+      transactionHash?: string;
+      explorerUrl?: string;
+      anchoredAt?: string;
+      chainId?: number;
+      chainName?: string;
+      mode: 'LIVE' | 'SIMULATED';
+    },
+  ) {
+    const anchor = [...draft.provenanceAnchors]
+      .filter(
+        (item) =>
+          item.organizationId === document.organizationId &&
+          item.kind === 'DOCUMENT' &&
+          item.documentId === document.id,
+      )
+      .sort((a, b) => b.anchoredAt.localeCompare(a.anchoredAt))[0];
+    if (!anchor) {
+      return;
+    }
+    anchor.status = input.mode === 'LIVE' ? 'CONFIRMED' : 'SIMULATED';
+    anchor.mode = input.mode;
+    anchor.txHash = input.transactionHash;
+    anchor.explorerUrl = input.explorerUrl;
+    anchor.anchoredAt = input.anchoredAt ?? anchor.anchoredAt;
+    anchor.chainId = input.chainId ?? anchor.chainId;
+    anchor.chainName = input.chainName ?? anchor.chainName;
   }
 
   private isText(mimeType: string, name: string): boolean {
@@ -721,6 +808,14 @@ function buildDocumentGroupKey(assetId: string, type: DocumentType, name: string
 
 function normalizeStoredHash(value: string) {
   return value.startsWith('0x') ? value.toLowerCase() : `0x${value.toLowerCase()}`;
+}
+
+function legacyDocumentBlockchainReference(
+  assetId: string,
+  documentType: string,
+  documentName: string,
+) {
+  return ethId(`${assetId}|${documentType}|${documentName.trim().toLowerCase()}`);
 }
 
 export function documentFolderName(type: DocumentType) {

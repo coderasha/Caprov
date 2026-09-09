@@ -36,18 +36,18 @@ describe('TokenizationController', () => {
     const audit = { log: jest.fn() } as unknown as AuditService;
     const sepolia = {
       mintAssetToken: jest.fn().mockResolvedValue({
-        mode: 'SIMULATED',
+        mode: 'LIVE',
         chainId: 11155111,
         chainName: 'Ethereum Sepolia',
-        contractAddress: undefined,
+        contractAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0',
         tokenId: 'tok_seed',
         supply: 1000,
         recipientAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0',
         txHash: '0xtesthash',
         explorerUrl: 'https://sepolia.etherscan.io/tx/0xtesthash',
-        status: 'SIMULATED',
+        status: 'CONFIRMED',
       }),
-      getNetworkStatus: jest.fn(),
+      getNetworkStatus: jest.fn(() => ({ liveMintReady: true })),
       probeRpc: jest.fn(),
     } as unknown as EthereumSepoliaTokenService;
 

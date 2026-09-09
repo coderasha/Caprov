@@ -7,6 +7,7 @@ import {
   HDNodeWallet,
   id as ethId,
   getAddress,
+  isAddress,
 } from 'ethers';
 import { sepoliaTxExplorerUrl } from './explorer';
 
@@ -17,7 +18,7 @@ export const DEFAULT_ETHEREUM_SEPOLIA_RPC =
   'https://ethereum-sepolia-rpc.publicnode.com';
 
 const CAPROV_TOKEN_ABI = [
-  'function mint(address to, uint256 id, uint256 amount, bytes data)',
+  'function mintAsset(address to, uint256 id, uint256 amount, string assetReference)',
   'function uri(uint256 id) view returns (string)',
   'event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)',
 ] as const;
@@ -31,7 +32,7 @@ export interface TokenNetworkStatus {
   liveMintReady: boolean;
   contractAddress?: string;
   walletAddress?: string;
-  mode: 'LIVE' | 'SIMULATED';
+  mode: 'LIVE' | 'UNAVAILABLE';
   message: string;
 }
 
@@ -50,8 +51,8 @@ export interface MintResult {
   tokenId: string;
   supply: number;
   recipientAddress: string;
-  txHash: string;
-  explorerUrl: string;
+  txHash?: string;
+  explorerUrl?: string;
   status: 'CONFIRMED' | 'SIMULATED' | 'FAILED';
   error?: string;
 }
@@ -81,7 +82,11 @@ export class EthereumSepoliaTokenService {
       DEFAULT_ETHEREUM_SEPOLIA_RPC;
     const privateKey = process.env.ETHEREUM_SEPOLIA_PRIVATE_KEY?.trim();
     const mnemonic = process.env.ETHEREUM_SEPOLIA_MNEMONIC?.trim();
-    const contractAddress = process.env.ETHEREUM_TOKEN_CONTRACT?.trim();
+    const configuredContractAddress = process.env.ETHEREUM_TOKEN_CONTRACT?.trim();
+    const contractAddress =
+      configuredContractAddress && isAddress(configuredContractAddress)
+        ? getAddress(configuredContractAddress)
+        : undefined;
     let walletAddress: string | undefined;
     if (privateKey || mnemonic) {
       try {
@@ -102,10 +107,10 @@ export class EthereumSepoliaTokenService {
       liveMintReady,
       contractAddress,
       walletAddress,
-      mode: liveMintReady ? 'LIVE' : 'SIMULATED',
+      mode: liveMintReady ? 'LIVE' : 'UNAVAILABLE',
       message: liveMintReady
         ? 'Live minting enabled against Ethereum Sepolia with configured signer and CaprovAssetToken contract.'
-        : 'Simulated Sepolia minting active. Set ETHEREUM_SEPOLIA_PRIVATE_KEY and ETHEREUM_TOKEN_CONTRACT for live testnet mints.',
+        : 'Live Ethereum Sepolia minting is unavailable. Set a valid ETHEREUM_SEPOLIA_PRIVATE_KEY (or ETHEREUM_SEPOLIA_MNEMONIC) and ETHEREUM_TOKEN_CONTRACT; simulated mints are disabled.',
     };
   }
 
@@ -133,23 +138,17 @@ export class EthereumSepoliaTokenService {
       '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0';
 
     if (!status.liveMintReady) {
-      const txHash = `0x${createHash('sha256')
-        .update(
-          `${request.assetId}:${request.tokenId}:${request.supply}:${Date.now()}`,
-        )
-        .digest('hex')}`;
-      const to = normalizeAddress(recipient);
       return {
-        mode: 'SIMULATED',
+        mode: 'LIVE',
         chainId: status.chainId,
         chainName: status.chainName,
         contractAddress: status.contractAddress,
         tokenId: request.tokenId,
         supply: request.supply,
-        recipientAddress: to,
-        txHash,
-        explorerUrl: sepoliaTxExplorerUrl(txHash) ?? `${status.explorerBase}/tx/${txHash}`,
-        status: 'SIMULATED',
+        recipientAddress: normalizeAddress(recipient),
+        status: 'FAILED',
+        error:
+          'Live Ethereum Sepolia minting is not configured. Set ETHEREUM_SEPOLIA_PRIVATE_KEY (or ETHEREUM_SEPOLIA_MNEMONIC) and ETHEREUM_TOKEN_CONTRACT.',
       };
     }
 
@@ -162,9 +161,11 @@ export class EthereumSepoliaTokenService {
         wallet,
       );
       const to = getAddress(request.recipientAddress?.trim() || wallet.address);
-      const tokenId = BigInt(ethId(request.tokenId).slice(0, 18));
-      const mintFn = contract.getFunction('mint');
-      const tx = await mintFn(to, tokenId, BigInt(request.supply), '0x');
+      // The asset id—not the listing id—defines the ERC-1155 token type. This
+      // makes every asset's supply immutable after its first tokenization.
+      const tokenId = BigInt(ethId(`caprov:asset:${request.assetId}`));
+      const mintFn = contract.getFunction('mintAsset');
+      const tx = await mintFn(to, tokenId, BigInt(request.supply), request.assetId);
       const receipt = await tx.wait();
       const txHash = receipt?.hash ?? tx.hash;
       this.logger.log(`Minted Caprov token on Sepolia tx=${txHash}`);
@@ -182,21 +183,16 @@ export class EthereumSepoliaTokenService {
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'mint failed';
-      this.logger.warn(
-        `Live Sepolia mint failed, recording simulated mint: ${message}`,
-      );
-      const txHash = `0x${createHash('sha256').update(`fallback:${message}:${request.assetId}:${Date.now()}`).digest('hex')}`;
+      this.logger.warn(`Live Sepolia mint failed; no simulated mint was created: ${message}`);
       return {
-        mode: 'SIMULATED',
+        mode: 'LIVE',
         chainId: status.chainId,
         chainName: status.chainName,
         contractAddress: status.contractAddress,
         tokenId: request.tokenId,
         supply: request.supply,
         recipientAddress: normalizeAddress(recipient),
-        txHash,
-        explorerUrl: sepoliaTxExplorerUrl(txHash) ?? `${status.explorerBase}/tx/${txHash}`,
-        status: 'SIMULATED',
+        status: 'FAILED',
         error: message,
       };
     }

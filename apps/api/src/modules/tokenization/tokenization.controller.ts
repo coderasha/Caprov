@@ -67,8 +67,22 @@ export class TokenizationController {
         item.id === dto.assetId && item.organizationId === user.organizationId,
     );
     if (!asset) throw new NotFoundException('Asset not found');
+    const existing = this.db.snapshot.tokens.find(
+      (item) => item.assetId === asset.id && item.status === 'CONFIRMED',
+    );
+    if (existing) {
+      throw new BadRequestException(
+        'This asset is already tokenized. Its supply is immutable and cannot be minted again.',
+      );
+    }
     if (dto.supply > 1_000_000_000) {
       throw new BadRequestException('Supply too large');
+    }
+    const network = this.sepolia.getNetworkStatus();
+    if (!network.liveMintReady) {
+      throw new BadRequestException(
+        'Live Ethereum Sepolia tokenization is not configured. Set ETHEREUM_SEPOLIA_PRIVATE_KEY (or ETHEREUM_SEPOLIA_MNEMONIC) and ETHEREUM_TOKEN_CONTRACT before minting.',
+      );
     }
 
     const now = new Date().toISOString();
@@ -79,17 +93,17 @@ export class TokenizationController {
       supply: dto.supply,
       recipientAddress: dto.recipientAddress,
     });
+    if (mint.status !== 'CONFIRMED' || mint.mode !== 'LIVE') {
+      throw new BadRequestException(
+        `Live Ethereum Sepolia mint failed. No token was created.${mint.error ? ` ${mint.error}` : ''}`,
+      );
+    }
 
     const token: TokenPosition = {
       id: pendingId,
       organizationId: user.organizationId,
       assetId: asset.id,
-      status:
-        mint.status === 'CONFIRMED'
-          ? 'CONFIRMED'
-          : mint.status === 'FAILED'
-            ? 'FAILED'
-            : 'SIMULATED',
+      status: 'CONFIRMED',
       chainId: mint.chainId,
       chainName: mint.chainName,
       contractAddress: mint.contractAddress,

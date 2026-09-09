@@ -110,6 +110,18 @@ Defaults to **simulated** Sepolia mints (chain id `11155111`). For live testnet 
 
 See [docs/capital-markets.md](docs/capital-markets.md).
 
+### Atomic asset-token marketplace (Sepolia)
+
+`contracts/CaprovAssetToken.sol` now assigns one immutable ERC-1155 token type and supply to each asset. `contracts/CaprovPaymentToken.sol` is the CAPROV ERC-20 test payment token, and `contracts/CaprovMarketplace.sol` escrows listed asset units and atomically swaps them for CAPROV.
+
+Deploy the three contracts from a funded Sepolia owner wallet:
+
+```bash
+node scripts/deploy-caprov-marketplace.mjs
+```
+
+Set the three addresses printed by the script in `apps/api/.env`. Sellers must approve the marketplace to transfer their ERC-1155 units before listing; buyers must approve it to spend CAPROV before calling `buy(listingId, units)` from their own wallet. The server must never hold a buyer's private key.
+
 ### Trusted intelligence and provenance
 
 - Each DNA rebuild persists a new versioned snapshot instead of overwriting the prior result.

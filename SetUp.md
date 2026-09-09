@@ -163,6 +163,26 @@ ETHEREUM_TOKEN_CONTRACT=0xDEPLOYED_CONTRACT_ADDRESS
 
 When `ETHEREUM_SEPOLIA_PRIVATE_KEY` is configured, the platform can anchor provenance hashes on Ethereum Sepolia for trusted Asset DNA snapshots and uploaded-source evidence.
 
+### 6.3 Live Ethereum Sepolia document anchoring
+
+To get genuine document anchor transactions for uploads in the asset Documents section, deploy the document registry contract and set its address in `apps/api/.env`.
+
+Deploy the registry:
+
+```bash
+node scripts/deploy-document-registry.mjs
+```
+
+Then configure:
+
+```env
+ETHEREUM_SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
+ETHEREUM_SEPOLIA_PRIVATE_KEY=0xYOUR_PRIVATE_KEY
+ETHEREUM_DOCUMENT_REGISTRY_CONTRACT=0xDEPLOYED_DOCUMENT_REGISTRY_ADDRESS
+```
+
+Without `ETHEREUM_DOCUMENT_REGISTRY_CONTRACT`, CAPROV will store the document but will not offer a genuine Sepolia document anchor transaction.
+
 ## 7. Full Local Startup Order
 
 If you want the complete platform running locally, use this order.

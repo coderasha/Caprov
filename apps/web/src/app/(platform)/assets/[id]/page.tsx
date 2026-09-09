@@ -97,7 +97,7 @@ const DEFAULT_SEPOLIA_RPC = 'https://ethereum-sepolia-rpc.publicnode.com';
 export default function AssetDetailPage() {
   const params = useParams<{ id: string }>();
   const queryClient = useQueryClient();
-  const roles = useAuthStore((state) => state.roles);
+  const user = useAuthStore((state) => state.user);
   const [tab, setTab] = useState<(typeof tabs)[number]>('Overview');
   const [owner, setOwner] = useState({
     holderName: '',
@@ -190,7 +190,8 @@ export default function AssetDetailPage() {
   const asset = assetQuery.data;
   const documents = docsQuery.data ?? [];
   const network = networkQuery.data;
-  const canWalletAnchor = roles.includes('ORG_ADMIN') || roles.includes('PLATFORM_ADMIN');
+  const canWalletAnchor = Boolean(user);
+  const liveDocumentAnchoringReady = Boolean(network?.liveReady && network.contractAddress);
   const fallbackFolders = useMemo<AssetDocumentsTree['folders']>(() => {
     const byType = new Map<DocumentType, DocumentRow[]>();
     for (const document of documents) {
@@ -331,7 +332,7 @@ export default function AssetDetailPage() {
         ? await uploadDoc.mutateAsync()
         : await ingestDoc.mutateAsync();
 
-      if (canWalletAnchor && network?.contractAddress && created.documentHash) {
+      if (canWalletAnchor && liveDocumentAnchoringReady && created.documentHash) {
         const session = walletSession ?? (await connectWallet());
         await anchorDocumentWithWallet(created, session);
       }
@@ -548,8 +549,8 @@ export default function AssetDetailPage() {
                     Upload stores the document off-chain first, then opens a real Sepolia wallet flow for signing.
                   </p>
                 </div>
-                <Badge tone={network?.contractAddress ? 'ok' : 'warn'}>
-                  {network?.chainName ?? 'Sepolia'} {network?.contractAddress ? 'ready' : 'not configured'}
+                <Badge tone={liveDocumentAnchoringReady ? 'ok' : 'warn'}>
+                  {network?.chainName ?? 'Sepolia'} {liveDocumentAnchoringReady ? 'live ready' : 'not configured'}
                 </Badge>
               </div>
               <p className="mt-3 text-xs text-[var(--muted)]">
@@ -566,7 +567,7 @@ export default function AssetDetailPage() {
                 <Button
                   type="button"
                   onClick={() => void connectWallet()}
-                  disabled={walletBusy || !canWalletAnchor}
+                  disabled={walletBusy || !canWalletAnchor || !liveDocumentAnchoringReady}
                 >
                   Connect MetaMask
                 </Button>
@@ -578,8 +579,13 @@ export default function AssetDetailPage() {
               </div>
               {!canWalletAnchor ? (
                 <p className="mt-3 text-xs text-[var(--muted)]">
-                  Only an org admin can sign the Sepolia anchor transaction. Other roles can still upload documents,
-                  and the version will remain pending until an org admin anchors it.
+                  Sign in to connect a wallet and anchor documents on Sepolia.
+                </p>
+              ) : null}
+              {canWalletAnchor && !liveDocumentAnchoringReady ? (
+                <p className="mt-3 text-xs text-[var(--muted)]">
+                  Genuine Sepolia document anchors are disabled until the API is configured with a live document
+                  registry contract. Uploads will be stored, but no real blockchain transaction will be requested.
                 </p>
               ) : null}
             </div>
@@ -635,17 +641,17 @@ export default function AssetDetailPage() {
                 {ingestDoc.isPending || uploadDoc.isPending || recordAnchor.isPending || walletBusy
                   ? 'Processing…'
                   : docFile
-                    ? canWalletAnchor && network?.contractAddress
+                    ? canWalletAnchor && liveDocumentAnchoringReady
                       ? 'Upload, sign, and anchor on Sepolia'
-                      : 'Upload, extract, and rebuild DNA'
-                    : canWalletAnchor && network?.contractAddress
+                      : 'Upload document'
+                    : canWalletAnchor && liveDocumentAnchoringReady
                       ? 'Add document and anchor on Sepolia'
                       : 'Add document'}
               </Button>
               <p className="text-xs leading-5 text-[var(--muted)]">
                 Upload a PDF or DOCX to extract text automatically. The file is stored in the asset folder for
                 its category, matching filenames create a new version instead of replacing older ones, and org
-                admins can sign the anchor transaction with gas fees on Sepolia.
+                admins can sign a real Sepolia anchor transaction only when live document anchoring is configured.
               </p>
             </form>
           </Card>

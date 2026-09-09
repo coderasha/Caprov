@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { HealthModule } from './common/health/health.module';
 import { ReservedModule } from './common/reserved/reserved.module';
+import { IdempotencyService } from './common/services/idempotency.service';
 import { EnvironmentConfigModule } from './config/environment-config.module';
 import { DatabaseModule } from './infrastructure/database/database.module';
 import { PrismaModule } from './infrastructure/prisma/prisma.module';
@@ -60,5 +61,6 @@ import { UsersModule } from './modules/users/users.module';
     AuditModule,
     ReservedModule,
   ],
+  providers: [IdempotencyService],
 })
 export class AppModule {}

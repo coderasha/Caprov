@@ -72,6 +72,24 @@ ETHEREUM_SEPOLIA_PRIVATE_KEY=
 ETHEREUM_TOKEN_CONTRACT=
 ```
 
+### On-chain delivery-versus-payment
+
+The Sepolia contract set has three parts: `CaprovAssetToken` (ERC-1155 asset units), `CaprovPaymentToken` (test CAPROV ERC-20), and `CaprovMarketplace` (escrow and atomic settlement). Deploy all three with:
+
+```bash
+node scripts/deploy-caprov-marketplace.mjs
+```
+
+Then configure:
+
+```bash
+ETHEREUM_TOKEN_CONTRACT=0x...
+ETHEREUM_PAYMENT_TOKEN_CONTRACT=0x...
+ETHEREUM_MARKETPLACE_CONTRACT=0x...
+```
+
+Asset tokenization may happen only once for a token id, fixing its total supply. A seller calls `setApprovalForAll(marketplace, true)` before creating an on-chain listing. A buyer approves the marketplace to spend CAPROV and calls `buy(listingId, units)`. The contract sends payment to the seller and units to the buyer in the same transaction.
+
 ### Collateral
 
 | Method | Path | Notes |

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { BrowserProvider, Contract } from 'ethers';
 import type { DocumentType } from '@caprov/types';
 import { PageHeader } from '@/components/layout/page-header';
 import { Badge } from '@/components/ui/badge';
@@ -13,10 +14,10 @@ import { api } from '@/lib/api';
 import {
   documentTypeLabel,
   documentTypeOptions,
-  formatDate,
   formatDateTime,
 } from '@/lib/format';
-import type { AssetDocumentsTree, HydratedAsset } from '@/lib/types';
+import type { AssetDocumentsTree, DocumentRow, HydratedAsset } from '@/lib/types';
+import { useAuthStore } from '@/stores/auth-store';
 
 function anchorTone(status?: string) {
   switch (status) {
@@ -31,8 +32,44 @@ function anchorTone(status?: string) {
   }
 }
 
+interface DocumentNetworkStatus {
+  chainId: number;
+  chainName: string;
+  rpcUrl: string;
+  explorerBase: string;
+  contractAddress?: string;
+  walletAddress?: string;
+  serverSignerReady?: boolean;
+  mode: 'LIVE' | 'SIMULATED';
+  liveReady: boolean;
+  message: string;
+}
+
+type WalletProviderLike = {
+  request: (args: { method: string; params?: unknown[] | Record<string, unknown> }) => Promise<unknown>;
+  on?: (event: string, handler: (...args: unknown[]) => void) => void;
+  removeListener?: (event: string, handler: (...args: unknown[]) => void) => void;
+  isMetaMask?: boolean;
+  providers?: WalletProviderLike[];
+};
+
+interface WalletSession {
+  account: string;
+  chainId: number;
+  provider: WalletProviderLike;
+  browserProvider: BrowserProvider;
+}
+
+const DOCUMENT_REGISTRY_ABI = [
+  'function anchorDocumentVersion(string assetId, string documentId, string documentType, string documentName, uint256 version, bytes32 documentHash, bytes32 previousVersionHash, string offChainUri)',
+] as const;
+
+const SEPOLIA_CHAIN_ID = 11155111;
+const DEFAULT_SEPOLIA_RPC = 'https://ethereum-sepolia-rpc.publicnode.com';
+
 export default function DocumentsPage() {
   const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
   const [selectedAssetId, setSelectedAssetId] = useState('');
   const [form, setForm] = useState({
     name: '',
@@ -42,6 +79,10 @@ export default function DocumentsPage() {
   });
   const [file, setFile] = useState<File | null>(null);
   const [formError, setFormError] = useState('');
+  const [walletSession, setWalletSession] = useState<WalletSession | null>(null);
+  const [walletBusy, setWalletBusy] = useState(false);
+  const [walletMessage, setWalletMessage] = useState<string | null>(null);
+  const [anchorError, setAnchorError] = useState<string | null>(null);
 
   const assetsQuery = useQuery({
     queryKey: ['assets'],
@@ -64,24 +105,22 @@ export default function DocumentsPage() {
     queryFn: async () =>
       (await api.get<AssetDocumentsTree>(`/documents/assets/${selectedAssetId}/folders`)).data,
   });
+  const networkQuery = useQuery({
+    queryKey: ['documents-network-status'],
+    queryFn: async () =>
+      (await api.get<DocumentNetworkStatus>('/documents/network-status')).data,
+  });
 
   const ingest = useMutation({
     mutationFn: async () =>
-      api.post('/documents', {
+      (
+        await api.post<DocumentRow>('/documents', {
         name: form.name,
         type: form.type,
         assetId: form.assetId,
         extractedText: form.extractedText,
-      }),
-    onSuccess: async () => {
-      const assetId = form.assetId;
-      setForm((current) => ({ ...current, name: '', type: 'OTHER', extractedText: '' }));
-      setFormError('');
-      await queryClient.invalidateQueries({ queryKey: ['documents-tree', assetId] });
-      await queryClient.invalidateQueries({ queryKey: ['documents'] });
-      await queryClient.invalidateQueries({ queryKey: ['asset', assetId] });
-      await queryClient.invalidateQueries({ queryKey: ['assets'] });
-    },
+      })
+      ).data,
   });
 
   const upload = useMutation({
@@ -98,21 +137,27 @@ export default function DocumentsPage() {
       }
       return api.post('/documents/upload', body, {
         headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      }).then((response) => response.data as DocumentRow);
     },
-    onSuccess: async () => {
-      const assetId = form.assetId;
-      setForm((current) => ({ ...current, name: '', type: 'OTHER', extractedText: '' }));
-      setFile(null);
-      setFormError('');
-      await queryClient.invalidateQueries({ queryKey: ['documents-tree', assetId] });
-      await queryClient.invalidateQueries({ queryKey: ['documents'] });
-      await queryClient.invalidateQueries({ queryKey: ['asset', assetId] });
-      await queryClient.invalidateQueries({ queryKey: ['assets'] });
-    },
+  });
+  const recordAnchor = useMutation({
+    mutationFn: async (input: {
+      documentId: string;
+      transactionHash: string;
+      walletAddress: string;
+    }) =>
+      (
+        await api.post<DocumentRow>(`/documents/${input.documentId}/anchor`, {
+          transactionHash: input.transactionHash,
+          walletAddress: input.walletAddress,
+        })
+      ).data,
   });
 
   const tree = assetTreeQuery.data;
+  const network = networkQuery.data;
+  const canWalletAnchor = Boolean(user);
+  const liveDocumentAnchoringReady = Boolean(network?.liveReady && network.contractAddress);
   const folderStats = useMemo(() => {
     const folders = tree?.folders ?? [];
     const currentDocs = folders.reduce((sum, folder) => sum + folder.documentCount, 0);
@@ -125,6 +170,113 @@ export default function DocumentsPage() {
     );
     return { currentDocs, versions, anchored };
   }, [tree]);
+
+  async function refreshDocuments(assetId: string) {
+    await queryClient.invalidateQueries({ queryKey: ['documents-tree', assetId] });
+    await queryClient.invalidateQueries({ queryKey: ['documents'] });
+    await queryClient.invalidateQueries({ queryKey: ['asset', assetId] });
+    await queryClient.invalidateQueries({ queryKey: ['assets'] });
+  }
+
+  async function connectWallet(): Promise<WalletSession> {
+    setWalletBusy(true);
+    setAnchorError(null);
+    setWalletMessage('Opening MetaMask…');
+    try {
+      const session = await connectMetaMask(network);
+      setWalletSession(session);
+      setWalletMessage(`MetaMask connected: ${shortAddress(session.account)}`);
+      return session;
+    } catch (error) {
+      const message = readErrorMessage(error);
+      setWalletMessage(null);
+      setAnchorError(message);
+      throw error;
+    } finally {
+      setWalletBusy(false);
+    }
+  }
+
+  async function disconnectWallet() {
+    setWalletSession(null);
+    setWalletMessage('Wallet disconnected.');
+  }
+
+  async function anchorDocumentWithWallet(document: DocumentRow, session: WalletSession) {
+    if (!document.assetId || !document.documentHash || !document.offChainUri) {
+      throw new Error('The uploaded document is missing anchor metadata.');
+    }
+    if (!network?.contractAddress) {
+      throw new Error('Sepolia document registry contract is not configured.');
+    }
+
+    await ensureSepoliaNetwork(session.provider, network);
+    const signer = await session.browserProvider.getSigner();
+    const signerAddress = await signer.getAddress();
+    const contract = new Contract(network.contractAddress, DOCUMENT_REGISTRY_ABI, signer);
+    const anchorFn = contract.getFunction('anchorDocumentVersion');
+    setWalletMessage('Awaiting MetaMask signature…');
+    const tx = await anchorFn(
+      document.assetId,
+      document.id,
+      document.type,
+      document.name,
+      BigInt(document.version ?? 1),
+      normalizeHash(document.documentHash),
+      normalizeHash(document.previousVersionHash),
+      document.offChainUri,
+    );
+    setWalletMessage(`Transaction submitted: ${tx.hash}`);
+    const receipt = await tx.wait();
+    const transactionHash = receipt?.hash ?? tx.hash;
+    if (!receipt || Number(receipt.status ?? 0) !== 1) {
+      throw new Error(`Sepolia anchor transaction failed: ${transactionHash}`);
+    }
+
+    await recordAnchor.mutateAsync({
+      documentId: document.id,
+      transactionHash,
+      walletAddress: signerAddress,
+    });
+    setWalletSession({
+      ...session,
+      account: signerAddress,
+    });
+    setWalletMessage(`Anchored on Sepolia: ${transactionHash}`);
+  }
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setFormError('');
+    setAnchorError(null);
+    if (!form.assetId) {
+      setFormError('Select the asset this document belongs to.');
+      return;
+    }
+    if (!file && !form.extractedText.trim()) {
+      setFormError('Add a file or paste text so the document has something to ingest.');
+      return;
+    }
+
+    let created: DocumentRow | null = null;
+    try {
+      created = file ? await upload.mutateAsync() : await ingest.mutateAsync();
+      if (canWalletAnchor && liveDocumentAnchoringReady && created.documentHash) {
+        const session = walletSession ?? (await connectWallet());
+        await anchorDocumentWithWallet(created, session);
+      }
+      setForm((current) => ({ ...current, name: '', type: 'OTHER', extractedText: '' }));
+      setFile(null);
+      setFormError('');
+      await refreshDocuments(form.assetId);
+    } catch (error) {
+      const message = readErrorMessage(error);
+      setAnchorError(message);
+      if (created?.assetId) {
+        await refreshDocuments(created.assetId);
+      }
+    }
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
@@ -287,26 +439,59 @@ export default function DocumentsPage() {
         </div>
 
         <Card className="p-6">
+          <div className="rounded-2xl border border-[var(--line)] px-4 py-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="font-medium">Wallet-signed Sepolia document anchoring</p>
+                <p className="mt-1 text-xs text-[var(--muted)]">
+                  When live anchoring is configured, document upload will prompt the uploader to connect MetaMask
+                  and sign the Sepolia anchor transaction.
+                </p>
+              </div>
+              <Badge tone={liveDocumentAnchoringReady ? 'ok' : 'warn'}>
+                {network?.chainName ?? 'Sepolia'} {liveDocumentAnchoringReady ? 'live ready' : 'not configured'}
+              </Badge>
+            </div>
+            <p className="mt-3 text-xs text-[var(--muted)]">
+              {network?.message ?? 'Loading Sepolia network status…'}
+            </p>
+            <p className="mt-2 text-xs text-[var(--muted)]">
+              {walletSession
+                ? `Connected MetaMask wallet ${shortAddress(walletSession.account)} on chain ${walletSession.chainId}.`
+                : 'No wallet connected yet.'}
+            </p>
+            {walletMessage ? <p className="mt-2 text-xs text-[var(--muted)]">{walletMessage}</p> : null}
+            {anchorError ? <p className="mt-2 text-xs text-rose-600">{anchorError}</p> : null}
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button
+                type="button"
+                onClick={() => void connectWallet()}
+                disabled={walletBusy || !canWalletAnchor || !liveDocumentAnchoringReady}
+              >
+                Connect MetaMask
+              </Button>
+              {walletSession ? (
+                <Button type="button" onClick={() => void disconnectWallet()} disabled={walletBusy}>
+                  Disconnect
+                </Button>
+              ) : null}
+            </div>
+            {!canWalletAnchor ? (
+              <p className="mt-3 text-xs text-[var(--muted)]">
+                Sign in to connect a wallet and anchor documents on Sepolia.
+              </p>
+            ) : null}
+            {canWalletAnchor && !liveDocumentAnchoringReady ? (
+              <p className="mt-3 text-xs text-[var(--muted)]">
+                Genuine Sepolia document anchors are disabled until the API is configured with a live document
+                registry contract. Uploads will be stored, but no real blockchain transaction will be requested.
+              </p>
+            ) : null}
+          </div>
           <h2 className="font-display text-lg font-semibold tracking-[-0.02em]">Upload a document</h2>
           <form
             className="mt-4 grid gap-3"
-            onSubmit={(event) => {
-              event.preventDefault();
-              setFormError('');
-              if (!form.assetId) {
-                setFormError('Select the asset this document belongs to.');
-                return;
-              }
-              if (!file && !form.extractedText.trim()) {
-                setFormError('Add a file or paste text so the document has something to ingest.');
-                return;
-              }
-              if (file) {
-                upload.mutate();
-                return;
-              }
-              ingest.mutate();
-            }}
+            onSubmit={(event) => void handleSubmit(event)}
           >
             <Field label="Asset">
               <Select
@@ -359,16 +544,147 @@ export default function DocumentsPage() {
               />
             </Field>
             {formError ? <p className="text-sm text-[var(--danger)]">{formError}</p> : null}
-            <Button type="submit" disabled={ingest.isPending || upload.isPending}>
-              {upload.isPending || ingest.isPending ? 'Saving…' : file ? 'Upload new version' : 'Ingest new version'}
+            <Button
+              type="submit"
+              disabled={ingest.isPending || upload.isPending || recordAnchor.isPending || walletBusy}
+            >
+              {ingest.isPending || upload.isPending || recordAnchor.isPending || walletBusy
+                ? 'Processing…'
+                : file
+                  ? canWalletAnchor && liveDocumentAnchoringReady
+                    ? 'Upload, sign, and anchor on Sepolia'
+                    : 'Upload new version'
+                  : canWalletAnchor && liveDocumentAnchoringReady
+                    ? 'Ingest, sign, and anchor on Sepolia'
+                    : 'Ingest new version'}
             </Button>
             <p className="text-xs leading-5 text-[var(--muted)]">
               Uploading the same filename into the same asset folder and category creates a new version and keeps
-              all previous versions available in history.
+              all previous versions available in history. When live Sepolia anchoring is configured, the uploader
+              will be prompted to sign the anchor transaction with MetaMask.
             </p>
           </form>
         </Card>
       </div>
     </div>
   );
+}
+
+function shortAddress(address: string) {
+  return `${address.slice(0, 6)}…${address.slice(-4)}`;
+}
+
+function normalizeHash(value?: string) {
+  if (!value) {
+    return `0x${'0'.repeat(64)}`;
+  }
+  return value.startsWith('0x') ? value : `0x${value}`;
+}
+
+function readErrorMessage(error: unknown) {
+  const code =
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    typeof error.code === 'number'
+      ? error.code
+      : undefined;
+  if (code === 4001) {
+    return 'MetaMask request was cancelled.';
+  }
+  if (code === -32002) {
+    return 'MetaMask already has a pending request open. Open the extension and finish that request first.';
+  }
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'response' in error &&
+    typeof error.response === 'object' &&
+    error.response !== null &&
+    'data' in error.response &&
+    typeof error.response.data === 'object' &&
+    error.response.data !== null &&
+    'message' in error.response.data
+  ) {
+    const message = error.response.data.message;
+    if (typeof message === 'string') {
+      return message;
+    }
+  }
+  return error instanceof Error ? error.message : 'Something went wrong.';
+}
+
+async function connectMetaMask(network?: DocumentNetworkStatus): Promise<WalletSession> {
+  const provider = getMetaMaskProvider();
+  if (!provider) {
+    throw new Error('MetaMask is not available in this browser. Install or unlock MetaMask and try again.');
+  }
+  await provider.request({ method: 'eth_requestAccounts' });
+  await ensureSepoliaNetwork(provider, network);
+  const browserProvider = new BrowserProvider(provider, network?.chainId ?? SEPOLIA_CHAIN_ID);
+  const signer = await browserProvider.getSigner();
+  const account = await signer.getAddress();
+  const chain = await browserProvider.getNetwork();
+  return {
+    account,
+    chainId: Number(chain.chainId),
+    provider,
+    browserProvider,
+  };
+}
+
+async function ensureSepoliaNetwork(
+  provider: WalletProviderLike,
+  network?: DocumentNetworkStatus,
+) {
+  const chainId = network?.chainId ?? SEPOLIA_CHAIN_ID;
+  const targetHex = `0x${chainId.toString(16)}`;
+  try {
+    await provider.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: targetHex }],
+    });
+  } catch (error) {
+    const code =
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      typeof error.code === 'number'
+        ? error.code
+        : undefined;
+    if (code !== 4902) {
+      throw error;
+    }
+    await provider.request({
+      method: 'wallet_addEthereumChain',
+      params: [
+        {
+          chainId: targetHex,
+          chainName: network?.chainName ?? 'Ethereum Sepolia',
+          rpcUrls: [network?.rpcUrl ?? DEFAULT_SEPOLIA_RPC],
+          nativeCurrency: {
+            name: 'Sepolia ETH',
+            symbol: 'SEP',
+            decimals: 18,
+          },
+          blockExplorerUrls: [network?.explorerBase ?? 'https://sepolia.etherscan.io'],
+        },
+      ],
+    });
+  }
+}
+
+function getMetaMaskProvider(): WalletProviderLike | undefined {
+  if (typeof window === 'undefined') {
+    return undefined;
+  }
+
+  const ethereum = (window as typeof window & { ethereum?: WalletProviderLike }).ethereum;
+  if (!ethereum) {
+    return undefined;
+  }
+  if (ethereum.providers?.length) {
+    return ethereum.providers.find((provider) => provider.isMetaMask) ?? ethereum.providers[0];
+  }
+  return ethereum;
 }

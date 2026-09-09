@@ -7,6 +7,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import compression from 'compression';
 import { AppModule } from './app.module';
+import { IdempotencyInterceptor } from './common/interceptors/idempotency.interceptor';
+import { IdempotencyService } from './common/services/idempotency.service';
+import { json, urlencoded } from 'express';
 
 loadEnv({
   path: resolve(__dirname, '../.env'),
@@ -17,9 +20,11 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bodyParser: false,
   });
-  const maxPayloadBytes = '50mb';
+  const maxPayloadBytes = '250mb';
   app.useBodyParser('json', { limit: maxPayloadBytes });
   app.useBodyParser('urlencoded', { limit: maxPayloadBytes, extended: true });
+  app.use(json({ limit: maxPayloadBytes }));
+  app.use(urlencoded({ limit: maxPayloadBytes, extended: true }));
   app.use(helmet({ contentSecurityPolicy: false }));
   app.use(compression());
   app.enableCors({
@@ -35,6 +40,10 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
+
+  // Register idempotency interceptor globally
+  const idempotencyService = app.get(IdempotencyService);
+  app.useGlobalInterceptors(new IdempotencyInterceptor(idempotencyService));
 
   const swagger = new DocumentBuilder()
     .setTitle('CAPROV API')

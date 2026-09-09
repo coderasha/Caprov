@@ -71,7 +71,7 @@ export default function TokenizationPage() {
       <PageHeader
         eyebrow="Tokenization"
         title="Ethereum Sepolia asset tokens"
-        description="Mint Caprov economic units on Ethereum Sepolia for any supported asset class. Live minting uses ETHEREUM_SEPOLIA_PRIVATE_KEY + ETHEREUM_TOKEN_CONTRACT; otherwise mints are simulated on Sepolia."
+        description="Mint Caprov economic units on Ethereum Sepolia for any supported asset class. Minting requires ETHEREUM_SEPOLIA_PRIVATE_KEY and ETHEREUM_TOKEN_CONTRACT; simulated mints are disabled."
       />
       <Card className="p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -122,7 +122,7 @@ export default function TokenizationPage() {
                 placeholder="0x…"
               />
             </Field>
-            <Button type="submit" disabled={!assetId || mint.isPending}>
+            <Button type="submit" disabled={!assetId || mint.isPending || !status?.liveMintReady}>
               Mint on Sepolia
             </Button>
           </form>

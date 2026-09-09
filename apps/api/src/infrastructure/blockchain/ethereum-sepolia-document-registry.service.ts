@@ -79,7 +79,7 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
     documentType: string,
     documentName: string,
   ): string {
-    return ethId(`${assetId}|${documentType}|${documentName.trim().toLowerCase()}`);
+    return ethId(`${assetId}|${documentType}|${documentName.trim()}`);
   }
 
   async anchorDocumentVersion(
@@ -230,6 +230,7 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
         chainName: status.chainName,
         contractAddress: status.contractAddress,
         ...(await this.findAnchorTransaction({
+          provider,
           contract,
           blockchainReference,
           assetId: record[0],
@@ -238,6 +239,7 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
           documentName: record[3],
           version: Number(record[4]),
           documentHash: record[5],
+          offChainUri: record[8],
         })),
       };
     } catch (error) {
@@ -249,6 +251,7 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
   }
 
   private async findAnchorTransaction(input: {
+    provider: JsonRpcProvider;
     contract: Contract;
     blockchainReference: string;
     assetId: string;
@@ -257,42 +260,51 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
     documentName: string;
     version: number;
     documentHash: string;
+    offChainUri: string;
   }): Promise<{ transactionHash?: string; explorerUrl?: string }> {
     try {
       const event = input.contract.getEvent('DocumentVersionAnchored');
-      const logs = await input.contract.queryFilter(
-        event,
-        -10_000,
-        'latest',
-      );
       const expectedHash = normalizeHash(input.documentHash).toLowerCase();
-      const match = [...logs]
-        .reverse()
-        .find((log) => {
-          const args = 'args' in log ? log.args : undefined;
-          if (!args) {
-            return false;
-          }
-          return (
-            String(args.lineageKey).toLowerCase() ===
-              input.blockchainReference.toLowerCase() &&
-            String(args.assetId) === input.assetId &&
-            String(args.documentId) === input.documentId &&
-            String(args.documentType) === input.documentType &&
-            String(args.documentName) === input.documentName &&
-            Number(args.version) === input.version &&
-            String(args.documentHash).toLowerCase() === expectedHash
-          );
-        });
+      const latestBlock = await input.provider.getBlockNumber();
+      const maxLookback = 100_000;
+      const maxRange = 50_000;
+      const startBlock = Math.max(0, latestBlock - maxLookback);
 
-      if (!match) {
-        return {};
+      for (let toBlock = latestBlock; toBlock >= startBlock; toBlock -= maxRange) {
+        const fromBlock = Math.max(startBlock, toBlock - maxRange + 1);
+        const logs = await input.contract.queryFilter(
+          event,
+          fromBlock,
+          toBlock,
+        );
+        const match = [...logs]
+          .reverse()
+          .find((log) => {
+            const args = 'args' in log ? log.args : undefined;
+            if (!args) {
+              return false;
+            }
+            return (
+              String(args.lineageKey).toLowerCase() ===
+                input.blockchainReference.toLowerCase() &&
+              String(args.assetId) === input.assetId &&
+              String(args.documentId) === input.documentId &&
+              String(args.documentType) === input.documentType &&
+              String(args.documentName) === input.documentName &&
+              Number(args.version) === input.version &&
+              String(args.documentHash).toLowerCase() === expectedHash &&
+              String(args.offChainUri) === input.offChainUri
+            );
+          });
+
+        if (match) {
+          return {
+            transactionHash: match.transactionHash,
+            explorerUrl: sepoliaTxExplorerUrl(match.transactionHash),
+          };
+        }
       }
-
-      return {
-        transactionHash: match.transactionHash,
-        explorerUrl: sepoliaTxExplorerUrl(match.transactionHash),
-      };
+      return {};
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'anchor event lookup failed';

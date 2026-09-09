@@ -19,6 +19,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import type { AuthUser } from '../../common/types/auth-user';
+import { IsTransactionHash } from '../../common/validators/transaction-hash.validator';
 import { DocumentsService } from './documents.service';
 
 class IngestDocumentDto {
@@ -52,8 +53,7 @@ class IngestDocumentDto {
 }
 
 class RecordWalletAnchorDto {
-  @IsString()
-  @MinLength(10)
+  @IsTransactionHash()
   transactionHash!: string;
 
   @IsString()
@@ -105,7 +105,6 @@ export class DocumentsController {
   }
 
   @Post(':id/anchor')
-  @Roles('ORG_ADMIN', 'PLATFORM_ADMIN')
   recordAnchor(
     @CurrentUser() user: AuthUser,
     @Param('id') id: string,

@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/layout/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { WalletConnect } from '@/components/wallet-connect';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { readFileAsDataUrl } from '@/lib/files';
@@ -49,6 +50,11 @@ interface ListingRow {
   risk?: { payload: { rating: string } } | null;
 }
 
+interface TokenNetworkStatus {
+  liveMintReady: boolean;
+  message: string;
+}
+
 const placeholderImage = '/file.svg';
 
 export default function MarketplacePage() {
@@ -64,7 +70,6 @@ export default function MarketplacePage() {
     imageUrl: '',
     imageName: '',
     offeringType: 'SALE' as 'SALE' | 'LEASE',
-    quantityBps: '2500',
     askPrice: '',
     leaseRate: '',
     leaseTermMonths: '36',
@@ -80,6 +85,11 @@ export default function MarketplacePage() {
   const assets = useQuery({
     queryKey: ['assets'],
     queryFn: async () => (await api.get<HydratedAsset[]>('/assets')).data,
+  });
+  const tokenNetwork = useQuery({
+    queryKey: ['tokenization-network'],
+    queryFn: async () =>
+      (await api.get<TokenNetworkStatus>('/tokenization/network')).data,
   });
 
   const selectedAsset = (assets.data ?? []).find((asset) => asset.id === form.assetId) ?? null;
@@ -106,7 +116,6 @@ export default function MarketplacePage() {
         summary: form.summary || undefined,
         imageUrl: form.imageUrl || undefined,
         offeringType: form.offeringType,
-        quantityBps: form.offeringType === 'SALE' ? Number(form.quantityBps) : undefined,
         askPrice: effectiveAskPrice ? Number(effectiveAskPrice) : undefined,
         leaseRate: form.offeringType === 'LEASE' && form.leaseRate ? Number(form.leaseRate) : undefined,
         leaseTermMonths:
@@ -126,7 +135,6 @@ export default function MarketplacePage() {
         imageUrl: '',
         imageName: '',
         offeringType: 'SALE',
-        quantityBps: '2500',
         askPrice: '',
         leaseRate: '',
         leaseTermMonths: '36',
@@ -165,6 +173,7 @@ export default function MarketplacePage() {
         title="Asset marketplace"
         description="Org admins can publish assets for sale or lease, optionally tokenize sale listings, and present them to buyers across the workspace."
       />
+      <WalletConnect />
 
       <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
         <div className="space-y-6">
@@ -234,6 +243,13 @@ export default function MarketplacePage() {
                 setFormError('');
                 if (requiresManualAskPrice) {
                   setFormError('Enter an ask price before listing an asset that has no valuation mark yet.');
+                  return;
+                }
+                if (form.offeringType === 'SALE' && form.tokenizeOnCreate && !tokenNetwork.data?.liveMintReady) {
+                  setFormError(
+                    tokenNetwork.data?.message ||
+                      'Live Ethereum Sepolia tokenization is not configured. A listing cannot be published with simulated tokens.',
+                  );
                   return;
                 }
                 create.mutate();
@@ -358,15 +374,6 @@ export default function MarketplacePage() {
                         : 'This asset has no valuation mark yet, so you need to enter an ask price manually.'}
                     </p>
                   </Field>
-                  <Field label="Interest offered (bps)">
-                    <Input
-                      type="number"
-                      min="1"
-                      max="10000"
-                      value={form.quantityBps}
-                      onChange={(e) => setForm((current) => ({ ...current, quantityBps: e.target.value }))}
-                    />
-                  </Field>
                   <label className="flex items-start gap-3 rounded-2xl border border-[var(--line)] px-4 py-3 text-sm">
                     <input
                       type="checkbox"
@@ -379,12 +386,17 @@ export default function MarketplacePage() {
                     <span>
                       Tokenize on listing creation
                       <span className="mt-1 block text-[12px] text-[var(--muted)]">
-                        This mints tokens on Ethereum Sepolia before publishing the sale listing.
+                        This sends a live Ethereum Sepolia testnet mint before publishing. If the mint cannot be confirmed, the listing is not created.
                       </span>
                     </span>
                   </label>
                   {form.tokenizeOnCreate ? (
                     <>
+                      {tokenNetwork.data && !tokenNetwork.data.liveMintReady ? (
+                        <p className="rounded-xl border border-[var(--danger)]/30 bg-[var(--danger)]/5 px-3 py-2 text-xs text-[var(--danger)]">
+                          {tokenNetwork.data.message}
+                        </p>
+                      ) : null}
                       <Field label="Token supply">
                         <Input
                           type="number"

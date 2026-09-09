@@ -113,9 +113,11 @@ export default function DocumentDetailPage() {
     verify?.effectiveAnchorMode ?? document.anchorMode;
   const transactionId = verify?.transactionHash ?? document.anchorTxHash;
   const explorerUrl =
-    sepoliaTxExplorerUrl(transactionId) ??
-    sepoliaTxExplorerUrl(verify?.explorerUrl) ??
-    sepoliaTxExplorerUrl(document.anchorExplorerUrl);
+    effectiveAnchorMode === 'LIVE'
+      ? sepoliaTxExplorerUrl(transactionId) ??
+        sepoliaTxExplorerUrl(verify?.explorerUrl) ??
+        sepoliaTxExplorerUrl(document.anchorExplorerUrl)
+      : undefined;
   const anchoredAt = verify?.anchoredAt ?? document.anchoredAt;
   const transactionDisplay =
     transactionId ??
@@ -272,7 +274,8 @@ export default function DocumentDetailPage() {
                     {item.anchorTxHash ? (
                       <div className="space-y-1">
                         <div className="break-all font-mono text-xs">{item.anchorTxHash}</div>
-                        {sepoliaTxExplorerUrl(item.anchorTxHash ?? item.anchorExplorerUrl) ? (
+                        {item.anchorMode === 'LIVE' &&
+                        sepoliaTxExplorerUrl(item.anchorTxHash ?? item.anchorExplorerUrl) ? (
                           <a
                             href={sepoliaTxExplorerUrl(item.anchorTxHash ?? item.anchorExplorerUrl)}
                             target="_blank"

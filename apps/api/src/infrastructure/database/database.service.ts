@@ -14,6 +14,9 @@ export class DatabaseService implements OnModuleInit {
   private data: CaprovData = emptyStore();
   private readonly filePath = resolveDataFilePath();
   private writeChain: Promise<void> = Promise.resolve();
+  
+  /** Document locks: map of documentId -> Promise for sequential access */
+  private documentLocks = new Map<string, Promise<void>>();
 
   onModuleInit(): void {
     mkdirSync(dirname(this.filePath), { recursive: true });
@@ -291,6 +294,52 @@ export class DatabaseService implements OnModuleInit {
     const result = fn(this.data);
     void this.persist();
     return result;
+  }
+
+  /**
+   * Thread-safe mutation that locks a specific document during the operation.
+   * Prevents concurrent modifications to the same document.
+   * 
+   * @param documentId - The ID of the document to lock
+   * @param fn - Mutation function that receives the draft data
+   * @returns The result of the mutation function
+   */
+  async mutateWithDocumentLock<T>(
+    documentId: string,
+    fn: (draft: CaprovData) => T,
+  ): Promise<T> {
+    // Get existing lock or create new one
+    const existingLock = this.documentLocks.get(documentId) ?? Promise.resolve();
+    
+    // Create a promise that resolves after this operation completes
+    let releaseLock: () => void = () => {};
+    const lockPromise = new Promise<void>((resolve) => {
+      releaseLock = resolve;
+    });
+    
+    // Queue this operation after the previous one
+    this.documentLocks.set(documentId, lockPromise);
+    
+    try {
+      // Wait for the previous lock to release
+      await existingLock;
+      
+      // Perform the mutation
+      const result = fn(this.data);
+      
+      // Persist changes
+      await this.persist();
+      
+      return result;
+    } finally {
+      // Release the lock
+      releaseLock();
+      
+      // Clean up if this was the last operation
+      if (this.documentLocks.get(documentId) === lockPromise) {
+        this.documentLocks.delete(documentId);
+      }
+    }
   }
 
   private persist(): Promise<void> {
