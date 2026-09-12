@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import type { AuthUser } from '../../common/types/auth-user';
 import { EthereumSepoliaTokenService } from '../../infrastructure/blockchain/ethereum-sepolia-token.service';
+import { EthereumSepoliaMarketplaceService } from '../../infrastructure/blockchain/ethereum-sepolia-marketplace.service';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import { createId } from '../../infrastructure/database/ids';
 import { AuditService } from '../audit/audit.service';
@@ -40,6 +41,7 @@ export class TokenizationController {
     private readonly db: DatabaseService,
     private readonly audit: AuditService,
     private readonly sepolia: EthereumSepoliaTokenService,
+    private readonly marketplace: EthereumSepoliaMarketplaceService,
   ) {}
 
   @Get()
@@ -88,6 +90,19 @@ export class TokenizationController {
     if (!network.liveMintReady) {
       throw new BadRequestException(
         'Live Ethereum Sepolia tokenization is not configured. Set ETHEREUM_SEPOLIA_PRIVATE_KEY (or ETHEREUM_SEPOLIA_MNEMONIC) and ETHEREUM_TOKEN_CONTRACT before minting.',
+      );
+    }
+    let marketplaceAssetToken: string | null;
+    try {
+      marketplaceAssetToken = await this.marketplace.getAssetTokenAddress();
+    } catch {
+      throw new BadRequestException(
+        'Cannot verify the Sepolia marketplace asset-token contract. Tokenization was not attempted.',
+      );
+    }
+    if (!marketplaceAssetToken || marketplaceAssetToken.toLowerCase() !== network.contractAddress?.toLowerCase()) {
+      throw new BadRequestException(
+        `Tokenization is blocked because ETHEREUM_TOKEN_CONTRACT (${network.contractAddress ?? 'missing'}) does not match the marketplace asset token (${marketplaceAssetToken ?? 'unavailable'}). Restart the API after correcting apps/api/.env.`,
       );
     }
 

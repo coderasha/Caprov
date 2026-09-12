@@ -6,6 +6,7 @@ import {
 import type { DatabaseService } from '../../infrastructure/database/database.service';
 import type { AuditService } from '../audit/audit.service';
 import type { EthereumSepoliaTokenService } from '../../infrastructure/blockchain/ethereum-sepolia-token.service';
+import type { EthereumSepoliaMarketplaceService } from '../../infrastructure/blockchain/ethereum-sepolia-marketplace.service';
 import type { AuthUser } from '../../common/types/auth-user';
 import type { AssetClass, TokenPosition } from '@caprov/types';
 
@@ -47,11 +48,12 @@ describe('TokenizationController', () => {
         explorerUrl: 'https://sepolia.etherscan.io/tx/0xtesthash',
         status: 'CONFIRMED',
       }),
-      getNetworkStatus: jest.fn(() => ({ liveMintReady: true })),
+      getNetworkStatus: jest.fn(() => ({ liveMintReady: true, contractAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0' })),
       probeRpc: jest.fn(),
     } as unknown as EthereumSepoliaTokenService;
 
-    const controller = new TokenizationController(db, audit, sepolia);
+    const marketplace = { getAssetTokenAddress: jest.fn().mockResolvedValue('0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0') } as unknown as EthereumSepoliaMarketplaceService;
+    const controller = new TokenizationController(db, audit, sepolia, marketplace);
     const result = await controller.tokenize(user, {
       assetId: 'ast_test',
       supply: 1000,

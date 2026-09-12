@@ -18,6 +18,13 @@ interface DemoAccount {
   role: string;
 }
 
+const DEMO_PERSONAS: DemoAccount[] = [
+  { name: 'Priya Nair', email: 'priya@caprov.io', password: 'CaprovDemo!23', role: 'Platform admin' },
+  { name: 'Elena Voss', email: 'elena@meridian.caprov', password: 'CaprovDemo!23', role: 'Organization admin' },
+  { name: 'Arjun Mehta', email: 'arjun@meridian.caprov', password: 'CaprovDemo!23', role: 'Analyst' },
+  { name: 'Sofia Laurent', email: 'sofia@meridian.caprov', password: 'CaprovDemo!23', role: 'Compliance' },
+];
+
 export default function LoginPage() {
   const router = useRouter();
   const setSession = useAuthStore((state) => state.setSession);
@@ -25,7 +32,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState('CaprovDemo!23');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [demos, setDemos] = useState<DemoAccount[]>([]);
+  // Keep personas visible even while the API is starting or unavailable.
+  const [demos, setDemos] = useState<DemoAccount[]>(DEMO_PERSONAS);
 
   useEffect(() => {
     api
@@ -34,12 +42,14 @@ export default function LoginPage() {
       .catch(() => undefined);
   }, []);
 
-  async function onSubmit(event: React.FormEvent) {
-    event.preventDefault();
+  async function signIn(loginEmail = email, loginPassword = password) {
     setLoading(true);
     setError('');
     try {
-      const response = await api.post<AuthSession>('/auth/login', { email, password });
+      const response = await api.post<AuthSession>('/auth/login', {
+        email: loginEmail,
+        password: loginPassword,
+      });
       setSession(response.data);
       router.push('/dashboard');
     } catch {
@@ -47,6 +57,11 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    void signIn();
   }
 
   return (
@@ -79,20 +94,23 @@ export default function LoginPage() {
           </form>
           {demos.length > 0 ? (
             <div className="mt-6 border-t border-[var(--line)] pt-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">Demo workspace</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">Enter as a demo persona</p>
+              <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Choose a role to sign in with its access level.</p>
               <div className="mt-3 grid gap-2">
                 {demos.map((account) => (
                   <button
                     key={account.email}
                     type="button"
-                    className="min-h-12 rounded-2xl border border-[var(--line)] px-3 py-3 text-left text-sm hover:bg-[var(--paper)]"
+                    className="min-h-12 rounded-2xl border border-[var(--line)] px-3 py-3 text-left text-sm transition hover:border-[var(--gold)] hover:bg-[var(--paper)] disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={loading}
                     onClick={() => {
                       setEmail(account.email);
                       setPassword(account.password);
+                      void signIn(account.email, account.password);
                     }}
                   >
                     <span className="font-medium">{account.name}</span>
-                    <span className="ml-2 text-[var(--muted)]">{account.role}</span>
+                    <span className="ml-2 text-[var(--muted)]">{loading ? 'Signing in…' : account.role}</span>
                   </button>
                 ))}
               </div>

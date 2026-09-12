@@ -219,9 +219,16 @@ export class MarketplaceController {
     const offeringType = dto.offeringType ?? 'SALE';
     const quantityBps =
       offeringType === 'LEASE' ? 10_000 : (dto.quantityBps ?? 10_000);
+    const network = this.sepolia.getNetworkStatus();
     let token: TokenPosition | null =
       this.db.snapshot.tokens
-        .filter((item) => item.assetId === asset.id)
+        .filter(
+          (item) =>
+            item.assetId === asset.id &&
+            item.status === 'CONFIRMED' &&
+            item.contractAddress?.toLowerCase() ===
+              network.contractAddress?.toLowerCase(),
+        )
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null;
     let mintedToken: TokenPosition | null = null;
 
@@ -231,10 +238,26 @@ export class MarketplaceController {
           'This asset has already been tokenized. Re-list its existing token units through the on-chain marketplace; a second supply cannot be minted.',
         );
       }
-      const network = this.sepolia.getNetworkStatus();
       if (!network.liveMintReady) {
         throw new BadRequestException(
           'Live Ethereum Sepolia tokenization is not configured. Set ETHEREUM_SEPOLIA_PRIVATE_KEY (or ETHEREUM_SEPOLIA_MNEMONIC) and ETHEREUM_TOKEN_CONTRACT before publishing a tokenized listing.',
+        );
+      }
+      let marketplaceAssetToken: string | null;
+      try {
+        marketplaceAssetToken = await this.marketplace.getAssetTokenAddress();
+      } catch {
+        throw new BadRequestException(
+          'Cannot verify the Sepolia marketplace asset-token contract. Tokenization was not attempted.',
+        );
+      }
+      if (
+        !marketplaceAssetToken ||
+        marketplaceAssetToken.toLowerCase() !==
+          network.contractAddress?.toLowerCase()
+      ) {
+        throw new BadRequestException(
+          'Tokenization is blocked because ETHEREUM_TOKEN_CONTRACT does not match the marketplace asset-token contract.',
         );
       }
       const pendingId = createId('tok');

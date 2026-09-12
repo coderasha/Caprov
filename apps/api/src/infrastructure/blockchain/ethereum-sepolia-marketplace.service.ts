@@ -6,6 +6,7 @@ import {
 } from './ethereum-sepolia-token.service';
 
 const MARKETPLACE_ABI = [
+  'function assetToken() view returns (address)',
   'function listings(uint256) view returns (address seller, uint256 assetId, uint256 remaining, uint256 pricePerUnit, bool active)',
   'event Listed(uint256 indexed listingId, address indexed seller, uint256 indexed assetId, uint256 amount, uint256 pricePerUnit)',
   'event Purchased(uint256 indexed listingId, address indexed buyer, uint256 amount, uint256 cost)',
@@ -30,6 +31,18 @@ export class EthereumSepoliaMarketplaceService {
 
   isConfigured() {
     return Boolean(this.address() && process.env.ETHEREUM_PAYMENT_TOKEN_CONTRACT?.trim());
+  }
+
+  /** The marketplace's immutable ERC-1155 address is the source of truth. */
+  async getAssetTokenAddress(): Promise<string | null> {
+    const address = this.address();
+    if (!address) return null;
+    const provider = new JsonRpcProvider(
+      process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC,
+      ETHEREUM_SEPOLIA_CHAIN_ID,
+    );
+    const market = new Contract(address, MARKETPLACE_ABI, provider);
+    return getAddress(await market.getFunction('assetToken')());
   }
 
   async getListing(listingId: string): Promise<OnChainListing | null> {

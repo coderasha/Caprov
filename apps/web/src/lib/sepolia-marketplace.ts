@@ -46,6 +46,14 @@ export async function connectSepoliaWallet() {
   return connectedSigner.getAddress();
 }
 
+/** Confirms the connected lister holds enough units on the configured ERC-1155. */
+export async function assetUnitBalance(assetTokenId: string) {
+  const connectedSigner = await signer();
+  const { assetToken } = addresses();
+  const asset = new Contract(assetToken, assetAbi, connectedSigner);
+  return BigInt(await asset.getFunction('balanceOf')(await connectedSigner.getAddress(), BigInt(assetTokenId)));
+}
+
 /** Seller signs approval and escrow creation; the browser wallet is the token holder. */
 export async function createOnChainListing(input: { assetTokenId: string; units: string; pricePerToken: string }) {
   const connectedSigner = await signer();
