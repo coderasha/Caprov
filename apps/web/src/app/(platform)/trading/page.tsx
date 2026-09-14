@@ -117,7 +117,7 @@ export default function TradingPage() {
               </p>
             ) : null}
             <Button type="submit" disabled={!listingId || place.isPending}>
-              Match buy order
+              Buy now
             </Button>
           </form>
         </Card>
