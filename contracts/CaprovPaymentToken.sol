@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
-/// @notice Testnet CAPROV payment token; use an approved payment token for production.
+/// @notice CAP payment token. One CAP is intended to represent one USD only with an external reserve/redemption policy.
 contract CaprovPaymentToken {
-    string public constant name = "CAPROV"; string public constant symbol = "CAPROV"; uint8 public constant decimals = 18;
+    string public constant name = "CAP"; string public constant symbol = "CAP"; uint8 public constant decimals = 18;
     address public owner; uint256 public totalSupply;
     mapping(address => uint256) public balanceOf; mapping(address => mapping(address => uint256)) public allowance;
     event Transfer(address indexed from, address indexed to, uint256 value); event Approval(address indexed owner, address indexed spender, uint256 value);

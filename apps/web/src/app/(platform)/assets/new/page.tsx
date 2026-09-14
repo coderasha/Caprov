@@ -11,11 +11,13 @@ import type { AssetClass, AssetStatus, CurrencyCode } from '@caprov/types';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useAuthStore } from '@/stores/auth-store';
 
 const classes = Object.keys(assetClassLabel) as AssetClass[];
 
 export default function NewAssetPage() {
   const router = useRouter();
+  const roles = useAuthStore((state) => state.roles);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
@@ -32,6 +34,25 @@ export default function NewAssetPage() {
     primaryImageName: '',
     galleryImageNames: [] as string[],
   });
+
+  const canCreateAssets = roles.includes('ORG_ADMIN') || roles.includes('PLATFORM_ADMIN');
+
+  if (!canCreateAssets) {
+    return (
+      <div className="mx-auto max-w-2xl space-y-6">
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--muted)]">Assets</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Asset creation is restricted</h1>
+        </div>
+        <Card className="p-6">
+          <p className="text-sm leading-6 text-[var(--muted)]">
+            Senior Analysts can review existing assets and use Ask AI, but only organization administrators can create assets.
+          </p>
+          <Button className="mt-5" onClick={() => router.push('/assets')}>View assets</Button>
+        </Card>
+      </div>
+    );
+  }
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();

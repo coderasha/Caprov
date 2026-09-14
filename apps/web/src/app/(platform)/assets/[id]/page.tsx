@@ -79,6 +79,7 @@ type WalletProviderLike = {
 
 interface WalletSession {
   account: string;
+  accounts: string[];
   chainId: number;
   provider: WalletProviderLike;
   browserProvider: BrowserProvider;
@@ -278,6 +279,15 @@ export default function AssetDetailPage() {
     setWalletMessage('Wallet disconnected.');
   }
 
+  async function selectWalletAccount(account: string) {
+    if (!walletSession) return;
+    const exposed = await walletSession.provider.request({ method: 'eth_accounts' }) as string[];
+    const selected = exposed.find((item) => item.toLowerCase() === account.toLowerCase());
+    if (!selected) throw new Error('Select this account for localhost in MetaMask before using it.');
+    setWalletSession({ ...walletSession, account: selected, accounts: exposed });
+    setWalletMessage(`MetaMask account selected: ${shortAddress(selected)}`);
+  }
+
   async function anchorDocumentWithWallet(document: DocumentRow, session: WalletSession) {
     if (!document.assetId || !document.documentHash || !document.offChainUri) {
       throw new Error('The uploaded document is missing anchor metadata.');
@@ -287,7 +297,7 @@ export default function AssetDetailPage() {
     }
 
     await ensureSepoliaNetwork(session.provider, network);
-    const signer = await session.browserProvider.getSigner();
+    const signer = await session.browserProvider.getSigner(session.account);
     const signerAddress = await signer.getAddress();
     const contract = new Contract(network.contractAddress, DOCUMENT_REGISTRY_ABI, signer);
     const anchorFn = contract.getFunction('anchorDocumentVersion');

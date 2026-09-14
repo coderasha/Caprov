@@ -106,6 +106,8 @@ class RegisterOnChainListingDto {
   @IsString() @MinLength(42) listerWalletAddress!: string;
   @IsInt() @Min(1) availableTokenUnits!: number;
   @IsString() @MinLength(1) pricePerTokenWei!: string;
+  /** The whole listing price in USD; 1 CAP is represented as 1 USD. */
+  @IsNumber() @Min(0.01) askPrice!: number;
   @IsOptional() @IsString() @MinLength(2) title?: string;
   @IsOptional() @IsString() summary?: string;
   @IsOptional() @IsString() imageUrl?: string;
@@ -176,7 +178,7 @@ export class MarketplaceController {
       id: createId('lst'), organizationId: user.organizationId, assetId: asset.id,
       title: dto.title?.trim() || `${asset.name} token units`, offeringType: 'SALE', status: 'OPEN',
       summary: dto.summary?.trim(), imageUrl: dto.imageUrl?.trim() || asset.primaryImageUrl || asset.imageUrls?.[0],
-      askPrice: 0, currency: 'USD', quantityBps: 0, remainingBps: 0,
+      askPrice: dto.askPrice, currency: 'USD', quantityBps: 0, remainingBps: 0,
       tokenPositionId: token.id, tokenizationMode: token.mode, assetTokenId: token.tokenId,
       totalTokenSupply: token.supply, availableTokenUnits: dto.availableTokenUnits,
       pricePerTokenWei: dto.pricePerTokenWei,

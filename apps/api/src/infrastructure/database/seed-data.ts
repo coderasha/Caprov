@@ -1531,6 +1531,7 @@ export function buildSeedData(): CaprovData {
       {
         id: 'ptf_core',
         organizationId: orgId,
+        ownerUserId: arjunId,
         name: 'Core Real Assets',
         description: 'Stabilized real estate and industrial infrastructure.',
         baseCurrency: 'GBP',

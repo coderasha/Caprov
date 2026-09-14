@@ -139,6 +139,8 @@ export interface DocumentRecord {
 export interface PortfolioRecord {
   id: string;
   organizationId: string;
+  /** The analyst responsible for this portfolio, when it is individually assigned. */
+  ownerUserId?: string;
   name: string;
   description?: string;
   baseCurrency: CurrencyCode;

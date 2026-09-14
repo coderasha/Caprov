@@ -27,6 +27,17 @@ import type { AuthUser } from '../../common/types/auth-user';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import { createId } from '../../infrastructure/database/ids';
 import { AuditService } from '../audit/audit.service';
+import { EthereumSepoliaMarketplaceService } from '../../infrastructure/blockchain/ethereum-sepolia-marketplace.service';
+import { isAddress, getAddress, formatUnits } from 'ethers';
+
+class RegisterOnChainTradeDto {
+  @IsString() listingId!: string;
+  @IsString() purchaseId!: string;
+  @IsString() purchaseTxHash!: string;
+  @IsString() buyerWalletAddress!: string;
+  @IsInt() @Min(1) tokenUnits!: number;
+  @IsString() paymentCapWei!: string;
+}
 
 class CreateOrderDto {
   @IsString()
@@ -55,7 +66,24 @@ export class TradingController {
   constructor(
     private readonly db: DatabaseService,
     private readonly audit: AuditService,
+    private readonly marketplace: EthereumSepoliaMarketplaceService,
   ) {}
+
+  @Post('on-chain-trades')
+  @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
+  async registerOnChainTrade(@CurrentUser() user: AuthUser, @Body() dto: RegisterOnChainTradeDto) {
+    if (!isAddress(dto.buyerWalletAddress) || !/^\d+$/.test(dto.purchaseId) || !/^\d+$/.test(dto.paymentCapWei)) throw new BadRequestException('Invalid purchase reference.');
+    const listing = this.db.snapshot.listings.find((item) => item.id === dto.listingId && item.onChainListingId && item.pricePerTokenWei);
+    if (!listing || listing.organizationId === user.organizationId) throw new BadRequestException('This tokenized listing is not available to this buyer.');
+    if (dto.tokenUnits > (listing.availableTokenUnits ?? 0)) throw new BadRequestException('Trade units exceed the available token units.');
+    const valid = await this.marketplace.verifyPurchaseTransaction({ txHash: dto.purchaseTxHash, purchaseId: dto.purchaseId, listingId: listing.onChainListingId!, buyer: dto.buyerWalletAddress, units: String(dto.tokenUnits) });
+    if (!valid) throw new BadRequestException('The submitted transaction is not a confirmed matching CAP escrow purchase.');
+    const now = new Date().toISOString();
+    const trade: TradeRecord = { id: createId('trd'), organizationId: user.organizationId, listingId: listing.id, orderId: `chain_${dto.purchaseId}`, assetId: listing.assetId, status: 'PENDING_SETTLEMENT', price: Number(formatUnits(BigInt(listing.pricePerTokenWei!), 18)), currency: 'USD', quantityBps: Math.round((dto.tokenUnits / (listing.totalTokenSupply ?? dto.tokenUnits)) * 10_000), notional: Number(formatUnits(BigInt(dto.paymentCapWei), 18)), onChainPurchaseId: dto.purchaseId, onChainListingId: listing.onChainListingId, buyerWalletAddress: getAddress(dto.buyerWalletAddress), tokenUnits: dto.tokenUnits, paymentCapWei: dto.paymentCapWei, purchaseTxHash: dto.purchaseTxHash, createdAt: now, updatedAt: now };
+    this.db.mutate((draft) => { draft.trades.unshift(trade); });
+    this.audit.log({ organizationId: user.organizationId, actorUserId: user.id, action: 'trading.cap_escrowed', entityType: 'Trade', entityId: trade.id, metadata: { purchaseId: dto.purchaseId, tokenUnits: dto.tokenUnits } });
+    return trade;
+  }
 
   @Get()
   overview(@CurrentUser() user: AuthUser) {
@@ -74,9 +102,14 @@ export class TradingController {
 
   @Get('trades')
   listTrades(@CurrentUser() user: AuthUser) {
-    return this.db.snapshot.trades.filter(
-      (item) => item.organizationId === user.organizationId,
-    );
+    return this.db.snapshot.trades.filter((item) => {
+      if (item.organizationId === user.organizationId) return true;
+      return this.db.snapshot.listings.some(
+        (listing) =>
+          listing.id === item.listingId &&
+          listing.organizationId === user.organizationId,
+      );
+    });
   }
 
   @Post('orders')
@@ -84,8 +117,7 @@ export class TradingController {
   createOrder(@CurrentUser() user: AuthUser, @Body() dto: CreateOrderDto) {
     const listing = this.db.snapshot.listings.find(
       (item) =>
-        item.id === dto.listingId &&
-        item.organizationId === user.organizationId,
+        item.id === dto.listingId,
     );
     if (
       !listing ||
@@ -97,6 +129,13 @@ export class TradingController {
     if (listing.offeringType === 'LEASE') {
       throw new BadRequestException(
         'Lease listings are not tradeable. Contact the org admin to lease.',
+      );
+    }
+    // A listing represents the seller's offered interest. The seller's tenant
+    // cannot take the other side of that listing, even through another user.
+    if (listing.organizationId === user.organizationId) {
+      throw new BadRequestException(
+        'The listing owner cannot place a buy order against its own asset listing.',
       );
     }
     if (dto.quantityBps > listing.remainingBps) {

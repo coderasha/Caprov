@@ -17,10 +17,11 @@ describe('MarketplaceController on-chain listings', () => {
     const db = mockDb(store);
     const market = { isConfigured: jest.fn(() => true), contractAddress: jest.fn(() => wallet), verifyListingTransaction: jest.fn().mockResolvedValue(true) } as unknown as EthereumSepoliaMarketplaceService;
     const controller = new MarketplaceController(db, { log: jest.fn() } as unknown as AuditService, {} as EthereumSepoliaTokenService, market);
-    const result = await controller.registerOnChainListing(user, { assetId: 'ast_1', tokenPositionId: 'tok_1', onChainListingId: '7', onChainTxHash: `0x${'a'.repeat(64)}`, listerWalletAddress: wallet, availableTokenUnits: 250, pricePerTokenWei: '1000000000000000000' });
+    const result = await controller.registerOnChainListing(user, { assetId: 'ast_1', tokenPositionId: 'tok_1', onChainListingId: '7', onChainTxHash: `0x${'a'.repeat(64)}`, listerWalletAddress: wallet, availableTokenUnits: 250, pricePerTokenWei: '1000000000000000000', askPrice: 250 });
     expect(market.verifyListingTransaction).toHaveBeenCalledWith(expect.objectContaining({ listingId: '7', assetTokenId: '42', units: '250' }));
     expect(result.onChainListingId).toBe('7');
     expect(store.listings[0]?.availableTokenUnits).toBe(250);
+    expect(store.listings[0]?.askPrice).toBe(250);
   });
 });
 

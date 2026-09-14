@@ -114,6 +114,7 @@ export interface JobRow {
 
 export interface PortfolioRow {
   id: string;
+  ownerUserId?: string;
   name: string;
   description?: string;
   baseCurrency: CurrencyCode;
@@ -122,7 +123,7 @@ export interface PortfolioRow {
     id: string;
     assetId: string;
     weight?: number;
-    asset: { id: string; name: string; assetClass: AssetClass; currency: CurrencyCode } | null;
+    asset: (Pick<HydratedAsset, 'id' | 'name' | 'assetClass' | 'currency' | 'location' | 'jurisdiction' | 'description' | 'ownerships' | 'documentCount' | 'primaryImageUrl'>) | null;
     valuation: { payload: ValuationSummary } | null;
     risk: { payload: RiskSummary } | null;
   }>;

@@ -66,14 +66,22 @@ export class PortfoliosController {
   @Get()
   list(@CurrentUser() user: AuthUser) {
     return this.db.snapshot.portfolios
-      .filter((item) => item.organizationId === user.organizationId)
+      .filter(
+        (item) =>
+          item.organizationId === user.organizationId &&
+          (!user.roles.includes('ANALYST') || item.ownerUserId === user.id),
+      )
       .map((portfolio) => this.hydrate(portfolio.id));
   }
 
   @Get(':id')
   get(@CurrentUser() user: AuthUser, @Param('id') id: string) {
     const portfolio = this.hydrate(id);
-    if (!portfolio || portfolio.organizationId !== user.organizationId) {
+    if (
+      !portfolio ||
+      portfolio.organizationId !== user.organizationId ||
+      (user.roles.includes('ANALYST') && portfolio.ownerUserId !== user.id)
+    ) {
       return null;
     }
     return portfolio;
@@ -86,6 +94,7 @@ export class PortfoliosController {
     const portfolio = {
       id: createId('ptf'),
       organizationId: user.organizationId,
+      ownerUserId: user.id,
       name: dto.name,
       description: dto.description,
       baseCurrency: dto.baseCurrency ?? 'USD',
@@ -232,18 +241,7 @@ export class PortfoliosController {
       .filter((item) => item.portfolioId === portfolioId)
       .map((holding) => ({
         ...holding,
-        asset:
-          this.db.snapshot.assets.find(
-            (asset) => asset.id === holding.assetId,
-          ) ?? null,
-        valuation:
-          this.db.snapshot.valuations
-            .filter((item) => item.assetId === holding.assetId)
-            .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null,
-        risk:
-          this.db.snapshot.risks
-            .filter((item) => item.assetId === holding.assetId)
-            .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null,
+        ...this.holdingDetails(holding.assetId),
       }));
     const normalizedWeights =
       rebalanceRemainingWeightsAfterRemoval(rawHoldings);
@@ -252,6 +250,29 @@ export class PortfoliosController {
       weight: normalizedWeights.get(holding.id) ?? holding.weight,
     }));
     return { ...portfolio, holdings, holdingCount: holdings.length };
+  }
+
+  /** Portfolio holdings are investment records, so return enough context to assess them without opening every asset. */
+  private holdingDetails(assetId: string) {
+    const asset = this.db.snapshot.assets.find((item) => item.id === assetId) ?? null;
+    const valuation = this.db.snapshot.valuations
+      .filter((item) => item.assetId === assetId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null;
+    const risk = this.db.snapshot.risks
+      .filter((item) => item.assetId === assetId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ?? null;
+    if (!asset) return { asset: null, valuation, risk };
+    return {
+      asset: {
+        ...asset,
+        ownerships: this.db.snapshot.ownerships.filter((item) => item.assetId === assetId),
+        documentCount: this.db.snapshot.documents.filter((item) => item.assetId === assetId && item.isCurrent).length,
+        latestValuation: valuation,
+        latestRisk: risk,
+      },
+      valuation,
+      risk,
+    };
   }
 
   private defaultWeightForNewHolding(portfolioId: string) {

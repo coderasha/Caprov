@@ -416,6 +416,14 @@ export interface TradeRecord {
   currency: CurrencyCode;
   quantityBps: number;
   notional: number;
+  /** Confirmed CaprovMarketplaceSettlementV2 purchase reference. */
+  onChainPurchaseId?: string;
+  onChainListingId?: string;
+  buyerWalletAddress?: string;
+  tokenUnits?: number;
+  paymentCapWei?: string;
+  purchaseTxHash?: string;
+  settlementTxHash?: string;
   createdAt: IsoTimestamp;
   updatedAt: IsoTimestamp;
 }

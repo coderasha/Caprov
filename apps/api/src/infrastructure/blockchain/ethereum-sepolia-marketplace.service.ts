@@ -9,6 +9,8 @@ const MARKETPLACE_ABI = [
   'function assetToken() view returns (address)',
   'function listings(uint256) view returns (address seller, uint256 assetId, uint256 remaining, uint256 pricePerUnit, bool active)',
   'event Listed(uint256 indexed listingId, address indexed seller, uint256 indexed assetId, uint256 amount, uint256 pricePerUnit)',
+  'event PurchaseRequested(uint256 indexed purchaseId, uint256 indexed listingId, address indexed buyer, uint256 units, uint256 paymentCAP)',
+  'event PurchaseSettled(uint256 indexed purchaseId, address indexed seller, address indexed buyer, uint256 units, uint256 paymentCAP)',
   'event Purchased(uint256 indexed listingId, address indexed buyer, uint256 amount, uint256 cost)',
   'event ListingClosed(uint256 indexed listingId)',
 ] as const;
@@ -91,6 +93,39 @@ export class EthereumSepoliaMarketplaceService {
           && event.args.amount.toString() === input.units
           && event.args.pricePerUnit.toString() === input.pricePerTokenWei;
       } catch { return false; }
+    });
+  }
+
+  async verifyPurchaseTransaction(input: { txHash: string; purchaseId: string; listingId: string; buyer: string; units: string }) {
+    const address = this.address();
+    if (!address) return false;
+    const provider = new JsonRpcProvider(process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC, ETHEREUM_SEPOLIA_CHAIN_ID);
+    const receipt = await provider.getTransactionReceipt(input.txHash);
+    if (!receipt || receipt.status !== 1) return false;
+    const contract = new Contract(address, MARKETPLACE_ABI, provider);
+    return receipt.logs.some((log) => {
+      if (log.address.toLowerCase() !== address.toLowerCase()) return false;
+      try {
+        const event = contract.interface.parseLog(log);
+        return event?.name === 'PurchaseRequested'
+          && event.args.purchaseId.toString() === input.purchaseId
+          && event.args.listingId.toString() === input.listingId
+          && getAddress(event.args.buyer) === getAddress(input.buyer)
+          && event.args.units.toString() === input.units;
+      } catch { return false; }
+    });
+  }
+
+  async verifySettlementTransaction(txHash: string, purchaseId: string) {
+    const address = this.address();
+    if (!address) return false;
+    const provider = new JsonRpcProvider(process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC, ETHEREUM_SEPOLIA_CHAIN_ID);
+    const receipt = await provider.getTransactionReceipt(txHash);
+    if (!receipt || receipt.status !== 1) return false;
+    const contract = new Contract(address, MARKETPLACE_ABI, provider);
+    return receipt.logs.some((log) => {
+      if (log.address.toLowerCase() !== address.toLowerCase()) return false;
+      try { const event = contract.interface.parseLog(log); return event?.name === 'PurchaseSettled' && event.args.purchaseId.toString() === purchaseId; } catch { return false; }
     });
   }
 

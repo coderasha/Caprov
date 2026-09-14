@@ -7,12 +7,15 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { assetClassLabel, assetStatusLabel, money, riskTone } from '@/lib/format';
+import { useAuthStore } from '@/stores/auth-store';
 import type { HydratedAsset } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 export default function AssetsPage() {
+  const roles = useAuthStore((state) => state.roles);
+  const canCreateAssets = roles.includes('ORG_ADMIN') || roles.includes('PLATFORM_ADMIN');
   const [query, setQuery] = useState('');
   const assetsQuery = useQuery({
     queryKey: ['assets'],
@@ -43,9 +46,11 @@ export default function AssetsPage() {
         description="Create and review the assets your team manages. Each asset becomes the home for documents, Asset DNA, collateral, and lending."
         actions={
           <>
-            <Link href="/assets/new">
-              <Button>New asset</Button>
-            </Link>
+            {canCreateAssets ? (
+              <Link href="/assets/new">
+                <Button>New asset</Button>
+              </Link>
+            ) : null}
             <Link href="/documents">
               <Button variant="secondary">Add documents</Button>
             </Link>
@@ -77,16 +82,19 @@ export default function AssetsPage() {
       {allAssets.length === 0 ? (
         <Card className="p-8">
           <h2 className="font-display text-xl font-semibold tracking-[-0.03em] text-[var(--ink)]">
-            Start with the first asset record
+            {canCreateAssets ? 'Start with the first asset record' : 'No assets are available yet'}
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            Assets are the anchor for the rest of the platform. Once you create one, your team can add documents,
-            review Asset DNA, and move into portfolio, tokenization, collateral, and lending workflows.
+            {canCreateAssets
+              ? 'Assets are the anchor for the rest of the platform. Once you create one, your team can add documents, review Asset DNA, and move into portfolio, tokenization, collateral, and lending workflows.'
+              : 'Assets created by your workspace will appear here. You can review them and ask AI for analysis.'}
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
-            <Link href="/assets/new">
-              <Button>Create asset</Button>
-            </Link>
+            {canCreateAssets ? (
+              <Link href="/assets/new">
+                <Button>Create asset</Button>
+              </Link>
+            ) : null}
             <Link href="/documents">
               <Button variant="secondary">See document workflow</Button>
             </Link>

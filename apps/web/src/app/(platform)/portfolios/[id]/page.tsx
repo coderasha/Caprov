@@ -60,6 +60,7 @@ export default function PortfolioDetailPage() {
             <tr>
               <th className="px-4 py-3 font-medium sm:px-6">Asset</th>
               <th className="px-3 py-3 font-medium">Weight</th>
+              <th className="px-3 py-3 font-medium">Investment details</th>
               <th className="px-3 py-3 font-medium">Value</th>
               <th className="px-4 py-3 font-medium sm:px-6">Risk</th>
             </tr>
@@ -76,10 +77,16 @@ export default function PortfolioDetailPage() {
                     holding.assetId
                   )}
                   <p className="text-xs text-[var(--muted)]">
-                    {holding.asset ? assetClassLabel[holding.asset.assetClass] : ''}
+                    {holding.asset ? `${assetClassLabel[holding.asset.assetClass]}${holding.asset.location ? ` · ${holding.asset.location}` : ''}` : ''}
                   </p>
+                  {holding.asset?.description ? <p className="mt-1 max-w-sm text-xs leading-5 text-[var(--muted)]">{holding.asset.description}</p> : null}
                 </td>
                 <td className="px-3 py-4">{holding.weight ?? '—'}%</td>
+                <td className="px-3 py-4 text-xs leading-5 text-[var(--muted)]">
+                  <p>{holding.asset?.jurisdiction ?? 'Jurisdiction not recorded'}</p>
+                  <p>{holding.asset?.documentCount ?? 0} current documents</p>
+                  <p>{holding.asset?.ownerships.length ?? 0} ownership records</p>
+                </td>
                 <td className="px-3 py-4">
                   {money(holding.valuation?.payload.amount, holding.valuation?.payload.currency)}
                 </td>

@@ -120,7 +120,7 @@ export class AssetsController {
   }
 
   @Post()
-  @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
+  @Roles('ORG_ADMIN', 'PLATFORM_ADMIN')
   create(@CurrentUser() user: AuthUser, @Body() dto: CreateAssetDto) {
     return this.assets.create(user, dto);
   }

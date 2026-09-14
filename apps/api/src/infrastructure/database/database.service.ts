@@ -39,6 +39,17 @@ export class DatabaseService implements OnModuleInit {
     let changed = false;
     const seeded = buildSeedData();
     const preferredDefaultModelId = getPreferredDefaultLlmModelId();
+    const arjun = this.data.users.find(
+      (user) => user.email === 'arjun@meridian.caprov',
+    );
+    for (const portfolio of this.data.portfolios) {
+      // Preserve existing portfolios, while giving the seeded senior analyst the
+      // portfolio that is part of the demo workspace.
+      if (portfolio.id === 'ptf_core' && !portfolio.ownerUserId && arjun) {
+        portfolio.ownerUserId = arjun.id;
+        changed = true;
+      }
+    }
     for (const organization of this.data.organizations) {
       if (!organization.status) {
         organization.status = 'ACTIVE';

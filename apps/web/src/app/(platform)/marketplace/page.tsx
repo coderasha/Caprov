@@ -10,6 +10,7 @@ import { api } from '@/lib/api';
 import { sepoliaTxExplorerUrl } from '@/lib/explorer';
 import { readFileAsDataUrl } from '@/lib/files';
 import { assetClassLabel, money } from '@/lib/format';
+import { capPricePerUnitFromTotal, createOnChainListing } from '@/lib/sepolia-marketplace';
 import type { HydratedAsset } from '@/lib/types';
 import { useAuthStore } from '@/stores/auth-store';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -32,6 +33,10 @@ interface Listing {
   leaseTermMonths?: number;
   createdAt?: string;
   tokenizationMode?: 'LIVE' | 'SIMULATED';
+  onChainListingId?: string;
+  availableTokenUnits?: number;
+  pricePerTokenWei?: string;
+  listerWalletAddress?: string;
   token?: {
     tokenId: string;
     supply: number;
@@ -66,12 +71,14 @@ const statusLabel: Record<string, string> = {
   PARTIALLY_FILLED: 'Partially filled',
 };
 
-const errorMessage = (error: unknown) =>
-  axios.isAxiosError(error) && typeof error.response?.data?.message === 'string'
-    ? error.response.data.message
-    : error instanceof Error
-      ? error.message
-      : 'Could not publish the listing.';
+const errorMessage = (error: unknown) => {
+  if (axios.isAxiosError(error)) {
+    const message = error.response?.data?.message;
+    if (typeof message === 'string') return message;
+    if (Array.isArray(message)) return message.filter((item): item is string => typeof item === 'string').join(' ');
+  }
+  return error instanceof Error ? error.message : 'Could not publish the listing.';
+};
 
 const isTokenized = (listing: Listing) => listing.tokenizationMode === 'LIVE' && Boolean(listing.token);
 
@@ -149,27 +156,60 @@ export default function MarketplacePage() {
   const publish = useMutation({
     mutationFn: async () => {
       if (!selectedAsset) throw new Error('Select an asset.');
+      const listingTitle = form.title.trim();
+      const totalAskPrice = Number(form.price);
+      if (!Number.isFinite(totalAskPrice) || totalAskPrice < 0.01) throw new Error('Enter a valid total asking price of at least 0.01 USD.');
+      if (listingTitle && listingTitle.length < 2) throw new Error('Listing title must contain at least 2 characters.');
       if (form.tokenizeBeforeListing && !wallet)
         throw new Error('Connect the lister MetaMask wallet first so the new ERC-1155 supply can be minted to it.');
       if (form.tokenizeBeforeListing && !network.data?.liveMintReady)
         throw new Error(network.data?.message || 'Live Sepolia tokenization is not configured.');
+      if (form.tokenizeBeforeListing) {
+        // The form price is the whole offering value. The V2 contract needs a
+        // per-unit CAP amount, so derive it before minting any live supply.
+        const pricePerToken = capPricePerUnitFromTotal(form.price, form.supply);
+        const token = (await api.post<{ id: string; tokenId: string; supply: number }>('/tokenization/tokens', {
+          assetId: selectedAsset.id,
+          supply: Number(form.supply),
+          recipientAddress: wallet,
+        })).data;
+        const onChain = await createOnChainListing({
+          assetTokenId: token.tokenId,
+          units: String(token.supply),
+          pricePerToken,
+        });
+        await api.post('/marketplace/on-chain-listings', {
+          assetId: selectedAsset.id,
+          tokenPositionId: token.id,
+          onChainListingId: onChain.listingId,
+          onChainTxHash: onChain.txHash,
+          // The confirmed Listed event, not stale UI wallet state, is the
+          // source of truth for the address that escrowed the ERC-1155 units.
+          listerWalletAddress: onChain.sellerAddress,
+          availableTokenUnits: token.supply,
+          pricePerTokenWei: onChain.pricePerTokenWei,
+          askPrice: totalAskPrice,
+          title: listingTitle || undefined,
+          summary: form.summary || undefined,
+          imageUrl: form.imageUrl || undefined,
+        });
+        return;
+      }
       await api.post('/marketplace/listings', {
         assetId: selectedAsset.id,
-        title: form.title || undefined,
+        title: listingTitle || undefined,
         summary: form.summary || undefined,
         imageUrl: form.imageUrl || undefined,
         offeringType: 'SALE',
-        askPrice: Number(form.price),
-        tokenizeOnCreate: form.tokenizeBeforeListing,
-        tokenSupply: form.tokenizeBeforeListing ? Number(form.supply) : undefined,
-        recipientAddress: form.tokenizeBeforeListing ? wallet : undefined,
+        askPrice: totalAskPrice,
+        tokenizeOnCreate: false,
       });
     },
     onSuccess: async () => {
       setNotice({
         tone: 'ok',
         text: form.tokenizeBeforeListing
-          ? 'ERC-1155 units were minted to the lister wallet and the listing was published. No units were escrowed.'
+          ? 'ERC-1155 units were escrowed on Sepolia. Buyers can now escrow CAP against the listing.'
           : 'Non-tokenized listing published.',
       });
       await client.invalidateQueries({ queryKey: ['marketplace'] });
@@ -192,7 +232,7 @@ export default function MarketplacePage() {
       <PageHeader
         eyebrow="Marketplace"
         title="Asset marketplace"
-        description="Tokenization is available at listing time. ERC-1155 units remain in the lister’s wallet; escrow and CAPROV settlement are currently disabled."
+        description="Tokenized listings escrow ERC-1155 units on Sepolia. Buyers escrow CAP, and sellers approve the final on-chain settlement."
       />
 
       <WalletConnect onConnected={setWallet} />
@@ -264,7 +304,7 @@ export default function MarketplacePage() {
             </div>
           ) : visible.length ? (
             <>
-              <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
                 {visible.map((listing) => (
                   <ListingCard key={listing.id} listing={listing} />
                 ))}
@@ -309,8 +349,7 @@ export default function MarketplacePage() {
         <Card className="h-fit p-6 xl:sticky xl:top-6">
           <h2 className="font-display text-lg font-semibold tracking-[-0.02em] text-[var(--ink)]">Create a listing</h2>
           <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-            You can tokenize before publishing. This mints the supply directly to the lister wallet; it does not
-            transfer or lock any units.
+            Tokenize before publishing to mint the ERC-1155 supply, escrow it in the Sepolia marketplace, and accept CAP-funded purchase requests.
           </p>
 
           {!canList ? (
@@ -353,7 +392,7 @@ export default function MarketplacePage() {
                 <span className="min-w-0">
                   <span className="font-medium text-[var(--ink)]">Tokenize before listing</span>
                   <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
-                    Mint a fixed ERC-1155 supply to the connected lister wallet. No escrow transaction is made.
+                    Mint a fixed ERC-1155 supply to the connected wallet, then escrow it in the Sepolia marketplace.
                   </span>
                 </span>
               </label>
@@ -376,7 +415,7 @@ export default function MarketplacePage() {
                 </Field>
               ) : null}
 
-              <Field label="Indicative asking price (USD)">
+              <Field label={form.tokenizeBeforeListing ? 'Total asking price (USD / CAP)' : 'Indicative asking price (USD)'}>
                 <Input
                   type="number"
                   min="0.01"
@@ -385,6 +424,11 @@ export default function MarketplacePage() {
                   onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))}
                   required
                 />
+                {form.tokenizeBeforeListing ? (
+                  <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
+                    This is the total for all token units. The Sepolia contract derives the per-unit CAP price; 1 CAP = 1 USD.
+                  </p>
+                ) : null}
               </Field>
 
               <Field label="Listing title">
@@ -458,7 +502,7 @@ function ListingCard({ listing }: { listing: Listing }) {
 
   return (
     <Card className="overflow-hidden transition hover:border-[var(--gold)]/35">
-      <div className="grid sm:grid-cols-[13rem_minmax(0,1fr)]">
+      <div className="grid">
         {image ? (
           <Image
             src={image}
@@ -466,10 +510,10 @@ function ListingCard({ listing }: { listing: Listing }) {
             width={416}
             height={312}
             unoptimized
-            className="h-44 w-full object-cover sm:h-full"
+            className="h-44 w-full object-cover"
           />
         ) : (
-          <div className="flex h-44 w-full items-center justify-center bg-[var(--paper-2)] sm:h-full">
+          <div className="flex h-44 w-full items-center justify-center bg-[var(--paper-2)]">
             <span className="font-display text-3xl font-semibold tracking-[-0.03em] text-[var(--muted)]/60">
               {(listing.asset?.name ?? listing.title).slice(0, 2).toUpperCase()}
             </span>
@@ -549,6 +593,7 @@ function ListingCard({ listing }: { listing: Listing }) {
               </a>
             ) : null}
           </div>
+          {listing.onChainListingId ? <p className="mt-5 border-t border-[var(--line)]/80 pt-4 text-xs text-[var(--muted)]">Tokenized trading and CAP escrow are available from the Trading section.</p> : null}
         </div>
       </div>
     </Card>

@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Field, Select } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { money } from '@/lib/format';
+import { approveSettlement } from '@/lib/sepolia-marketplace';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 
@@ -16,6 +17,8 @@ interface TradeRow {
   notional: number;
   currency: string;
   quantityBps: number;
+  onChainPurchaseId?: string;
+  tokenUnits?: number;
 }
 
 interface SettlementRow {
@@ -47,7 +50,7 @@ export default function SettlementPage() {
     [trading.data],
   );
   const create = useMutation({
-    mutationFn: async () => api.post('/settlement', { tradeId, method: 'OFF_CHAIN' }),
+    mutationFn: async () => api.post('/settlement', { tradeId, method: 'TOKENIZED_TRANSFER' }),
     onSuccess: async () => {
       setTradeId('');
       await queryClient.invalidateQueries({ queryKey: ['settlement'] });
@@ -55,7 +58,11 @@ export default function SettlementPage() {
     },
   });
   const complete = useMutation({
-    mutationFn: async (id: string) => api.post(`/settlement/${id}/complete`),
+    mutationFn: async (item: SettlementRow) => {
+      if (!item.trade?.onChainPurchaseId) throw new Error('This settlement is not linked to a Sepolia CAP escrow purchase.');
+      const receipt = await approveSettlement(item.trade.onChainPurchaseId);
+      return api.post(`/settlement/${item.id}/complete`, { settlementTxHash: receipt.hash });
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['settlement'] });
       await queryClient.invalidateQueries({ queryKey: ['trading'] });
@@ -67,7 +74,7 @@ export default function SettlementPage() {
       <PageHeader
         eyebrow="Settlement"
         title="Trade settlement"
-        description="Move matched trades through pending → completed settlement with audit trail."
+        description="Sellers approve a CAP-escrow trade. Sepolia atomically pays CAP and transfers ERC-1155 asset units."
       />
       <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
         <Card className="p-6">
@@ -110,8 +117,8 @@ export default function SettlementPage() {
                 <Badge>{item.status}</Badge>
               </div>
               {item.status !== 'COMPLETED' ? (
-                <Button className="mt-4" onClick={() => complete.mutate(item.id)}>
-                  Mark completed
+                <Button className="mt-4" onClick={() => complete.mutate(item)} disabled={complete.isPending || !item.trade?.onChainPurchaseId}>
+                  Approve settlement on Sepolia
                 </Button>
               ) : null}
             </Card>

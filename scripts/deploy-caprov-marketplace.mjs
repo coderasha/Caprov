@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Deploy the ERC-1155 asset token, ERC-20 CAPROV test token, and atomic marketplace to Sepolia. */
+/** Deploy the ERC-1155 asset token, CAP ERC-20 payment token, and seller-approved settlement marketplace to Sepolia. */
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import solc from 'solc';
@@ -10,7 +10,7 @@ const rpc = process.env.ETHEREUM_SEPOLIA_RPC_URL || 'https://ethereum-sepolia-rp
 const key = process.env.ETHEREUM_SEPOLIA_PRIVATE_KEY;
 const mnemonic = process.env.ETHEREUM_SEPOLIA_MNEMONIC;
 if (!key && !mnemonic) throw new Error('Set a funded ETHEREUM_SEPOLIA_PRIVATE_KEY or ETHEREUM_SEPOLIA_MNEMONIC.');
-const sources = Object.fromEntries(['CaprovAssetToken.sol', 'CaprovPaymentToken.sol', 'CaprovMarketplace.sol'].map((name) => [name, { content: readFileSync(resolve(process.cwd(), 'contracts', name), 'utf8') }]));
+const sources = Object.fromEntries(['CaprovAssetToken.sol', 'CaprovPaymentToken.sol', 'CaprovMarketplaceSettlementV2.sol'].map((name) => [name, { content: readFileSync(resolve(process.cwd(), 'contracts', name), 'utf8') }]));
 const output = JSON.parse(solc.compile(JSON.stringify({ language: 'Solidity', sources, settings: { outputSelection: { '*': { '*': ['abi', 'evm.bytecode'] } } } })));
 if (output.errors?.some((error) => error.severity === 'error')) throw new Error(output.errors.map((error) => error.formattedMessage).join('\n'));
 const provider = new JsonRpcProvider(rpc, 11155111);
@@ -23,7 +23,7 @@ const deploy = async (file, name, args = []) => {
 };
 const asset = await deploy('CaprovAssetToken.sol', 'CaprovAssetToken', [process.env.CAPROV_TOKEN_URI || 'https://caprov.local/token/{id}.json']);
 const payment = await deploy('CaprovPaymentToken.sol', 'CaprovPaymentToken');
-const marketplace = await deploy('CaprovMarketplace.sol', 'CaprovMarketplace', [asset, payment]);
+const marketplace = await deploy('CaprovMarketplaceSettlementV2.sol', 'CaprovMarketplaceSettlementV2', [asset, payment]);
 console.log(`Asset token: ${asset}`);
 console.log(`Payment token: ${payment}`);
 console.log(`Marketplace: ${marketplace}`);
