@@ -52,6 +52,7 @@ export type MembershipRole =
   | 'PLATFORM_ADMIN'
   | 'ORG_ADMIN'
   | 'ANALYST'
+  | 'BANKER'
   | 'COMPLIANCE'
   | 'VIEWER';
 
@@ -464,6 +465,12 @@ export interface CollateralPosition {
   organizationId: EntityId;
   assetId: EntityId;
   tokenId?: EntityId;
+  /** Portion of the tokenized asset locked as collateral, in basis points. */
+  collateralBps?: number;
+  totalTokenSupply?: number;
+  lockedTokenUnits?: number;
+  vaultCollateralId?: string;
+  vaultTxHash?: string;
   status: CollateralStatus;
   requestedByUserId?: EntityId;
   approvedAt?: IsoTimestamp;
@@ -490,6 +497,11 @@ export interface LoanFacility {
   termDays: number;
   outstanding: number;
   ltvBps: number;
+  bankerHaircutBps?: number;
+  maxLoanAmount?: number;
+  lenderWalletAddress?: string;
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
   disbursedAt?: IsoTimestamp;
   createdAt: IsoTimestamp;
   updatedAt: IsoTimestamp;

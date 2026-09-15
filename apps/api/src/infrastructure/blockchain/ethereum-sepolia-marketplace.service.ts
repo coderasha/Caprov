@@ -116,7 +116,7 @@ export class EthereumSepoliaMarketplaceService {
     });
   }
 
-  async verifySettlementTransaction(txHash: string, purchaseId: string) {
+  async verifySettlementTransaction(txHash: string, purchaseId: string, expectedSeller?: string) {
     const address = this.address();
     if (!address) return false;
     const provider = new JsonRpcProvider(process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC, ETHEREUM_SEPOLIA_CHAIN_ID);
@@ -125,7 +125,12 @@ export class EthereumSepoliaMarketplaceService {
     const contract = new Contract(address, MARKETPLACE_ABI, provider);
     return receipt.logs.some((log) => {
       if (log.address.toLowerCase() !== address.toLowerCase()) return false;
-      try { const event = contract.interface.parseLog(log); return event?.name === 'PurchaseSettled' && event.args.purchaseId.toString() === purchaseId; } catch { return false; }
+      try {
+        const event = contract.interface.parseLog(log);
+        return event?.name === 'PurchaseSettled'
+          && event.args.purchaseId.toString() === purchaseId
+          && (!expectedSeller || getAddress(event.args.seller) === getAddress(expectedSeller));
+      } catch { return false; }
     });
   }
 

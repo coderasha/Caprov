@@ -103,6 +103,7 @@ export const roleLabel: Record<MembershipRole, string> = {
   PLATFORM_ADMIN: 'Platform admin',
   ORG_ADMIN: 'Org admin',
   ANALYST: 'Analyst',
+  BANKER: 'Banker',
   COMPLIANCE: 'Compliance',
   VIEWER: 'Viewer',
 };

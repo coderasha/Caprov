@@ -10,7 +10,7 @@ import { api } from '@/lib/api';
 import { sepoliaTxExplorerUrl } from '@/lib/explorer';
 import { readFileAsDataUrl } from '@/lib/files';
 import { assetClassLabel, money } from '@/lib/format';
-import { capPricePerUnitFromTotal, createOnChainListing } from '@/lib/sepolia-marketplace';
+import { capPricePerUnitFromTotal, connectMetaMaskWallet, createOnChainListing, mintAssetFromWallet } from '@/lib/sepolia-marketplace';
 import type { HydratedAsset } from '@/lib/types';
 import { useAuthStore } from '@/stores/auth-store';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -56,6 +56,7 @@ interface Listing {
 interface Network {
   liveMintReady: boolean;
   message: string;
+  contractAddress?: string;
 }
 
 type Filter = 'ALL' | 'TOKENIZED' | 'OFF_CHAIN';
@@ -160,18 +161,30 @@ export default function MarketplacePage() {
       const totalAskPrice = Number(form.price);
       if (!Number.isFinite(totalAskPrice) || totalAskPrice < 0.01) throw new Error('Enter a valid total asking price of at least 0.01 USD.');
       if (listingTitle && listingTitle.length < 2) throw new Error('Listing title must contain at least 2 characters.');
-      if (form.tokenizeBeforeListing && !wallet)
-        throw new Error('Connect the lister MetaMask wallet first so the new ERC-1155 supply can be minted to it.');
-      if (form.tokenizeBeforeListing && !network.data?.liveMintReady)
-        throw new Error(network.data?.message || 'Live Sepolia tokenization is not configured.');
+      if (form.tokenizeBeforeListing && !network.data?.contractAddress)
+        throw new Error('The Sepolia ERC-1155 token contract is not configured.');
       if (form.tokenizeBeforeListing) {
+        // Requesting account permissions from this click lets MetaMask present
+        // its native account chooser instead of relying on a server-held key.
+        let listerWallet = wallet;
+        if (!listerWallet) {
+          const connected = await connectMetaMaskWallet();
+          listerWallet = connected.address;
+          setWallet(listerWallet);
+        }
         // The form price is the whole offering value. The V2 contract needs a
         // per-unit CAP amount, so derive it before minting any live supply.
         const pricePerToken = capPricePerUnitFromTotal(form.price, form.supply);
-        const token = (await api.post<{ id: string; tokenId: string; supply: number }>('/tokenization/tokens', {
+        const mint = await mintAssetFromWallet({
           assetId: selectedAsset.id,
           supply: Number(form.supply),
-          recipientAddress: wallet,
+          recipientAddress: listerWallet,
+        });
+        const token = (await api.post<{ id: string; tokenId: string; supply: number }>('/tokenization/tokens/wallet-mints', {
+          assetId: selectedAsset.id,
+          supply: Number(form.supply),
+          recipientAddress: listerWallet,
+          txHash: mint.txHash,
         })).data;
         const onChain = await createOnChainListing({
           assetTokenId: token.tokenId,

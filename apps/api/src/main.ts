@@ -19,6 +19,7 @@ loadEnv({
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bodyParser: false,
+    rawBody: true,
   });
   const maxPayloadBytes = '250mb';
   app.useBodyParser('json', { limit: maxPayloadBytes });

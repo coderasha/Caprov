@@ -17,10 +17,12 @@ const now = '2026-08-10T10:00:00.000Z';
 
 const orgId = 'org_meridian';
 const platformOrgId = 'org_caprov';
+const bankOrgId = 'org_caprov_demo_bank';
 const elenaId = 'usr_elena';
 const arjunId = 'usr_arjun';
 const sofiaId = 'usr_sofia';
 const adminId = 'usr_caprov_admin';
+const bankerId = 'usr_bank_demo';
 const platformAdminEmail = 'priya@caprov.io';
 const platformAdminName = 'Priya Nair';
 const defaultLlmModelId = getPreferredDefaultLlmModelId();
@@ -1015,6 +1017,7 @@ export function buildSeedData(): CaprovData {
         createdAt: '2020-01-06T09:00:00.000Z',
         updatedAt: now,
       },
+      { id: bankOrgId, name: 'CAPROV Demo Bank', slug: 'caprov-demo-bank', status: 'ACTIVE', llmModelId: defaultLlmModelId, createdAt: now, updatedAt: now },
     ],
     users: [
       {
@@ -1053,6 +1056,7 @@ export function buildSeedData(): CaprovData {
         createdAt: '2020-01-06T09:00:00.000Z',
         updatedAt: now,
       },
+      { id: bankerId, email: 'banker@caprov.demo', passwordHash, fullName: 'Jordan Lee', title: 'Banker', createdAt: now, updatedAt: now },
     ],
     memberships: [
       {
@@ -1083,6 +1087,7 @@ export function buildSeedData(): CaprovData {
         role: 'PLATFORM_ADMIN',
         createdAt: '2020-01-06T09:00:00.000Z',
       },
+      { id: 'mem_bank_demo', organizationId: bankOrgId, userId: bankerId, role: 'BANKER', createdAt: now },
     ],
     organizationAccessRequests: [],
     assets: [
@@ -1994,6 +1999,7 @@ export function buildSeedData(): CaprovData {
 }
 
 export const DEMO_ACCOUNTS = [
+  { name: 'Jordan Lee', email: 'banker@caprov.demo', password: DEMO_PASSWORD, role: 'Banker' },
   {
     email: platformAdminEmail,
     password: DEMO_PASSWORD,

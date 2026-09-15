@@ -8,6 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { IsInt, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import { getAddress, isAddress } from 'ethers';
 import type { TokenPosition } from '@caprov/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -32,6 +33,23 @@ class TokenizeDto {
   @IsString()
   @MinLength(42)
   recipientAddress?: string;
+}
+
+class RegisterWalletMintDto {
+  @IsString()
+  assetId!: string;
+
+  @IsInt()
+  @Min(1)
+  supply!: number;
+
+  @IsString()
+  @MinLength(66)
+  txHash!: string;
+
+  @IsString()
+  @MinLength(42)
+  recipientAddress!: string;
 }
 
 @Controller('tokenization')
@@ -154,6 +172,64 @@ export class TokenizationController {
         chainId: token.chainId,
         error: mint.error,
       },
+    });
+    return this.hydrate(token);
+  }
+
+  /** Records a confirmed mint signed by the lister's MetaMask account. */
+  @Post('tokens/wallet-mints')
+  @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
+  async registerWalletMint(@CurrentUser() user: AuthUser, @Body() dto: RegisterWalletMintDto) {
+    if (!isAddress(dto.recipientAddress)) {
+      throw new BadRequestException('A valid recipient wallet address is required.');
+    }
+    const asset = this.db.snapshot.assets.find(
+      (item) => item.id === dto.assetId && item.organizationId === user.organizationId,
+    );
+    if (!asset) throw new NotFoundException('Asset not found');
+    if (dto.supply > 1_000_000_000) throw new BadRequestException('Supply too large');
+
+    const network = this.sepolia.getNetworkStatus();
+    if (!network.contractAddress) {
+      throw new BadRequestException('ETHEREUM_TOKEN_CONTRACT must be configured to register a wallet-signed mint.');
+    }
+    const existing = this.db.snapshot.tokens.find(
+      (item) =>
+        item.assetId === asset.id &&
+        item.status === 'CONFIRMED' &&
+        item.contractAddress?.toLowerCase() === network.contractAddress?.toLowerCase(),
+    );
+    if (existing) throw new BadRequestException('This asset is already tokenized on the active ERC-1155 contract.');
+
+    const marketplaceAssetToken = await this.marketplace.getAssetTokenAddress();
+    if (!marketplaceAssetToken || marketplaceAssetToken.toLowerCase() !== network.contractAddress.toLowerCase()) {
+      throw new BadRequestException('ETHEREUM_TOKEN_CONTRACT does not match the active Sepolia marketplace asset-token contract.');
+    }
+    const recipientAddress = getAddress(dto.recipientAddress);
+    const valid = await this.sepolia.verifyWalletMintTransaction({
+      txHash: dto.txHash,
+      assetId: asset.id,
+      supply: dto.supply,
+      recipientAddress,
+    });
+    if (!valid) {
+      throw new BadRequestException('The submitted transaction is not a confirmed matching ERC-1155 mint for this asset.');
+    }
+
+    const now = new Date().toISOString();
+    const token: TokenPosition = {
+      id: createId('tok'), organizationId: user.organizationId, assetId: asset.id,
+      status: 'CONFIRMED', chainId: network.chainId, chainName: network.chainName,
+      contractAddress: network.contractAddress, tokenId: this.sepolia.tokenIdForAsset(asset.id),
+      supply: dto.supply, recipientAddress, txHash: dto.txHash,
+      explorerUrl: `https://sepolia.etherscan.io/tx/${dto.txHash}`, mode: 'LIVE',
+      createdAt: now, updatedAt: now,
+    };
+    this.db.mutate((draft) => draft.tokens.unshift(token));
+    this.audit.log({
+      organizationId: user.organizationId, actorUserId: user.id,
+      action: 'tokenization.wallet_mint_registered', entityType: 'Token', entityId: token.id,
+      metadata: { assetId: asset.id, txHash: dto.txHash, recipientAddress },
     });
     return this.hydrate(token);
   }

@@ -42,6 +42,20 @@ export class DatabaseService implements OnModuleInit {
     const arjun = this.data.users.find(
       (user) => user.email === 'arjun@meridian.caprov',
     );
+    const bankOrgId = 'org_caprov_demo_bank';
+    const bankerId = 'usr_bank_demo';
+    if (!this.data.organizations.some((org) => org.id === bankOrgId)) {
+      this.data.organizations.push({ id: bankOrgId, name: 'CAPROV Demo Bank', slug: 'caprov-demo-bank', status: 'ACTIVE', llmModelId: preferredDefaultModelId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); changed = true;
+    }
+    if (!this.data.users.some((user) => user.id === bankerId)) {
+      this.data.users.push({ id: bankerId, email: 'banker@caprov.demo', passwordHash: seeded.users.find((user) => user.id === bankerId)!.passwordHash, fullName: 'Jordan Lee', title: 'Banker', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); changed = true;
+    }
+    if (!this.data.memberships.some((membership) => membership.id === 'mem_bank_demo')) {
+      this.data.memberships.push({ id: 'mem_bank_demo', organizationId: bankOrgId, userId: bankerId, role: 'BANKER', createdAt: new Date().toISOString() }); changed = true;
+    }
+    if (!this.data.wallets.some((wallet) => wallet.organizationId === bankOrgId && wallet.currency === 'USD')) {
+      this.data.wallets.push({ organizationId: bankOrgId, currency: 'USD', balance: 100_000_000, updatedAt: new Date().toISOString() }); changed = true;
+    }
     for (const portfolio of this.data.portfolios) {
       // Preserve existing portfolios, while giving the seeded senior analyst the
       // portfolio that is part of the demo workspace.

@@ -38,6 +38,7 @@ class RegisterOnChainTradeDto {
   @IsInt() @Min(1) tokenUnits!: number;
   @IsString() paymentCapWei!: string;
 }
+class OnChainTradeQuoteDto { @IsString() listingId!: string; @IsString() buyerWalletAddress!: string; @IsInt() @Min(1) tokenUnits!: number; }
 
 class CreateOrderDto {
   @IsString()
@@ -69,12 +70,23 @@ export class TradingController {
     private readonly marketplace: EthereumSepoliaMarketplaceService,
   ) {}
 
+  @Post('on-chain-trades/quote')
+  @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
+  quoteOnChainTrade(@CurrentUser() user: AuthUser, @Body() dto: OnChainTradeQuoteDto) {
+    const listing = this.db.snapshot.listings.find((item) => item.id === dto.listingId && item.onChainListingId && item.pricePerTokenWei);
+    if (!listing || !isAddress(dto.buyerWalletAddress)) throw new NotFoundException('Open tokenized listing not found.');
+    if (listing.listerWalletAddress && getAddress(listing.listerWalletAddress) === getAddress(dto.buyerWalletAddress)) throw new BadRequestException('The listing wallet cannot buy its own asset.');
+    if (dto.tokenUnits > (listing.availableTokenUnits ?? 0)) throw new BadRequestException('Trade units exceed the available token units.');
+    return { listingId: listing.id, onChainListingId: listing.onChainListingId, pricePerTokenWei: listing.pricePerTokenWei, tokenUnits: dto.tokenUnits };
+  }
+
   @Post('on-chain-trades')
   @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
   async registerOnChainTrade(@CurrentUser() user: AuthUser, @Body() dto: RegisterOnChainTradeDto) {
     if (!isAddress(dto.buyerWalletAddress) || !/^\d+$/.test(dto.purchaseId) || !/^\d+$/.test(dto.paymentCapWei)) throw new BadRequestException('Invalid purchase reference.');
     const listing = this.db.snapshot.listings.find((item) => item.id === dto.listingId && item.onChainListingId && item.pricePerTokenWei);
-    if (!listing || listing.organizationId === user.organizationId) throw new BadRequestException('This tokenized listing is not available to this buyer.');
+    if (!listing) throw new BadRequestException('This tokenized listing is not available to this buyer.');
+    if (listing.listerWalletAddress && getAddress(listing.listerWalletAddress) === getAddress(dto.buyerWalletAddress)) throw new BadRequestException('The listing wallet cannot buy its own asset.');
     if (dto.tokenUnits > (listing.availableTokenUnits ?? 0)) throw new BadRequestException('Trade units exceed the available token units.');
     const valid = await this.marketplace.verifyPurchaseTransaction({ txHash: dto.purchaseTxHash, purchaseId: dto.purchaseId, listingId: listing.onChainListingId!, buyer: dto.buyerWalletAddress, units: String(dto.tokenUnits) });
     if (!valid) throw new BadRequestException('The submitted transaction is not a confirmed matching CAP escrow purchase.');
@@ -102,14 +114,20 @@ export class TradingController {
 
   @Get('trades')
   listTrades(@CurrentUser() user: AuthUser) {
-    return this.db.snapshot.trades.filter((item) => {
-      if (item.organizationId === user.organizationId) return true;
-      return this.db.snapshot.listings.some(
-        (listing) =>
-          listing.id === item.listingId &&
-          listing.organizationId === user.organizationId,
-      );
-    });
+    return this.db.snapshot.trades
+      .filter((item) => {
+        if (item.organizationId === user.organizationId) return true;
+        return this.db.snapshot.listings.some(
+          (listing) =>
+            listing.id === item.listingId &&
+            listing.organizationId === user.organizationId,
+        );
+      })
+      .map((trade) => ({
+        ...trade,
+        listing:
+          this.db.snapshot.listings.find((item) => item.id === trade.listingId) ?? null,
+      }));
   }
 
   @Post('orders')

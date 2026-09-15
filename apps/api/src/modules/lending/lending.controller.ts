@@ -62,7 +62,7 @@ export class LendingController {
   @Get()
   list(@CurrentUser() user: AuthUser) {
     return this.db.snapshot.loans
-      .filter((item) => item.organizationId === user.organizationId)
+      .filter((item) => item.organizationId === user.organizationId || user.roles.includes('BANKER'))
       .map((item) => this.hydrate(item));
   }
 
@@ -125,10 +125,10 @@ export class LendingController {
   }
 
   @Post(':id/disburse')
-  @Roles('COMPLIANCE', 'ORG_ADMIN', 'PLATFORM_ADMIN')
+  @Roles('BANKER', 'PLATFORM_ADMIN')
   disburse(@CurrentUser() user: AuthUser, @Param('id') id: string) {
     const loan = this.db.snapshot.loans.find(
-      (item) => item.id === id && item.organizationId === user.organizationId,
+      (item) => item.id === id,
     );
     if (!loan) throw new NotFoundException('Loan not found');
     if (loan.status !== 'PENDING_APPROVAL') {
@@ -138,7 +138,7 @@ export class LendingController {
     const collateral = this.db.snapshot.collateralPositions.find(
       (item) =>
         item.id === loan.collateralId &&
-        item.organizationId === user.organizationId,
+        item.organizationId === loan.organizationId,
     );
     if (!collateral || collateral.status !== 'ACTIVE') {
       throw new NotFoundException('Approved collateral position not found');
@@ -163,15 +163,20 @@ export class LendingController {
       target.disbursedAt = now;
       target.updatedAt = now;
 
+      const bankWallet = draft.wallets.find((item) => item.organizationId === user.organizationId && item.currency === target.currency);
+      if (!bankWallet || bankWallet.balance < target.principal) throw new BadRequestException('Bank simulated USD treasury has insufficient funds.');
+      bankWallet.balance = Number((bankWallet.balance - target.principal).toFixed(2)); bankWallet.updatedAt = now;
+      draft.walletTransactions.unshift({ id: createId('wtx'), organizationId: user.organizationId, direction: 'DEBIT', type: 'LOAN_DISBURSAL', amount: target.principal, currency: target.currency, description: `Simulated USD disbursal for loan ${target.id}`, referenceType: 'Loan', referenceId: target.id, createdAt: now, createdByUserId: user.id });
       const wallet =
         draft.wallets.find(
           (item) =>
-            item.organizationId === user.organizationId &&
+            item.organizationId === target.organizationId &&
             item.currency === target.currency,
         ) ??
         (() => {
           const created = {
             organizationId: user.organizationId,
+            organizationId: target.organizationId,
             currency: target.currency,
             balance: 0,
             updatedAt: now,
@@ -185,7 +190,7 @@ export class LendingController {
 
       draft.walletTransactions.unshift({
         id: createId('wtx'),
-        organizationId: user.organizationId,
+        organizationId: target.organizationId,
         direction: 'CREDIT',
         type: 'LOAN_DISBURSAL',
         amount: target.principal,

@@ -137,6 +137,7 @@ export default function OrganizationPage() {
               >
                 <option value="ORG_ADMIN">Org admin</option>
                 <option value="ANALYST">Analyst</option>
+                <option value="BANKER">Banker</option>
                 <option value="COMPLIANCE">Compliance</option>
                 <option value="VIEWER">Viewer</option>
               </Select>

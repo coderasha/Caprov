@@ -19,6 +19,7 @@ interface DemoAccount {
 }
 
 const DEMO_PERSONAS: DemoAccount[] = [
+  { name: 'Jordan Lee', email: 'banker@caprov.demo', password: 'CaprovDemo!23', role: 'Banker' },
   { name: 'Priya Nair', email: 'priya@caprov.io', password: 'CaprovDemo!23', role: 'Platform admin' },
   { name: 'Elena Voss', email: 'elena@meridian.caprov', password: 'CaprovDemo!23', role: 'Organization admin' },
   { name: 'Arjun Mehta', email: 'arjun@meridian.caprov', password: 'CaprovDemo!23', role: 'Analyst' },

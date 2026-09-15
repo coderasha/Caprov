@@ -36,26 +36,14 @@ class CreateCollateralDto {
   @IsString()
   assetId!: string;
 
-  @IsOptional()
-  @IsString()
-  tokenId?: string;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(1)
-  pledgedValue?: number;
-
-  @IsOptional()
-  @IsString()
-  currency?: CurrencyCode;
-
-  @IsOptional()
   @Type(() => Number)
   @IsInt()
-  @Min(0)
-  @Max(5000)
-  haircutBps?: number;
+  @Min(1)
+  @Max(10_000)
+  collateralBps!: number;
+
+  @IsString()
+  tokenId!: string;
 }
 
 class UpdateCollateralDto {
@@ -118,51 +106,41 @@ export class CollateralController {
       );
     }
 
-    if (dto.tokenId) {
-      const token = this.db.snapshot.tokens.find(
-        (item) =>
-          item.id === dto.tokenId &&
-          item.organizationId === user.organizationId,
-      );
-      if (!token) throw new NotFoundException('Token position not found');
-      if (token.assetId !== asset.id) {
-        throw new BadRequestException('Token does not belong to this asset');
-      }
-      const tokenInUse = this.db.snapshot.collateralPositions.find(
-        (item) =>
-          item.organizationId === user.organizationId &&
-          item.tokenId === dto.tokenId &&
-          item.status === 'ACTIVE',
-      );
-      if (tokenInUse) {
-        throw new BadRequestException(
-          'Token is already pledged in an active collateral position',
-        );
-      }
-    }
+    const token = this.db.snapshot.tokens.find((item) => item.id === dto.tokenId && item.organizationId === user.organizationId && item.status === 'CONFIRMED');
+    if (!token || token.assetId !== asset.id) throw new NotFoundException('A confirmed token position for this asset is required.');
+    const existingBps = this.db.snapshot.collateralPositions
+      .filter((item) => item.assetId === asset.id && item.tokenId === token.id && ['ACTIVE', 'PENDING_APPROVAL'].includes(item.status))
+      .reduce((sum, item) => sum + (item.collateralBps ?? 10_000), 0);
+    if (existingBps + dto.collateralBps > 10_000) throw new BadRequestException('This request exceeds the unpledged portion of the asset token supply.');
+    const lockedTokenUnits = Math.floor((token.supply * dto.collateralBps) / 10_000);
+    if (lockedTokenUnits < 1) throw new BadRequestException('The selected percentage produces fewer than one ERC-1155 unit.');
 
     const valuation = this.db.snapshot.valuations
       .filter((item) => item.assetId === asset.id)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
-    const pledgedValue = dto.pledgedValue ?? valuation?.payload.amount;
+    const pledgedValue = valuation?.payload.amount ? Number(((valuation.payload.amount * dto.collateralBps) / 10_000).toFixed(2)) : undefined;
     if (!pledgedValue || pledgedValue <= 0) {
       throw new BadRequestException(
-        'pledgedValue required when the asset has no valuation mark',
+        'A current valuation mark is required before a percentage can be collateralized.',
       );
     }
-    const haircutBps = dto.haircutBps ?? 1500;
     const now = new Date().toISOString();
     const position: CollateralPosition = {
       id: createId('col'),
       organizationId: user.organizationId,
       assetId: asset.id,
-      tokenId: dto.tokenId,
+      tokenId: token.id,
+      collateralBps: dto.collateralBps,
+      totalTokenSupply: token.supply,
+      lockedTokenUnits,
       status: 'PENDING_APPROVAL',
       requestedByUserId: user.id,
       pledgedValue,
-      currency: dto.currency ?? valuation?.payload.currency ?? asset.currency,
-      haircutBps,
-      advanceableValue: this.advanceable(pledgedValue, haircutBps),
+      currency: valuation?.payload.currency ?? asset.currency,
+      // Banker underwriting applies the haircut later. The lister only states
+      // the portion of the asset offered as collateral.
+      haircutBps: 0,
+      advanceableValue: pledgedValue,
       createdAt: now,
       updatedAt: now,
     };

@@ -1,6 +1,7 @@
-import { BrowserProvider, Contract, Interface, type Eip1193Provider, formatUnits, parseUnits } from 'ethers';
+import { BrowserProvider, Contract, Interface, id as ethId, type Eip1193Provider, formatUnits, parseUnits } from 'ethers';
 
 const assetAbi = [
+  'function mintAsset(address to, uint256 id, uint256 amount, string assetReference)',
   'function setApprovalForAll(address operator, bool approved)',
   'function isApprovedForAll(address account, address operator) view returns (bool)',
   'function balanceOf(address account, uint256 id) view returns (uint256)',
@@ -168,6 +169,22 @@ async function signer(walletId?: string) {
 export async function connectSepoliaWallet(walletId?: string) {
   const connectedSigner = await signer(walletId);
   return connectedSigner.getAddress();
+}
+
+/** Mints immutable ERC-1155 supply from the account chosen in MetaMask. */
+export async function mintAssetFromWallet(input: { assetId: string; supply: number; recipientAddress: string }) {
+  if (!Number.isSafeInteger(input.supply) || input.supply < 1) throw new Error('Token supply must be a positive whole number.');
+  const connectedSigner = await signer();
+  const selectedAddress = await connectedSigner.getAddress();
+  if (selectedAddress.toLowerCase() !== input.recipientAddress.toLowerCase()) {
+    throw new Error('The mint recipient must be the MetaMask account selected for this transaction.');
+  }
+  const { assetToken } = addresses();
+  const asset = new Contract(assetToken, assetAbi, connectedSigner);
+  const tokenId = BigInt(ethId(`caprov:asset:${input.assetId}`));
+  const receipt = await (await asset.getFunction('mintAsset')(selectedAddress, tokenId, BigInt(input.supply), input.assetId)).wait();
+  if (!receipt) throw new Error('MetaMask submitted the mint but no confirmed receipt was returned.');
+  return { txHash: receipt.hash, tokenId: tokenId.toString() };
 }
 
 /** Confirms the connected lister holds enough units on the configured ERC-1155. */

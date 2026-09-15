@@ -8,7 +8,8 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
+import { getAddress, isAddress } from 'ethers';
 import type { SettlementRecord } from '@caprov/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -31,6 +32,10 @@ class CreateSettlementDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsString()
+  @MinLength(42)
+  sellerWalletAddress!: string;
 }
 class CompleteSettlementDto { @IsString() settlementTxHash!: string; }
 
@@ -57,7 +62,10 @@ export class SettlementController {
       (item) => item.id === dto.tradeId,
     );
     if (!trade) throw new NotFoundException('Trade not found');
-    if (!this.isSellerForTrade(trade.id, user.organizationId)) {
+    if (!trade.onChainPurchaseId) {
+      throw new BadRequestException('Only confirmed CAP-escrow trades can enter the Sepolia settlement flow.');
+    }
+    if (!this.isSellerWalletForTrade(trade.id, user.organizationId, dto.sellerWalletAddress)) {
       throw new BadRequestException('Only the listing owner can initiate settlement for this buyer order.');
     }
     if (trade.status === 'SETTLED') {
@@ -75,7 +83,7 @@ export class SettlementController {
       tradeId: trade.id,
       assetId: trade.assetId,
       status: 'PENDING',
-      method: dto.method ?? 'OFF_CHAIN',
+      method: 'TOKENIZED_TRANSFER',
       notes: dto.notes,
       createdAt: now,
       updatedAt: now,
@@ -106,11 +114,18 @@ export class SettlementController {
       (item) => item.id === id,
     );
     if (!settlement) throw new NotFoundException('Settlement not found');
+    const trade = this.db.snapshot.trades.find((item) => item.id === settlement.tradeId);
+    const listing = trade && this.db.snapshot.listings.find((item) => item.id === trade.listingId);
+    if (!trade?.onChainPurchaseId || !listing?.listerWalletAddress) {
+      throw new BadRequestException('This settlement is not linked to a tokenized CAP-escrow trade.');
+    }
     if (!this.isSellerForTrade(settlement.tradeId, user.organizationId)) {
       throw new BadRequestException('Only the listing owner can approve settlement and release the tokenized interest.');
     }
-    const trade = this.db.snapshot.trades.find((item) => item.id === settlement.tradeId);
-    if (!trade?.onChainPurchaseId || !await this.marketplace.verifySettlementTransaction(dto.settlementTxHash, trade.onChainPurchaseId)) {
+    if (settlement.status === 'COMPLETED' || trade.status === 'SETTLED') {
+      throw new BadRequestException('This trade is already settled.');
+    }
+    if (!await this.marketplace.verifySettlementTransaction(dto.settlementTxHash, trade.onChainPurchaseId, listing.listerWalletAddress)) {
       throw new BadRequestException('A confirmed matching Sepolia settlement transaction is required.');
     }
     const now = new Date().toISOString();
@@ -124,6 +139,7 @@ export class SettlementController {
       );
       if (draftTrade) {
         draftTrade.status = 'SETTLED';
+        draftTrade.settlementTxHash = dto.settlementTxHash;
         draftTrade.updatedAt = now;
       }
     });
@@ -140,12 +156,18 @@ export class SettlementController {
   }
 
   private hydrate(settlement: SettlementRecord) {
+    const trade = this.db.snapshot.trades.find(
+      (item) => item.id === settlement.tradeId,
+    );
     return {
       ...settlement,
-      trade:
-        this.db.snapshot.trades.find(
-          (item) => item.id === settlement.tradeId,
-        ) ?? null,
+      trade: trade
+        ? {
+            ...trade,
+            listing:
+              this.db.snapshot.listings.find((item) => item.id === trade.listingId) ?? null,
+          }
+        : null,
       asset:
         this.db.snapshot.assets.find(
           (item) => item.id === settlement.assetId,
@@ -159,6 +181,18 @@ export class SettlementController {
       trade && this.db.snapshot.listings.some(
         (listing) => listing.id === trade.listingId && listing.organizationId === organizationId,
       ),
+    );
+  }
+
+  private isSellerWalletForTrade(tradeId: string, organizationId: string, walletAddress: string) {
+    if (!isAddress(walletAddress)) return false;
+    const trade = this.db.snapshot.trades.find((item) => item.id === tradeId);
+    const listing = trade && this.db.snapshot.listings.find((item) => item.id === trade.listingId);
+    return Boolean(
+      listing &&
+        listing.organizationId === organizationId &&
+        listing.listerWalletAddress &&
+        getAddress(listing.listerWalletAddress) === getAddress(walletAddress),
     );
   }
 

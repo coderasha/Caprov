@@ -5,6 +5,7 @@ import {
   JsonRpcProvider,
   Wallet,
   HDNodeWallet,
+  Interface,
   id as ethId,
   getAddress,
   isAddress,
@@ -21,6 +22,7 @@ const CAPROV_TOKEN_ABI = [
   'function mintAsset(address to, uint256 id, uint256 amount, string assetReference)',
   'function uri(uint256 id) view returns (string)',
   'event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)',
+  'event AssetCreated(uint256 indexed id, uint256 supply, string assetReference)',
 ] as const;
 
 export interface TokenNetworkStatus {
@@ -55,6 +57,13 @@ export interface MintResult {
   explorerUrl?: string;
   status: 'CONFIRMED' | 'SIMULATED' | 'FAILED';
   error?: string;
+}
+
+export interface WalletMintVerification {
+  txHash: string;
+  assetId: string;
+  supply: number;
+  recipientAddress: string;
 }
 
 export interface ProvenanceAnchorRequest {
@@ -110,7 +119,9 @@ export class EthereumSepoliaTokenService {
       mode: liveMintReady ? 'LIVE' : 'UNAVAILABLE',
       message: liveMintReady
         ? 'Live minting enabled against Ethereum Sepolia with configured signer and CaprovAssetToken contract.'
-        : 'Live Ethereum Sepolia minting is unavailable. Set a valid ETHEREUM_SEPOLIA_PRIVATE_KEY (or ETHEREUM_SEPOLIA_MNEMONIC) and ETHEREUM_TOKEN_CONTRACT; simulated mints are disabled.',
+        : contractAddress
+          ? 'Wallet-signed Sepolia minting is available in Marketplace. Connect an authorized MetaMask account to mint; the API does not hold or require a private key for this flow.'
+          : 'Ethereum Sepolia tokenization is unavailable because ETHEREUM_TOKEN_CONTRACT is not configured.',
     };
   }
 
@@ -127,6 +138,56 @@ export class EthereumSepoliaTokenService {
         ok: false,
         error: error instanceof Error ? error.message : 'rpc probe failed',
       };
+    }
+  }
+
+  /** The ERC-1155 type is deterministic for an asset, regardless of who signs the mint. */
+  tokenIdForAsset(assetId: string): string {
+    return BigInt(ethId(`caprov:asset:${assetId}`)).toString();
+  }
+
+  /**
+   * Verifies a mint signed in the user's browser wallet before it is recorded
+   * by the API. This deliberately needs only an RPC URL and token contract,
+   * never an API-held private key.
+   */
+  async verifyWalletMintTransaction(input: WalletMintVerification): Promise<boolean> {
+    const status = this.getNetworkStatus();
+    if (!status.contractAddress || !isAddress(input.recipientAddress) || input.supply < 1) return false;
+    try {
+      const provider = new JsonRpcProvider(status.rpcUrl, status.chainId);
+      const receipt = await provider.getTransactionReceipt(input.txHash);
+      if (!receipt || receipt.status !== 1) return false;
+      const iface = new Interface(CAPROV_TOKEN_ABI);
+      const expectedTokenId = this.tokenIdForAsset(input.assetId);
+      const recipient = getAddress(input.recipientAddress);
+      let assetCreated = false;
+      let mintedToRecipient = false;
+      for (const log of receipt.logs) {
+        if (log.address.toLowerCase() !== status.contractAddress.toLowerCase()) continue;
+        try {
+          const event = iface.parseLog(log);
+          if (event?.name === 'AssetCreated') {
+            assetCreated =
+              event.args.id.toString() === expectedTokenId &&
+              event.args.supply.toString() === String(input.supply) &&
+              event.args.assetReference === input.assetId;
+          }
+          if (event?.name === 'TransferSingle') {
+            mintedToRecipient =
+              event.args.from === '0x0000000000000000000000000000000000000000' &&
+              getAddress(event.args.to) === recipient &&
+              event.args.id.toString() === expectedTokenId &&
+              event.args.value.toString() === String(input.supply);
+          }
+        } catch {
+          // An unrelated log from the transaction is not evidence of a mint.
+        }
+      }
+      return assetCreated && mintedToRecipient;
+    } catch (error) {
+      this.logger.warn(`Could not verify browser-wallet mint ${input.txHash}: ${error instanceof Error ? error.message : 'unknown error'}`);
+      return false;
     }
   }
 
@@ -163,7 +224,7 @@ export class EthereumSepoliaTokenService {
       const to = getAddress(request.recipientAddress?.trim() || wallet.address);
       // The asset id—not the listing id—defines the ERC-1155 token type. This
       // makes every asset's supply immutable after its first tokenization.
-      const tokenId = BigInt(ethId(`caprov:asset:${request.assetId}`));
+      const tokenId = BigInt(this.tokenIdForAsset(request.assetId));
       const mintFn = contract.getFunction('mintAsset');
       const tx = await mintFn(to, tokenId, BigInt(request.supply), request.assetId);
       const receipt = await tx.wait();

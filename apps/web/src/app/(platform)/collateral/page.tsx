@@ -34,6 +34,8 @@ interface CollateralRow {
   activeLoanCount: number;
   currency: string;
   haircutBps: number;
+  collateralBps?: number;
+  lockedTokenUnits?: number;
   tokenId?: string;
   asset?: { name: string } | null;
   token?: { id: string; mode: string; supply?: number } | null;
@@ -71,8 +73,7 @@ export default function CollateralPage() {
   const roles = useAuthStore((state) => state.roles);
   const [assetId, setAssetId] = useState('');
   const [tokenId, setTokenId] = useState('');
-  const [haircutBps, setHaircutBps] = useState('1500');
-  const [pledgedValue, setPledgedValue] = useState('');
+  const [collateralBps, setCollateralBps] = useState('1000');
   const [formError, setFormError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -126,14 +127,9 @@ export default function CollateralPage() {
     [assets.data, activeAssetIds],
   );
   const selectedAsset = (assets.data ?? []).find((asset) => asset.id === assetId);
-  const markAmount = selectedAsset?.latestValuation?.payload.amount;
-  const markCurrency = selectedAsset?.latestValuation?.payload.currency ?? selectedAsset?.currency;
-  const previewPledged = Number(pledgedValue || markAmount || 0);
-  const previewHaircut = Number(haircutBps || 0);
-  const previewAdvanceable =
-    previewPledged > 0
-      ? Number((previewPledged * (1 - previewHaircut / 10_000)).toFixed(2))
-      : 0;
+  const markAmount = selectedAsset?.latestValuation?.payload.amount ?? 0;
+  const markCurrency = selectedAsset?.latestValuation?.payload.currency ?? selectedAsset?.currency ?? 'USD';
+  const previewPledged = Number(((markAmount * Number(collateralBps || 0)) / 10_000).toFixed(2));
 
   const availableTokens = useMemo(
     () =>
@@ -153,15 +149,13 @@ export default function CollateralPage() {
     mutationFn: async () =>
       api.post('/collateral', {
         assetId,
-        tokenId: tokenId || undefined,
-        haircutBps: Number(haircutBps),
-        pledgedValue: pledgedValue ? Number(pledgedValue) : undefined,
+        tokenId,
+        collateralBps: Number(collateralBps),
       }),
     onSuccess: async () => {
       setAssetId('');
       setTokenId('');
-      setPledgedValue('');
-      setHaircutBps('1500');
+      setCollateralBps('1000');
       setFormError(null);
       await refresh();
     },
@@ -224,7 +218,6 @@ export default function CollateralPage() {
                 onChange={(e) => {
                   setAssetId(e.target.value);
                   setTokenId('');
-                  setPledgedValue('');
                 }}
                 required
               >
@@ -245,9 +238,9 @@ export default function CollateralPage() {
                 to pledge again.
               </p>
             ) : null}
-            <Field label="Token position (optional)">
-              <Select value={tokenId} onChange={(e) => setTokenId(e.target.value)}>
-                <option value="">None</option>
+            <Field label="Token position">
+              <Select value={tokenId} onChange={(e) => setTokenId(e.target.value)} required>
+                <option value="">Select confirmed token position</option>
                 {availableTokens.map((token) => (
                   <option key={token.id} value={token.id}>
                     {token.asset?.name ?? token.id}
@@ -255,38 +248,24 @@ export default function CollateralPage() {
                 ))}
               </Select>
             </Field>
-            <Field label="Pledged value (optional override)">
+            <Field label="Collateral percentage (bps)">
               <Input
                 type="number"
                 min={1}
-                step="any"
-                value={pledgedValue}
-                onChange={(e) => setPledgedValue(e.target.value)}
-                placeholder={
-                  markAmount != null
-                    ? `Default mark ${money(markAmount, markCurrency ?? 'USD')}`
-                    : 'Requires valuation mark or manual value'
-                }
-              />
-            </Field>
-            <Field label="Haircut (bps)">
-              <Input
-                type="number"
-                min={0}
-                max={5000}
-                value={haircutBps}
-                onChange={(e) => setHaircutBps(e.target.value)}
+                max={10000}
+                value={collateralBps}
+                onChange={(e) => setCollateralBps(e.target.value)}
+                placeholder="1000 = 10%"
                 required
               />
             </Field>
             {previewPledged > 0 ? (
               <p className="text-sm text-[var(--muted)]">
-                Preview advanceable {money(previewAdvanceable, markCurrency ?? 'USD')} after{' '}
-                {(previewHaircut / 100).toFixed(1)}% haircut
+                {(Number(collateralBps) / 100).toFixed(2)}% of the latest valuation: {money(previewPledged, markCurrency)}. The banker will apply the haircut and loan limit during underwriting.
               </p>
             ) : null}
             {formError ? <p className="text-sm text-red-700">{formError}</p> : null}
-            <Button type="submit" disabled={!assetId || create.isPending || !canManageCollateral}>
+            <Button type="submit" disabled={!assetId || !tokenId || create.isPending || !canManageCollateral}>
               {create.isPending ? 'Submitting…' : 'Submit pledge for review'}
             </Button>
           </form>
@@ -313,9 +292,9 @@ export default function CollateralPage() {
                     {item.asset?.name ?? item.id}
                   </h2>
                   <p className="mt-1 text-sm text-[var(--muted)]">
-                    pledged {money(item.pledgedValue, item.currency)} · advanceable{' '}
-                    {money(item.advanceableValue, item.currency)} · haircut{' '}
-                    {(item.haircutBps / 100).toFixed(1)}%
+                    pledged {money(item.pledgedValue, item.currency)} · collateral{' '}
+                    {item.collateralBps != null ? `${(item.collateralBps / 100).toFixed(2)}%` : 'legacy position'}
+                    {item.lockedTokenUnits != null ? ` · ${item.lockedTokenUnits.toLocaleString()} ERC-1155 units` : ''}
                   </p>
                   <p className="mt-1 text-sm text-[var(--muted)]">
                     utilized {money(item.utilizedAmount ?? 0, item.currency)} · available{' '}

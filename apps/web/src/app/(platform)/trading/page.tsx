@@ -9,9 +9,10 @@ import { Field, Input, Select } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { formatUnits, requestPurchase } from '@/lib/sepolia-marketplace';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 import { useMemo, useState } from 'react';
 
-interface Listing { id: string; title: string; status: string; organizationId: string; onChainListingId?: string; availableTokenUnits?: number; totalTokenSupply?: number; pricePerTokenWei?: string; asset?: { name: string } | null; }
+interface Listing { id: string; title: string; status: string; listerWalletAddress?: string; onChainListingId?: string; availableTokenUnits?: number; totalTokenSupply?: number; pricePerTokenWei?: string; asset?: { name: string } | null; }
 interface Trade { id: string; status: string; quantityBps: number; notional: number; currency: string; tokenUnits?: number; onChainPurchaseId?: string; asset?: { name: string } | null; }
 
 export default function TradingPage() {
@@ -21,19 +22,20 @@ export default function TradingPage() {
   const [bps, setBps] = useState('100');
   const market = useQuery({ queryKey: ['marketplace'], queryFn: async () => (await api.get<{ listings: Listing[] }>('/marketplace')).data.listings });
   const trades = useQuery({ queryKey: ['trading'], queryFn: async () => (await api.get<{ trades: Trade[] }>('/trading')).data.trades });
-  const listings = useMemo(() => (market.data ?? []).filter((item) => item.status !== 'CLOSED' && item.onChainListingId && item.pricePerTokenWei && item.availableTokenUnits), [market.data]);
+  const listings = useMemo(() => (market.data ?? []).filter((item) => item.status !== 'CLOSED' && item.onChainListingId && item.pricePerTokenWei && item.availableTokenUnits && item.listerWalletAddress?.toLowerCase() !== wallet?.toLowerCase()), [market.data, wallet]);
   const selected = listings.find((item) => item.id === listingId);
   const units = selected ? Math.floor((Number(selected.totalTokenSupply ?? selected.availableTokenUnits) * Number(bps)) / 10_000) : 0;
   const cap = selected && units > 0 ? formatUnits(BigInt(selected.pricePerTokenWei!) * BigInt(units), 18) : '0';
   const buy = useMutation({
     mutationFn: async () => {
       if (!selected || !wallet || !Number.isInteger(Number(bps)) || Number(bps) < 1 || Number(bps) > 10_000 || units < 1 || units > selected.availableTokenUnits!) throw new Error('Enter a BPS amount that maps to available whole token units.');
-      const purchase = await requestPurchase({ listingId: selected.onChainListingId!, units: String(units), pricePerUnitWei: selected.pricePerTokenWei! });
+      const quote = (await api.post<{ onChainListingId: string; pricePerTokenWei: string }>('/trading/on-chain-trades/quote', { listingId: selected.id, buyerWalletAddress: wallet, tokenUnits: units })).data;
+      const purchase = await requestPurchase({ listingId: quote.onChainListingId, units: String(units), pricePerUnitWei: quote.pricePerTokenWei });
       return api.post('/trading/on-chain-trades', { listingId: selected.id, purchaseId: purchase.purchaseId, purchaseTxHash: purchase.txHash, buyerWalletAddress: purchase.buyerAddress, tokenUnits: units, paymentCapWei: purchase.paymentCAP });
     },
     onSuccess: async () => { await client.invalidateQueries({ queryKey: ['trading'] }); await client.invalidateQueries({ queryKey: ['marketplace'] }); },
   });
-  const error = buy.error instanceof Error ? buy.error.message : '';
+  const error = axios.isAxiosError(buy.error) && typeof buy.error.response?.data?.message === 'string' ? buy.error.response.data.message : buy.error instanceof Error ? buy.error.message : '';
   return <div className="mx-auto max-w-6xl space-y-6">
     <PageHeader eyebrow="Trading" title="CAP escrow trades" description="Select a tokenized listing, set the economic interest in basis points, and escrow CAP on Sepolia." />
     <WalletConnect onConnected={setWallet} />
