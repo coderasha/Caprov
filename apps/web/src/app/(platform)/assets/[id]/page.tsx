@@ -575,6 +575,15 @@ export default function AssetDetailPage() {
                   </Button>
                 ) : null}
               </div>
+              {walletSession && walletSession.accounts.length > 1 ? (
+                <div className="mt-4 max-w-md">
+                  <Field label="MetaMask account for this asset action">
+                    <Select value={walletSession.account} onChange={(event) => void selectWalletAccount(event.target.value)} disabled={walletBusy}>
+                      {walletSession.accounts.map((account) => <option key={account} value={account}>{account}</option>)}
+                    </Select>
+                  </Field>
+                </div>
+              ) : null}
               {!canWalletAnchor ? (
                 <p className="mt-3 text-xs text-[var(--muted)]">
                   Sign in to connect a wallet and anchor documents on Sepolia.
@@ -827,14 +836,18 @@ async function connectMetaMask(network?: DocumentNetworkStatus): Promise<WalletS
   if (!provider) {
     throw new Error('MetaMask is not available in this browser. Install or unlock MetaMask and try again.');
   }
-  await provider.request({ method: 'eth_requestAccounts' });
+  // MetaMask's native permission dialog lets the user choose which account(s)
+  // this local application may use.
+  await provider.request({ method: 'wallet_requestPermissions', params: [{ eth_accounts: {} }] });
+  const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
   await ensureSepoliaNetwork(provider, network);
   const browserProvider = new BrowserProvider(provider, network?.chainId ?? SEPOLIA_CHAIN_ID);
-  const signer = await browserProvider.getSigner();
-  const account = await signer.getAddress();
+  const account = accounts[0];
+  if (!account) throw new Error('MetaMask did not expose an account to CAPROV.');
   const chain = await browserProvider.getNetwork();
   return {
     account,
+    accounts,
     chainId: Number(chain.chainId),
     provider,
     browserProvider,
