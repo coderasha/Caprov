@@ -332,6 +332,8 @@ export type CollateralStatus =
 
 export type LoanStatus =
   | 'PENDING_APPROVAL'
+  | 'OFFERED'
+  | 'ACCEPTED'
   | 'ACTIVE'
   | 'REPAID'
   | 'DEFAULTED'
@@ -348,7 +350,7 @@ export interface WalletTransaction {
   id: EntityId;
   organizationId: EntityId;
   direction: 'CREDIT' | 'DEBIT';
-  type: 'LOAN_DISBURSAL';
+  type: 'LOAN_DISBURSAL' | 'LOAN_REPAYMENT';
   amount: number;
   currency: CurrencyCode;
   description: string;
@@ -386,6 +388,9 @@ export interface MarketplaceListing {
   onChainListingId?: string;
   listerWalletAddress?: string;
   onChainListingTxHash?: string;
+  /** Confirmed seller close transaction returning unsold units from escrow. */
+  onChainCloseTxHash?: string;
+  closedAt?: IsoTimestamp;
   createdAt: IsoTimestamp;
   updatedAt: IsoTimestamp;
 }

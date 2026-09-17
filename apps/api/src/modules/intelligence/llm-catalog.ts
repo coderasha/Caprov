@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process';
 import type { LlmModelOption } from '@caprov/types';
 
 export const DEFAULT_LLM_MODEL_ID = 'caprov-deterministic';
-export const DEFAULT_OPENAI_MODEL_ID = 'openai-gpt-4.1';
+export const DEFAULT_OPENAI_MODEL_ID = 'openai-gpt-5.6-terra';
 const CURSOR_AGENT_BINARY =
   process.env.CURSOR_AGENT_BIN?.trim() || 'cursor-agent';
 
@@ -31,6 +31,18 @@ export const LLM_MODEL_CATALOG: LlmModelOption[] = [
     capabilities: ['copilot'],
     alwaysAvailable: false,
     apiKeyEnv: 'CURSOR_API_KEY',
+  },
+  {
+    id: 'openai-gpt-5.6-terra',
+    provider: 'openai',
+    label: 'OpenAI GPT-5.6 Terra',
+    description:
+      'Production-grade reasoning and synthesis that balances answer quality with operating cost for CAPROV Copilot.',
+    contextWindow: 1_050_000,
+    strengths: ['Reasoning', 'Long context', 'Copilot'],
+    capabilities: ['copilot'],
+    alwaysAvailable: false,
+    apiKeyEnv: 'OPENAI_API_KEY',
   },
   {
     id: 'openai-gpt-4.1',

@@ -60,7 +60,7 @@ export class AssetsService {
       name: input.name,
       assetClass: input.assetClass,
       status: input.status ?? 'DRAFT',
-      currency: input.currency ?? 'USD',
+      currency: 'USD' as CurrencyCode,
       jurisdiction: input.jurisdiction,
       location: input.location,
       description: input.description,
@@ -93,7 +93,7 @@ export class AssetsService {
       Object.assign(asset, {
         ...input,
         status: input.status ?? asset.status,
-        currency: input.currency ?? asset.currency,
+        currency: 'USD',
         primaryImageUrl: input.primaryImageUrl ?? asset.primaryImageUrl,
         imageUrls:
           input.imageUrls != null || input.primaryImageUrl != null

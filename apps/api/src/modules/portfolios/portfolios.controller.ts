@@ -97,7 +97,7 @@ export class PortfoliosController {
       ownerUserId: user.id,
       name: dto.name,
       description: dto.description,
-      baseCurrency: dto.baseCurrency ?? 'USD',
+      baseCurrency: 'USD' as CurrencyCode,
       createdAt: now,
       updatedAt: now,
     };

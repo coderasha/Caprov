@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Field, Input, Select } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { money } from '@/lib/format';
+import { lockCollateralOnSepolia } from '@/lib/sepolia-marketplace';
 import type { HydratedAsset } from '@/lib/types';
 import { useAuthStore } from '@/stores/auth-store';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -39,6 +40,7 @@ interface CollateralRow {
   tokenId?: string;
   asset?: { name: string } | null;
   token?: { id: string; mode: string; supply?: number } | null;
+  marketValuation?: CollateralMarketValuation | null;
   loans?: LoanSummary[];
   valuation?: {
     payload: {
@@ -55,7 +57,21 @@ interface CollateralRow {
 interface TokenOption {
   id: string;
   assetId: string;
+  tokenId: string;
+  supply: number;
+  recipientAddress: string;
+  contractAddress?: string;
+  status: string;
   asset?: { name: string } | null;
+}
+
+interface CollateralMarketValuation {
+  pricePerTokenUsd: number;
+  assetValueUsd: number;
+  source: 'SETTLED_CAP_VWAP' | 'TOKENIZED_LISTING_PRICE';
+  sourceLabel: string;
+  settledTradeCount: number;
+  observedAt: string;
 }
 
 function errorMessage(error: unknown): string {
@@ -76,9 +92,6 @@ export default function CollateralPage() {
   const [collateralBps, setCollateralBps] = useState('1000');
   const [formError, setFormError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editHaircut, setEditHaircut] = useState('');
-  const [editPledged, setEditPledged] = useState('');
 
   const collateral = useQuery({
     queryKey: ['collateral'],
@@ -96,8 +109,6 @@ export default function CollateralPage() {
 
   const canManageCollateral =
     roles.includes('ORG_ADMIN') || roles.includes('ANALYST') || roles.includes('PLATFORM_ADMIN');
-  const canApproveCollateral =
-    roles.includes('COMPLIANCE') || roles.includes('ORG_ADMIN') || roles.includes('PLATFORM_ADMIN');
 
   const activeAssetIds = useMemo(
     () =>
@@ -127,9 +138,26 @@ export default function CollateralPage() {
     [assets.data, activeAssetIds],
   );
   const selectedAsset = (assets.data ?? []).find((asset) => asset.id === assetId);
-  const markAmount = selectedAsset?.latestValuation?.payload.amount ?? 0;
-  const markCurrency = selectedAsset?.latestValuation?.payload.currency ?? selectedAsset?.currency ?? 'USD';
-  const previewPledged = Number(((markAmount * Number(collateralBps || 0)) / 10_000).toFixed(2));
+  const selectedToken = (tokens.data ?? []).find((token) => token.id === tokenId);
+  const previewUnits = selectedToken
+    ? Math.floor((selectedToken.supply * Number(collateralBps || 0)) / 10_000)
+    : 0;
+  const marketValuation = useQuery({
+    queryKey: ['collateral-market-valuation', assetId, tokenId],
+    enabled: Boolean(assetId && tokenId),
+    retry: false,
+    queryFn: async () =>
+      (
+        await api.get<CollateralMarketValuation>(
+          `/collateral/valuation/${assetId}?tokenId=${encodeURIComponent(tokenId)}`,
+        )
+      ).data,
+  });
+  const previewPledged = marketValuation.data
+    ? Number(
+        (marketValuation.data.pricePerTokenUsd * previewUnits).toFixed(2),
+      )
+    : 0;
 
   const availableTokens = useMemo(
     () =>
@@ -146,12 +174,20 @@ export default function CollateralPage() {
   };
 
   const create = useMutation({
-    mutationFn: async () =>
-      api.post('/collateral', {
-        assetId,
-        tokenId,
-        collateralBps: Number(collateralBps),
-      }),
+    mutationFn: async () => {
+      if (!selectedToken || previewUnits < 1) throw new Error('Choose a percentage that locks at least one ERC-1155 unit.');
+      // This opens MetaMask and waits for a confirmed Sepolia transaction. The
+      // server subsequently verifies the vault event before recording anything.
+      const lock = await lockCollateralOnSepolia({
+        tokenId: selectedToken.tokenId,
+        units: String(previewUnits),
+      });
+      return api.post('/collateral', {
+        assetId, tokenId, collateralBps: Number(collateralBps),
+        vaultCollateralId: lock.collateralId, vaultTxHash: lock.txHash,
+        borrowerWalletAddress: selectedToken.recipientAddress,
+      });
+    },
     onSuccess: async () => {
       setAssetId('');
       setTokenId('');
@@ -160,38 +196,6 @@ export default function CollateralPage() {
       await refresh();
     },
     onError: (error) => setFormError(errorMessage(error)),
-  });
-
-  const release = useMutation({
-    mutationFn: async (id: string) => api.post(`/collateral/${id}/release`),
-    onSuccess: async () => {
-      setActionError(null);
-      await refresh();
-    },
-    onError: (error) => setActionError(errorMessage(error)),
-  });
-
-  const approve = useMutation({
-    mutationFn: async (id: string) => api.post(`/collateral/${id}/approve`),
-    onSuccess: async () => {
-      setActionError(null);
-      await refresh();
-    },
-    onError: (error) => setActionError(errorMessage(error)),
-  });
-
-  const update = useMutation({
-    mutationFn: async (id: string) =>
-      api.patch(`/collateral/${id}`, {
-        haircutBps: editHaircut ? Number(editHaircut) : undefined,
-        pledgedValue: editPledged ? Number(editPledged) : undefined,
-      }),
-    onSuccess: async () => {
-      setEditingId(null);
-      setActionError(null);
-      await refresh();
-    },
-    onError: (error) => setActionError(errorMessage(error)),
   });
 
   return (
@@ -225,16 +229,13 @@ export default function CollateralPage() {
                 {pledgeableAssets.map((asset) => (
                   <option key={asset.id} value={asset.id}>
                     {asset.name}
-                    {asset.latestValuation
-                      ? ` · mark ${money(asset.latestValuation.payload.amount, asset.latestValuation.payload.currency)}`
-                      : ''}
                   </option>
                 ))}
               </Select>
             </Field>
             {!pledgeableAssets.length ? (
               <p className="text-sm text-[var(--muted)]">
-                All assets with available marks already have an active or pending pledge. Release one
+                All tokenized assets already have an active or pending pledge. Release one
                 to pledge again.
               </p>
             ) : null}
@@ -259,14 +260,26 @@ export default function CollateralPage() {
                 required
               />
             </Field>
-            {previewPledged > 0 ? (
+            {marketValuation.isLoading ? (
               <p className="text-sm text-[var(--muted)]">
-                {(Number(collateralBps) / 100).toFixed(2)}% of the latest valuation: {money(previewPledged, markCurrency)}. The banker will apply the haircut and loan limit during underwriting.
+                Loading tokenized collateral reference…
+              </p>
+            ) : null}
+            {marketValuation.data && previewPledged > 0 ? (
+              <p className="text-sm text-[var(--muted)]">
+                {(Number(collateralBps) / 100).toFixed(2)}% equals {money(previewPledged, 'USD')} at{' '}
+                {money(marketValuation.data.pricePerTokenUsd, 'USD')} per ERC-1155 unit ({marketValuation.data.sourceLabel}).{' '}
+                {previewUnits.toLocaleString()} ERC-1155 units will be locked in the Sepolia vault. The banker applies the haircut and loan limit during underwriting.
+              </p>
+            ) : null}
+            {assetId && tokenId && marketValuation.isError ? (
+              <p className="text-sm text-amber-800">
+                This token position has no collateral reference yet. Publish an on-chain CAP listing to establish its initial USD price, or settle a CAP trade.
               </p>
             ) : null}
             {formError ? <p className="text-sm text-red-700">{formError}</p> : null}
-            <Button type="submit" disabled={!assetId || !tokenId || create.isPending || !canManageCollateral}>
-              {create.isPending ? 'Submitting…' : 'Submit pledge for review'}
+            <Button type="submit" disabled={!assetId || !tokenId || !marketValuation.data || create.isPending || !canManageCollateral}>
+              {create.isPending ? 'Waiting for Sepolia confirmation…' : 'Lock collateral on Sepolia'}
             </Button>
           </form>
         </Card>
@@ -301,20 +314,16 @@ export default function CollateralPage() {
                     {money(item.availableAmount ?? item.advanceableValue, item.currency)}
                     {item.token ? ` · token ${item.token.mode}` : ''}
                   </p>
-                  {item.valuation?.payload ? (
+                  {item.marketValuation ? (
                     <div className="mt-3 rounded-xl border border-[var(--line)] bg-[var(--paper)]/60 px-3 py-3 text-sm text-[var(--muted)]">
                       <p className="font-medium text-[var(--ink)]">
-                        Valuation {money(item.valuation.payload.amount, item.valuation.payload.currency)}
+                        Tokenized collateral reference {money(item.marketValuation.assetValueUsd, 'USD')}
                       </p>
-                      <p className="mt-1">{item.valuation.payload.method ?? 'Method not recorded'}</p>
                       <p className="mt-1">
-                        As of {item.valuation.payload.asOf?.slice(0, 10) ?? 'n/a'}
-                        {item.valuation.payload.low != null && item.valuation.payload.high != null
-                          ? ` · Range ${money(item.valuation.payload.low, item.valuation.payload.currency)} to ${money(
-                              item.valuation.payload.high,
-                              item.valuation.payload.currency,
-                            )}`
-                          : ''}
+                        {money(item.marketValuation.pricePerTokenUsd, 'USD')} per ERC-1155 unit · {item.marketValuation.sourceLabel}
+                      </p>
+                      <p className="mt-1">
+                        Observed {item.marketValuation.observedAt.slice(0, 10)} · {item.marketValuation.settledTradeCount} settled CAP trade{item.marketValuation.settledTradeCount === 1 ? '' : 's'}
                       </p>
                     </div>
                   ) : null}
@@ -324,24 +333,7 @@ export default function CollateralPage() {
 
               {item.status === 'PENDING_APPROVAL' ? (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {canApproveCollateral ? (
-                    <Button onClick={() => approve.mutate(item.id)} disabled={approve.isPending}>
-                      Approve for lending
-                    </Button>
-                  ) : null}
-                  {canManageCollateral ? (
-                    <Button
-                      variant="secondary"
-                      onClick={() => {
-                        setEditingId(editingId === item.id ? null : item.id);
-                        setEditHaircut(String(item.haircutBps));
-                        setEditPledged(String(item.pledgedValue));
-                        setActionError(null);
-                      }}
-                    >
-                      Adjust request
-                    </Button>
-                  ) : null}
+                  <p className="text-sm text-[var(--muted)]">Locked on Sepolia and awaiting a bank loan offer.</p>
                 </div>
               ) : null}
 
@@ -364,35 +356,8 @@ export default function CollateralPage() {
               ) : null}
 
               {item.status === 'ACTIVE' ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button
-                    variant="secondary"
-                    disabled={!item.canRelease || release.isPending}
-                    onClick={() => {
-                      setActionError(null);
-                      release.mutate(item.id);
-                    }}
-                  >
-                    {item.canRelease ? 'Release' : 'Release blocked'}
-                  </Button>
-                  {canManageCollateral ? (
-                    <Button
-                      variant="secondary"
-                      onClick={() => {
-                        setEditingId(editingId === item.id ? null : item.id);
-                        setEditHaircut(String(item.haircutBps));
-                        setEditPledged(String(item.pledgedValue));
-                        setActionError(null);
-                      }}
-                    >
-                      Adjust
-                    </Button>
-                  ) : null}
-                </div>
-              ) : null}
-              {!item.canRelease && item.status === 'ACTIVE' ? (
                 <p className="mt-2 text-xs text-[var(--muted)]">
-                  Repay linked loans before releasing this collateral.
+                  Collateral remains locked until the facility is repaid and the bank confirms the on-chain ERC-1155 release from Lending.
                 </p>
               ) : null}
               {item.status === 'ACTIVE' && item.approvedAt ? (
@@ -401,37 +366,6 @@ export default function CollateralPage() {
                 </p>
               ) : null}
 
-              {editingId === item.id ? (
-                <form
-                  className="mt-4 grid gap-3 border-t border-[var(--line)] pt-4"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    update.mutate(item.id);
-                  }}
-                >
-                  <Field label="Pledged value">
-                    <Input
-                      type="number"
-                      min={1}
-                      step="any"
-                      value={editPledged}
-                      onChange={(e) => setEditPledged(e.target.value)}
-                    />
-                  </Field>
-                  <Field label="Haircut (bps)">
-                    <Input
-                      type="number"
-                      min={0}
-                      max={5000}
-                      value={editHaircut}
-                      onChange={(e) => setEditHaircut(e.target.value)}
-                    />
-                  </Field>
-                  <Button type="submit" disabled={update.isPending}>
-                    Save terms
-                  </Button>
-                </form>
-              ) : null}
             </Card>
           ))}
         </div>

@@ -20,6 +20,15 @@ const marketplaceAbi = [
   'event Listed(uint256 indexed listingId, address indexed seller, uint256 indexed assetId, uint256 amount, uint256 pricePerUnit)',
   'event PurchaseRequested(uint256 indexed purchaseId, uint256 indexed listingId, address indexed buyer, uint256 units, uint256 paymentCAP)',
 ] as const;
+const collateralVaultAbi = [
+  'function lockCollateral(address assetToken,uint256 tokenId,uint256 units) returns (uint256)',
+  'function activateLoan(uint256 collateralId,bytes32 loanReference)',
+  'function releaseAfterRepayment(uint256 collateralId)',
+  'function setLoanActivator(address account,bool allowed)',
+  'function loanActivators(address account) view returns (bool)',
+  'event CollateralLocked(uint256 indexed collateralId,address indexed borrower,address indexed assetToken,uint256 tokenId,uint256 units)',
+  'event CollateralReleased(uint256 indexed collateralId,address indexed borrower)',
+] as const;
 
 type WalletWindow = Window & { ethereum?: Eip1193Provider & { providers?: Eip1193Provider[] } };
 
@@ -169,6 +178,47 @@ async function signer(walletId?: string) {
 export async function connectSepoliaWallet(walletId?: string) {
   const connectedSigner = await signer(walletId);
   return connectedSigner.getAddress();
+}
+
+/** Lister signs a real Sepolia ERC-1155 transfer into the configured collateral vault. */
+export async function lockCollateralOnSepolia(input: { tokenId: string; units: string }) {
+  const vault = process.env.NEXT_PUBLIC_ETHEREUM_COLLATERAL_VAULT_CONTRACT;
+  if (!vault) throw new Error('CollateralVault is not configured.');
+  const connectedSigner = await signer(); const { assetToken } = addresses();
+  const asset = new Contract(assetToken, assetAbi, connectedSigner);
+  if (!(await asset.getFunction('isApprovedForAll')(await connectedSigner.getAddress(), vault))) await (await asset.getFunction('setApprovalForAll')(vault, true)).wait();
+  const contract = new Contract(vault, collateralVaultAbi, connectedSigner);
+  const receipt = await (await contract.getFunction('lockCollateral')(assetToken, BigInt(input.tokenId), BigInt(input.units))).wait();
+  if (!receipt) throw new Error('Collateral lock did not confirm.');
+  const event = receipt.logs.map((log: { topics: readonly string[]; data: string }) => { try { return contract.interface.parseLog(log); } catch { return null; } }).find((log: ReturnType<Interface['parseLog']> | null) => log?.name === 'CollateralLocked');
+  if (!event) throw new Error('Collateral lock confirmed but event was not found.');
+  return { collateralId: event.args.collateralId.toString(), txHash: receipt.hash };
+}
+
+/** A whitelisted bank wallet records the accepted facility on Sepolia before USD is credited. */
+export async function activateCollateralLoanOnSepolia(input: { collateralId: string; loanId: string }) {
+  const vault = process.env.NEXT_PUBLIC_ETHEREUM_COLLATERAL_VAULT_CONTRACT;
+  if (!vault) throw new Error('CollateralVault is not configured.');
+  const connectedSigner = await signer();
+  const contract = new Contract(vault, collateralVaultAbi, connectedSigner);
+  const receipt = await (await contract.getFunction('activateLoan')(
+    BigInt(input.collateralId), ethId(`caprov:loan:${input.loanId}`),
+  )).wait();
+  if (!receipt) throw new Error('Collateral-loan activation did not confirm.');
+  return { txHash: receipt.hash };
+}
+
+/** The bank custody wallet returns a fully repaid ERC-1155 collateral position. */
+export async function releaseCollateralAfterRepaymentOnSepolia(input: { collateralId: string }) {
+  const vault = process.env.NEXT_PUBLIC_ETHEREUM_COLLATERAL_VAULT_CONTRACT;
+  if (!vault) throw new Error('CollateralVault is not configured.');
+  const connectedSigner = await signer();
+  const contract = new Contract(vault, collateralVaultAbi, connectedSigner);
+  const receipt = await (await contract.getFunction('releaseAfterRepayment')(
+    BigInt(input.collateralId),
+  )).wait();
+  if (!receipt) throw new Error('Collateral release did not confirm.');
+  return { txHash: receipt.hash };
 }
 
 /** Mints immutable ERC-1155 supply from the account chosen in MetaMask. */

@@ -31,6 +31,11 @@ const CURSOR_AGENT_BINARY =
 const CURSOR_AGENT_WORKDIR = process.env.CURSOR_AGENT_WORKDIR?.trim() || '/tmp';
 
 const REMOTE_ENDPOINTS: Record<string, ProviderEndpoint> = {
+  'openai-gpt-5.6-terra': {
+    url: 'https://api.openai.com/v1/responses',
+    model: 'gpt-5.6-terra',
+    apiKeyEnv: 'OPENAI_API_KEY',
+  },
   'openai-gpt-4.1': {
     url: 'https://api.openai.com/v1/chat/completions',
     model: 'gpt-4.1',
@@ -209,6 +214,44 @@ async function callRemoteModel(
 
   const system =
     'You are CAPROV Asset DNA copilot. Answer from the provided context only. Cite facts briefly. If unknown, say so.';
+
+  if (endpoint.url === 'https://api.openai.com/v1/responses') {
+    const response = await fetch(endpoint.url, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: endpoint.model,
+        instructions: system,
+        input: `Context:\n${context}\n\nQuestion: ${question}`,
+        max_output_tokens: 800,
+        reasoning: { effort: 'medium' },
+        text: { verbosity: 'medium' },
+      }),
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (!response.ok) {
+      throw await buildHttpError(response);
+    }
+    const payload = (await response.json()) as {
+      output_text?: string;
+      output?: Array<{
+        type?: string;
+        content?: Array<{ type?: string; text?: string }>;
+      }>;
+    };
+    return (
+      payload.output_text ??
+      payload.output
+        ?.flatMap((item) => item.content ?? [])
+        .filter((item) => item.type === 'output_text')
+        .map((item) => item.text ?? '')
+        .join('\n') ??
+      ''
+    );
+  }
 
   if (endpoint.url.includes('anthropic.com')) {
     const response = await fetch(endpoint.url, {

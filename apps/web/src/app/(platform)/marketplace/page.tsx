@@ -10,7 +10,7 @@ import { api } from '@/lib/api';
 import { sepoliaTxExplorerUrl } from '@/lib/explorer';
 import { readFileAsDataUrl } from '@/lib/files';
 import { assetClassLabel, money } from '@/lib/format';
-import { capPricePerUnitFromTotal, connectMetaMaskWallet, createOnChainListing, mintAssetFromWallet } from '@/lib/sepolia-marketplace';
+import { capPricePerUnitFromTotal, closeOnChainListing, connectMetaMaskWallet, createOnChainListing, mintAssetFromWallet } from '@/lib/sepolia-marketplace';
 import type { HydratedAsset } from '@/lib/types';
 import { useAuthStore } from '@/stores/auth-store';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -32,8 +32,10 @@ interface Listing {
   leaseRate?: number;
   leaseTermMonths?: number;
   createdAt?: string;
+  closedAt?: string;
   tokenizationMode?: 'LIVE' | 'SIMULATED';
   onChainListingId?: string;
+  onChainCloseTxHash?: string;
   availableTokenUnits?: number;
   pricePerTokenWei?: string;
   listerWalletAddress?: string;
@@ -59,17 +61,20 @@ interface Network {
   contractAddress?: string;
 }
 
-type Filter = 'ALL' | 'TOKENIZED' | 'OFF_CHAIN';
+type Filter = 'ALL' | 'TOKENIZED' | 'OFF_CHAIN' | 'CLOSED';
 
 const filters: Array<{ id: Filter; label: string }> = [
   { id: 'ALL', label: 'All' },
   { id: 'TOKENIZED', label: 'Tokenized' },
   { id: 'OFF_CHAIN', label: 'Off-chain' },
+  { id: 'CLOSED', label: 'Closed' },
 ];
 
 const statusLabel: Record<string, string> = {
   OPEN: 'Open',
   PARTIALLY_FILLED: 'Partially filled',
+  FILLED: 'Filled',
+  CLOSED: 'Closed',
 };
 
 const errorMessage = (error: unknown) => {
@@ -120,13 +125,17 @@ export default function MarketplacePage() {
   });
 
   const selectedAsset = (assets.data ?? []).find((asset) => asset.id === form.assetId);
+  const allListings = listings.data ?? [];
   const open = useMemo(
     () => (listings.data ?? []).filter((listing) => ['OPEN', 'PARTIALLY_FILLED'].includes(listing.status)),
     [listings.data],
   );
   const visible = useMemo(() => {
     const term = query.trim().toLowerCase();
-    return open.filter((listing) => {
+    return allListings.filter((listing) => {
+      if (filter === 'CLOSED' && listing.status !== 'CLOSED') {
+        return false;
+      }
       if (filter === 'TOKENIZED' && !isTokenized(listing)) {
         return false;
       }
@@ -140,7 +149,7 @@ export default function MarketplacePage() {
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(term));
     });
-  }, [open, query, filter]);
+  }, [allListings, query, filter]);
 
   const tokenizedCount = open.filter(isTokenized).length;
   const stats = [
@@ -225,6 +234,27 @@ export default function MarketplacePage() {
           ? 'ERC-1155 units were escrowed on Sepolia. Buyers can now escrow CAP against the listing.'
           : 'Non-tokenized listing published.',
       });
+      await client.invalidateQueries({ queryKey: ['marketplace'] });
+      await client.invalidateQueries({ queryKey: ['tokenization'] });
+    },
+    onError: (error) => setNotice({ tone: 'danger', text: errorMessage(error) }),
+  });
+
+  const closeListing = useMutation({
+    mutationFn: async (listing: Listing) => {
+      if (!listing.onChainListingId) throw new Error('This is not an on-chain listing.');
+      if (!wallet || wallet.toLowerCase() !== listing.listerWalletAddress?.toLowerCase()) {
+        throw new Error('Connect the MetaMask wallet that originally created this listing.');
+      }
+      // The V2 contract restricts this transaction to the seller. It returns
+      // only unsold ERC-1155 units from marketplace escrow to that wallet.
+      const receipt = await closeOnChainListing(listing.onChainListingId);
+      await api.post(`/marketplace/on-chain-listings/${listing.id}/sync`, {
+        closeTxHash: receipt.hash,
+      });
+    },
+    onSuccess: async () => {
+      setNotice({ tone: 'ok', text: 'Listing closed on Sepolia. Its unsold ERC-1155 units were returned to the lister wallet.' });
       await client.invalidateQueries({ queryKey: ['marketplace'] });
       await client.invalidateQueries({ queryKey: ['tokenization'] });
     },
@@ -319,14 +349,20 @@ export default function MarketplacePage() {
             <>
               <div className="grid gap-4 md:grid-cols-2">
                 {visible.map((listing) => (
-                  <ListingCard key={listing.id} listing={listing} />
+                  <ListingCard
+                    key={listing.id}
+                    listing={listing}
+                    connectedWallet={wallet}
+                    onClose={(item) => closeListing.mutate(item)}
+                    closing={closeListing.isPending}
+                  />
                 ))}
               </div>
               <p className="text-xs text-[var(--muted)]">
-                Showing {visible.length} of {open.length} open listing{open.length === 1 ? '' : 's'}.
+                Showing {visible.length} of {allListings.length} listing{allListings.length === 1 ? '' : 's'} · {open.length} open.
               </p>
             </>
-          ) : open.length ? (
+          ) : allListings.length ? (
             <Card className="p-8 text-center">
               <h2 className="font-display text-lg font-semibold tracking-[-0.02em] text-[var(--ink)]">
                 No listings match this view
@@ -500,13 +536,30 @@ export default function MarketplacePage() {
   );
 }
 
-function ListingCard({ listing }: { listing: Listing }) {
+function ListingCard({
+  listing,
+  connectedWallet,
+  onClose,
+  closing,
+}: {
+  listing: Listing;
+  connectedWallet: string;
+  onClose: (listing: Listing) => void;
+  closing: boolean;
+}) {
   const image = listing.imageUrl || listing.asset?.primaryImageUrl || listing.asset?.imageUrls?.[0];
   const tokenized = isTokenized(listing);
   const explorerUrl = tokenized
     ? sepoliaTxExplorerUrl(listing.token?.txHash ?? listing.token?.explorerUrl)
     : undefined;
   const isLease = listing.offeringType === 'LEASE';
+  const isClosed = listing.status === 'CLOSED';
+  const totalUnits = listing.token?.supply ?? 0;
+  const returnedUnits = isClosed ? (listing.availableTokenUnits ?? 0) : 0;
+  const soldUnits = isClosed ? Math.max(0, totalUnits - returnedUnits) : undefined;
+  const closeExplorerUrl = sepoliaTxExplorerUrl(listing.onChainCloseTxHash);
+  const isLister = Boolean(connectedWallet && listing.listerWalletAddress
+    && connectedWallet.toLowerCase() === listing.listerWalletAddress.toLowerCase());
   const context = [
     listing.asset?.name,
     listing.asset?.assetClass ? assetClassLabel[listing.asset.assetClass] : undefined,
@@ -544,7 +597,7 @@ function ListingCard({ listing }: { listing: Listing }) {
               ) : null}
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">
-              <Badge tone={listing.status === 'OPEN' ? 'ok' : 'warn'}>
+              <Badge tone={listing.status === 'OPEN' ? 'ok' : isClosed ? 'muted' : 'warn'}>
                 {statusLabel[listing.status] ?? listing.status}
               </Badge>
               <Badge tone={tokenized ? 'accent' : 'muted'}>{tokenized ? 'Tokenized' : 'Off-chain'}</Badge>
@@ -584,6 +637,14 @@ function ListingCard({ listing }: { listing: Listing }) {
                     #{shortTokenId(listing.token.tokenId)}
                   </dd>
                 </div>
+                {isClosed ? (
+                  <div>
+                    <dt className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">Units returned</dt>
+                    <dd className="mt-1 text-sm tabular-nums text-[var(--ink)]">
+                      {returnedUnits.toLocaleString('en-GB')} units
+                    </dd>
+                  </div>
+                ) : null}
               </>
             ) : null}
           </dl>
@@ -605,8 +666,35 @@ function ListingCard({ listing }: { listing: Listing }) {
                 View on transaction explorer
               </a>
             ) : null}
+            {closeExplorerUrl ? (
+              <a
+                href={closeExplorerUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[var(--muted)] underline-offset-4 hover:text-[var(--ink)] hover:underline"
+              >
+                View close transaction
+              </a>
+            ) : null}
           </div>
-          {listing.onChainListingId ? <p className="mt-5 border-t border-[var(--line)]/80 pt-4 text-xs text-[var(--muted)]">Tokenized trading and CAP escrow are available from the Trading section.</p> : null}
+          {listing.onChainListingId ? (
+            <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-[var(--line)]/80 pt-4">
+              <p className="mr-auto text-xs text-[var(--muted)]">
+                {isClosed
+                  ? `Closed${listing.closedAt ? ` ${listing.closedAt.slice(0, 10)}` : ''}. ${soldUnits?.toLocaleString('en-GB') ?? 0} units sold; ${returnedUnits.toLocaleString('en-GB')} unsold units returned to the lister wallet.`
+                  : 'Tokenized trading and CAP escrow are available from the Trading section.'}
+              </p>
+              {isLister && !isClosed && ['OPEN', 'PARTIALLY_FILLED'].includes(listing.status) ? (
+                <Button
+                  variant="secondary"
+                  onClick={() => onClose(listing)}
+                  disabled={closing}
+                >
+                  {closing ? 'Closing on Sepolia…' : 'Close listing'}
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
     </Card>

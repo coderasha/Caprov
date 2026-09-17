@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AuditModule } from '../audit/audit.module';
+import { BlockchainModule } from '../../infrastructure/blockchain/blockchain.module';
 import { LendingController } from './lending.controller';
-import { RazorpayController } from './razorpay.controller';
 
 @Module({
-  imports: [AuditModule],
-  controllers: [LendingController, RazorpayController],
+  imports: [AuditModule, BlockchainModule],
+  controllers: [LendingController],
 })
 export class LendingModule {}

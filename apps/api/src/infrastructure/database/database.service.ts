@@ -169,6 +169,7 @@ export class DatabaseService implements OnModuleInit {
       });
     }
     for (const asset of this.data.assets) {
+      if (asset.currency !== 'USD') { asset.currency = 'USD'; changed = true; }
       const legacy = asset as typeof asset & { acquisitionDate?: string };
       if (legacy.acquisitionDate && !legacy.creationDate) {
         legacy.creationDate = legacy.acquisitionDate;
@@ -183,6 +184,36 @@ export class DatabaseService implements OnModuleInit {
         asset.primaryImageUrl = asset.imageUrls[0];
         changed = true;
       }
+    }
+    // CAPROV's operational ledger is USD-only. Historical source documents
+    // retain their original currencies as evidence, but all platform marks,
+    // positions, facilities, and wallet entries are denominated in USD.
+    for (const valuation of this.data.valuations) {
+      if (valuation.payload.currency !== 'USD') { valuation.payload.currency = 'USD'; changed = true; }
+    }
+    for (const listing of this.data.listings) {
+      if (listing.currency !== 'USD') { listing.currency = 'USD'; changed = true; }
+    }
+    for (const order of this.data.orders) {
+      if (order.currency !== 'USD') { order.currency = 'USD'; changed = true; }
+    }
+    for (const trade of this.data.trades) {
+      if (trade.currency !== 'USD') { trade.currency = 'USD'; changed = true; }
+    }
+    for (const position of this.data.collateralPositions) {
+      if (position.currency !== 'USD') { position.currency = 'USD'; changed = true; }
+    }
+    for (const loan of this.data.loans) {
+      if (loan.currency !== 'USD') { loan.currency = 'USD'; changed = true; }
+    }
+    for (const wallet of this.data.wallets) {
+      if (wallet.currency !== 'USD') { wallet.currency = 'USD'; changed = true; }
+    }
+    for (const transaction of this.data.walletTransactions) {
+      if (transaction.currency !== 'USD') { transaction.currency = 'USD'; changed = true; }
+    }
+    for (const portfolio of this.data.portfolios) {
+      if (portfolio.baseCurrency !== 'USD') { portfolio.baseCurrency = 'USD'; changed = true; }
     }
     for (const listing of this.data.listings) {
       if (!listing.offeringType) {

@@ -113,6 +113,13 @@ class RegisterOnChainListingDto {
   @IsOptional() @IsString() imageUrl?: string;
 }
 
+class SyncOnChainListingDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(66)
+  closeTxHash?: string;
+}
+
 @Controller('marketplace')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class MarketplaceController {
@@ -194,14 +201,34 @@ export class MarketplaceController {
 
   /** Syncs the UI record to contract state after a buyer purchase or seller close. */
   @Post('on-chain-listings/:id/sync')
-  async syncOnChainListing(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+  async syncOnChainListing(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Body() dto: SyncOnChainListingDto = {},
+  ) {
     const listing = this.db.snapshot.listings.find((item) => item.id === id && item.onChainListingId);
     if (!listing) throw new NotFoundException('On-chain listing not found');
     const chain = await this.marketplace.getListing(listing.onChainListingId!);
     if (!chain) throw new BadRequestException('Marketplace contract is not configured.');
     this.db.mutate((draft) => {
       const target = draft.listings.find((item) => item.id === id);
-      if (target) { target.availableTokenUnits = Number(chain.remaining); target.status = !chain.active ? 'CLOSED' : chain.remaining === '0' ? 'FILLED' : Number(chain.remaining) < (target.availableTokenUnits ?? 0) ? 'PARTIALLY_FILLED' : 'OPEN'; target.updatedAt = new Date().toISOString(); }
+      if (target) {
+        const now = new Date().toISOString();
+        const previousAvailable = target.availableTokenUnits ?? 0;
+        target.availableTokenUnits = Number(chain.remaining);
+        target.status = !chain.active
+          ? 'CLOSED'
+          : chain.remaining === '0'
+            ? 'FILLED'
+            : Number(chain.remaining) < previousAvailable
+              ? 'PARTIALLY_FILLED'
+              : 'OPEN';
+        if (target.status === 'CLOSED') {
+          target.closedAt ??= now;
+          target.onChainCloseTxHash ??= dto.closeTxHash;
+        }
+        target.updatedAt = now;
+      }
     });
     return this.get(user, id);
   }
@@ -311,7 +338,7 @@ export class MarketplaceController {
       imageUrl:
         dto.imageUrl?.trim() || asset.primaryImageUrl || asset.imageUrls?.[0],
       askPrice,
-      currency: dto.currency ?? valuation?.payload.currency ?? asset.currency,
+      currency: 'USD',
       leaseRate:
         offeringType === 'LEASE' ? (dto.leaseRate ?? dto.askPrice) : undefined,
       leaseTermMonths:
