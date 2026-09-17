@@ -7,7 +7,13 @@ import type { LlmModelSelection } from '@caprov/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
-export function LlmModelPicker({ compact = false }: { compact?: boolean }) {
+export function LlmModelPicker({
+  compact = false,
+  purpose = 'COPILOT',
+}: {
+  compact?: boolean;
+  purpose?: 'COPILOT' | 'DNA';
+}) {
   const queryClient = useQueryClient();
   const [pendingId, setPendingId] = useState<string>();
   const modelsQuery = useQuery({
@@ -16,7 +22,7 @@ export function LlmModelPicker({ compact = false }: { compact?: boolean }) {
   });
   const select = useMutation({
     mutationFn: async (modelId: string) =>
-      (await api.patch<LlmModelSelection>('/intelligence/models', { modelId })).data,
+      (await api.patch<LlmModelSelection>('/intelligence/models', { modelId, purpose })).data,
     onSuccess: async () => {
       setPendingId(undefined);
       await queryClient.invalidateQueries({ queryKey: ['llm-models'] });
@@ -25,6 +31,18 @@ export function LlmModelPicker({ compact = false }: { compact?: boolean }) {
   });
 
   const data = modelsQuery.data;
+  const selectedModelId =
+    purpose === 'DNA' ? data?.dnaSelectedModelId : data?.selectedModelId;
+  const eligibleModels = data?.models.filter((model) =>
+    purpose === 'DNA'
+      ? model.capabilities.includes('asset_dna')
+      : model.capabilities.includes('copilot'),
+  );
+  const title = purpose === 'DNA' ? 'Asset DNA extraction model' : 'Copilot model';
+  const description =
+    purpose === 'DNA'
+      ? 'Choose the model that can assist DNA extraction when source-validated fields are missing. The deterministic core remains the authoritative extractor and fallback.'
+      : 'Choose the model for copilot synthesis.';
   if (modelsQuery.isLoading || !data) {
     return (
       <p className="text-sm text-[var(--muted)]">
@@ -37,10 +55,10 @@ export function LlmModelPicker({ compact = false }: { compact?: boolean }) {
     return (
       <div className="grid gap-2">
         <label className="grid gap-2 text-sm">
-          <span className="font-medium text-[var(--muted)]">LLM model</span>
+          <span className="font-medium text-[var(--muted)]">{title}</span>
           <select
             className="w-full rounded-2xl border border-[var(--line)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--ink)]"
-            value={data.selectedModelId}
+            value={selectedModelId}
             disabled={select.isPending}
             onChange={(event) => {
               const modelId = event.target.value;
@@ -48,7 +66,7 @@ export function LlmModelPicker({ compact = false }: { compact?: boolean }) {
               select.mutate(modelId);
             }}
           >
-            {data.models.map((model) => {
+            {eligibleModels?.map((model) => {
               const available = data.availability[model.id]?.available;
               return (
                 <option key={model.id} value={model.id}>
@@ -60,7 +78,7 @@ export function LlmModelPicker({ compact = false }: { compact?: boolean }) {
           </select>
         </label>
         <p className="text-xs text-[var(--muted)]">
-          {data.availability[data.selectedModelId]?.reason}
+          {data.availability[selectedModelId ?? '']?.reason}
           {select.isPending && pendingId ? ' Saving…' : null}
         </p>
       </div>
@@ -70,16 +88,15 @@ export function LlmModelPicker({ compact = false }: { compact?: boolean }) {
   return (
     <div className="grid gap-4">
       <div>
-        <h2 className="text-lg font-semibold">LLM model</h2>
+        <h2 className="text-lg font-semibold">{title}</h2>
         <p className="mt-1 text-sm text-[var(--muted)]">
-          Choose the model for copilot synthesis. Asset DNA extraction always uses the CAPROV
-          deterministic core for mark accuracy.
+          {description}
         </p>
       </div>
       <div className="grid gap-3">
-        {data.models.map((model) => {
+        {eligibleModels?.map((model) => {
           const available = data.availability[model.id]?.available;
-          const selected = data.selectedModelId === model.id;
+          const selected = selectedModelId === model.id;
           return (
             <button
               key={model.id}

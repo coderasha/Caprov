@@ -33,6 +33,8 @@ export interface OrganizationRecord {
   status: OrganizationStatus;
   suspendedAt?: string;
   suspensionNote?: string;
+  /** Preferred model for optional, source-validated Asset DNA assistance. */
+  dnaLlmModelId?: string;
   llmModelId?: string;
   createdAt: string;
   updatedAt: string;

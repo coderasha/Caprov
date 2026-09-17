@@ -299,6 +299,9 @@ export interface LlmModelSelection {
   selectedModelId: string;
   models: LlmModelOption[];
   selected: LlmModelOption;
+  /** Model used for optional, source-validated Asset DNA extraction assistance. */
+  dnaSelectedModelId: string;
+  dnaSelected: LlmModelOption;
   availability: Record<
     string,
     {

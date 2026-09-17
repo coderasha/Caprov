@@ -51,6 +51,10 @@ class SelectModelDto {
   @IsString()
   @MinLength(2)
   modelId!: string;
+
+  @IsOptional()
+  @IsEnum(['COPILOT', 'DNA'])
+  purpose?: 'COPILOT' | 'DNA';
 }
 
 @Controller('intelligence')
@@ -69,7 +73,9 @@ export class IntelligenceController {
   @Patch('models')
   @Roles('ORG_ADMIN', 'PLATFORM_ADMIN', 'ANALYST')
   selectModel(@CurrentUser() user: AuthUser, @Body() dto: SelectModelDto) {
-    return this.llmModels.select(user.organizationId, user.id, dto.modelId);
+    return dto.purpose === 'DNA'
+      ? this.llmModels.selectDna(user.organizationId, user.id, dto.modelId)
+      : this.llmModels.select(user.organizationId, user.id, dto.modelId);
   }
 
   @Get('jobs')

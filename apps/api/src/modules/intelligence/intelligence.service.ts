@@ -126,7 +126,7 @@ export class IntelligenceService {
         now,
       );
 
-      const selectedModel = this.llmModels.getSelectedModel(
+      const selectedModel = this.llmModels.getDnaSelectedModel(
         user.organizationId,
       );
       this.db.mutate((draft) => {
@@ -137,13 +137,13 @@ export class IntelligenceService {
           current.result = {
             dnaVersion: version,
             confidence: envelope.confidence,
-            llmModelId: selectedModel.id,
-            llmModelLabel: selectedModel.label,
+            dnaLlmModelId: selectedModel.id,
+            dnaLlmModelLabel: selectedModel.label,
             extractionEngine: 'caprov-deterministic',
             note:
               selectedModel.provider === 'caprov'
                 ? undefined
-                : 'Asset DNA extraction uses the CAPROV deterministic core; selected LLM applies to copilot synthesis.',
+                : 'Selected LLM may fill missing DNA fields only after source-fragment validation; deterministic extraction remains authoritative.',
           };
         }
         draft.dnaSnapshots.push({
@@ -425,7 +425,7 @@ export class IntelligenceService {
     organizationId: string,
   ): Promise<AssetDnaEnvelope> {
     let local = runLocalPipeline(asset, documents);
-    const model = this.llmModels.getSelectedModel(organizationId);
+    const model = this.llmModels.getDnaSelectedModel(organizationId);
     const assist = await assistExtractionGaps({
       model,
       documents,

@@ -26,8 +26,10 @@ export default function IntelligencePage() {
       (
         await api.get<{
           selected: { label: string; provider: string };
+          dnaSelected: { label: string; provider: string };
           availability: Record<string, { available: boolean }>;
           selectedModelId: string;
+          dnaSelectedModelId: string;
         }>('/intelligence/models')
       ).data,
   });
@@ -46,8 +48,8 @@ export default function IntelligencePage() {
         title="Review Asset DNA"
         description={`Versioned intelligence envelopes with source provenance, confidence, valuation and risk.${
           modelsQuery.data
-            ? ` Active model: ${modelsQuery.data.selected.label} (${modelsQuery.data.selected.provider}${
-                modelsQuery.data.availability[modelsQuery.data.selectedModelId]?.available
+            ? ` Copilot: ${modelsQuery.data.selected.label}; DNA: ${modelsQuery.data.dnaSelected.label} (${modelsQuery.data.dnaSelected.provider}${
+                modelsQuery.data.availability[modelsQuery.data.dnaSelectedModelId]?.available
                   ? ', ready'
                   : ', key needed'
               }).`
@@ -95,6 +97,9 @@ export default function IntelligencePage() {
       </Card>
       <Card className="p-6">
         <LlmModelPicker />
+      </Card>
+      <Card className="p-6">
+        <LlmModelPicker purpose="DNA" />
       </Card>
       {assets.length ? (
         <div className="grid gap-4 md:grid-cols-3">

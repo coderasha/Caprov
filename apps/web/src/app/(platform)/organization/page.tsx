@@ -181,6 +181,9 @@ export default function OrganizationPage() {
       <Card className="p-6">
         <LlmModelPicker />
       </Card>
+      <Card className="p-6">
+        <LlmModelPicker purpose="DNA" />
+      </Card>
       <Card className="overflow-hidden">
         <div className="caprov-scroll">
         <table className="caprov-table w-full text-left text-sm">

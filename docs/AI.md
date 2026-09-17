@@ -115,10 +115,10 @@ Organizations pick a preferred LLM from the platform catalog. UI pickers live on
 
 | Workload | Engine used |
 | --- | --- |
-| Asset DNA extraction, valuation marks, risk | Always **CAPROV deterministic core** (repeatable marks + provenance) |
+| Asset DNA extraction, valuation marks, risk | CAPROV deterministic core, optionally assisted by the organization-selected DNA model for missing, source-validated fields |
 | Copilot Q&A synthesis | Selected org model when its API key is live; otherwise deterministic retrieval over the DNA envelope |
 
-Preference is stored on the organization as `llmModelId` (default `openai-gpt-4.1` when `OPENAI_API_KEY` is live, otherwise `caprov-deterministic`) and audited as `intelligence.llm_model_selected`. Pipeline job results record the selected model id/label; extraction still notes that DNA used the deterministic core.
+The Copilot preference is stored as `llmModelId`; the separate DNA-assist preference is stored as `dnaLlmModelId` and defaults to `caprov-deterministic`. DNA selections are limited to models with the `asset_dna` capability and are audited as `intelligence.dna_llm_model_selected`. The deterministic extractor remains authoritative, with the selected DNA model able to fill only missing fields after its proposed values and source fragments are validated against the uploaded documents.
 
 #### Catalog
 
