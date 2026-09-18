@@ -113,9 +113,11 @@ export function LandingAssetCarousel() {
 
   useEffect(() => {
     if (paused) return;
-    const timer = window.setInterval(next, 6000);
+    const timer = window.setInterval(next, 7000);
     return () => window.clearInterval(timer);
   }, [next, paused]);
+
+  const activeAsset = showcaseAssets[active] ?? showcaseAssets[0]!;
 
   return (
     <div
@@ -127,10 +129,10 @@ export function LandingAssetCarousel() {
     >
       <div className="flex items-center justify-between gap-4 border-b border-[var(--ink)]/6 px-6 py-5 sm:px-7">
         <div>
-          <p className="landing-kicker">Portfolio preview</p>
-          <p className="mt-2 text-sm text-[var(--muted)]">Representative private assets under governed review</p>
+          <p className="landing-kicker">Private asset universe</p>
+         
         </div>
-        <span className="landing-badge landing-badge--ok shrink-0">Verified DNA</span>
+        <span className="landing-badge landing-badge--teal shrink-0">Auto-rotating</span>
       </div>
 
       <div className="landing-asset-carousel__viewport relative px-6 py-6 sm:px-7">
@@ -171,8 +173,8 @@ export function LandingAssetCarousel() {
                   <p className="mt-2 text-sm font-medium text-[var(--ink)]">{riskLabel[item.risk]}</p>
                 </div>
                 <div className="bg-[var(--paper)] px-5 py-4 sm:col-span-1">
-                  <p className="landing-metric-label">Status</p>
-                  <p className="mt-2 text-sm text-[var(--ink)]">Document-backed · Provenance linked</p>
+                  <p className="landing-metric-label">Record status</p>
+                  <p className="mt-2 text-sm text-[var(--ink)]">Illustrative · Evidence-aware</p>
                 </div>
               </div>
             </article>
@@ -194,7 +196,7 @@ export function LandingAssetCarousel() {
             <button
               key={item.id}
               type="button"
-              aria-label={`View ${item.name}`}
+              aria-label={'View ' + assetClassLabel[item.assetClass] + ' category: ' + item.name}
               aria-current={index === active ? 'true' : undefined}
               className={`landing-asset-carousel__dot ${index === active ? 'landing-asset-carousel__dot--active' : ''}`}
               onClick={() => goTo(index)}
@@ -205,10 +207,10 @@ export function LandingAssetCarousel() {
 
       <div className="flex flex-col gap-2 border-t border-[var(--ink)]/6 bg-[var(--paper)]/70 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
         <p className="text-xs text-[var(--muted)]">
-          {active + 1} of {showcaseAssets.length} assets
+          {assetClassLabel[activeAsset.assetClass]} · {active + 1} of {showcaseAssets.length}
         </p>
         <Link href="/login" className="landing-text-link text-sm">
-          Open in workspace
+          Explore Asset DNA
         </Link>
       </div>
     </div>
