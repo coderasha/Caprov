@@ -41,7 +41,7 @@ export function LlmModelPicker({
   const title = purpose === 'DNA' ? 'Asset DNA extraction model' : 'Copilot model';
   const description =
     purpose === 'DNA'
-      ? 'Choose the model that can assist DNA extraction when source-validated fields are missing. The deterministic core remains the authoritative extractor and fallback.'
+      ? 'Choose the primary model for Asset DNA extraction. Every accepted fact must match an uploaded source fragment; the deterministic core is used only when the model is unavailable or produces no validated facts.'
       : 'Choose the model for copilot synthesis.';
   if (modelsQuery.isLoading || !data) {
     return (

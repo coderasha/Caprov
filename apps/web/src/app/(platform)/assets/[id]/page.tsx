@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { DnaDecisionTable } from '@/components/intelligence/dna-decision-table';
 import { FactSummaryTable } from '@/components/intelligence/fact-summary-table';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
@@ -23,7 +24,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BrowserProvider, Contract } from 'ethers';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 const tabs = ['Overview', 'DNA', 'Documents', 'Ownership', 'Valuation & risk'] as const;
 
@@ -104,6 +105,7 @@ export default function AssetDetailPage() {
     percentage: 100,
     notes: '',
   });
+  const [ownershipDraft, setOwnershipDraft] = useState<Array<typeof owner>>([]);
   const [doc, setDoc] = useState({
     name: '',
     type: 'OTHER' as DocumentType,
@@ -141,11 +143,13 @@ export default function AssetDetailPage() {
       await queryClient.invalidateQueries({ queryKey: ['jobs'] });
     },
   });
-  const addOwnership = useMutation({
-    mutationFn: async () => api.post(`/assets/${params.id}/ownerships`, owner),
+  const saveOwnerships = useMutation({
+    mutationFn: async () =>
+      api.put(`/assets/${params.id}/ownerships`, { ownerships: ownershipDraft }),
     onSuccess: async () => {
-      setOwner({ holderName: '', ownershipType: 'LEGAL', percentage: 100, notes: '' });
       await queryClient.invalidateQueries({ queryKey: ['asset', params.id] });
+      await queryClient.invalidateQueries({ queryKey: ['dna', params.id] });
+      await queryClient.invalidateQueries({ queryKey: ['jobs'] });
     },
   });
   const ingestDoc = useMutation({
@@ -189,6 +193,19 @@ export default function AssetDetailPage() {
   const asset = assetQuery.data;
   const documents = docsQuery.data ?? [];
   const network = networkQuery.data;
+  useEffect(() => {
+    if (assetQuery.data) {
+      setOwnershipDraft(
+        assetQuery.data.ownerships.map((item) => ({
+          holderName: item.holderName,
+          ownershipType: item.type,
+          percentage: item.percentage,
+          asOf: item.asOf,
+          notes: item.notes ?? '',
+        })),
+      );
+    }
+  }, [assetQuery.data?.id, assetQuery.data?.updatedAt]);
   const canWalletAnchor = Boolean(user);
   const liveDocumentAnchoringReady = Boolean(network?.liveReady && network.contractAddress);
   const fallbackFolders = useMemo<AssetDocumentsTree['folders']>(() => {
@@ -438,14 +455,19 @@ export default function AssetDetailPage() {
       ) : null}
 
       {tab === 'DNA' ? (
-        <div className="space-y-4">
-          <div className="flex items-center justify-end">
+        <div className="space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--gold)]">Asset intelligence</p>
+              <p className="mt-1 text-sm text-[var(--muted)]">Review the decision brief first, then verify the supporting facts against their source excerpts.</p>
+            </div>
             <Link href={`/intelligence/dna/${asset.id}`} className="text-sm underline">
               Full explorer
             </Link>
           </div>
+          <DnaDecisionTable asset={asset} />
           <FactSummaryTable
-            title="Key extracted details"
+            title="Supporting extracted facts"
             facts={(dna?.facts ?? []).map((fact) => ({
               id: fact.id,
               key: fact.key,
@@ -668,25 +690,40 @@ export default function AssetDetailPage() {
       {tab === 'Ownership' ? (
         <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
           <Card className="p-6">
-            <h2 className="text-lg font-semibold">Holders</h2>
-            <div className="mt-4 grid gap-3">
-              {asset.ownerships.map((item) => (
-                <div key={item.id} className="rounded-2xl border border-[var(--line)] px-4 py-3">
-                  <p className="font-medium">{item.holderName}</p>
-                  <p className="text-xs text-[var(--muted)]">
-                    {item.type} · {item.percentage}% {item.asOf ? `· as of ${formatDate(item.asOf)}` : ''}
-                  </p>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--gold)]">Ownership register</p>
+                <h2 className="mt-1 text-lg font-semibold">Allocation</h2>
+                <p className="mt-1 text-sm text-[var(--muted)]">Edit the full allocation, then save it as one validated record.</p>
+              </div>
+              <Badge tone={Math.abs(ownershipDraft.reduce((sum, item) => sum + Number(item.percentage || 0), 0) - 100) < 0.001 ? 'ok' : 'warn'}>
+                {ownershipDraft.reduce((sum, item) => sum + Number(item.percentage || 0), 0).toFixed(2)}% allocated
+              </Badge>
+            </div>
+            <div className="mt-5 space-y-3">
+              {ownershipDraft.map((item, index) => (
+                <div key={index} className="rounded-xl border border-[var(--line)] bg-white/50 p-4">
+                  <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_9rem_7rem_auto] sm:items-end">
+                    <Field label="Holder"><Input value={item.holderName} onChange={(event) => setOwnershipDraft((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, holderName: event.target.value } : row))} /></Field>
+                    <Field label="Interest"><Select value={item.ownershipType} onChange={(event) => setOwnershipDraft((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, ownershipType: event.target.value as OwnershipType } : row))}><option value="LEGAL">Legal</option><option value="BENEFICIAL">Beneficial</option><option value="ECONOMIC">Economic</option></Select></Field>
+                    <Field label="Percentage"><Input type="number" min={0} max={100} value={item.percentage} onChange={(event) => setOwnershipDraft((current) => current.map((row, rowIndex) => rowIndex === index ? { ...row, percentage: Number(event.target.value) } : row))} /></Field>
+                    <Button type="button" variant="ghost" onClick={() => setOwnershipDraft((current) => current.filter((_, rowIndex) => rowIndex !== index))}>Remove</Button>
+                  </div>
                 </div>
               ))}
+              {!ownershipDraft.length ? <div className="rounded-xl border border-dashed border-[var(--line)] px-4 py-6 text-sm text-[var(--muted)]">No holders added. Add at least one holder and allocate exactly 100% before saving.</div> : null}
             </div>
+            {saveOwnerships.isError ? <p className="mt-3 text-sm text-[var(--danger)]">Could not save the ownership register. Confirm every holder is valid and the total is exactly 100%.</p> : null}
           </Card>
           <Card className="p-6">
-            <h2 className="text-lg font-semibold">Add ownership</h2>
+            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--gold)]">Register controls</p>
+            <h2 className="mt-1 text-lg font-semibold">Add & save holders</h2>
             <form
               className="mt-4 grid gap-3"
               onSubmit={(event) => {
                 event.preventDefault();
-                addOwnership.mutate();
+                setOwnershipDraft((current) => [...current, owner]);
+                setOwner({ holderName: '', ownershipType: 'LEGAL', percentage: 0, notes: '' });
               }}
             >
               <Field label="Holder">
@@ -715,10 +752,14 @@ export default function AssetDetailPage() {
                   onChange={(e) => setOwner({ ...owner, percentage: Number(e.target.value) })}
                 />
               </Field>
-              <Button type="submit" disabled={addOwnership.isPending}>
-                Save ownership
-              </Button>
+              <Button type="submit" disabled={!owner.holderName.trim()}>Add holder to allocation</Button>
             </form>
+            <div className="mt-6 border-t border-[var(--line)] pt-5">
+              <p className="text-xs leading-5 text-[var(--muted)]">Saving replaces the previous register, records an audit event, and automatically rebuilds Asset DNA with the registered ownership data.</p>
+              <Button className="mt-4 w-full" type="button" disabled={saveOwnerships.isPending || !ownershipDraft.length || Math.abs(ownershipDraft.reduce((sum, item) => sum + Number(item.percentage || 0), 0) - 100) >= 0.001} onClick={() => saveOwnerships.mutate()}>
+                {saveOwnerships.isPending ? 'Saving & rebuilding DNA…' : 'Save validated ownership register'}
+              </Button>
+            </div>
           </Card>
         </div>
       ) : null}

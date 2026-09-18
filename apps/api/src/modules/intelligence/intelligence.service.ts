@@ -13,6 +13,7 @@ import { createId } from '../../infrastructure/database/ids';
 import type {
   IntelligenceJobRecord,
   ProvenanceAnchorRecord,
+  AssetOwnershipRecord,
 } from '../../infrastructure/database/models';
 import { AuditService } from '../audit/audit.service';
 import {
@@ -26,6 +27,12 @@ import { isLlmModelLive } from './llm-catalog';
 import { LlmModelsService } from './llm-models.service';
 import { resolveCopilotAnswer } from './llm-runtime';
 import { attachProjection } from './projection-engine';
+
+type ComposedEnvelope = {
+  envelope: AssetDnaEnvelope;
+  extractionEngine: 'caprov-deterministic' | 'llm-primary';
+  note?: string;
+};
 
 @Injectable()
 export class IntelligenceService {
@@ -96,11 +103,15 @@ export class IntelligenceService {
     });
 
     try {
-      const envelope = await this.composeEnvelope(
+      const composed = await this.composeEnvelope(
         asset,
         documents,
         user.organizationId,
       );
+      const ownerships = this.db.snapshot.ownerships.filter(
+        (item) => item.assetId === assetId,
+      );
+      const envelope = applyOwnershipRegister(composed.envelope, ownerships);
       const version =
         Math.max(
           0,
@@ -139,11 +150,8 @@ export class IntelligenceService {
             confidence: envelope.confidence,
             dnaLlmModelId: selectedModel.id,
             dnaLlmModelLabel: selectedModel.label,
-            extractionEngine: 'caprov-deterministic',
-            note:
-              selectedModel.provider === 'caprov'
-                ? undefined
-                : 'Selected LLM may fill missing DNA fields only after source-fragment validation; deterministic extraction remains authoritative.',
+            extractionEngine: composed.extractionEngine,
+            note: composed.note,
           };
         }
         draft.dnaSnapshots.push({
@@ -257,28 +265,7 @@ export class IntelligenceService {
     const briefing =
       resolved.mode === 'deterministic'
         ? local.briefing
-        : {
-            title: 'Model synthesis',
-            headline: resolved.answer.split('\n')[0] ?? resolved.answer,
-            sections: [
-              {
-                title: 'Response',
-                body: resolved.answer,
-                kind: 'detail' as const,
-              },
-              ...(resolved.note
-                ? [
-                    {
-                      title: 'Note',
-                      body: resolved.note,
-                      kind: 'note' as const,
-                    },
-                  ]
-                : []),
-            ],
-            disclaimer:
-              'Remote model synthesis over Asset DNA context. Verify against source documents.',
-          };
+        : createSynthesisBriefing(resolved.answer, resolved.note);
 
     const answer =
       resolved.mode === 'deterministic'
@@ -423,16 +410,31 @@ export class IntelligenceService {
     asset: PipelineAsset,
     documents: PipelineDocument[],
     organizationId: string,
-  ): Promise<AssetDnaEnvelope> {
+  ): Promise<ComposedEnvelope> {
     let local = runLocalPipeline(asset, documents);
     const model = this.llmModels.getDnaSelectedModel(organizationId);
-    const assist = await assistExtractionGaps({
-      model,
-      documents,
-      facts: local.facts,
-    });
-    if (assist.filled.length) {
-      local = runLocalPipeline(asset, documents, { facts: assist.facts });
+    let extractionEngine: ComposedEnvelope['extractionEngine'] =
+      'caprov-deterministic';
+    let extractionNote: string | undefined;
+
+    // An opted-in live DNA model receives the entire supported fact set. Its
+    // output becomes authoritative only when every accepted fact is grounded in
+    // the uploaded source text; otherwise the deterministic result is retained.
+    const primary = await assistExtractionGaps({ model, documents, facts: [] });
+    if (primary.filled.length) {
+      local = runLocalPipeline(asset, documents, { facts: primary.facts });
+      extractionEngine = 'llm-primary';
+      extractionNote = `Primary extraction via ${model.label}. ${primary.note ?? ''}`.trim();
+    } else {
+      const assist = await assistExtractionGaps({
+        model,
+        documents,
+        facts: local.facts,
+      });
+      if (assist.filled.length) {
+        local = runLocalPipeline(asset, documents, { facts: assist.facts });
+        extractionNote = assist.note;
+      }
       local = {
         ...local,
         summary: `${local.summary} ${assist.note ?? ''}`.trim(),
@@ -446,10 +448,7 @@ export class IntelligenceService {
         signal: AbortSignal.timeout(1500),
       });
       if (!health.ok) {
-        return {
-          ...local,
-          summary: `${local.summary} (local intelligence fallback)`,
-        };
+        return { envelope: { ...local, summary: `${local.summary} (local intelligence fallback)` }, extractionEngine, note: extractionNote };
       }
       const response = await fetch(`${engineUrl}/api/pipeline/asset-dna`, {
         method: 'POST',
@@ -466,10 +465,7 @@ export class IntelligenceService {
         signal: AbortSignal.timeout(8000),
       });
       if (!response.ok) {
-        return {
-          ...local,
-          summary: `${local.summary} (local intelligence fallback)`,
-        };
+        return { envelope: { ...local, summary: `${local.summary} (local intelligence fallback)` }, extractionEngine, note: extractionNote };
       }
       const remote = (await response.json()) as AssetDnaEnvelope & {
         engine?: string;
@@ -489,15 +485,18 @@ export class IntelligenceService {
           timeline: remote.timeline?.length ? remote.timeline : local.timeline,
           summary: `${local.summary} (engine-enriched graph)`.trim(),
         };
-        return merged.projection
-          ? merged
-          : attachProjection(merged, asset.assetClass);
+        return {
+          envelope: merged.projection ? merged : attachProjection(merged, asset.assetClass),
+          extractionEngine,
+          note: extractionNote,
+        };
       }
-      return local;
+      return { envelope: local, extractionEngine, note: extractionNote };
     } catch {
       return {
-        ...local,
-        summary: `${local.summary} (local intelligence fallback)`,
+        envelope: { ...local, summary: `${local.summary} (local intelligence fallback)` },
+        extractionEngine,
+        note: extractionNote,
       };
     }
   }
@@ -641,6 +640,68 @@ export class IntelligenceService {
       },
     };
   }
+}
+
+function createSynthesisBriefing(answer: string, note?: string) {
+  const parts = answer
+    .split(/^\s*#{1,3}\s+/m)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const sections = parts.length > 1
+    ? parts.map((part) => {
+        const [title = '', ...body] = part.split('\n');
+        const content = body.join('\n').trim();
+        return {
+          title: title.replace(/[\*_]/g, '') || 'Response',
+          body: content || title,
+          kind: /^key findings$/i.test(title) ? ('list' as const) : /^evidence|caveats/i.test(title) ? ('note' as const) : ('detail' as const),
+        };
+      })
+    : [{ title: 'Answer', body: answer.trim(), kind: 'detail' as const }];
+  const answerSection =
+    sections.find((section) => /^answer$/i.test(section.title)) ??
+    sections[0] ??
+    { title: 'Answer', body: 'No response returned.', kind: 'detail' as const };
+  return {
+    title: 'Model synthesis',
+    headline: answerSection?.body.split(/[\n.!?]/)[0]?.trim() || 'Response prepared from the current Asset DNA context.',
+    sections: [
+      ...sections,
+      ...(note ? [{ title: 'Service note', body: note, kind: 'note' as const }] : []),
+    ],
+    disclaimer: 'Remote-model synthesis over Asset DNA context. Verify material conclusions against source documents.',
+  };
+}
+
+function applyOwnershipRegister(
+  envelope: AssetDnaEnvelope,
+  ownerships: AssetOwnershipRecord[],
+): AssetDnaEnvelope {
+  if (!ownerships.length) return envelope;
+  const observedAt = new Date().toISOString();
+  const registeredFacts = (['LEGAL', 'BENEFICIAL', 'ECONOMIC'] as const)
+    .map((type) => {
+      const holders = ownerships.filter((item) => item.type === type);
+      if (!holders.length) return null;
+      return {
+        id: createId('fact'),
+        key: type === 'LEGAL' ? 'legal_ownership' : type.toLowerCase() + '_ownership',
+        label: type.charAt(0) + type.slice(1).toLowerCase() + ' ownership',
+        value: holders.map((item) => item.holderName + ' (' + item.percentage + '%)').join('; '),
+        confidence: 1,
+        provenance: [{
+          sourceDocumentId: 'ownership-register',
+          sourceFragment: 'CAPROV ownership register: ' + holders.map((item) => item.holderName + ' ' + item.percentage + '%').join('; '),
+          confidence: 1,
+          observedAt,
+        }],
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+  const keys = new Set(registeredFacts.map((fact) => fact.key));
+  const facts = [...envelope.facts.filter((fact) => !keys.has(fact.key)), ...registeredFacts];
+  const summary = envelope.summary + ' Ownership register synced (' + ownerships.length + ' holder' + (ownerships.length === 1 ? '' : 's') + ', 100% allocated).';
+  return { ...envelope, facts, summary };
 }
 
 function canonicalStringify(value: unknown): string {

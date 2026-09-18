@@ -3,9 +3,9 @@ import { Providers } from '@/components/providers';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'CAPROV — Private-asset intelligence',
+  title: 'CAPROV — Evidence-led private asset operations',
   description:
-    'AI-first private-asset intelligence platform built around Asset DNA, provenance and confidence.',
+    'The operating system for evidence-led private asset decisions: Asset DNA, provenance, controls, and execution workflows.',
 };
 
 export const viewport: Viewport = {

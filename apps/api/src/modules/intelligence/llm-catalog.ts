@@ -37,10 +37,10 @@ export const LLM_MODEL_CATALOG: LlmModelOption[] = [
     provider: 'openai',
     label: 'OpenAI GPT-5.6 Terra',
     description:
-      'Production-grade reasoning and synthesis that balances answer quality with operating cost for CAPROV Copilot.',
+      'Production-grade reasoning for source-grounded Asset DNA assistance and CAPROV Copilot.',
     contextWindow: 1_050_000,
-    strengths: ['Reasoning', 'Long context', 'Copilot'],
-    capabilities: ['copilot'],
+    strengths: ['Reasoning', 'Long context', 'Asset DNA', 'Copilot'],
+    capabilities: ['extraction', 'asset_dna', 'copilot'],
     alwaysAvailable: false,
     apiKeyEnv: 'OPENAI_API_KEY',
   },

@@ -3,7 +3,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from caprov_intelligence.pipeline import answer_copilot, run_asset_dna
+from caprov_intelligence.pipeline import _parse_amount, answer_copilot, run_asset_dna
 
 HARBOURVIEW = {
     "id": "ast_harbourview",
@@ -64,6 +64,12 @@ DOCS = [
         ),
     },
 ]
+
+
+def test_written_amount_does_not_rescale_numeric_amount() -> None:
+    assert _parse_amount(
+        "$2,200,000 (Two Million Two Hundred Thousand U.S. Dollars only)"
+    ) == (2_200_000.0, "USD")
 
 
 def test_harbourview_prefers_market_value_not_purchase_price() -> None:

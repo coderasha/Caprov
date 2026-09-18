@@ -177,6 +177,42 @@ If unknown, omit the key. Do not invent amounts.
 Never use declared value, insured value, sum insured, replacement cost, reinstatement value, or book value as market_value or nav.
 Prefer valuation memos and financial statements for marks. Documents:\n${corpus}`;
 
+  if (model.id === 'openai-gpt-5.6-terra') {
+    const response = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-5.6-terra',
+        instructions:
+          'Return only valid JSON. Never invent numbers not present in the documents.',
+        input: prompt,
+        max_output_tokens: 800,
+        reasoning: { effort: 'medium' },
+        text: { verbosity: 'low' },
+      }),
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const payload = (await response.json()) as {
+      output_text?: string;
+      output?: Array<{
+        content?: Array<{ type?: string; text?: string }>;
+      }>;
+    };
+    const text =
+      payload.output_text ??
+      payload.output
+        ?.flatMap((item) => item.content ?? [])
+        .filter((item) => item.type === 'output_text')
+        .map((item) => item.text ?? '')
+        .join('\n') ??
+      '';
+    return parseJsonObject(text);
+  }
+
   // Prefer OpenAI-compatible chat completions when possible.
   const endpoint =
     model.provider === 'anthropic'

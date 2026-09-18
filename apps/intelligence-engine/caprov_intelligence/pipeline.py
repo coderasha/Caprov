@@ -158,10 +158,9 @@ def _parse_amount(raw: str) -> tuple[float, str] | None:
         amount *= 1_000_000
     if suffix in {"billion", "bn"}:
         amount *= 1_000_000_000
-    if not suffix and re.search(r"\bmillion\b", cleaned, re.I):
-        amount *= 1_000_000
-    if not suffix and re.search(r"\bbillion\b|\bbn\b", cleaned, re.I):
-        amount *= 1_000_000_000
+    # A written-out amount may follow the numeric amount in parentheses, e.g.
+    # "$2,200,000 (Two Million...)". Only a suffix next to the numeric token
+    # is a scale instruction.
     if currency_match and currency_match.group(1):
         currency = currency_match.group(1).upper()
     elif currency_match and currency_match.group(3):

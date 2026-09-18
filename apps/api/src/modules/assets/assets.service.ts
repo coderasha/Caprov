@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type {
   AssetClass,
   AssetStatus,
@@ -9,6 +9,7 @@ import type { AuthUser } from '../../common/types/auth-user';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import { createId } from '../../infrastructure/database/ids';
 import { AuditService } from '../audit/audit.service';
+import { IntelligenceService } from '../intelligence/intelligence.service';
 
 export interface CreateAssetInput {
   name: string;
@@ -36,6 +37,7 @@ export class AssetsService {
   constructor(
     private readonly db: DatabaseService,
     private readonly audit: AuditService,
+    private readonly intelligence: IntelligenceService,
   ) {}
 
   list(organizationId: string) {
@@ -115,28 +117,47 @@ export class AssetsService {
     return this.hydrate(assetId);
   }
 
-  addOwnership(user: AuthUser, assetId: string, input: OwnershipInput) {
+  async replaceOwnerships(
+    user: AuthUser,
+    assetId: string,
+    inputs: OwnershipInput[],
+  ) {
     this.get(user.organizationId, assetId);
-    const ownership = {
+    if (!inputs.length) {
+      throw new BadRequestException('At least one ownership holder is required.');
+    }
+    const total = inputs.reduce((sum, item) => sum + Number(item.percentage), 0);
+    if (Math.abs(total - 100) > 0.001) {
+      throw new BadRequestException(
+        'Ownership percentages must total exactly 100%. Current total: ' + total.toFixed(2) + '%.',
+      );
+    }
+    if (inputs.some((item) => !item.holderName.trim() || item.percentage < 0 || item.percentage > 100)) {
+      throw new BadRequestException('Each holder needs a name and a percentage between 0 and 100.');
+    }
+    const ownerships = inputs.map((input) => ({
       id: createId('own'),
       assetId,
-      holderName: input.holderName,
+      holderName: input.holderName.trim(),
       type: input.ownershipType,
-      percentage: input.percentage,
+      percentage: Number(input.percentage),
       asOf: input.asOf,
       notes: input.notes,
-    };
+    }));
     this.db.mutate((draft) => {
-      draft.ownerships.push(ownership);
+      draft.ownerships = draft.ownerships.filter((item) => item.assetId !== assetId);
+      draft.ownerships.push(...ownerships);
     });
     this.audit.log({
       organizationId: user.organizationId,
       actorUserId: user.id,
-      action: 'asset.ownership_added',
+      action: 'asset.ownership_register_updated',
       entityType: 'Asset',
       entityId: assetId,
+      metadata: { holderCount: ownerships.length, totalPercentage: total },
     });
-    return ownership;
+    await this.intelligence.runPipeline(user, assetId);
+    return this.hydrate(assetId);
   }
 
   hydrate(assetId: string) {

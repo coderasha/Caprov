@@ -44,7 +44,7 @@ export function LandingHeader() {
                 markClassName="text-[var(--gold)]"
               />
               <p className="landing-header__tagline mt-1 hidden text-[10px] uppercase tracking-[0.22em] text-[var(--muted)] sm:block">
-                Private asset intelligence
+                Evidence-led private asset operations
               </p>
             </Link>
 

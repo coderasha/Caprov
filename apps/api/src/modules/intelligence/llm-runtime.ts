@@ -213,7 +213,7 @@ async function callRemoteModel(
   }
 
   const system =
-    'You are CAPROV Asset DNA copilot. Answer from the provided context only. Cite facts briefly. If unknown, say so.';
+    'You are CAPROV Asset DNA copilot. Answer only from the provided context; if unknown, say so clearly. Return a concise professional briefing using exactly these Markdown headings when relevant: ## Answer, ## Key findings, ## Evidence and caveats. Put one finding per bullet under Key findings. Do not invent sources, use tables, or give legal, tax, or investment advice.';
 
   if (endpoint.url === 'https://api.openai.com/v1/responses') {
     const response = await fetch(endpoint.url, {

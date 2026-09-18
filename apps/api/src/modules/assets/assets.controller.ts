@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -13,10 +14,12 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  ValidateNested,
   Max,
   Min,
   MinLength,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import type {
   AssetClass,
   AssetStatus,
@@ -104,6 +107,13 @@ class OwnershipDto {
   notes?: string;
 }
 
+class OwnershipRegisterDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OwnershipDto)
+  ownerships!: OwnershipDto[];
+}
+
 @Controller('assets')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AssetsController {
@@ -135,13 +145,13 @@ export class AssetsController {
     return this.assets.update(user, id, dto);
   }
 
-  @Post(':id/ownerships')
+  @Put(':id/ownerships')
   @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
-  addOwnership(
+  replaceOwnerships(
     @CurrentUser() user: AuthUser,
     @Param('id') id: string,
-    @Body() dto: OwnershipDto,
+    @Body() dto: OwnershipRegisterDto,
   ) {
-    return this.assets.addOwnership(user, id, dto);
+    return this.assets.replaceOwnerships(user, id, dto.ownerships);
   }
 }

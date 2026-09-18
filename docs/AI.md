@@ -115,16 +115,17 @@ Organizations pick a preferred LLM from the platform catalog. UI pickers live on
 
 | Workload | Engine used |
 | --- | --- |
-| Asset DNA extraction, valuation marks, risk | CAPROV deterministic core, optionally assisted by the organization-selected DNA model for missing, source-validated fields |
+| Asset DNA extraction, valuation marks, risk | Organization-selected DNA model when live; deterministic core if the model is unavailable or produces no source-validated facts |
 | Copilot Q&A synthesis | Selected org model when its API key is live; otherwise deterministic retrieval over the DNA envelope |
 
-The Copilot preference is stored as `llmModelId`; the separate DNA-assist preference is stored as `dnaLlmModelId` and defaults to `caprov-deterministic`. DNA selections are limited to models with the `asset_dna` capability and are audited as `intelligence.dna_llm_model_selected`. The deterministic extractor remains authoritative, with the selected DNA model able to fill only missing fields after its proposed values and source fragments are validated against the uploaded documents.
+The Copilot preference is stored as `llmModelId`; the separate primary DNA preference is stored as `dnaLlmModelId` and defaults to `caprov-deterministic`. DNA selections are limited to models with the `asset_dna` capability and are audited as `intelligence.dna_llm_model_selected`. A live selected DNA model extracts the full supported fact set; only values and provenance fragments found in the uploaded documents are accepted. When no facts survive that validation or the model is unavailable, CAPROV falls back to the deterministic extractor.
 
 #### Catalog
 
 | Model id | Provider | Label | API key env | Always available |
 | --- | --- | --- | --- | --- |
 | `caprov-deterministic` | caprov | CAPROV Deterministic Extractor | — | Yes |
+| `openai-gpt-5.6-terra` | openai | OpenAI GPT-5.6 Terra | `OPENAI_API_KEY` | No |
 | `openai-gpt-4.1` | openai | OpenAI GPT-4.1 | `OPENAI_API_KEY` | No |
 | `openai-gpt-4o` | openai | OpenAI GPT-4o | `OPENAI_API_KEY` | No |
 | `openai-o3-mini` | openai | OpenAI o3-mini | `OPENAI_API_KEY` | No |

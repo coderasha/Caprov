@@ -4,9 +4,11 @@ import { CopilotBriefingCard, type CopilotBriefing } from '@/components/intellig
 import { LlmModelPicker } from '@/components/intelligence/llm-model-picker';
 import { PageHeader } from '@/components/layout/page-header';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Field, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
+import { money, riskTone } from '@/lib/format';
 import type { HydratedAsset } from '@/lib/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -67,19 +69,20 @@ export default function CopilotPage() {
   const selectedAsset = (assetsQuery.data ?? []).find((asset) => asset.id === assetId);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6">
       <PageHeader
         eyebrow="Copilot"
-        title="Ask across Asset DNA"
-        description="Structured briefings cite valuation, risk and source documents. This is retrieval over the intelligence envelope, not a legal opinion."
+        title="Asset intelligence copilot"
+        description="Ask focused questions and receive a source-aware briefing grounded in the selected asset’s current DNA."
       />
 
-      <div className="grid gap-6 lg:grid-cols-[0.9fr_1.3fr]">
+      <div className="grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
         <div className="space-y-6">
           <Card className="p-5">
             <LlmModelPicker compact />
           </Card>
           <Card className="p-5">
+            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--gold)]">Research context</p>
             <Field label="Asset context">
               <Select value={assetId} onChange={(e) => setAssetId(e.target.value)}>
                 {(assetsQuery.data ?? []).map((asset) => (
@@ -90,19 +93,24 @@ export default function CopilotPage() {
               </Select>
             </Field>
             {selectedAsset ? (
-              <p className="mt-3 text-xs leading-5 text-[var(--muted)]">
-                {selectedAsset.location ?? selectedAsset.jurisdiction ?? 'Private asset'} ·{' '}
-                {selectedAsset.currency}
-              </p>
+              <div className="mt-4 rounded-xl bg-[var(--paper)]/70 p-3">
+                <p className="font-medium text-[var(--ink)]">{selectedAsset.name}</p>
+                <p className="mt-1 text-xs leading-5 text-[var(--muted)]">{selectedAsset.location ?? selectedAsset.jurisdiction ?? 'Private asset'} · {selectedAsset.documentCount} source {selectedAsset.documentCount === 1 ? 'document' : 'documents'}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Badge tone={selectedAsset.latestDna ? 'ok' : 'warn'}>{selectedAsset.latestDna ? 'DNA ready' : 'DNA needed'}</Badge>
+                  <Badge tone={riskTone(selectedAsset.latestRisk?.payload.rating)}>{selectedAsset.latestRisk?.payload.rating ?? 'No risk'}</Badge>
+                </div>
+                {selectedAsset.latestValuation ? <p className="mt-3 text-sm font-medium text-[var(--ink)]">{money(selectedAsset.latestValuation.payload.amount, selectedAsset.latestValuation.payload.currency)}</p> : null}
+              </div>
             ) : null}
             <div className="mt-5 grid gap-2">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">Suggested</p>
+              <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--muted)]">Suggested questions</p>
               {SUGGESTIONS.map((suggestion) => (
                 <button
                   key={suggestion}
                   type="button"
                   onClick={() => setMessage(suggestion)}
-                  className="rounded-xl border border-[var(--line)] bg-white/50 px-3 py-2.5 text-left text-xs leading-5 text-[var(--ink)] transition hover:border-[var(--ink)]/20 hover:bg-white"
+                  className="rounded-xl border border-[var(--line)] bg-white/50 px-3 py-2.5 text-left text-xs leading-5 text-[var(--ink)] transition hover:border-[var(--teal)]/40 hover:bg-[var(--teal-soft)]/35"
                 >
                   {suggestion}
                 </button>
@@ -111,17 +119,19 @@ export default function CopilotPage() {
           </Card>
         </div>
 
-        <Card className="flex min-h-[28rem] flex-col p-4 sm:min-h-[34rem] sm:p-6">
+        <Card className="flex min-h-[34rem] flex-col overflow-hidden p-0">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--line)]/80 px-5 py-4 sm:px-6">
+            <div><p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--gold)]">Conversation</p><h2 className="mt-1 font-display text-lg font-semibold tracking-[-0.02em] text-[var(--ink)]">Source-aware briefing desk</h2></div>
+            <Badge tone="ink">{selectedAsset?.latestDna ? 'Grounded in DNA' : 'No DNA context'}</Badge>
+          </div>
+          <div className="flex-1 p-4 sm:p-6">
           <div className="flex-1 space-y-5 overflow-y-auto pr-1">
             {messages.length === 0 ? (
               <div className="grid h-full min-h-[12rem] place-items-center rounded-[1.25rem] border border-dashed border-[var(--line)] bg-[var(--paper)]/50 px-4 text-center sm:min-h-[16rem] sm:px-6">
                 <div>
-                  <p className="font-display text-lg font-semibold tracking-[-0.02em] text-[var(--ink)]">
-                    Briefing desk
-                  </p>
+                  <p className="font-display text-lg font-semibold tracking-[-0.02em] text-[var(--ink)]">Ready when you are</p>
                   <p className="mt-2 max-w-sm text-sm leading-6 text-[var(--muted)]">
-                    Ask about value, ownership, risk, leases, occupancy or forward marks to receive a
-                    structured intelligence card.
+                    Ask about value, ownership, risk, leases, occupancy, or forward marks. Every response is organized into a concise briefing with evidence and caveats.
                   </p>
                 </div>
               </div>
@@ -168,18 +178,20 @@ export default function CopilotPage() {
             }}
           >
             <Textarea
-              rows={3}
+              rows={2}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Ask a precise question about this asset…"
               required
             />
-            <div className="flex justify-end">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs text-[var(--muted)]">Answers are grounded in the selected asset’s stored DNA.</p>
               <Button type="submit" disabled={chat.isPending || !message.trim()}>
                 {chat.isPending ? 'Preparing briefing…' : 'Ask copilot'}
               </Button>
             </div>
           </form>
+          </div>
         </Card>
       </div>
     </div>

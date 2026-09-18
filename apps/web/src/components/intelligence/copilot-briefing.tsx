@@ -52,16 +52,23 @@ export function CopilotBriefingCard({
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--gold)]">
               {section.title}
             </p>
-            <div
-              className={cn(
-                'mt-2 text-sm leading-7 text-[var(--ink)]/85',
-                section.kind === 'list' && 'whitespace-pre-line',
-                section.kind === 'note' && 'text-[var(--muted)]',
-                section.kind === 'metric' && 'font-display text-lg font-semibold tracking-[-0.02em]',
-              )}
-            >
-              {section.body}
-            </div>
+            {section.kind === 'list' ? (
+              <ul className="mt-3 space-y-2 text-sm leading-6 text-[var(--ink)]/85">
+                {section.body.split('\n').filter(Boolean).map((item) => (
+                  <li key={item} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--gold)]" />{item.replace(/^[-•]\s*/, '')}</li>
+                ))}
+              </ul>
+            ) : (
+              <div
+                className={cn(
+                  'mt-2 whitespace-pre-line text-sm leading-7 text-[var(--ink)]/85',
+                  section.kind === 'note' && 'rounded-lg bg-[var(--paper)]/70 px-3 py-2.5 text-[var(--muted)]',
+                  section.kind === 'metric' && 'font-display text-lg font-semibold tracking-[-0.02em]',
+                )}
+              >
+                {section.body}
+              </div>
+            )}
           </div>
         ))}
       </div>

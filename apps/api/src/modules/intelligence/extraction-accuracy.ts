@@ -217,8 +217,9 @@ export function parseAmount(
   if (suffix === 'lakh') amount *= 100_000;
   if (suffix === 'million' || suffix === 'm') amount *= 1_000_000;
   if (suffix === 'billion' || suffix === 'bn') amount *= 1_000_000_000;
-  if (!suffix && /\bmillion\b/i.test(cleaned)) amount *= 1_000_000;
-  if (!suffix && /\bbillion\b|\bbn\b/i.test(cleaned)) amount *= 1_000_000_000;
+  // A written-out amount may follow the numeric amount in parentheses, e.g.
+  // "$2,200,000 (Two Million...)". Only a suffix directly adjacent to the
+  // numeric token is a scale instruction.
   const currency: CurrencyCode = moneyMatch[1]
     ? (moneyMatch[1].toUpperCase() as CurrencyCode)
     : moneyMatch[3]
