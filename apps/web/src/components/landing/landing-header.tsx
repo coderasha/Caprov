@@ -2,7 +2,7 @@
 
 import { CaprovWordmark } from '@/components/brand/caprov-logo';
 import { cn } from '@/lib/utils';
-import { Menu, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -66,16 +66,6 @@ export function LandingHeader() {
                 </Link>
               </div>
 
-              <button
-                type="button"
-                className="landing-icon-btn xl:hidden"
-                aria-expanded={menuOpen}
-                aria-controls="landing-mobile-menu"
-                aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-                onClick={() => setMenuOpen((open) => !open)}
-              >
-                {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-              </button>
             </div>
           </div>
         </div>

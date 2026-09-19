@@ -4,6 +4,7 @@ import { assetClassLabel } from '@/lib/format';
 import type { AssetClass } from '@caprov/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCallback, useEffect, useState } from 'react';
 
 type ShowcaseAsset = {
@@ -145,6 +146,15 @@ export function LandingAssetCarousel() {
               className={`landing-asset-carousel__slide ${isActive ? 'landing-asset-carousel__slide--active' : ''}`}
             >
               <div className={`landing-asset-carousel__visual bg-gradient-to-br ${item.accent}`}>
+                <Image
+                  src="/private-assets-hero.png"
+                  alt=""
+                  fill
+                  priority={index === 0}
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  className="object-cover opacity-35 mix-blend-luminosity"
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,15,26,0.55),rgba(10,15,26,0.16),rgba(10,15,26,0.42))]" aria-hidden="true" />
                 <div className="landing-asset-carousel__visual-shine" aria-hidden="true" />
                 <div className="relative z-10 flex h-full min-h-[12.5rem] flex-col justify-between p-6 sm:min-h-[14rem]">
                   <div className="flex items-start justify-between gap-3">
