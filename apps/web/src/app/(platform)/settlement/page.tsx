@@ -1,14 +1,14 @@
 'use client';
 
 import { PageHeader } from '@/components/layout/page-header';
-import { WalletConnect } from '@/components/wallet-connect';
+import { useWallet } from '@/components/wallet/wallet-provider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Field, Select } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { money } from '@/lib/format';
-import { approveSettlement, connectMetaMaskWallet, connectSepoliaWallet } from '@/lib/sepolia-marketplace';
+import { approveSettlement, connectSepoliaWallet } from '@/lib/sepolia-marketplace';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useMemo, useState } from 'react';
@@ -28,7 +28,7 @@ const errorMessage = (error: unknown) => {
 
 export default function SettlementPage() {
   const queryClient = useQueryClient();
-  const [wallet, setWallet] = useState('');
+  const { address: wallet = '' } = useWallet();
   const [tradeId, setTradeId] = useState('');
   const [settlingId, setSettlingId] = useState<string>();
   const [notice, setNotice] = useState<{ tone: 'ok' | 'danger'; text: string }>();
@@ -45,10 +45,7 @@ export default function SettlementPage() {
     mutationFn: async (item: SettlementRow) => {
       if (!item.trade?.onChainPurchaseId) throw new Error('This settlement is not linked to a Sepolia CAP escrow purchase.');
       const expectedSeller = item.trade.listing?.listerWalletAddress;
-      // This user-clicked permission request makes MetaMask show its native
-      // account chooser immediately before the settlement signature.
-      const connection = await connectMetaMaskWallet();
-      setWallet(connection.address);
+      if (!wallet) throw new Error('Connect the listing wallet from the top-right menu before approving settlement.');
       const signingWallet = await connectSepoliaWallet();
       if (!sameAddress(expectedSeller, signingWallet)) {
         throw new Error(`Settlement must be approved by the listing wallet ${expectedSeller}. Select that account in MetaMask and try again.`);
@@ -63,7 +60,7 @@ export default function SettlementPage() {
 
   return <div className="mx-auto max-w-6xl space-y-6">
     <PageHeader eyebrow="Settlement" title="Trade settlement" description="The buyer has already escrowed CAP. Only the listing wallet can approve the atomic Sepolia release of CAP and ERC-1155 units." />
-    <WalletConnect onConnected={setWallet} />
+    {!wallet ? <p className="rounded-xl border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--muted)]">Connect the listing MetaMask wallet from the top-right menu to create or approve settlement.</p> : null}
     {notice ? <div role="status" className={notice.tone === 'ok' ? 'rounded-2xl border border-[var(--ok)]/25 bg-[var(--ok-soft)] px-4 py-3 text-sm text-[var(--ok)]' : 'rounded-2xl border border-[var(--danger)]/25 bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger)]'}>{notice.text}</div> : null}
     <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
       <Card className="p-6">

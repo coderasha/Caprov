@@ -1,7 +1,7 @@
 'use client';
 
 import { PageHeader } from '@/components/layout/page-header';
-import { WalletConnect } from '@/components/wallet-connect';
+import { useWallet } from '@/components/wallet/wallet-provider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -10,7 +10,7 @@ import { api } from '@/lib/api';
 import { sepoliaTxExplorerUrl } from '@/lib/explorer';
 import { readFileAsDataUrl } from '@/lib/files';
 import { assetClassLabel, money } from '@/lib/format';
-import { capPricePerUnitFromTotal, closeOnChainListing, connectMetaMaskWallet, createOnChainListing, mintAssetFromWallet } from '@/lib/sepolia-marketplace';
+import { capPricePerUnitFromTotal, closeOnChainListing, createOnChainListing, mintAssetFromWallet } from '@/lib/sepolia-marketplace';
 import type { HydratedAsset } from '@/lib/types';
 import { useAuthStore } from '@/stores/auth-store';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -96,7 +96,8 @@ export default function MarketplacePage() {
   const canList = useAuthStore((state) => state.roles).some((role) =>
     ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN'].includes(role),
   );
-  const [wallet, setWallet] = useState('');
+  const { address: connectedWallet = '' } = useWallet();
+  const wallet = connectedWallet;
   const [notice, setNotice] = useState<{ tone: 'ok' | 'danger'; text: string }>();
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('ALL');
@@ -175,12 +176,8 @@ export default function MarketplacePage() {
       if (form.tokenizeBeforeListing) {
         // Requesting account permissions from this click lets MetaMask present
         // its native account chooser instead of relying on a server-held key.
-        let listerWallet = wallet;
-        if (!listerWallet) {
-          const connected = await connectMetaMaskWallet();
-          listerWallet = connected.address;
-          setWallet(listerWallet);
-        }
+        const listerWallet = wallet;
+        if (!listerWallet) throw new Error('Connect the lister MetaMask wallet from the top-right menu before tokenizing.');
         // The form price is the whole offering value. The V2 contract needs a
         // per-unit CAP amount, so derive it before minting any live supply.
         const pricePerToken = capPricePerUnitFromTotal(form.price, form.supply);
@@ -278,7 +275,7 @@ export default function MarketplacePage() {
         description="Tokenized listings escrow ERC-1155 units on Sepolia. Buyers escrow CAP, and sellers approve the final on-chain settlement."
       />
 
-      <WalletConnect onConnected={setWallet} />
+      {!wallet ? <p className="rounded-xl border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--muted)]">Connect the lister MetaMask wallet from the top-right menu before creating an on-chain listing.</p> : null}
 
       {notice ? (
         <div

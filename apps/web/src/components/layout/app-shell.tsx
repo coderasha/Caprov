@@ -1,6 +1,8 @@
 'use client';
 
 import { CaprovWordmark } from '@/components/brand/caprov-logo';
+import { WalletStatus } from '@/components/layout/wallet-status';
+import { WalletProvider } from '@/components/wallet/wallet-provider';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth-store';
 import {
@@ -221,6 +223,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
+    <WalletProvider>
     <div className="min-h-screen xl:grid xl:grid-cols-[272px_minmax(0,1fr)]">
       <aside className="platform-sidebar hidden text-white xl:sticky xl:top-0 xl:flex xl:h-screen xl:w-[272px] xl:flex-col">
         <SidebarContent pathname={pathname} />
@@ -281,12 +284,16 @@ export function AppShell({ children }: { children: ReactNode }) {
               </p>
             </div>
           </div>
-          <div className="hidden rounded-xl border border-[var(--line)] bg-[var(--card)]/90 px-3.5 py-2 text-[11px] uppercase tracking-[0.16em] text-[var(--muted)] sm:block">
-            Collect → Review → Act
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="hidden rounded-xl border border-[var(--line)] bg-[var(--card)]/90 px-3.5 py-2 text-[11px] uppercase tracking-[0.16em] text-[var(--muted)] md:block">
+              Collect → Review → Act
+            </div>
+            <WalletStatus />
           </div>
         </header>
         <main className="px-4 py-6 sm:px-6 sm:py-9 xl:px-10 xl:py-10">{children}</main>
       </div>
     </div>
+    </WalletProvider>
   );
 }
