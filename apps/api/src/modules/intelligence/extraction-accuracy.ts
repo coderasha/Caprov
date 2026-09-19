@@ -35,6 +35,12 @@ const FIELD_SPECS: FieldSpec[] = [
   {
     key: 'market_value',
     label: 'Market value',
+    regex: /(?:indicatives+fairs+values+conclusion|valuations+conclusion)[\s\S]{0,180}?\n\s*(\$\s*[0-9][0-9,]*(?:\.[0-9]+)?)/gi,
+    baseConfidence: 0.99,
+  },
+  {
+    key: 'market_value',
+    label: 'Market value',
     // Valuation conclusions often put the date and amount on separate lines.
     // Require an explicit money marker so "30 September 2026" is never read
     // as a USD 30 valuation.
@@ -111,6 +117,30 @@ const FIELD_SPECS: FieldSpec[] = [
     label: 'Net internal area',
     regex: /(?:nia|net internal area)\s*[:\-]?\s*([^\n]+)/gi,
     baseConfidence: 0.88,
+  },
+  {
+    key: 'area_sq_ft',
+    label: 'Area',
+    regex: /(?:approx(?:imate)?\s+(?:super\s+)?area|super\s+area|built-up\s+area|net\s+internal\s+area)\s*[:\-]?\s*([0-9][0-9,]*(?:\.[0-9]+)?\s*sq\.?(?:\s*ft\.?)?)/gi,
+    baseConfidence: 0.94,
+  },
+  {
+    key: 'valuation_rate_low',
+    label: 'Low rate per sq. ft.',
+    regex: /low\s+case\s*\n\s*[0-9,]+\s*[×x]\s*(\$\s*[0-9][0-9,]*(?:\.[0-9]+)?)/gi,
+    baseConfidence: 0.96,
+  },
+  {
+    key: 'valuation_rate_central',
+    label: 'Central rate per sq. ft.',
+    regex: /central\s+case\s*\n\s*[0-9,]+\s*[×x]\s*(\$\s*[0-9][0-9,]*(?:\.[0-9]+)?)/gi,
+    baseConfidence: 0.96,
+  },
+  {
+    key: 'valuation_rate_high',
+    label: 'High rate per sq. ft.',
+    regex: /high\s+case\s*\n\s*[0-9,]+\s*[×x]\s*(\$\s*[0-9][0-9,]*(?:\.[0-9]+)?)/gi,
+    baseConfidence: 0.96,
   },
   {
     key: 'commitment',
@@ -242,6 +272,11 @@ export function parseYears(raw: string): number | undefined {
   return match ? Number(match[1]) : undefined;
 }
 
+function parseSquareFeet(raw: string): number | undefined {
+  const match = /([0-9][0-9,]*(?:\.[0-9]+)?)\s*sq\.?\s*ft\.?/i.exec(raw);
+  return match?.[1] ? Number(match[1].replace(/,/g, '')) : undefined;
+}
+
 function documentAsOfMs(text: string): number {
   const match = AS_OF_RE.exec(text);
   const date = match?.[1]?.match(DATE_RE)?.[0];
@@ -342,7 +377,7 @@ export function extractFactsAccurate(
 
         if (
           spec.key === 'market_value' &&
-          (document.type === 'INSURANCE' || isNonMarketValueFragment(fragment))
+          (document.type === 'INSURANCE' || isNonMarketValueFragment(fragment) || /per\s+sq\.?\s*ft/i.test(fragment))
         ) {
           continue;
         }
@@ -387,14 +422,16 @@ export function extractFactsAccurate(
           label: spec.label,
           value,
           numericValue:
-            parsed?.amount ?? parsePercent(value) ?? parseYears(value),
+            parsed?.amount ?? parsePercent(value) ?? parseYears(value) ?? parseSquareFeet(value),
           currency: parsed?.currency,
           unit:
             parsePercent(value) != null && !parsed
               ? '%'
               : parseYears(value) != null
                 ? 'years'
-                : undefined,
+                : parseSquareFeet(value) != null
+                  ? 'sq ft'
+                  : undefined,
           confidence,
           provenance: [
             {

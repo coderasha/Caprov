@@ -508,6 +508,8 @@ export interface LoanFacility {
   bankerHaircutBps?: number;
   maxLoanAmount?: number;
   lenderWalletAddress?: string;
+  /** Confirmed Sepolia transaction that activated the vault-backed facility. */
+  vaultActivationTxHash?: string;
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
   disbursedAt?: IsoTimestamp;

@@ -20,6 +20,7 @@ interface CollateralRow {
   availableAmount?: number;
   currency: string;
   vaultCollateralId?: string;
+  vaultTxHash?: string;
   asset?: { name: string } | null;
 }
 
@@ -31,6 +32,7 @@ interface LoanRow {
   currency: string;
   interestRateBps: number;
   termDays: number;
+  vaultActivationTxHash?: string;
   ltvBps: number;
   disbursedAt?: string;
   repaidAt?: string;
@@ -322,7 +324,7 @@ export default function LendingPage() {
                 ) : null}
                 {loan.status === 'OFFERED' && canRequestDisbursal ? <Button onClick={() => accept.mutate(loan.id)} disabled={accept.isPending}>Accept bank offer</Button> : null}
                 {loan.status === 'ACCEPTED' && canApproveDisbursal ? <Button onClick={() => disburse.mutate(loan)} disabled={disburse.isPending}>Activate vault & disburse USD</Button> : null}
-                {loan.status === 'ACTIVE' ? (
+                {loan.status === 'ACTIVE' && !isBanker ? (
                   <Button onClick={() => repay.mutate(loan.id)}>Repay</Button>
                 ) : null}
                 {loan.status === 'REPAID' && canApproveDisbursal && loan.collateral?.vaultCollateralId ? (
@@ -347,6 +349,16 @@ export default function LendingPage() {
                 <p className="mt-3 text-sm text-[var(--muted)]">
                   Disbursed on {loan.disbursedAt.slice(0, 10)} into the asset-owner wallet.
                 </p>
+              ) : null}
+              {isBanker && loan.status === 'ACTIVE' && loan.disbursedAt && (loan.vaultActivationTxHash || loan.collateral?.vaultTxHash) ? (
+                <a
+                  href={`https://sepolia.etherscan.io/tx/${loan.vaultActivationTxHash ?? loan.collateral?.vaultTxHash}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-3 inline-flex text-sm font-medium text-[var(--teal)] underline underline-offset-4"
+                >
+                  {loan.vaultActivationTxHash ? 'View vault activation transaction' : 'View collateral vault transaction'} →
+                </a>
               ) : null}
             </Card>
           ))}

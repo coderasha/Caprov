@@ -77,8 +77,8 @@ export class DocumentsController {
     @Query('assetId') assetId?: string,
     @Query('currentOnly') currentOnly?: string,
   ) {
-    return this.documents.list(
-      user.organizationId,
+    return this.documents.listForUser(
+      user,
       assetId,
       currentOnly === 'true',
     );
@@ -86,22 +86,22 @@ export class DocumentsController {
 
   @Get('assets/:assetId/folders')
   folders(@CurrentUser() user: AuthUser, @Param('assetId') assetId: string) {
-    return this.documents.folders(user.organizationId, assetId);
+    return this.documents.foldersForUser(user, assetId);
   }
 
   @Get(':id')
   get(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    return this.documents.get(user.organizationId, id);
+    return this.documents.getForUser(user, id);
   }
 
   @Get(':id/history')
   history(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    return this.documents.history(user.organizationId, id);
+    return this.documents.historyForUser(user, id);
   }
 
   @Get(':id/verify')
   verify(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    return this.documents.verify(user.organizationId, id);
+    return this.documents.verifyForUser(user, id);
   }
 
   @Post(':id/anchor')

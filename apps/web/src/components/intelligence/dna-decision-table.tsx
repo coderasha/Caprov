@@ -28,8 +28,17 @@ export function DnaDecisionTable({ asset }: { asset: HydratedAsset }) {
   const dna = asset.latestDna?.envelope;
   const valuation = asset.latestValuation?.payload ?? dna?.valuation;
   const risk = asset.latestRisk?.payload ?? dna?.risk;
+  const area = (dna?.facts ?? []).find((fact) => fact.key === 'area_sq_ft');
+  const valuationRates = [
+    ['Low case', 'valuation_rate_low'],
+    ['Central case', 'valuation_rate_central'],
+    ['High case', 'valuation_rate_high'],
+  ].map(([label, key]) => ({ label, fact: (dna?.facts ?? []).find((item) => item.key === key) }));
+  const hasRateBreakdown = Boolean(
+    area?.numericValue && valuationRates.some((item) => item.fact?.numericValue != null),
+  );
   const extractedFacts = (dna?.facts ?? []).filter(
-    (fact) => !['market_value', 'nav', 'purchase_price'].includes(fact.key),
+    (fact) => !['market_value', 'nav', 'purchase_price', 'area_sq_ft', 'valuation_rate_low', 'valuation_rate_central', 'valuation_rate_high'].includes(fact.key),
   );
 
   const sections: DetailSection[] = [
@@ -67,7 +76,7 @@ export function DnaDecisionTable({ asset }: { asset: HydratedAsset }) {
             ? valuation.method + (valuation.asOf ? ' · As of ' + formatDate(valuation.asOf) : '')
             : 'Upload a valuation source or run Asset DNA',
         },
-        ...(valuation?.low != null || valuation?.high != null
+        ...(!hasRateBreakdown && (valuation?.low != null || valuation?.high != null)
           ? [
               {
                 label: 'Value range',
@@ -78,6 +87,21 @@ export function DnaDecisionTable({ asset }: { asset: HydratedAsset }) {
                 evidence: confidenceLabel(valuation.confidence) + ' confidence',
               },
             ]
+          : []),
+        ...(hasRateBreakdown
+          ? valuationRates
+              .filter((item) => item.fact?.numericValue != null)
+              .map((item) => {
+                const rate = item.fact!;
+                const total = area!.numericValue! * rate.numericValue!;
+                return {
+                  label: item.label + ' · rate-based value',
+                  value: money(total, rate.currency ?? valuation?.currency ?? asset.currency),
+                  evidence:
+                    rate.value + ' / sq. ft. × ' + area!.numericValue!.toLocaleString() + ' sq. ft. · ' +
+                    (rate.provenance[0]?.sourceFragment ?? 'Extracted from valuation memo'),
+                };
+              })
           : []),
       ],
     },

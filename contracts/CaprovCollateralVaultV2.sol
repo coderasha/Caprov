@@ -5,7 +5,7 @@ interface IERC1155CollateralV2 {
     function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes calldata data) external;
 }
 
-/// @notice ERC-1155 collateral vault with owner-managed loan-activation delegates.
+/// @notice ERC-1155 collateral vault with owner-managed bank execution delegates.
 contract CaprovCollateralVaultV2 {
     enum Status { LOCKED, ACTIVE, RELEASED, CLAIMED }
     struct Collateral {
@@ -21,14 +21,17 @@ contract CaprovCollateralVaultV2 {
     address public owner;
     uint256 public nextCollateralId = 1;
     mapping(address => bool) public loanActivators;
+    mapping(address => bool) public releaseExecutors;
     mapping(uint256 => Collateral) public collateral;
 
     modifier onlyOwner() { require(msg.sender == owner, "not owner"); _; }
     modifier onlyLoanActivator() { require(loanActivators[msg.sender], "not loan activator"); _; }
+    modifier onlyReleaseExecutor() { require(msg.sender == owner || releaseExecutors[msg.sender], "not release executor"); _; }
     modifier onlyBorrower(uint256 collateralId) { require(msg.sender == collateral[collateralId].borrower, "not borrower"); _; }
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     event LoanActivatorUpdated(address indexed account, bool allowed);
+    event ReleaseExecutorUpdated(address indexed account, bool allowed);
     event CollateralLocked(uint256 indexed collateralId, address indexed borrower, address indexed assetToken, uint256 tokenId, uint256 units);
     event LoanActivated(uint256 indexed collateralId, address indexed lender, bytes32 indexed loanReference);
     event CollateralReleased(uint256 indexed collateralId, address indexed borrower);
@@ -51,6 +54,13 @@ contract CaprovCollateralVaultV2 {
         require(account != address(0), "zero activator");
         loanActivators[account] = allowed;
         emit LoanActivatorUpdated(account, allowed);
+    }
+
+    /// @notice Allows a bank custody wallet to return repaid collateral without granting vault ownership.
+    function setReleaseExecutor(address account, bool allowed) external onlyOwner {
+        require(account != address(0), "zero executor");
+        releaseExecutors[account] = allowed;
+        emit ReleaseExecutorUpdated(account, allowed);
     }
 
     function lockCollateral(address assetToken, uint256 tokenId, uint256 units) external returns (uint256 collateralId) {
@@ -80,8 +90,8 @@ contract CaprovCollateralVaultV2 {
         emit CollateralReleased(collateralId, item.borrower);
     }
 
-    /// @dev Owner/multisig executes after off-chain repayment verification.
-    function releaseAfterRepayment(uint256 collateralId) external onlyOwner {
+    /// @dev The owner or an explicitly authorized bank release executor acts after repayment verification.
+    function releaseAfterRepayment(uint256 collateralId) external onlyReleaseExecutor {
         Collateral storage item = collateral[collateralId];
         require(item.status == Status.ACTIVE, "not active");
         item.status = Status.RELEASED;

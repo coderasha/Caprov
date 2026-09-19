@@ -85,22 +85,22 @@ export class IntelligenceController {
 
   @Get('assets/:assetId/dna')
   dna(@CurrentUser() user: AuthUser, @Param('assetId') assetId: string) {
-    return this.intelligence.getDna(user.organizationId, assetId);
+    return this.intelligence.getDnaForUser(user, assetId);
   }
 
   @Get('assets/:assetId/valuation')
   valuation(@CurrentUser() user: AuthUser, @Param('assetId') assetId: string) {
-    return this.intelligence.getValuation(user.organizationId, assetId);
+    return this.intelligence.getValuationForUser(user, assetId);
   }
 
   @Get('assets/:assetId/projection')
   projection(@CurrentUser() user: AuthUser, @Param('assetId') assetId: string) {
-    return this.intelligence.getProjection(user.organizationId, assetId);
+    return this.intelligence.getProjectionForUser(user, assetId);
   }
 
   @Get('assets/:assetId/risk')
   risk(@CurrentUser() user: AuthUser, @Param('assetId') assetId: string) {
-    return this.intelligence.getRisk(user.organizationId, assetId);
+    return this.intelligence.getRiskForUser(user, assetId);
   }
 
   @Post('assets/:assetId/run')

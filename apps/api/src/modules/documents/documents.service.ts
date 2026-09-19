@@ -67,6 +67,13 @@ export class DocumentsService {
       .map((document) => this.toDocumentRow(document));
   }
 
+  listForUser(user: AuthUser, assetId?: string, currentOnly = false) {
+    const organizationId = assetId
+      ? this.organizationForAssetRead(user, assetId)
+      : user.organizationId;
+    return this.list(organizationId, assetId, currentOnly);
+  }
+
   getNetworkStatus(): BlockchainAdapterNetworkStatus {
     return this.blockchain.getDocumentNetworkStatus();
   }
@@ -131,6 +138,10 @@ export class DocumentsService {
     };
   }
 
+  foldersForUser(user: AuthUser, assetId: string) {
+    return this.folders(this.organizationForAssetRead(user, assetId), assetId);
+  }
+
   get(organizationId: string, documentId: string) {
     const document = this.requireDocument(organizationId, documentId);
     const facts = [
@@ -155,6 +166,10 @@ export class DocumentsService {
     };
   }
 
+  getForUser(user: AuthUser, documentId: string) {
+    return this.get(this.organizationForDocumentRead(user, documentId), documentId);
+  }
+
   history(organizationId: string, documentId: string) {
     const document = this.requireDocument(organizationId, documentId);
     return this.db.snapshot.documents
@@ -165,6 +180,10 @@ export class DocumentsService {
       )
       .sort((a, b) => b.version - a.version)
       .map((item) => this.toDocumentRow(item));
+  }
+
+  historyForUser(user: AuthUser, documentId: string) {
+    return this.history(this.organizationForDocumentRead(user, documentId), documentId);
   }
 
   async verify(organizationId: string, documentId: string) {
@@ -268,6 +287,10 @@ export class DocumentsService {
       onChainRecord: onChain,
       history: this.history(organizationId, document.id),
     };
+  }
+
+  async verifyForUser(user: AuthUser, documentId: string) {
+    return this.verify(this.organizationForDocumentRead(user, documentId), documentId);
   }
 
   async recordWalletAnchor(
@@ -544,6 +567,35 @@ export class DocumentsService {
       versionStatus: document.isCurrent ? 'CURRENT' : 'PREVIOUS',
       folderName: documentFolderName(document.type),
     };
+  }
+
+  /** Bankers receive evidence only for an asset in their live collateral review queue. */
+  private organizationForAssetRead(user: AuthUser, assetId: string) {
+    const asset = this.db.snapshot.assets.find((item) => item.id === assetId);
+    const collateralAccess = user.roles.includes('BANKER') && this.db.snapshot.collateralPositions.some(
+      (position) =>
+        position.assetId === assetId &&
+        (position.status === 'PENDING_APPROVAL' || position.status === 'ACTIVE'),
+    );
+    if (
+      !asset ||
+      (!user.roles.includes('PLATFORM_ADMIN') && asset.organizationId !== user.organizationId && !collateralAccess)
+    ) {
+      throw new NotFoundException('Asset not found');
+    }
+    return asset.organizationId;
+  }
+
+  private organizationForDocumentRead(user: AuthUser, documentId: string) {
+    const document = this.db.snapshot.documents.find((item) => item.id === documentId);
+    if (!document) throw new NotFoundException('Document not found');
+    if (!document.assetId) {
+      if (document.organizationId !== user.organizationId && !user.roles.includes('PLATFORM_ADMIN')) {
+        throw new NotFoundException('Document not found');
+      }
+      return document.organizationId;
+    }
+    return this.organizationForAssetRead(user, document.assetId);
   }
 
   private requireDocument(organizationId: string, documentId: string) {

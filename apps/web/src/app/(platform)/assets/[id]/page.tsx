@@ -23,7 +23,7 @@ import type { DocumentType, OwnershipType } from '@caprov/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BrowserProvider, Contract } from 'ethers';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 const tabs = ['Overview', 'DNA', 'Documents', 'Ownership', 'Valuation & risk'] as const;
@@ -96,9 +96,12 @@ const DEFAULT_SEPOLIA_RPC = 'https://ethereum-sepolia-rpc.publicnode.com';
 
 export default function AssetDetailPage() {
   const params = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
-  const [tab, setTab] = useState<(typeof tabs)[number]>('Overview');
+  const requestedTab = searchParams.get('tab')?.toLowerCase();
+  const initialTab = requestedTab === 'documents' ? 'Documents' : 'Overview';
+  const [tab, setTab] = useState<(typeof tabs)[number]>(initialTab);
   const [owner, setOwner] = useState({
     holderName: '',
     ownershipType: 'LEGAL' as OwnershipType,

@@ -126,7 +126,7 @@ export class AssetsController {
 
   @Get(':id')
   get(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    return this.assets.get(user.organizationId, id);
+    return this.assets.getForUser(user, id);
   }
 
   @Post()

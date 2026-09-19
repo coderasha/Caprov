@@ -9,6 +9,7 @@ const rpc = process.env.ETHEREUM_SEPOLIA_RPC_URL || 'https://ethereum-sepolia-rp
 const credential = process.env.ETHEREUM_SEPOLIA_PRIVATE_KEY || process.env.ETHEREUM_SEPOLIA_MNEMONIC;
 const owner = process.env.COLLATERAL_VAULT_OWNER;
 const activator = process.env.COLLATERAL_VAULT_INITIAL_ACTIVATOR;
+const releaseExecutor = process.env.COLLATERAL_VAULT_INITIAL_RELEASE_EXECUTOR || activator;
 if (!credential || !owner || !activator) throw new Error('Set a signer plus COLLATERAL_VAULT_OWNER and COLLATERAL_VAULT_INITIAL_ACTIVATOR.');
 const sourceName = 'CaprovCollateralVaultV2.sol';
 const output = JSON.parse(solc.compile(JSON.stringify({
@@ -27,9 +28,12 @@ await vault.waitForDeployment();
 const address = await vault.getAddress();
 const whitelistTx = await vault.setLoanActivator(getAddress(activator), true);
 await whitelistTx.wait();
+const releaseWhitelistTx = await vault.setReleaseExecutor(getAddress(releaseExecutor), true);
+await releaseWhitelistTx.wait();
 console.log(`Collateral vault V2: ${address}`);
 console.log(`Deployment tx: ${vault.deploymentTransaction().hash}`);
 console.log(`Jordan Lee whitelisting tx: ${whitelistTx.hash}`);
+console.log(`Collateral-release executor whitelisting tx: ${releaseWhitelistTx.hash}`);
 
 function loadEnv(path) {
   if (!existsSync(path)) return;

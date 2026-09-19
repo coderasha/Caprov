@@ -109,6 +109,7 @@ export default function CollateralPage() {
 
   const canManageCollateral =
     roles.includes('ORG_ADMIN') || roles.includes('ANALYST') || roles.includes('PLATFORM_ADMIN');
+  const isBankerReview = roles.includes('BANKER');
 
   const activeAssetIds = useMemo(
     () =>
@@ -163,9 +164,18 @@ export default function CollateralPage() {
     () =>
       (tokens.data ?? []).filter(
         (token) =>
-          (!assetId || token.assetId === assetId) && !pledgedTokenIds.has(token.id),
+          token.status === 'CONFIRMED' &&
+          (!assetId || token.assetId === assetId) &&
+          !pledgedTokenIds.has(token.id),
       ),
     [tokens.data, assetId, pledgedTokenIds],
+  );
+  const selectedAssetTokens = useMemo(
+    () => (tokens.data ?? []).filter((token) => token.assetId === assetId),
+    [tokens.data, assetId],
+  );
+  const selectedAssetHasPledgedToken = selectedAssetTokens.some((token) =>
+    pledgedTokenIds.has(token.id),
   );
 
   const refresh = async () => {
@@ -202,11 +212,15 @@ export default function CollateralPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader
         eyebrow="Collateral"
-        title="Pledge DNA-backed assets"
-        description="Submit assets or tokenized positions for bank review. Approvers can inspect valuation details before activating collateral for lending."
+        title={isBankerReview ? 'Review pledged collateral' : 'Pledge DNA-backed assets'}
+        description={
+          isBankerReview
+            ? 'Review the evidence, document record, and Asset DNA valuation before making a collateral decision.'
+            : 'Submit assets or tokenized positions for bank review. Approvers can inspect valuation details before activating collateral for lending.'
+        }
       />
-      <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-        <Card className="p-6">
+      <div className={isBankerReview ? 'grid gap-4' : 'grid gap-6 lg:grid-cols-[0.85fr_1.15fr]'}>
+        {!isBankerReview ? <Card className="p-6">
           <h2 className="font-display text-lg font-semibold tracking-[-0.02em]">Submit collateral</h2>
           <form
             className="mt-4 grid gap-3"
@@ -249,6 +263,28 @@ export default function CollateralPage() {
                 ))}
               </Select>
             </Field>
+            {assetId && !availableTokens.length ? (
+              <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-3 text-sm text-amber-950">
+                <p className="font-medium">
+                  {selectedAssetHasPledgedToken
+                    ? 'This asset’s token position is already pledged.'
+                    : 'No confirmed token position is registered for this asset.'}
+                </p>
+                <p className="mt-1 text-amber-900/80">
+                  {selectedAssetHasPledgedToken
+                    ? 'Release the existing collateral position before submitting it again.'
+                    : 'Owner-held ERC-1155 units must be linked to this asset in CAPROV before they can be selected as collateral.'}
+                </p>
+                {!selectedAssetHasPledgedToken ? (
+                  <Link
+                    className="mt-2 inline-flex font-medium text-[var(--ink)] underline underline-offset-4"
+                    href="/marketplace"
+                  >
+                    Register or verify token position →
+                  </Link>
+                ) : null}
+              </div>
+            ) : null}
             <Field label="Collateral percentage (bps)">
               <Input
                 type="number"
@@ -282,7 +318,7 @@ export default function CollateralPage() {
               {create.isPending ? 'Waiting for Sepolia confirmation…' : 'Lock collateral on Sepolia'}
             </Button>
           </form>
-        </Card>
+        </Card> : null}
 
         <div className="grid gap-4">
           {actionError ? (
@@ -325,6 +361,16 @@ export default function CollateralPage() {
                       <p className="mt-1">
                         Observed {item.marketValuation.observedAt.slice(0, 10)} · {item.marketValuation.settledTradeCount} settled CAP trade{item.marketValuation.settledTradeCount === 1 ? '' : 's'}
                       </p>
+                    </div>
+                  ) : null}
+                  {isBankerReview && item.asset ? (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <Link href={`/assets/${item.assetId}?tab=documents`}>
+                        <Button variant="secondary">Check documents</Button>
+                      </Link>
+                      <Link href={`/intelligence/dna/${item.assetId}`}>
+                        <Button variant="secondary">Check valuation</Button>
+                      </Link>
                     </div>
                   ) : null}
                 </div>

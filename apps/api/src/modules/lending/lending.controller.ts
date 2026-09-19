@@ -272,6 +272,7 @@ export class LendingController {
       target.outstanding = target.principal;
       target.approvedByUserId = user.id;
       target.disbursedAt = now;
+      target.vaultActivationTxHash = dto.vaultTxHash;
       target.updatedAt = now;
 
       const bankWallet = draft.wallets.find((item) => item.organizationId === user.organizationId && item.currency === target.currency);
@@ -321,6 +322,7 @@ export class LendingController {
       metadata: {
         principal: loan.principal,
         currency: loan.currency,
+        vaultActivationTxHash: dto.vaultTxHash,
       },
     });
     return this.hydrate(this.db.snapshot.loans.find((item) => item.id === id)!);

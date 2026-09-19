@@ -54,6 +54,25 @@ export class AssetsService {
     return asset;
   }
 
+  /** Read-only lender access is limited to assets currently submitted for collateral review. */
+  getForUser(user: AuthUser, assetId: string) {
+    const asset = this.hydrate(assetId);
+    if (!asset) throw new NotFoundException('Asset not found');
+    if (
+      asset.organizationId === user.organizationId ||
+      user.roles.includes('PLATFORM_ADMIN') ||
+      (user.roles.includes('BANKER') &&
+        this.db.snapshot.collateralPositions.some(
+          (position) =>
+            position.assetId === assetId &&
+            (position.status === 'PENDING_APPROVAL' || position.status === 'ACTIVE'),
+        ))
+    ) {
+      return asset;
+    }
+    throw new NotFoundException('Asset not found');
+  }
+
   create(user: AuthUser, input: CreateAssetInput) {
     const now = new Date().toISOString();
     const asset = {

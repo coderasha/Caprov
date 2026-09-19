@@ -57,11 +57,19 @@ export class IntelligenceService {
       .map((snapshot) => this.toTrustedSnapshot(organizationId, snapshot.id));
   }
 
+  getDnaForUser(user: AuthUser, assetId: string) {
+    return this.getDna(this.organizationForAssetRead(user, assetId), assetId);
+  }
+
   getValuation(organizationId: string, assetId: string) {
     this.assertAsset(organizationId, assetId);
     return this.db.snapshot.valuations
       .filter((item) => item.assetId === assetId)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  getValuationForUser(user: AuthUser, assetId: string) {
+    return this.getValuation(this.organizationForAssetRead(user, assetId), assetId);
   }
 
   getProjection(organizationId: string, assetId: string) {
@@ -71,11 +79,19 @@ export class IntelligenceService {
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
+  getProjectionForUser(user: AuthUser, assetId: string) {
+    return this.getProjection(this.organizationForAssetRead(user, assetId), assetId);
+  }
+
   getRisk(organizationId: string, assetId: string) {
     this.assertAsset(organizationId, assetId);
     return this.db.snapshot.risks
       .filter((item) => item.assetId === assetId)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  getRiskForUser(user: AuthUser, assetId: string) {
+    return this.getRisk(this.organizationForAssetRead(user, assetId), assetId);
   }
 
   async runPipeline(
@@ -365,6 +381,23 @@ export class IntelligenceService {
     return asset;
   }
 
+  /** A lender can read intelligence only for live collateral awaiting or under approval. */
+  private organizationForAssetRead(user: AuthUser, assetId: string) {
+    const asset = this.db.snapshot.assets.find((item) => item.id === assetId);
+    const collateralAccess = user.roles.includes('BANKER') && this.db.snapshot.collateralPositions.some(
+      (position) =>
+        position.assetId === assetId &&
+        (position.status === 'PENDING_APPROVAL' || position.status === 'ACTIVE'),
+    );
+    if (
+      !asset ||
+      (!user.roles.includes('PLATFORM_ADMIN') && asset.organizationId !== user.organizationId && !collateralAccess)
+    ) {
+      throw new NotFoundException('Asset not found');
+    }
+    return asset.organizationId;
+  }
+
   private answerWithEngineFallback(
     question: string,
     envelope: AssetDnaEnvelope | undefined,
@@ -422,7 +455,9 @@ export class IntelligenceService {
     // the uploaded source text; otherwise the deterministic result is retained.
     const primary = await assistExtractionGaps({ model, documents, facts: [] });
     if (primary.filled.length) {
-      local = runLocalPipeline(asset, documents, { facts: primary.facts });
+      local = runLocalPipeline(asset, documents, {
+        facts: mergeExtractedFacts(local.facts, primary.facts),
+      });
       extractionEngine = 'llm-primary';
       extractionNote = `Primary extraction via ${model.label}. ${primary.note ?? ''}`.trim();
     } else {
@@ -432,7 +467,9 @@ export class IntelligenceService {
         facts: local.facts,
       });
       if (assist.filled.length) {
-        local = runLocalPipeline(asset, documents, { facts: assist.facts });
+        local = runLocalPipeline(asset, documents, {
+          facts: mergeExtractedFacts(local.facts, assist.facts),
+        });
         extractionNote = assist.note;
       }
       local = {
@@ -702,6 +739,11 @@ function applyOwnershipRegister(
   const facts = [...envelope.facts.filter((fact) => !keys.has(fact.key)), ...registeredFacts];
   const summary = envelope.summary + ' Ownership register synced (' + ownerships.length + ' holder' + (ownerships.length === 1 ? '' : 's') + ', 100% allocated).';
   return { ...envelope, facts, summary };
+}
+
+function mergeExtractedFacts<T extends { key: string }>(base: T[], additions: T[]): T[] {
+  const addedKeys = new Set(additions.map((fact) => fact.key));
+  return [...base.filter((fact) => !addedKeys.has(fact.key)), ...additions];
 }
 
 function canonicalStringify(value: unknown): string {
