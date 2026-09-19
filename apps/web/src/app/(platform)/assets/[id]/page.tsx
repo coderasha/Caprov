@@ -1,6 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
+import { useWallet } from '@/components/wallet/wallet-provider';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { DnaDecisionTable } from '@/components/intelligence/dna-decision-table';
@@ -119,6 +120,7 @@ export default function AssetDetailPage() {
   const [walletBusy, setWalletBusy] = useState(false);
   const [walletMessage, setWalletMessage] = useState<string | null>(null);
   const [anchorError, setAnchorError] = useState<string | null>(null);
+  const { address: connectedWallet } = useWallet();
 
   const assetQuery = useQuery({
     queryKey: ['asset', params.id],
@@ -278,7 +280,7 @@ export default function AssetDetailPage() {
   async function connectWallet(): Promise<WalletSession> {
     setWalletBusy(true);
     setAnchorError(null);
-    setWalletMessage('Opening MetaMask…');
+    setWalletMessage('Using the wallet connected from the top-right menu…');
     try {
       const session = await connectMetaMask(network);
       setWalletSession(session);
@@ -292,20 +294,6 @@ export default function AssetDetailPage() {
     } finally {
       setWalletBusy(false);
     }
-  }
-
-  async function disconnectWallet() {
-    setWalletSession(null);
-    setWalletMessage('Wallet disconnected.');
-  }
-
-  async function selectWalletAccount(account: string) {
-    if (!walletSession) return;
-    const exposed = await walletSession.provider.request({ method: 'eth_accounts' }) as string[];
-    const selected = exposed.find((item) => item.toLowerCase() === account.toLowerCase());
-    if (!selected) throw new Error('Select this account for localhost in MetaMask before using it.');
-    setWalletSession({ ...walletSession, account: selected, accounts: exposed });
-    setWalletMessage(`MetaMask account selected: ${shortAddress(selected)}`);
   }
 
   async function anchorDocumentWithWallet(document: DocumentRow, session: WalletSession) {
@@ -580,35 +568,12 @@ export default function AssetDetailPage() {
                 {network?.message ?? 'Loading Sepolia network status…'}
               </p>
               <p className="mt-2 text-xs text-[var(--muted)]">
-                {walletSession
-                  ? `Connected MetaMask wallet ${shortAddress(walletSession.account)} on chain ${walletSession.chainId}.`
-                  : 'No wallet connected yet.'}
+                {connectedWallet
+                  ? `Using top-right MetaMask wallet ${shortAddress(connectedWallet)}.`
+                  : 'No wallet connected yet. Use the top-right menu to connect MetaMask.'}
               </p>
               {walletMessage ? <p className="mt-2 text-xs text-[var(--muted)]">{walletMessage}</p> : null}
               {anchorError ? <p className="mt-2 text-xs text-rose-600">{anchorError}</p> : null}
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  onClick={() => void connectWallet()}
-                  disabled={walletBusy || !canWalletAnchor || !liveDocumentAnchoringReady}
-                >
-                  Connect MetaMask
-                </Button>
-                {walletSession ? (
-                  <Button type="button" onClick={() => void disconnectWallet()} disabled={walletBusy}>
-                    Disconnect
-                  </Button>
-                ) : null}
-              </div>
-              {walletSession && walletSession.accounts.length > 1 ? (
-                <div className="mt-4 max-w-md">
-                  <Field label="MetaMask account for this asset action">
-                    <Select value={walletSession.account} onChange={(event) => void selectWalletAccount(event.target.value)} disabled={walletBusy}>
-                      {walletSession.accounts.map((account) => <option key={account} value={account}>{account}</option>)}
-                    </Select>
-                  </Field>
-                </div>
-              ) : null}
               {!canWalletAnchor ? (
                 <p className="mt-3 text-xs text-[var(--muted)]">
                   Sign in to connect a wallet and anchor documents on Sepolia.
@@ -880,10 +845,8 @@ async function connectMetaMask(network?: DocumentNetworkStatus): Promise<WalletS
   if (!provider) {
     throw new Error('MetaMask is not available in this browser. Install or unlock MetaMask and try again.');
   }
-  // MetaMask's native permission dialog lets the user choose which account(s)
-  // this local application may use.
-  await provider.request({ method: 'wallet_requestPermissions', params: [{ eth_accounts: {} }] });
-  const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
+  const accounts = await provider.request({ method: 'eth_accounts' }) as string[];
+  if (!accounts[0]) throw new Error('Connect MetaMask from the top-right menu before signing an anchor.');
   await ensureSepoliaNetwork(provider, network);
   const browserProvider = new BrowserProvider(provider, network?.chainId ?? SEPOLIA_CHAIN_ID);
   const account = accounts[0];

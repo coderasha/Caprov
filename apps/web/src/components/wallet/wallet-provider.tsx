@@ -3,6 +3,12 @@
 import { connectMetaMaskWallet, selectMetaMaskAccount } from '@/lib/sepolia-marketplace';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
+type InjectedProvider = {
+  request: (input: { method: string }) => Promise<unknown>;
+  on?: (event: string, listener: (value: string[]) => void) => void;
+  removeListener?: (event: string, listener: (value: string[]) => void) => void;
+};
+
 type WalletContextValue = {
   address?: string;
   accounts: string[];
@@ -44,13 +50,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const ethereum = window.ethereum;
+    const ethereum = (window as Window & { ethereum?: InjectedProvider }).ethereum;
     if (!ethereum) return;
     const updateAccounts = (next: string[]) => {
       setAccounts(next);
       setAddress((current) => next.find((item) => item.toLowerCase() === current?.toLowerCase()) ?? next[0]);
     };
-    void ethereum.request({ method: 'eth_accounts' }).then((result) => updateAccounts(result as string[])).catch(() => undefined);
+    void ethereum.request({ method: 'eth_accounts' }).then((result: unknown) => updateAccounts(result as string[])).catch(() => undefined);
     ethereum.on?.('accountsChanged', updateAccounts);
     ethereum.on?.('chainChanged', () => setMessage('Wallet network changed. Use Ethereum Sepolia for CAPROV transactions.'));
     return () => {

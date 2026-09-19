@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BrowserProvider, Contract } from 'ethers';
 import type { DocumentType } from '@caprov/types';
 import { PageHeader } from '@/components/layout/page-header';
+import { useWallet } from '@/components/wallet/wallet-provider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -69,6 +70,7 @@ const DEFAULT_SEPOLIA_RPC = 'https://ethereum-sepolia-rpc.publicnode.com';
 export default function DocumentsPage() {
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
+  const { address: connectedWallet } = useWallet();
   const [selectedAssetId, setSelectedAssetId] = useState('');
   const [form, setForm] = useState({
     name: '',
@@ -200,7 +202,7 @@ export default function DocumentsPage() {
   async function connectWallet(): Promise<WalletSession> {
     setWalletBusy(true);
     setAnchorError(null);
-    setWalletMessage('Opening MetaMask…');
+    setWalletMessage('Using the wallet connected from the top-right menu…');
     try {
       const session = await connectMetaMask(network);
       setWalletSession(session);
@@ -214,11 +216,6 @@ export default function DocumentsPage() {
     } finally {
       setWalletBusy(false);
     }
-  }
-
-  async function disconnectWallet() {
-    setWalletSession(null);
-    setWalletMessage('Wallet disconnected.');
   }
 
   async function anchorDocumentWithWallet(document: DocumentRow, session: WalletSession) {
@@ -518,10 +515,10 @@ export default function DocumentsPage() {
                 <div className="min-w-0">
                   <p className="font-medium text-[var(--ink)]">Sepolia anchoring</p>
                   <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-                    {walletSession
-                      ? `Connected ${shortAddress(walletSession.account)}`
+                    {connectedWallet
+                      ? `Using top-right wallet ${shortAddress(connectedWallet)}`
                       : liveDocumentAnchoringReady
-                        ? 'Connect MetaMask to sign anchors on upload.'
+                        ? 'Connect MetaMask from the top-right menu to sign anchors on upload.'
                         : network?.message ?? 'Loading network status…'}
                   </p>
                 </div>
@@ -531,21 +528,6 @@ export default function DocumentsPage() {
               </div>
               {walletMessage ? <p className="mt-3 text-xs leading-5 text-[var(--muted)]">{walletMessage}</p> : null}
               {anchorError ? <p className="mt-3 text-xs leading-5 text-[var(--danger)]">{anchorError}</p> : null}
-              <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => void connectWallet()}
-                  disabled={walletBusy || !canWalletAnchor || !liveDocumentAnchoringReady}
-                >
-                  {walletSession ? 'Reconnect wallet' : 'Connect MetaMask'}
-                </Button>
-                {walletSession ? (
-                  <Button type="button" variant="ghost" onClick={() => void disconnectWallet()} disabled={walletBusy}>
-                    Disconnect
-                  </Button>
-                ) : null}
-              </div>
             </Card>
 
             <Card className="p-5">
@@ -696,11 +678,11 @@ async function connectMetaMask(network?: DocumentNetworkStatus): Promise<WalletS
   if (!provider) {
     throw new Error('MetaMask is not available in this browser. Install or unlock MetaMask and try again.');
   }
-  await provider.request({ method: 'eth_requestAccounts' });
+  const accounts = await provider.request({ method: 'eth_accounts' }) as string[];
+  if (!accounts[0]) throw new Error('Connect MetaMask from the top-right menu before signing an anchor.');
   await ensureSepoliaNetwork(provider, network);
   const browserProvider = new BrowserProvider(provider, network?.chainId ?? SEPOLIA_CHAIN_ID);
-  const signer = await browserProvider.getSigner();
-  const account = await signer.getAddress();
+  const account = accounts[0];
   const chain = await browserProvider.getNetwork();
   return {
     account,
