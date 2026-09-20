@@ -1,13 +1,14 @@
 'use client';
 
 import { PageHeader } from '@/components/layout/page-header';
+import { useWallet } from '@/components/wallet/wallet-provider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Field, Input, Select } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { money } from '@/lib/format';
-import { lockCollateralOnSepolia } from '@/lib/sepolia-marketplace';
+import { capPricePerUnitFromTotal, closeOnChainListing, createOnChainListing, lockCollateralOnSepolia } from '@/lib/sepolia-marketplace';
 import type { HydratedAsset } from '@/lib/types';
 import { useAuthStore } from '@/stores/auth-store';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -65,6 +66,19 @@ interface TokenOption {
   asset?: { name: string } | null;
 }
 
+interface ExistingListing {
+  id: string;
+  assetId: string;
+  tokenPositionId?: string;
+  title: string;
+  summary?: string;
+  imageUrl?: string;
+  askPrice: number;
+  status: string;
+  onChainListingId?: string;
+  onChainCloseTxHash?: string;
+}
+
 interface CollateralMarketValuation {
   pricePerTokenUsd: number;
   assetValueUsd: number;
@@ -87,6 +101,7 @@ function errorMessage(error: unknown): string {
 export default function CollateralPage() {
   const queryClient = useQueryClient();
   const roles = useAuthStore((state) => state.roles);
+  const { address: wallet } = useWallet();
   const [assetId, setAssetId] = useState('');
   const [tokenId, setTokenId] = useState('');
   const [collateralBps, setCollateralBps] = useState('1000');
@@ -105,6 +120,10 @@ export default function CollateralPage() {
     queryKey: ['tokenization'],
     queryFn: async () =>
       (await api.get<{ tokens: TokenOption[] }>('/tokenization')).data.tokens,
+  });
+  const listings = useQuery({
+    queryKey: ['marketplace'],
+    queryFn: async () => (await api.get<{ listings: ExistingListing[] }>('/marketplace')).data.listings,
   });
 
   const canManageCollateral =
@@ -159,6 +178,12 @@ export default function CollateralPage() {
         (marketValuation.data.pricePerTokenUsd * previewUnits).toFixed(2),
       )
     : 0;
+  const existingListing = (listings.data ?? []).find((listing) =>
+    listing.assetId === assetId && listing.tokenPositionId === tokenId && listing.status === 'OPEN' && !listing.onChainListingId,
+  );
+  const activeOnChainListing = (listings.data ?? []).find((listing) =>
+    listing.assetId === assetId && listing.tokenPositionId === tokenId && listing.status === 'OPEN' && Boolean(listing.onChainListingId),
+  );
 
   const availableTokens = useMemo(
     () =>
@@ -186,6 +211,7 @@ export default function CollateralPage() {
   const create = useMutation({
     mutationFn: async () => {
       if (!selectedToken || previewUnits < 1) throw new Error('Choose a percentage that locks at least one ERC-1155 unit.');
+      if (activeOnChainListing) throw new Error('Close the active on-chain listing first so its escrowed token units return to your wallet.');
       // This opens MetaMask and waits for a confirmed Sepolia transaction. The
       // server subsequently verifies the vault event before recording anything.
       const lock = await lockCollateralOnSepolia({
@@ -204,6 +230,51 @@ export default function CollateralPage() {
       setCollateralBps('1000');
       setFormError(null);
       await refresh();
+    },
+    onError: (error) => setFormError(errorMessage(error)),
+  });
+
+  const closeOnChain = useMutation({
+    mutationFn: async () => {
+      if (!activeOnChainListing?.onChainListingId) throw new Error('No active on-chain listing is available to close.');
+      if (!wallet) throw new Error('Connect the listing wallet from the top-right menu first.');
+      const closed = await closeOnChainListing(activeOnChainListing.onChainListingId);
+      return api.post(`/marketplace/on-chain-listings/${activeOnChainListing.id}/sync`, { closeTxHash: closed.txHash });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['marketplace'] });
+      await queryClient.invalidateQueries({ queryKey: ['collateral-market-valuation', assetId, tokenId] });
+      setFormError(null);
+    },
+    onError: (error) => setFormError(errorMessage(error)),
+  });
+
+  const publishOnChain = useMutation({
+    mutationFn: async () => {
+      if (!selectedToken || !existingListing) throw new Error('Select a token position with an open listing first.');
+      if (!wallet) throw new Error('Connect the token-holder MetaMask wallet from the top-right menu first.');
+      if (wallet.toLowerCase() !== selectedToken.recipientAddress.toLowerCase()) throw new Error('Connect the wallet that holds this token position before publishing it.');
+      const pricePerToken = capPricePerUnitFromTotal(String(existingListing.askPrice), String(selectedToken.supply));
+      const onChain = await createOnChainListing({ assetTokenId: selectedToken.tokenId, units: String(selectedToken.supply), pricePerToken });
+      return api.post('/marketplace/on-chain-listings', {
+        sourceListingId: existingListing.id,
+        assetId,
+        tokenPositionId: selectedToken.id,
+        onChainListingId: onChain.listingId,
+        onChainTxHash: onChain.txHash,
+        listerWalletAddress: onChain.sellerAddress,
+        availableTokenUnits: selectedToken.supply,
+        pricePerTokenWei: onChain.pricePerTokenWei,
+        askPrice: existingListing.askPrice,
+        title: existingListing.title,
+        summary: existingListing.summary,
+        imageUrl: existingListing.imageUrl,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['marketplace'] });
+      await queryClient.invalidateQueries({ queryKey: ['collateral-market-valuation', assetId, tokenId] });
+      setFormError(null);
     },
     onError: (error) => setFormError(errorMessage(error)),
   });
@@ -308,13 +379,25 @@ export default function CollateralPage() {
                 {previewUnits.toLocaleString()} ERC-1155 units will be locked in the Sepolia vault. The banker applies the haircut and loan limit during underwriting.
               </p>
             ) : null}
+            {activeOnChainListing ? (
+              <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-3 text-sm text-amber-950">
+                <p>The active Sepolia listing holds this token position in marketplace escrow. Close it to return the unsold units to your wallet before pledging collateral.</p>
+                <Button type="button" className="mt-3" variant="secondary" disabled={closeOnChain.isPending || !wallet} onClick={() => { setFormError(null); closeOnChain.mutate(); }}>
+                  {closeOnChain.isPending ? 'Closing listing on Sepolia…' : 'Close listing and recover units'}
+                </Button>
+              </div>
+            ) : null}
             {assetId && tokenId && marketValuation.isError ? (
-              <p className="text-sm text-amber-800">
-                This token position has no collateral reference yet. Publish an on-chain CAP listing to establish its initial USD price, or settle a CAP trade.
-              </p>
+              <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-3 text-sm text-amber-950">
+                <p>This token position has no collateral reference yet. Publish an on-chain CAP listing to establish its initial USD price, or settle a CAP trade.</p>
+                {existingListing ? <Button type="button" className="mt-3" variant="secondary" disabled={publishOnChain.isPending || !wallet} onClick={() => { setFormError(null); publishOnChain.mutate(); }}>
+                  {publishOnChain.isPending ? 'Publishing on Sepolia…' : `Publish ${existingListing.title} on Sepolia`}
+                </Button> : <p className="mt-2 text-xs text-amber-900/80">Create an open listing for this token position in Marketplace first.</p>}
+                {existingListing && !wallet ? <p className="mt-2 text-xs text-amber-900/80">Connect the token-holder wallet from the top-right menu to publish.</p> : null}
+              </div>
             ) : null}
             {formError ? <p className="text-sm text-red-700">{formError}</p> : null}
-            <Button type="submit" disabled={!assetId || !tokenId || !marketValuation.data || create.isPending || !canManageCollateral}>
+            <Button type="submit" disabled={!assetId || !tokenId || !marketValuation.data || Boolean(activeOnChainListing) || create.isPending || !canManageCollateral}>
               {create.isPending ? 'Waiting for Sepolia confirmation…' : 'Lock collateral on Sepolia'}
             </Button>
           </form>

@@ -99,6 +99,7 @@ class CreateListingDto {
 }
 
 class RegisterOnChainListingDto {
+  @IsOptional() @IsString() @MinLength(1) sourceListingId?: string;
   @IsString() assetId!: string;
   @IsString() @MinLength(1) tokenPositionId!: string;
   @IsString() @MinLength(1) onChainListingId!: string;
@@ -180,11 +181,18 @@ export class MarketplaceController {
       pricePerTokenWei: dto.pricePerTokenWei,
     });
     if (!valid) throw new BadRequestException('The submitted transaction is not a confirmed matching Caprov marketplace listing.');
+    const sourceListing = dto.sourceListingId
+      ? this.db.snapshot.listings.find((item) => item.id === dto.sourceListingId && item.organizationId === user.organizationId)
+      : undefined;
+    if (dto.sourceListingId && (!sourceListing || sourceListing.assetId !== asset.id || sourceListing.tokenPositionId !== token.id || sourceListing.onChainListingId)) {
+      throw new BadRequestException('The source listing cannot be converted to an on-chain listing.');
+    }
     const now = new Date().toISOString();
     const listing: MarketplaceListing = {
+      ...(sourceListing ?? {}),
       id: createId('lst'), organizationId: user.organizationId, assetId: asset.id,
-      title: dto.title?.trim() || `${asset.name} token units`, offeringType: 'SALE', status: 'OPEN',
-      summary: dto.summary?.trim(), imageUrl: dto.imageUrl?.trim() || asset.primaryImageUrl || asset.imageUrls?.[0],
+      title: dto.title?.trim() || sourceListing?.title || `${asset.name} token units`, offeringType: 'SALE', status: 'OPEN',
+      summary: dto.summary?.trim() ?? sourceListing?.summary, imageUrl: dto.imageUrl?.trim() || sourceListing?.imageUrl || asset.primaryImageUrl || asset.imageUrls?.[0],
       askPrice: dto.askPrice, currency: 'USD', quantityBps: 0, remainingBps: 0,
       tokenPositionId: token.id, tokenizationMode: token.mode, assetTokenId: token.tokenId,
       totalTokenSupply: token.supply, availableTokenUnits: dto.availableTokenUnits,
@@ -192,9 +200,14 @@ export class MarketplaceController {
       paymentTokenAddress: process.env.ETHEREUM_PAYMENT_TOKEN_CONTRACT?.trim(),
       marketplaceContractAddress: this.marketplace.contractAddress(),
       onChainListingId: dto.onChainListingId, listerWalletAddress: getAddress(dto.listerWalletAddress),
-      onChainListingTxHash: dto.onChainTxHash, createdAt: now, updatedAt: now,
+      onChainListingTxHash: dto.onChainTxHash, createdAt: sourceListing?.createdAt ?? now, updatedAt: now,
     };
-    this.db.mutate((draft) => draft.listings.unshift(listing));
+    if (sourceListing) listing.id = sourceListing.id;
+    this.db.mutate((draft) => {
+      const index = sourceListing ? draft.listings.findIndex((item) => item.id === sourceListing.id) : -1;
+      if (index >= 0) draft.listings[index] = listing;
+      else draft.listings.unshift(listing);
+    });
     this.audit.log({ organizationId: user.organizationId, actorUserId: user.id, action: 'marketplace.on_chain_listing_registered', entityType: 'Listing', entityId: listing.id, metadata: { onChainListingId: dto.onChainListingId, tokenId: token.tokenId } });
     return this.hydrate(listing);
   }

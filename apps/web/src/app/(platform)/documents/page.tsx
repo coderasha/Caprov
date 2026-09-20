@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
+import { activeMetaMaskConnection } from '@/lib/sepolia-marketplace';
 import {
   documentTypeOptions,
   formatDateTime,
@@ -227,7 +228,7 @@ export default function DocumentsPage() {
     }
 
     await ensureSepoliaNetwork(session.provider, network);
-    const signer = await session.browserProvider.getSigner();
+    const signer = await session.browserProvider.getSigner(session.account);
     const signerAddress = await signer.getAddress();
     const contract = new Contract(network.contractAddress, DOCUMENT_REGISTRY_ABI, signer);
     const anchorFn = contract.getFunction('anchorDocumentVersion');
@@ -674,15 +675,10 @@ function readErrorMessage(error: unknown) {
 }
 
 async function connectMetaMask(network?: DocumentNetworkStatus): Promise<WalletSession> {
-  const provider = getMetaMaskProvider();
-  if (!provider) {
-    throw new Error('MetaMask is not available in this browser. Install or unlock MetaMask and try again.');
-  }
-  const accounts = await provider.request({ method: 'eth_accounts' }) as string[];
-  if (!accounts[0]) throw new Error('Connect MetaMask from the top-right menu before signing an anchor.');
+  const { provider, address: account } = await activeMetaMaskConnection();
+  if (!account) throw new Error('Connect MetaMask from the top-right menu before signing an anchor.');
   await ensureSepoliaNetwork(provider, network);
   const browserProvider = new BrowserProvider(provider, network?.chainId ?? SEPOLIA_CHAIN_ID);
-  const account = accounts[0];
   const chain = await browserProvider.getNetwork();
   return {
     account,

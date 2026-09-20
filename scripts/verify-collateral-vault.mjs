@@ -3,6 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import solc from 'solc';
+import { AbiCoder, getAddress } from 'ethers';
 
 const apiKey = process.env.ETHERSCAN_API_KEY;
 const address = process.env.ETHEREUM_COLLATERAL_VAULT_CONTRACT;
@@ -11,6 +12,10 @@ if (!address) throw new Error('Set ETHEREUM_COLLATERAL_VAULT_CONTRACT for this c
 
 const sourceName = process.env.COLLATERAL_VAULT_SOURCE || 'CaprovCollateralVault.sol';
 const contractName = process.env.COLLATERAL_VAULT_CONTRACT_NAME || 'CaprovCollateralVault';
+const initialOwner = process.env.COLLATERAL_VAULT_OWNER?.trim();
+const constructorArguments = initialOwner
+  ? AbiCoder.defaultAbiCoder().encode(['address'], [getAddress(initialOwner)]).slice(2)
+  : '';
 const input = {
   language: 'Solidity',
   sources: {
@@ -37,7 +42,7 @@ const submission = await call(new URLSearchParams({
   compilerversion: compilerVersion,
   optimizationUsed: '1',
   runs: '200',
-  constructorArguments: '',
+  constructorArguments,
   evmVersion: 'default',
   licenseType: '3',
 }));

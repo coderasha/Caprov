@@ -15,8 +15,8 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import type { AuthUser } from '../../common/types/auth-user';
-import { EthereumSepoliaTokenService } from '../../infrastructure/blockchain/ethereum-sepolia-token.service';
 import { EthereumSepoliaMarketplaceService } from '../../infrastructure/blockchain/ethereum-sepolia-marketplace.service';
+import { EthereumSepoliaTokenService } from '../../infrastructure/blockchain/ethereum-sepolia-token.service';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import { createId } from '../../infrastructure/database/ids';
 import { AuditService } from '../audit/audit.service';
@@ -201,10 +201,6 @@ export class TokenizationController {
     );
     if (existing) throw new BadRequestException('This asset is already tokenized on the active ERC-1155 contract.');
 
-    const marketplaceAssetToken = await this.marketplace.getAssetTokenAddress();
-    if (!marketplaceAssetToken || marketplaceAssetToken.toLowerCase() !== network.contractAddress.toLowerCase()) {
-      throw new BadRequestException('ETHEREUM_TOKEN_CONTRACT does not match the active Sepolia marketplace asset-token contract.');
-    }
     const recipientAddress = getAddress(dto.recipientAddress);
     const valid = await this.sepolia.verifyWalletMintTransaction({
       txHash: dto.txHash,

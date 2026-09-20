@@ -8,6 +8,7 @@ import { DnaDecisionTable } from '@/components/intelligence/dna-decision-table';
 import { FactSummaryTable } from '@/components/intelligence/fact-summary-table';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
+import { activeMetaMaskConnection } from '@/lib/sepolia-marketplace';
 import {
   assetClassLabel,
   assetStatusLabel,
@@ -551,41 +552,7 @@ export default function AssetDetailPage() {
             </div>
           </Card>
           <Card className="p-6">
-            <h2 className="text-lg font-semibold">Upload, connect, and anchor</h2>
-            <div className="mt-4 rounded-2xl border border-[var(--line)] px-4 py-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-medium">Org admin wallet connection</p>
-                  <p className="mt-1 text-xs text-[var(--muted)]">
-                    Upload stores the document off-chain first, then opens a real Sepolia wallet flow for signing.
-                  </p>
-                </div>
-                <Badge tone={liveDocumentAnchoringReady ? 'ok' : 'warn'}>
-                  {network?.chainName ?? 'Sepolia'} {liveDocumentAnchoringReady ? 'live ready' : 'not configured'}
-                </Badge>
-              </div>
-              <p className="mt-3 text-xs text-[var(--muted)]">
-                {network?.message ?? 'Loading Sepolia network status…'}
-              </p>
-              <p className="mt-2 text-xs text-[var(--muted)]">
-                {connectedWallet
-                  ? `Using top-right MetaMask wallet ${shortAddress(connectedWallet)}.`
-                  : 'No wallet connected yet. Use the top-right menu to connect MetaMask.'}
-              </p>
-              {walletMessage ? <p className="mt-2 text-xs text-[var(--muted)]">{walletMessage}</p> : null}
-              {anchorError ? <p className="mt-2 text-xs text-rose-600">{anchorError}</p> : null}
-              {!canWalletAnchor ? (
-                <p className="mt-3 text-xs text-[var(--muted)]">
-                  Sign in to connect a wallet and anchor documents on Sepolia.
-                </p>
-              ) : null}
-              {canWalletAnchor && !liveDocumentAnchoringReady ? (
-                <p className="mt-3 text-xs text-[var(--muted)]">
-                  Genuine Sepolia document anchors are disabled until the API is configured with a live document
-                  registry contract. Uploads will be stored, but no real blockchain transaction will be requested.
-                </p>
-              ) : null}
-            </div>
+            <h2 className="text-lg font-semibold">Upload and anchor</h2>
             <form
               className="mt-4 grid gap-3"
               onSubmit={(event) => void handleDocumentSubmit(event)}
@@ -841,15 +808,10 @@ function readErrorMessage(error: unknown) {
 }
 
 async function connectMetaMask(network?: DocumentNetworkStatus): Promise<WalletSession> {
-  const provider = getMetaMaskProvider();
-  if (!provider) {
-    throw new Error('MetaMask is not available in this browser. Install or unlock MetaMask and try again.');
-  }
-  const accounts = await provider.request({ method: 'eth_accounts' }) as string[];
-  if (!accounts[0]) throw new Error('Connect MetaMask from the top-right menu before signing an anchor.');
+  const { provider, accounts, address: account } = await activeMetaMaskConnection();
+  if (!account) throw new Error('Connect MetaMask from the top-right menu before signing an anchor.');
   await ensureSepoliaNetwork(provider, network);
   const browserProvider = new BrowserProvider(provider, network?.chainId ?? SEPOLIA_CHAIN_ID);
-  const account = accounts[0];
   if (!account) throw new Error('MetaMask did not expose an account to CAPROV.');
   const chain = await browserProvider.getNetwork();
   return {

@@ -38,7 +38,7 @@ export interface WalletOption {
   rdns?: string;
 }
 
-type WalletProvider = Eip1193Provider & {
+export type WalletProvider = Eip1193Provider & {
   isMetaMask?: boolean;
   isCoinbaseWallet?: boolean;
   isRabby?: boolean;
@@ -134,6 +134,12 @@ function addresses() {
   return { assetToken, paymentToken, marketplace };
 }
 
+function assetTokenAddress() {
+  const assetToken = process.env.NEXT_PUBLIC_ETHEREUM_ASSET_TOKEN_CONTRACT;
+  if (!assetToken) throw new Error('The Sepolia ERC-1155 asset-token contract is not configured for this web app.');
+  return assetToken;
+}
+
 /**
  * The listing form accepts a total USD/CAP asking price, while the settlement
  * contract prices each ERC-1155 unit. Avoid a silent rounding difference
@@ -159,6 +165,21 @@ async function selectedProvider(walletId?: string) {
     activeWallet = { id: wallet.id, provider: wallet.provider };
   }
   return activeWallet.provider;
+}
+
+/** The exact MetaMask provider selected by CAPROV's global wallet menu. */
+export async function activeMetaMaskProvider(): Promise<WalletProvider> {
+  return selectedProvider();
+}
+
+/** Returns the provider and account selected from CAPROV's global wallet menu. */
+export async function activeMetaMaskConnection() {
+  const provider = await selectedProvider();
+  const accounts = await provider.request({ method: 'eth_accounts' }) as string[];
+  const address = activeAccount && accounts.find((item) => item.toLowerCase() === activeAccount?.toLowerCase())
+    ? activeAccount
+    : accounts[0];
+  return { provider, accounts, address };
 }
 
 async function signer(walletId?: string) {
@@ -229,7 +250,7 @@ export async function mintAssetFromWallet(input: { assetId: string; supply: numb
   if (selectedAddress.toLowerCase() !== input.recipientAddress.toLowerCase()) {
     throw new Error('The mint recipient must be the MetaMask account selected for this transaction.');
   }
-  const { assetToken } = addresses();
+  const assetToken = assetTokenAddress();
   const asset = new Contract(assetToken, assetAbi, connectedSigner);
   const tokenId = BigInt(ethId(`caprov:asset:${input.assetId}`));
   const receipt = await (await asset.getFunction('mintAsset')(selectedAddress, tokenId, BigInt(input.supply), input.assetId)).wait();
