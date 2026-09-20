@@ -97,6 +97,15 @@ export default function LendingPage() {
     () => (collateral.data ?? []).filter((item) => item.status === 'PENDING_APPROVAL' || item.status === 'ACTIVE'),
     [collateral.data],
   );
+  // A loan is tied to one collateral position, rather than to the asset as a
+  // whole. Once that position has been released, its release workflow is
+  // complete. A later pledge for the same asset creates a new ACTIVE position
+  // and can therefore be released after its own repayment.
+  const canReleaseCollateral = (loan: LoanRow) =>
+    loan.status === 'REPAID' &&
+    canApproveDisbursal &&
+    loan.collateral?.status === 'ACTIVE' &&
+    Boolean(loan.collateral.vaultCollateralId);
   const selected = requestableCollateral.find((item) => item.id === collateralId);
   const create = useMutation({
     mutationFn: async () =>
@@ -327,7 +336,7 @@ export default function LendingPage() {
                 {loan.status === 'ACTIVE' && !isBanker ? (
                   <Button onClick={() => repay.mutate(loan.id)}>Repay</Button>
                 ) : null}
-                {loan.status === 'REPAID' && canApproveDisbursal && loan.collateral?.vaultCollateralId ? (
+                {canReleaseCollateral(loan) ? (
                   <Button onClick={() => { setActionError(null); releaseCollateral.mutate(loan); }} disabled={releaseCollateral.isPending}>
                     Release collateral on Sepolia
                   </Button>
@@ -336,8 +345,11 @@ export default function LendingPage() {
               {loan.status === 'REPAID' && !canApproveDisbursal ? (
                 <p className="mt-3 text-sm text-[var(--muted)]">Repayment is posted. The bank must now release the ERC-1155 collateral on Sepolia.</p>
               ) : null}
-              {loan.status === 'REPAID' && canApproveDisbursal && loan.collateral?.vaultCollateralId ? (
+              {canReleaseCollateral(loan) ? (
                 <p className="mt-3 text-sm text-[var(--muted)]">Sign from the configured bank custody (vault-owner) wallet. CAPROV will mark this collateral released only after the Sepolia release event is confirmed.</p>
+              ) : null}
+              {loan.status === 'REPAID' && canApproveDisbursal && loan.collateral?.status === 'RELEASED' ? (
+                <p className="mt-3 text-sm text-[var(--muted)]">Collateral has been released. A new collateral lock for this asset will create a separate release workflow after repayment.</p>
               ) : null}
               {canApproveDisbursal && loan.disbursedAt ? (
                 <p className="mt-3 text-sm text-[var(--muted)]">
