@@ -145,6 +145,8 @@ export interface AuditRow {
   entityId?: string;
   createdAt: string;
   actorUserId?: string;
+  metadata?: Record<string, unknown>;
+  explorerUrl?: string;
 }
 
 export interface PlatformOrganizationRow {

@@ -19,7 +19,7 @@ import {
   money,
   riskTone,
 } from '@/lib/format';
-import type { AssetDocumentsTree, DocumentRow, HydratedAsset } from '@/lib/types';
+import type { AssetDocumentsTree, AuditRow, DocumentRow, HydratedAsset } from '@/lib/types';
 import { useAuthStore } from '@/stores/auth-store';
 import type { DocumentType, OwnershipType } from '@caprov/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -28,7 +28,7 @@ import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
-const tabs = ['Overview', 'DNA', 'Documents', 'Ownership', 'Valuation & risk'] as const;
+const tabs = ['Overview', 'DNA', 'Documents', 'Ownership', 'Valuation & risk', 'Audit'] as const;
 
 function folderNameForType(type: DocumentType) {
   switch (type) {
@@ -140,6 +140,10 @@ export default function AssetDetailPage() {
     queryKey: ['documents-network-status'],
     queryFn: async () =>
       (await api.get<DocumentNetworkStatus>('/documents/network-status')).data,
+  });
+  const auditQuery = useQuery({
+    queryKey: ['asset-audit', params.id],
+    queryFn: async () => (await api.get<AuditRow[]>(`/audit/assets/${params.id}`)).data,
   });
 
   const runPipeline = useMutation({
@@ -739,6 +743,36 @@ export default function AssetDetailPage() {
             )}
           </Card>
         </div>
+      ) : null}
+
+      {tab === 'Audit' ? (
+        <Card className="overflow-hidden">
+          <div className="border-b border-[var(--line)] px-6 py-5">
+            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--gold)]">Asset activity</p>
+            <h2 className="mt-1 text-lg font-semibold">Audit trail</h2>
+            <p className="mt-1 text-sm text-[var(--muted)]">All recorded actions for this asset and its related documents, tokens, collateral, lending, marketplace, trading, and settlement records.</p>
+          </div>
+          {(auditQuery.data ?? []).length ? (
+            <ol className="divide-y divide-[var(--line)]">
+              {(auditQuery.data ?? []).map((event) => (
+                <li key={event.id} className="flex flex-wrap items-start justify-between gap-4 px-6 py-4">
+                  <div>
+                    <p className="font-medium text-[var(--ink)]">{event.action.replaceAll('.', ' ')}</p>
+                    <p className="mt-1 text-sm text-[var(--muted)]">{event.entityType}{event.actorUserId ? ` · by ${event.actorUserId}` : ''}</p>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    {event.explorerUrl ? (
+                      <a href={event.explorerUrl} target="_blank" rel="noreferrer" className="font-medium text-[var(--teal)] underline underline-offset-4">See on explorer →</a>
+                    ) : null}
+                    <time className="text-[var(--muted)]" dateTime={event.createdAt}>{formatDateTime(event.createdAt)}</time>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="px-6 py-10 text-sm text-[var(--muted)]">No recorded activity for this asset yet.</p>
+          )}
+        </Card>
       ) : null}
     </div>
   );
