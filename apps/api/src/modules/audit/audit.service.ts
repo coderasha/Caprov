@@ -46,21 +46,137 @@ export class AuditService {
     assetId: string,
     includeAll = false,
   ) {
-    return this.db.snapshot.auditEvents
+    const recordedEvents = this.db.snapshot.auditEvents
       .filter(
         (event) =>
           (includeAll || event.organizationId === organizationId) &&
           this.assetIdForEvent(event) === assetId,
-      )
+      );
+    const historicalEvents = this.backfillAssetHistory(assetId, recordedEvents)
+      .filter((event) => includeAll || event.organizationId === organizationId);
+
+    return [...recordedEvents, ...historicalEvents]
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
       .map((event) => {
         const transactionHash = this.transactionHashForEvent(event);
+        const configuredExplorerUrl = event.metadata?.explorerUrl;
         return {
           ...event,
-          explorerUrl: transactionHash
+          explorerUrl: typeof configuredExplorerUrl === 'string'
+            ? configuredExplorerUrl
+            : transactionHash
             ? `https://sepolia.etherscan.io/tx/${transactionHash}`
             : undefined,
         };
       });
+  }
+
+  /**
+   * Older records predate the asset audit view. Reconstruct their known
+   * lifecycle events in memory so the first visit has a useful history. This
+   * deliberately does not write synthetic events back to the audit ledger.
+   */
+  private backfillAssetHistory(assetId: string, recordedEvents: AuditEventRecord[]) {
+    const asset = this.db.snapshot.assets.find((item) => item.id === assetId);
+    if (!asset) return [];
+
+    const existing = new Set(
+      recordedEvents.map((event) => `${event.action}:${event.entityType}:${event.entityId ?? ''}`),
+    );
+    const events: AuditEventRecord[] = [];
+    const add = (
+      action: string,
+      entityType: string,
+      entityId: string,
+      createdAt: string | undefined,
+      metadata?: Record<string, unknown>,
+    ) => {
+      if (!createdAt || existing.has(`${action}:${entityType}:${entityId}`)) return;
+      events.push({
+        id: `history_${action}_${entityId}`.replaceAll('.', '_'),
+        organizationId: asset.organizationId,
+        action,
+        entityType,
+        entityId,
+        metadata: { ...metadata, backfilled: true },
+        createdAt,
+      });
+    };
+
+    add('asset.created', 'Asset', asset.id, asset.createdAt);
+
+    for (const document of this.db.snapshot.documents.filter((item) => item.assetId === assetId)) {
+      add('document.uploaded', 'Document', document.id, document.createdAt, {
+        documentName: document.name,
+        documentType: document.type,
+      });
+      if (document.anchorTxHash || document.anchorExplorerUrl) {
+        add('document.anchor.recorded', 'Document', document.id, document.anchoredAt ?? document.createdAt, {
+          transactionHash: document.anchorTxHash,
+          explorerUrl: document.anchorExplorerUrl,
+        });
+      }
+    }
+
+    for (const token of this.db.snapshot.tokens.filter((item) => item.assetId === assetId)) {
+      add('tokenization.minted', 'Token', token.id, token.createdAt, {
+        transactionHash: token.txHash,
+        explorerUrl: token.explorerUrl,
+        assetId,
+      });
+    }
+
+    for (const position of this.db.snapshot.collateralPositions.filter((item) => item.assetId === assetId)) {
+      add('collateral.pledged', 'Collateral', position.id, position.createdAt, {
+        transactionHash: position.vaultTxHash,
+        assetId,
+      });
+      add('collateral.approved', 'Collateral', position.id, position.approvedAt);
+      if (position.status === 'RELEASED') {
+        add('lending.collateral_released_after_repayment', 'Collateral', position.id, position.updatedAt, {
+          transactionHash: position.vaultTxHash,
+          assetId,
+        });
+      }
+    }
+
+    for (const loan of this.db.snapshot.loans.filter((item) => item.assetId === assetId)) {
+      add('lending.loan_opened', 'Loan', loan.id, loan.createdAt, { assetId });
+      add('lending.loan_disbursed', 'Loan', loan.id, loan.disbursedAt, {
+        transactionHash: loan.vaultActivationTxHash,
+        assetId,
+      });
+      add('lending.loan_repaid', 'Loan', loan.id, loan.repaidAt, { assetId });
+    }
+
+    for (const listing of this.db.snapshot.listings.filter((item) => item.assetId === assetId)) {
+      add('marketplace.listing_created', 'Listing', listing.id, listing.createdAt, { assetId });
+      if (listing.onChainListingId || listing.onChainListingTxHash) {
+        add('marketplace.on_chain_listing_registered', 'Listing', listing.id, listing.createdAt, {
+          transactionHash: listing.onChainListingTxHash,
+          assetId,
+        });
+      }
+      add('marketplace.listing_closed', 'Listing', listing.id, listing.closedAt, {
+        transactionHash: listing.onChainCloseTxHash,
+        assetId,
+      });
+    }
+
+    for (const order of this.db.snapshot.orders.filter((item) => item.assetId === assetId)) {
+      add('trading.order_created', 'Order', order.id, order.createdAt, { assetId });
+    }
+    for (const trade of this.db.snapshot.trades.filter((item) => item.assetId === assetId)) {
+      add('trading.trade_matched', 'Trade', trade.id, trade.createdAt, {
+        transactionHash: trade.purchaseTxHash,
+        assetId,
+      });
+    }
+    for (const settlement of this.db.snapshot.settlements.filter((item) => item.assetId === assetId)) {
+      add('settlement.created', 'Settlement', settlement.id, settlement.createdAt, { assetId });
+      add('settlement.completed', 'Settlement', settlement.id, settlement.completedAt, { assetId });
+    }
+    return events;
   }
 
   private assetIdForEvent(event: AuditEventRecord): string | undefined {

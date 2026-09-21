@@ -18,9 +18,9 @@ import {
 import Link from 'next/link';
 
 const proofPoints = [
-  { label: 'Evidence', value: 'Document-grounded facts' },
-  { label: 'Record', value: 'Versioned Asset DNA' },
-  { label: 'Execution', value: 'From portfolio to lending' },
+  { label: 'Intelligence', value: 'Document-grounded Asset DNA' },
+  { label: 'Access', value: 'Tokenized fractional interests' },
+  { label: 'Credit', value: 'Evidence-led asset lending' },
 ] as const;
 
 const trustMarquee = [
@@ -46,17 +46,17 @@ const platformModules = [
   {
     icon: Store,
     title: 'Marketplace & trading',
-    body: 'Move from an approved asset record to listings, orders, matching, and settlement in one controlled workflow.',
+    body: 'List fractional asset-token interests, then manage orders, matching, and settlement in one controlled workflow.',
   },
   {
     icon: ShieldCheck,
     title: 'Tokenization',
-    body: 'Create asset-token records with simulated or live Ethereum Sepolia execution and provenance anchoring.',
+    body: 'Create fractional asset-token interests with simulated or live Ethereum Sepolia execution and provenance anchoring.',
   },
   {
     icon: Scale,
     title: 'Collateral & lending',
-    body: 'Assess advanceable value, manage collateral positions, and track lending facilities against approved records.',
+    body: 'Asset owners submit collateral while banks review documents, valuation, and risk before approving and managing facilities.',
   },
   {
     icon: Workflow,
@@ -67,9 +67,9 @@ const platformModules = [
 
 const workflowSteps = [
   { step: '01', title: 'Capture evidence', detail: 'Upload, classify, and preserve the source documents behind an asset.' },
-  { step: '02', title: 'Establish Asset DNA', detail: 'Review extracted facts, valuation, ownership, risk, and confidence before approval.' },
-  { step: '03', title: 'Run the portfolio', detail: 'Use the validated record across portfolio oversight, approvals, and reporting.' },
-  { step: '04', title: 'Execute with context', detail: 'Carry approved intelligence into market, settlement, tokenization, collateral, and lending workflows.' },
+  { step: '02', title: 'Establish Asset DNA', detail: 'Extract and review facts, valuation, ownership, risk, and confidence from the evidence.' },
+  { step: '03', title: 'Tokenize & list', detail: 'Create fractional token interests and list them for marketplace trading and settlement.' },
+  { step: '04', title: 'Finance with confidence', detail: 'Asset owners lock collateral; banks review the record and approve loans against advanceable value.' },
 ] as const;
 
 const platformPillars = [
@@ -105,11 +105,11 @@ export default function Home() {
                   Evidence-led private asset operations
                 </p>
                 <h1 className="landing-hero-title mt-6">
-                  Know what you own. Know why it matters.
+                  Turn private-asset evidence into market access.
                 </h1>
                 <p className="landing-lead landing-read mt-5">
-                  CAPROV turns fragmented private-asset documents into a governed Asset DNA record—so investment,
-                  operations, and control teams can review, decide, and execute from the same trusted facts.
+                  CAPROV extracts trusted intelligence from private-asset documents to create Asset DNA—then carries
+                  that evidence into tokenization, fractional marketplace trading, and collateralized lending.
                 </p>
                 <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                   <Link href="/login" className="landing-btn landing-btn--primary group w-full sm:w-auto">
@@ -165,8 +165,8 @@ export default function Home() {
           <LandingReveal>
             <LandingSectionHeader
               kicker="Platform"
-              title="One operating record for every material asset decision"
-              description="CAPROV gives investment, operations, and control teams a shared place to establish evidence, review intelligence, and act with appropriate controls."
+              title="One operating record from document to market and credit"
+              description="CAPROV gives asset owners, investors, banks, and control teams a shared place to establish evidence, review intelligence, tokenize fractional interests, and act with appropriate controls."
             />
             <div className="mt-12 grid gap-4 md:grid-cols-3">
               {platformPillars.map((item, index) => (
@@ -187,7 +187,7 @@ export default function Home() {
           <LandingReveal>
             <LandingSectionHeader
               kicker="Workflow"
-              title="From source document to informed action"
+              title="From source document to fractional market access and lending"
             />
           </LandingReveal>
 
@@ -213,8 +213,8 @@ export default function Home() {
           <LandingReveal>
             <LandingSectionHeader
               kicker="Capital markets"
-              title="Carry the evidence into every execution workflow"
-              description="Once an Asset DNA record is reviewed, the same context can support listings, trading, settlement, tokenization, collateral, and lending."
+              title="Turn validated intelligence into fractional access and credit"
+              description="Once Asset DNA is reviewed, owners can tokenize and list fractional interests. The same documents, valuation, and risk context support collateral review and bank-approved lending."
               action={
                 <Link href="/login" className="landing-btn landing-btn--ghost w-full sm:w-auto">
                   Explore the workspace

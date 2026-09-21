@@ -13,7 +13,9 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 
-const classes = Object.keys(assetClassLabel) as AssetClass[];
+const classes = (Object.keys(assetClassLabel) as AssetClass[]).filter(
+  (assetClass) => assetClass !== 'PRIVATE_CREDIT' && assetClass !== 'FUND',
+);
 
 export default function NewAssetPage() {
   const router = useRouter();
