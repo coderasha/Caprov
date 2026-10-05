@@ -272,7 +272,9 @@ export default function AssetDetailPage() {
       })
       .sort((a, b) => a.folderName.localeCompare(b.folderName));
   }, [documents]);
-  const folders = docsTreeQuery.data?.folders?.length ? docsTreeQuery.data.folders : fallbackFolders;
+  const folders = (docsTreeQuery.data?.folders?.length ? docsTreeQuery.data.folders : fallbackFolders).filter(
+    (folder) => folder.type !== 'SPA',
+  );
 
   async function refreshAssetDocuments() {
     await api.post(`/intelligence/assets/${params.id}/run`, { type: 'FULL_PIPELINE' });

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CAPROV Real Estate Valuation Model</title>
+  <style>
+    @page { size: A4; margin: 1.7cm; }
+    body { font-family: Arial, sans-serif; color: #17212b; font-size: 10.5pt; line-height: 1.42; }
+    h1 { color: #0e5263; font-size: 24pt; margin: 0 0 4pt; }
+    h2 { color: #0e5263; font-size: 15pt; border-bottom: 1px solid #b9d2d7; padding-bottom: 3pt; margin-top: 20pt; }
+    h3 { color: #1f5360; font-size: 11.5pt; margin-bottom: 3pt; }
+    .subtitle { color: #62727c; font-size: 11pt; margin-top: 0; }
+    .callout { background: #eff7f7; border-left: 4px solid #0e7a82; padding: 9pt 11pt; margin: 12pt 0; }
+    .formula { background: #f5f7f8; border: 1px solid #d8e1e3; padding: 8pt; font-family: 'Courier New', monospace; font-size: 9.5pt; margin: 8pt 0; }
+    table { border-collapse: collapse; width: 100%; margin: 8pt 0; }
+    th { background: #0e5263; color: white; text-align: left; padding: 6pt; }
+    td { border: 1px solid #d7e0e2; padding: 6pt; vertical-align: top; }
+    tr:nth-child(even) { background: #f6f9f9; }
+    ul { margin-top: 4pt; }
+    .small { font-size: 9pt; color: #56646c; }
+    .footer { margin-top: 18pt; border-top: 1px solid #b9d2d7; padding-top: 7pt; color: #62727c; font-size: 8.5pt; }
+  </style>
+</head>
+<body>
+  <h1>CAPROV Real Estate Valuation Model</h1>
+  <p class="subtitle">Current valuation mark selection and forward-mark projection &middot; Model: <strong>caprov-forward-mark-v1</strong></p>
+
+  <div class="callout">
+    <strong>What this model is:</strong> a transparent, deterministic projection from a source-backed current valuation mark and operating facts.<br>
+    <strong>What it is not:</strong> an independent appraisal, market quote, DCF, or guarantee of future value.
+  </div>
+
+  <h2>1. End-to-end flow</h2>
+  <svg xmlns="http://www.w3.org/2000/svg" width="720" height="430" viewBox="0 0 720 430">
+    <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#0e5263"/></marker></defs>
+    <style>.b{fill:#eff7f7;stroke:#0e7a82;stroke-width:2}.g{fill:#f5f7f8;stroke:#829ca3;stroke-width:1.5}.o{fill:#fff6e5;stroke:#c98a1a;stroke-width:1.5}.t{font:14px Arial;fill:#17212b}.s{font:11px Arial;fill:#46545c}.a{stroke:#0e5263;stroke-width:2;marker-end:url(#arrow)}</style>
+    <rect class="b" x="225" y="15" width="270" height="58" rx="9"/><text class="t" x="282" y="40">Source documents</text><text class="s" x="245" y="59">valuation memo, title, SPA, financial / insurance</text>
+    <line class="a" x1="360" y1="73" x2="360" y2="105"/>
+    <rect class="b" x="225" y="105" width="270" height="58" rx="9"/><text class="t" x="270" y="130">Deterministic extraction</text><text class="s" x="243" y="149">facts, source provenance, confidence, document type</text>
+    <line class="a" x1="360" y1="163" x2="360" y2="195"/>
+    <rect class="o" x="205" y="195" width="310" height="66" rx="9"/><text class="t" x="246" y="220">Current DNA valuation mark</text><text class="s" x="221" y="239">market value → NAV → purchase price → class heuristic</text><text class="s" x="264" y="254">with valuation date and confidence</text>
+    <line class="a" x1="360" y1="261" x2="360" y2="293"/>
+    <rect class="g" x="115" y="293" width="490" height="58" rx="9"/><text class="t" x="230" y="318">Forward growth calculation</text><text class="s" x="139" y="337">2.5% real-estate base + occupancy + WALT/WALE + cap-rate + purchase drift − risk penalty</text>
+    <line class="a" x1="360" y1="351" x2="360" y2="383"/>
+    <rect class="b" x="160" y="383" width="400" height="36" rx="9"/><text class="t" x="222" y="406">1-, 3-, and 5-year base, bear, bull and range marks</text>
+  </svg>
+
+  <h2>2. Current mark: evidence-led selection</h2>
+  <p>The local intelligence pipeline extracts candidate facts from uploaded documents, keeps source provenance and confidence, and selects the current mark in this priority order:</p>
+  <table>
+    <tr><th>Priority</th><th>Selected fact</th><th>Model method label</th></tr>
+    <tr><td>1</td><td>Market value / fair value</td><td>Independent valuation memo / appraisal extract</td></tr>
+    <tr><td>2</td><td>NAV</td><td>Fund NAV statement extract</td></tr>
+    <tr><td>3</td><td>Purchase price</td><td>Acquisition price from purchase agreement (no later mark available)</td></tr>
+    <tr><td>4</td><td>No explicit value</td><td>Class heuristic pending primary valuation memo</td></tr>
+  </table>
+  <p>Insurance, replacement-cost and book-value figures are explicitly not used as market marks when a market value is available. When more than one source corroborates a mark, the model records that in the valuation notes.</p>
+
+  <h2>3. Real-estate forward projection</h2>
+  <p>Projection requires a positive current mark. For real estate, the starting annual growth rate is <strong>2.5%</strong>. The model applies the following deterministic adjustments, then clamps the result to the range <strong>−8.0% to +10.0%</strong> per annum.</p>
+  <table>
+    <tr><th>Driver</th><th>Adjustment formula</th><th>Limit</th></tr>
+    <tr><td>Occupancy</td><td>(occupancy % − 90) × 0.0008</td><td>−1.5 pp to +1.5 pp</td></tr>
+    <tr><td>WALT / WALE</td><td>(lease years − 5) × 0.0015</td><td>−1.0 pp to +2.0 pp</td></tr>
+    <tr><td>Cap rate</td><td>(6 − cap rate %) × 0.002</td><td>−1.5 pp to +1.5 pp</td></tr>
+    <tr><td>Purchase-price drift</td><td>15% × annualized return of current mark versus purchase price</td><td>−1.0 pp to +1.5 pp</td></tr>
+    <tr><td>Risk rating</td><td>HIGH −2.0 pp; ELEVATED −1.2 pp; MODERATE −0.5 pp; otherwise 0</td><td>Not capped separately</td></tr>
+  </table>
+  <div class="formula">annualGrowth = clamp(2.5% + occupancyAdj + leaseAdj + capRateAdj + purchaseDriftAdj − riskPenalty, −8.0%, +10.0%)</div>
+
+  <h2>4. Scenario marks and confidence</h2>
+  <p>For each horizon (1, 3 and 5 years), the system compounds the selected current mark:</p>
+  <div class="formula">base = currentMark × (1 + annualGrowth)^years<br>bear = currentMark × (1 + annualGrowth − 2.0%)^years<br>bull = currentMark × (1 + annualGrowth + 2.0%)^years</div>
+  <p>The displayed low/high range is centred on the base projection: ±8.5% at year 1, ±13.5% at year 3, and ±18.5% at year 5. Base confidence begins from the current-mark confidence, reduced to 85%; it receives an additional reduction for HIGH risk and declines by 8 percentage points per projected year, bounded between 25% and 85%.</p>
+
+  <h2>5. Controls, provenance and downstream use</h2>
+  <ul>
+    <li>Every extracted fact carries document provenance; the projection retains source IDs for market value, NAV or purchase-price facts.</li>
+    <li>A missing or non-positive current mark prevents projection generation.</li>
+    <li>The model preserves the original valuation method and valuation date as the base-mark context.</li>
+    <li>Marketplace ask-price defaults, collateral pledged value and lending LTV workflows may consume the latest Asset DNA valuation mark.</li>
+    <li>Risk flags use document coverage, ownership evidence, jurisdiction, occupancy and WALT/WALE inputs; the resulting risk rating directly affects the projection.</li>
+  </ul>
+
+  <div class="footer">Prepared from the CAPROV local intelligence pipeline and projection engine. This document describes implementation behavior, not investment advice or a regulated valuation methodology.</div>
+</body>
+</html>
