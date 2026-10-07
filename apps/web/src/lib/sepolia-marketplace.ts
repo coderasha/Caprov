@@ -1,4 +1,5 @@
 import { BrowserProvider, Contract, Interface, id as ethId, type Eip1193Provider, formatUnits, parseUnits } from 'ethers';
+import { selectedBlockchainNetwork } from './blockchain-network';
 
 const assetAbi = [
   'function mintAsset(address to, uint256 id, uint256 amount, string assetReference)',
@@ -125,18 +126,20 @@ export async function selectMetaMaskAccount(account: string) {
 }
 
 function addresses() {
-  const assetToken = process.env.NEXT_PUBLIC_ETHEREUM_ASSET_TOKEN_CONTRACT;
-  const paymentToken = process.env.NEXT_PUBLIC_ETHEREUM_PAYMENT_TOKEN_CONTRACT;
-  const marketplace = process.env.NEXT_PUBLIC_ETHEREUM_MARKETPLACE_CONTRACT;
+  const network = selectedBlockchainNetwork();
+  const assetToken = network.assetToken;
+  const paymentToken = network.paymentToken;
+  const marketplace = network.marketplace;
   if (!assetToken || !paymentToken || !marketplace) {
-    throw new Error('Sepolia marketplace contracts are not configured for this web app.');
+    throw new Error(`${network.chainName} marketplace contracts are not configured for this web app.`);
   }
   return { assetToken, paymentToken, marketplace };
 }
 
 function assetTokenAddress() {
-  const assetToken = process.env.NEXT_PUBLIC_ETHEREUM_ASSET_TOKEN_CONTRACT;
-  if (!assetToken) throw new Error('The Sepolia ERC-1155 asset-token contract is not configured for this web app.');
+  const network = selectedBlockchainNetwork();
+  const assetToken = network.assetToken;
+  if (!assetToken) throw new Error(`The ${network.chainName} ERC-1155 asset-token contract is not configured for this web app.`);
   return assetToken;
 }
 
@@ -167,6 +170,42 @@ async function selectedProvider(walletId?: string) {
   return activeWallet.provider;
 }
 
+/**
+ * Makes the wallet follow the CAPROV network selected in the application.
+ * Both Sepolia and Besu are EVM networks, so their contract workflows use the
+ * same signer once the wallet has moved to the selected chain.
+ */
+export async function switchWalletToSelectedNetwork() {
+  const provider = await selectedProvider();
+  const network = selectedBlockchainNetwork();
+  const chainId = `0x${network.chainId.toString(16)}`;
+  try {
+    await provider.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId }],
+    });
+  } catch (error) {
+    const code = typeof error === 'object' && error !== null && 'code' in error
+      ? (error as { code?: number }).code
+      : undefined;
+    if (code !== 4902) throw error;
+    await provider.request({
+      method: 'wallet_addEthereumChain',
+      params: [{
+        chainId,
+        chainName: network.chainName,
+        rpcUrls: [network.rpcUrl],
+        nativeCurrency: {
+          name: network.chainName,
+          symbol: network.id === 'besu' ? 'BESU' : 'SEP',
+          decimals: 18,
+        },
+        blockExplorerUrls: network.blockExplorerUrl ? [network.blockExplorerUrl] : [],
+      }],
+    });
+  }
+}
+
 /** The exact MetaMask provider selected by CAPROV's global wallet menu. */
 export async function activeMetaMaskProvider(): Promise<WalletProvider> {
   return selectedProvider();
@@ -186,8 +225,9 @@ async function signer(walletId?: string) {
   const provider = new BrowserProvider(await selectedProvider(walletId));
   const requestedAccounts = await provider.send('eth_requestAccounts', []) as string[];
   const network = await provider.getNetwork();
-  if (network.chainId !== 11155111n) {
-    throw new Error('Switch your wallet to Ethereum Sepolia (chain ID 11155111).');
+  const selected = selectedBlockchainNetwork();
+  if (network.chainId !== BigInt(selected.chainId)) {
+    throw new Error(`Switch your wallet to ${selected.chainName} (chain ID ${selected.chainId}).`);
   }
   const account = activeAccount && requestedAccounts.find((item) => item.toLowerCase() === activeAccount?.toLowerCase())
     ? activeAccount
@@ -203,8 +243,8 @@ export async function connectSepoliaWallet(walletId?: string) {
 
 /** Lister signs a real Sepolia ERC-1155 transfer into the configured collateral vault. */
 export async function lockCollateralOnSepolia(input: { tokenId: string; units: string }) {
-  const vault = process.env.NEXT_PUBLIC_ETHEREUM_COLLATERAL_VAULT_CONTRACT;
-  if (!vault) throw new Error('CollateralVault is not configured.');
+  const vault = selectedBlockchainNetwork().collateralVault;
+  if (!vault) throw new Error(`CollateralVault is not configured for ${selectedBlockchainNetwork().chainName}.`);
   const connectedSigner = await signer(); const { assetToken } = addresses();
   const asset = new Contract(assetToken, assetAbi, connectedSigner);
   if (!(await asset.getFunction('isApprovedForAll')(await connectedSigner.getAddress(), vault))) await (await asset.getFunction('setApprovalForAll')(vault, true)).wait();
@@ -218,8 +258,8 @@ export async function lockCollateralOnSepolia(input: { tokenId: string; units: s
 
 /** A whitelisted bank wallet records the accepted facility on Sepolia before USD is credited. */
 export async function activateCollateralLoanOnSepolia(input: { collateralId: string; loanId: string }) {
-  const vault = process.env.NEXT_PUBLIC_ETHEREUM_COLLATERAL_VAULT_CONTRACT;
-  if (!vault) throw new Error('CollateralVault is not configured.');
+  const vault = selectedBlockchainNetwork().collateralVault;
+  if (!vault) throw new Error(`CollateralVault is not configured for ${selectedBlockchainNetwork().chainName}.`);
   const connectedSigner = await signer();
   const contract = new Contract(vault, collateralVaultAbi, connectedSigner);
   const receipt = await (await contract.getFunction('activateLoan')(
@@ -231,8 +271,8 @@ export async function activateCollateralLoanOnSepolia(input: { collateralId: str
 
 /** The bank custody wallet returns a fully repaid ERC-1155 collateral position. */
 export async function releaseCollateralAfterRepaymentOnSepolia(input: { collateralId: string }) {
-  const vault = process.env.NEXT_PUBLIC_ETHEREUM_COLLATERAL_VAULT_CONTRACT;
-  if (!vault) throw new Error('CollateralVault is not configured.');
+  const vault = selectedBlockchainNetwork().collateralVault;
+  if (!vault) throw new Error(`CollateralVault is not configured for ${selectedBlockchainNetwork().chainName}.`);
   const connectedSigner = await signer();
   const contract = new Contract(vault, collateralVaultAbi, connectedSigner);
   const receipt = await (await contract.getFunction('releaseAfterRepayment')(

@@ -7,7 +7,8 @@ import {
   HDNodeWallet,
   id as ethId,
 } from 'ethers';
-import { sepoliaTxExplorerUrl } from './explorer';
+import { transactionExplorerUrl } from './explorer';
+import { BlockchainNetworkService, type BlockchainNetworkConfig } from './blockchain-network.service';
 import type {
   AnchoredDocumentVersionRecord,
   BlockchainAdapter,
@@ -33,19 +34,18 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
   private readonly logger = new Logger(
     EthereumSepoliaDocumentRegistryService.name,
   );
+  constructor(private readonly networks: BlockchainNetworkService) {}
 
   getDocumentNetworkStatus(): BlockchainAdapterNetworkStatus {
-    const rpcUrl =
-      process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() ||
-      DEFAULT_ETHEREUM_SEPOLIA_RPC;
-    const privateKey = process.env.ETHEREUM_SEPOLIA_PRIVATE_KEY?.trim();
-    const mnemonic = process.env.ETHEREUM_SEPOLIA_MNEMONIC?.trim();
-    const contractAddress =
-      process.env.ETHEREUM_DOCUMENT_REGISTRY_CONTRACT?.trim();
+    const config = this.networks.selected();
+    const rpcUrl = config.rpcUrl;
+    const privateKey = config.privateKey;
+    const mnemonic = config.mnemonic;
+    const contractAddress = config.documentRegistryContract;
     let walletAddress: string | undefined;
     if (privateKey || mnemonic) {
       try {
-        walletAddress = this.buildWallet(rpcUrl).address;
+        walletAddress = this.buildWallet(config).address;
       } catch {
         walletAddress = undefined;
       }
@@ -57,10 +57,10 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
       (privateKey || mnemonic) && contractAddress && walletAddress,
     );
     return {
-      chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
-      chainName: ETHEREUM_SEPOLIA_NAME,
+      chainId: config.chainId,
+      chainName: config.chainName,
       rpcUrl,
-      explorerBase: ETHEREUM_SEPOLIA_EXPLORER,
+      explorerBase: config.explorerBase ?? '',
       contractAddress,
       walletAddress,
       serverSignerReady,
@@ -68,9 +68,9 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
       liveReady,
       message: liveReady
         ? serverSignerReady
-          ? 'Live document anchoring is enabled against Ethereum Sepolia.'
-          : 'Live wallet-signed document anchoring is ready on Ethereum Sepolia. Org admins can connect MetaMask and sign the anchor transaction in the browser.'
-        : 'Document anchoring is not ready. Set ETHEREUM_DOCUMENT_REGISTRY_CONTRACT to verify and anchor document versions on Ethereum Sepolia.',
+          ? `Live document anchoring is enabled against ${config.chainName}.`
+          : `Live wallet-signed document anchoring is ready on ${config.chainName}. Org admins can connect MetaMask and sign the anchor transaction in the browser.`
+        : `Document anchoring is not ready. Configure the document registry contract for ${config.chainName}.`,
     };
   }
 
@@ -107,7 +107,7 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
 
     try {
       const provider = new JsonRpcProvider(status.rpcUrl, status.chainId);
-      const wallet = this.buildWallet(status.rpcUrl, provider);
+      const wallet = this.buildWallet(this.networks.selected(), provider);
       const contract = new Contract(
         status.contractAddress!,
         DOCUMENT_REGISTRY_ABI,
@@ -123,6 +123,7 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
         normalizeHash(request.documentHash),
         normalizeHash(request.previousVersionHash),
         request.offChainUri,
+        ...(this.networks.selected().zeroGas ? [{ gasPrice: 0n }] : []),
       );
       const receipt = await tx.wait();
       const transactionHash = receipt?.hash ?? tx.hash;
@@ -157,7 +158,7 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
         chainName: status.chainName,
         contractAddress: status.contractAddress,
         transactionHash,
-        explorerUrl: sepoliaTxExplorerUrl(transactionHash) ?? `${status.explorerBase}/tx/${transactionHash}`,
+        explorerUrl: status.explorerBase ? `${status.explorerBase.replace(/\/$/, '')}/tx/${transactionHash}` : undefined,
         anchoredAt,
         blockchainReference,
       };
@@ -300,7 +301,10 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
         if (match) {
           return {
             transactionHash: match.transactionHash,
-            explorerUrl: sepoliaTxExplorerUrl(match.transactionHash),
+            explorerUrl: transactionExplorerUrl(
+              match.transactionHash,
+              this.networks.selected().explorerBase,
+            ),
           };
         }
       }
@@ -314,18 +318,18 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
   }
 
   private buildWallet(
-    rpcUrl: string,
+    config: BlockchainNetworkConfig,
     provider?: JsonRpcProvider,
   ): Wallet | HDNodeWallet {
-    const mnemonic = process.env.ETHEREUM_SEPOLIA_MNEMONIC?.trim();
+    const mnemonic = config.mnemonic;
     if (mnemonic) {
       const wallet = HDNodeWallet.fromPhrase(mnemonic);
       return provider ? wallet.connect(provider) : wallet;
     }
-    const privateKey = process.env.ETHEREUM_SEPOLIA_PRIVATE_KEY?.trim();
+    const privateKey = config.privateKey;
     if (!privateKey) {
       throw new Error(
-        `Missing ETHEREUM_SEPOLIA_PRIVATE_KEY or ETHEREUM_SEPOLIA_MNEMONIC for ${rpcUrl}`,
+        `Missing signer credentials for ${config.chainName}`,
       );
     }
     return new Wallet(privateKey, provider);

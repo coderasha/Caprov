@@ -17,6 +17,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import type { AuthUser } from '../../common/types/auth-user';
 import { EthereumSepoliaMarketplaceService } from '../../infrastructure/blockchain/ethereum-sepolia-marketplace.service';
 import { EthereumSepoliaTokenService } from '../../infrastructure/blockchain/ethereum-sepolia-token.service';
+import { transactionExplorerUrl } from '../../infrastructure/blockchain/explorer';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import { createId } from '../../infrastructure/database/ids';
 import { AuditService } from '../audit/audit.service';
@@ -64,10 +65,17 @@ export class TokenizationController {
 
   @Get()
   list(@CurrentUser() user: AuthUser) {
+    const network = this.sepolia.getNetworkStatus();
     return {
-      network: this.sepolia.getNetworkStatus(),
+      network,
       tokens: this.db.snapshot.tokens
-        .filter((item) => item.organizationId === user.organizationId)
+        // Token positions are chain-specific. Never present a Sepolia token as
+        // usable collateral or marketplace inventory after Besu is selected.
+        .filter((item) =>
+          item.organizationId === user.organizationId &&
+          item.chainId === network.chainId &&
+          item.contractAddress?.toLowerCase() === network.contractAddress?.toLowerCase(),
+        )
         .map((token) => this.hydrate(token)),
     };
   }
@@ -218,7 +226,7 @@ export class TokenizationController {
       status: 'CONFIRMED', chainId: network.chainId, chainName: network.chainName,
       contractAddress: network.contractAddress, tokenId: this.sepolia.tokenIdForAsset(asset.id),
       supply: dto.supply, recipientAddress, txHash: dto.txHash,
-      explorerUrl: `https://sepolia.etherscan.io/tx/${dto.txHash}`, mode: 'LIVE',
+      explorerUrl: transactionExplorerUrl(dto.txHash, network.explorerBase), mode: 'LIVE',
       createdAt: now, updatedAt: now,
     };
     this.db.mutate((draft) => draft.tokens.unshift(token));

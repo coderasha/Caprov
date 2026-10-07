@@ -9,6 +9,7 @@ import { FactSummaryTable } from '@/components/intelligence/fact-summary-table';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { activeMetaMaskConnection } from '@/lib/sepolia-marketplace';
+import { selectedBlockchainNetwork } from '@/lib/blockchain-network';
 import {
   assetClassLabel,
   assetStatusLabel,
@@ -92,9 +93,6 @@ const DOCUMENT_REGISTRY_ABI = [
   'function anchorDocumentVersion(string assetId, string documentId, string documentType, string documentName, uint256 version, bytes32 documentHash, bytes32 previousVersionHash, string offChainUri)',
 ] as const;
 
-const SEPOLIA_CHAIN_ID = 11155111;
-const SEPOLIA_CHAIN_HEX = '0xaa36a7';
-const DEFAULT_SEPOLIA_RPC = 'https://ethereum-sepolia-rpc.publicnode.com';
 
 export default function AssetDetailPage() {
   const params = useParams<{ id: string }>();
@@ -847,7 +845,8 @@ async function connectMetaMask(network?: DocumentNetworkStatus): Promise<WalletS
   const { provider, accounts, address: account } = await activeMetaMaskConnection();
   if (!account) throw new Error('Connect MetaMask from the top-right menu before signing an anchor.');
   await ensureSepoliaNetwork(provider, network);
-  const browserProvider = new BrowserProvider(provider, network?.chainId ?? SEPOLIA_CHAIN_ID);
+  const selected = selectedBlockchainNetwork();
+  const browserProvider = new BrowserProvider(provider, network?.chainId ?? selected.chainId);
   if (!account) throw new Error('MetaMask did not expose an account to CAPROV.');
   const chain = await browserProvider.getNetwork();
   return {
@@ -863,7 +862,8 @@ async function ensureSepoliaNetwork(
   provider: WalletProviderLike,
   network?: DocumentNetworkStatus,
 ) {
-  const chainId = network?.chainId ?? SEPOLIA_CHAIN_ID;
+  const selected = selectedBlockchainNetwork();
+  const chainId = network?.chainId ?? selected.chainId;
   const targetHex = `0x${chainId.toString(16)}`;
   try {
     await provider.request({
@@ -885,15 +885,15 @@ async function ensureSepoliaNetwork(
       method: 'wallet_addEthereumChain',
       params: [
         {
-          chainId: SEPOLIA_CHAIN_HEX,
-          chainName: network?.chainName ?? 'Ethereum Sepolia',
-          rpcUrls: [network?.rpcUrl ?? DEFAULT_SEPOLIA_RPC],
+          chainId: targetHex,
+          chainName: network?.chainName ?? selected.chainName,
+          rpcUrls: [network?.rpcUrl ?? selected.rpcUrl],
           nativeCurrency: {
-            name: 'Sepolia Ether',
-            symbol: 'SEP',
+            name: selected.chainName,
+            symbol: selected.id === 'besu' ? 'BESU' : 'SEP',
             decimals: 18,
           },
-          blockExplorerUrls: [network?.explorerBase ?? 'https://sepolia.etherscan.io'],
+          blockExplorerUrls: network?.explorerBase ? [network.explorerBase] : selected.blockExplorerUrl ? [selected.blockExplorerUrl] : [],
         },
       ],
     });

@@ -24,7 +24,7 @@ import type {
   ProvenanceAnchorRecord,
 } from '../../infrastructure/database/models';
 import { StorageService } from '../../infrastructure/storage/storage.service';
-import { sepoliaTxExplorerUrl } from '../../infrastructure/blockchain/explorer';
+import { transactionExplorerUrl } from '../../infrastructure/blockchain/explorer';
 import { AuditService } from '../audit/audit.service';
 import {
   extractFactsAccurate,
@@ -223,8 +223,8 @@ export class DocumentsService {
         : document.anchorMode;
     const effectiveTransactionHash = resolvedAnchor.transactionHash;
     const effectiveExplorerUrl =
-      sepoliaTxExplorerUrl(effectiveTransactionHash) ??
-      sepoliaTxExplorerUrl(resolvedAnchor.explorerUrl);
+      this.transactionExplorerUrl(effectiveTransactionHash) ??
+      this.transactionExplorerUrl(resolvedAnchor.explorerUrl);
     const effectiveAnchoredAt = resolvedAnchor.anchoredAt;
     const transactionRecorded = Boolean(effectiveTransactionHash);
     if (
@@ -340,7 +340,7 @@ export class DocumentsService {
       );
     }
 
-    const explorerUrl = sepoliaTxExplorerUrl(transactionHash);
+    const explorerUrl = this.transactionExplorerUrl(transactionHash);
     if (!explorerUrl) {
       throw new BadRequestException(
         'Transaction hash format is invalid.',
@@ -733,6 +733,13 @@ export class DocumentsService {
     anchor.anchoredAt = input.anchoredAt ?? anchor.anchoredAt;
     anchor.chainId = input.chainId ?? anchor.chainId;
     anchor.chainName = input.chainName ?? anchor.chainName;
+  }
+
+  private transactionExplorerUrl(value?: string | null) {
+    return transactionExplorerUrl(
+      value,
+      this.blockchain.getDocumentNetworkStatus().explorerBase,
+    );
   }
 
   private isText(mimeType: string, name: string): boolean {

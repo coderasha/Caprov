@@ -1,3 +1,5 @@
+import { selectedBlockchainNetwork } from './blockchain-network';
+
 export const SEPOLIA_EXPLORER_BASE = 'https://sepolia.etherscan.io';
 
 const TX_HASH = /0x[a-fA-F0-9]{64}/;
@@ -7,9 +9,13 @@ export function sepoliaTxExplorerUrl(hashOrUrl?: string | null): string | undefi
     return undefined;
   }
   const value = hashOrUrl.trim();
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
   const hash = value.match(TX_HASH)?.[0];
   if (!hash) {
     return undefined;
   }
-  return `${SEPOLIA_EXPLORER_BASE}/tx/${hash}`;
+  const explorer = selectedBlockchainNetwork().blockExplorerUrl;
+  return explorer ? `${explorer.replace(/\/$/, '')}/tx/${hash}` : undefined;
 }

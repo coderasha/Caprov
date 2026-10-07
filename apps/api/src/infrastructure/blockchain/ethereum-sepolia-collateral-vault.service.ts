@@ -4,6 +4,7 @@ import {
   DEFAULT_ETHEREUM_SEPOLIA_RPC,
   ETHEREUM_SEPOLIA_CHAIN_ID,
 } from './ethereum-sepolia-token.service';
+import { BlockchainNetworkService } from './blockchain-network.service';
 
 const VAULT_ABI = [
   'event CollateralLocked(uint256 indexed collateralId,address indexed borrower,address indexed assetToken,uint256 tokenId,uint256 units)',
@@ -14,8 +15,9 @@ const VAULT_ABI = [
 /** Read-only verifier for collateral locks signed in MetaMask on Sepolia. */
 @Injectable()
 export class EthereumSepoliaCollateralVaultService {
+  constructor(private readonly networks: BlockchainNetworkService) {}
   private address(): string | undefined {
-    const value = process.env.ETHEREUM_COLLATERAL_VAULT_CONTRACT?.trim();
+    const value = this.networks.selected().collateralVaultContract;
     return value && isAddress(value) ? getAddress(value) : undefined;
   }
 
@@ -28,8 +30,7 @@ export class EthereumSepoliaCollateralVaultService {
     const address = this.address();
     if (!address || !isAddress(input.borrower) || !isAddress(input.assetToken)) return false;
     const provider = new JsonRpcProvider(
-      process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC,
-      ETHEREUM_SEPOLIA_CHAIN_ID,
+      this.networks.selected().rpcUrl, this.networks.selected().chainId,
     );
     const receipt = await provider.getTransactionReceipt(input.txHash);
     if (!receipt || receipt.status !== 1) return false;
@@ -51,7 +52,7 @@ export class EthereumSepoliaCollateralVaultService {
   async verifyLoanActivation(input: { txHash: string; collateralId: string; loanReference: string }) {
     const address = this.address();
     if (!address) return false;
-    const provider = new JsonRpcProvider(process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC, ETHEREUM_SEPOLIA_CHAIN_ID);
+    const provider = new JsonRpcProvider(this.networks.selected().rpcUrl, this.networks.selected().chainId);
     const receipt = await provider.getTransactionReceipt(input.txHash);
     if (!receipt || receipt.status !== 1) return false;
     const vault = new Contract(address, VAULT_ABI, provider);
@@ -69,7 +70,7 @@ export class EthereumSepoliaCollateralVaultService {
   async hasLoanActivation(collateralId: string, loanReference: string) {
     const address = this.address();
     if (!address) return false;
-    const provider = new JsonRpcProvider(process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC, ETHEREUM_SEPOLIA_CHAIN_ID);
+    const provider = new JsonRpcProvider(this.networks.selected().rpcUrl, this.networks.selected().chainId);
     const logs = await provider.getLogs({
       address,
       topics: [ethId('LoanActivated(uint256,address,bytes32)'), zeroPadValue(toBeHex(BigInt(collateralId)), 32), null, loanReference],
@@ -87,8 +88,7 @@ export class EthereumSepoliaCollateralVaultService {
     const address = this.address();
     if (!address || !isAddress(input.borrower)) return false;
     const provider = new JsonRpcProvider(
-      process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC,
-      ETHEREUM_SEPOLIA_CHAIN_ID,
+      this.networks.selected().rpcUrl, this.networks.selected().chainId,
     );
     const receipt = await provider.getTransactionReceipt(input.txHash);
     if (!receipt || receipt.status !== 1) return false;

@@ -133,25 +133,33 @@ export class MarketplaceController {
 
   @Get()
   overview(@CurrentUser() user: AuthUser) {
+    const listings = this.list(user);
     return {
-      listings: this.list(user),
-      openCount: this.db.snapshot.listings.filter(
-        (item) =>
-          item.status === 'OPEN',
-      ).length,
+      listings,
+      openCount: listings.filter((item) => item.status === 'OPEN').length,
     };
   }
 
   @Get('listings')
   list(@CurrentUser() user: AuthUser) {
+    const marketplaceAddress = this.marketplace.contractAddress()?.toLowerCase();
     return this.db.snapshot.listings
+      // Draft/off-chain listings are shared business records. A listing that
+      // has entered an EVM marketplace is visible only on the chain where its
+      // escrow contract exists.
+      .filter((listing) =>
+        !listing.onChainListingId ||
+        listing.marketplaceContractAddress?.toLowerCase() === marketplaceAddress,
+      )
       .map((listing) => this.hydrate(listing));
   }
 
   @Get('listings/:id')
   get(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    const listing = this.db.snapshot.listings.find(
-      (item) => item.id === id,
+    const marketplaceAddress = this.marketplace.contractAddress()?.toLowerCase();
+    const listing = this.db.snapshot.listings.find((item) =>
+      item.id === id &&
+      (!item.onChainListingId || item.marketplaceContractAddress?.toLowerCase() === marketplaceAddress),
     );
     if (!listing) throw new NotFoundException('Listing not found');
     return this.hydrate(listing);
@@ -165,12 +173,20 @@ export class MarketplaceController {
       throw new BadRequestException('Invalid wallet, listing id, or token price.');
     }
     const asset = this.db.snapshot.assets.find((item) => item.id === dto.assetId && item.organizationId === user.organizationId);
-    const token = this.db.snapshot.tokens.find((item) => item.id === dto.tokenPositionId && item.assetId === dto.assetId && item.organizationId === user.organizationId && item.status === 'CONFIRMED');
+    const network = this.sepolia.getNetworkStatus();
+    const token = this.db.snapshot.tokens.find((item) =>
+      item.id === dto.tokenPositionId &&
+      item.assetId === dto.assetId &&
+      item.organizationId === user.organizationId &&
+      item.status === 'CONFIRMED' &&
+      item.chainId === network.chainId &&
+      item.contractAddress?.toLowerCase() === network.contractAddress?.toLowerCase(),
+    );
     if (!asset || !token) throw new NotFoundException('A confirmed tokenized asset is required before listing.');
     if (this.db.snapshot.listings.some((item) => item.onChainListingId === dto.onChainListingId && item.marketplaceContractAddress === this.marketplace.contractAddress())) {
       throw new BadRequestException('This on-chain listing has already been registered.');
     }
-    if (!this.marketplace.isConfigured()) throw new BadRequestException('The Sepolia marketplace and CAPROV payment token are not configured.');
+    if (!this.marketplace.isConfigured()) throw new BadRequestException(`The ${network.chainName} marketplace and CAPROV payment token are not configured.`);
     if (dto.availableTokenUnits > token.supply) throw new BadRequestException('Listing quantity exceeds the asset token supply.');
     const valid = await this.marketplace.verifyListingTransaction({
       txHash: dto.onChainTxHash,
@@ -197,7 +213,9 @@ export class MarketplaceController {
       tokenPositionId: token.id, tokenizationMode: token.mode, assetTokenId: token.tokenId,
       totalTokenSupply: token.supply, availableTokenUnits: dto.availableTokenUnits,
       pricePerTokenWei: dto.pricePerTokenWei,
-      paymentTokenAddress: process.env.ETHEREUM_PAYMENT_TOKEN_CONTRACT?.trim(),
+      paymentTokenAddress: network.chainId === 1337
+        ? process.env.BESU_PAYMENT_TOKEN_CONTRACT?.trim()
+        : process.env.ETHEREUM_PAYMENT_TOKEN_CONTRACT?.trim(),
       marketplaceContractAddress: this.marketplace.contractAddress(),
       onChainListingId: dto.onChainListingId, listerWalletAddress: getAddress(dto.listerWalletAddress),
       onChainListingTxHash: dto.onChainTxHash, createdAt: sourceListing?.createdAt ?? now, updatedAt: now,

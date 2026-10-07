@@ -13,6 +13,7 @@ import { Card } from '@/components/ui/card';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { activeMetaMaskConnection } from '@/lib/sepolia-marketplace';
+import { selectedBlockchainNetwork } from '@/lib/blockchain-network';
 import {
   documentTypeOptions,
   formatDateTime,
@@ -65,8 +66,6 @@ const DOCUMENT_REGISTRY_ABI = [
   'function anchorDocumentVersion(string assetId, string documentId, string documentType, string documentName, uint256 version, bytes32 documentHash, bytes32 previousVersionHash, string offChainUri)',
 ] as const;
 
-const SEPOLIA_CHAIN_ID = 11155111;
-const DEFAULT_SEPOLIA_RPC = 'https://ethereum-sepolia-rpc.publicnode.com';
 
 export default function DocumentsPage() {
   const queryClient = useQueryClient();
@@ -678,7 +677,8 @@ async function connectMetaMask(network?: DocumentNetworkStatus): Promise<WalletS
   const { provider, address: account } = await activeMetaMaskConnection();
   if (!account) throw new Error('Connect MetaMask from the top-right menu before signing an anchor.');
   await ensureSepoliaNetwork(provider, network);
-  const browserProvider = new BrowserProvider(provider, network?.chainId ?? SEPOLIA_CHAIN_ID);
+  const selected = selectedBlockchainNetwork();
+  const browserProvider = new BrowserProvider(provider, network?.chainId ?? selected.chainId);
   const chain = await browserProvider.getNetwork();
   return {
     account,
@@ -692,7 +692,8 @@ async function ensureSepoliaNetwork(
   provider: WalletProviderLike,
   network?: DocumentNetworkStatus,
 ) {
-  const chainId = network?.chainId ?? SEPOLIA_CHAIN_ID;
+  const selected = selectedBlockchainNetwork();
+  const chainId = network?.chainId ?? selected.chainId;
   const targetHex = `0x${chainId.toString(16)}`;
   try {
     await provider.request({
@@ -715,14 +716,14 @@ async function ensureSepoliaNetwork(
       params: [
         {
           chainId: targetHex,
-          chainName: network?.chainName ?? 'Ethereum Sepolia',
-          rpcUrls: [network?.rpcUrl ?? DEFAULT_SEPOLIA_RPC],
+          chainName: network?.chainName ?? selected.chainName,
+          rpcUrls: [network?.rpcUrl ?? selected.rpcUrl],
           nativeCurrency: {
-            name: 'Sepolia ETH',
-            symbol: 'SEP',
+            name: selected.chainName,
+            symbol: selected.id === 'besu' ? 'BESU' : 'SEP',
             decimals: 18,
           },
-          blockExplorerUrls: [network?.explorerBase ?? 'https://sepolia.etherscan.io'],
+          blockExplorerUrls: network?.explorerBase ? [network.explorerBase] : selected.blockExplorerUrl ? [selected.blockExplorerUrl] : [],
         },
       ],
     });

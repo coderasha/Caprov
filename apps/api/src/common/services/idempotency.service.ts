@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
 
 /**
  * Idempotency key storage - prevents duplicate processing of the same request
  * Keys are mapped to their response, so retried requests return the same result
  */
 @Injectable()
-export class IdempotencyService {
+export class IdempotencyService implements OnModuleDestroy {
   private cache = new Map<string, { timestamp: number; response: any }>();
   private readonly MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
   private readonly MAX_KEYS = 10000; // Prevent unbounded memory growth
@@ -82,6 +82,10 @@ export class IdempotencyService {
       clearInterval(this.cleanupInterval);
       this.cleanupInterval = null;
     }
+  }
+
+  onModuleDestroy(): void {
+    this.destroy();
   }
 
   /**

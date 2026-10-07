@@ -11,6 +11,7 @@ import {
   isAddress,
 } from 'ethers';
 import { sepoliaTxExplorerUrl } from './explorer';
+import { BlockchainNetworkService, type BlockchainNetworkConfig } from './blockchain-network.service';
 
 export const ETHEREUM_SEPOLIA_CHAIN_ID = 11155111;
 export const ETHEREUM_SEPOLIA_NAME = 'Ethereum Sepolia';
@@ -84,14 +85,14 @@ export interface ProvenanceAnchorResult {
 @Injectable()
 export class EthereumSepoliaTokenService {
   private readonly logger = new Logger(EthereumSepoliaTokenService.name);
+  constructor(private readonly networks: BlockchainNetworkService) {}
 
   getNetworkStatus(): TokenNetworkStatus {
-    const rpcUrl =
-      process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() ||
-      DEFAULT_ETHEREUM_SEPOLIA_RPC;
-    const privateKey = process.env.ETHEREUM_SEPOLIA_PRIVATE_KEY?.trim();
-    const mnemonic = process.env.ETHEREUM_SEPOLIA_MNEMONIC?.trim();
-    const configuredContractAddress = process.env.ETHEREUM_TOKEN_CONTRACT?.trim();
+    const config = this.networks.selected();
+    const rpcUrl = config.rpcUrl;
+    const privateKey = config.privateKey;
+    const mnemonic = config.mnemonic;
+    const configuredContractAddress = config.tokenContract;
     const contractAddress =
       configuredContractAddress && isAddress(configuredContractAddress)
         ? getAddress(configuredContractAddress)
@@ -99,7 +100,7 @@ export class EthereumSepoliaTokenService {
     let walletAddress: string | undefined;
     if (privateKey || mnemonic) {
       try {
-        walletAddress = this.buildWallet(rpcUrl).address;
+        walletAddress = this.buildWallet(config).address;
       } catch {
         walletAddress = undefined;
       }
@@ -108,29 +109,27 @@ export class EthereumSepoliaTokenService {
       (privateKey || mnemonic) && contractAddress && walletAddress,
     );
     return {
-      chainId: ETHEREUM_SEPOLIA_CHAIN_ID,
-      chainName: ETHEREUM_SEPOLIA_NAME,
+      chainId: config.chainId,
+      chainName: config.chainName,
       rpcUrl,
-      explorerBase: ETHEREUM_SEPOLIA_EXPLORER,
+      explorerBase: config.explorerBase ?? '',
       connected: true,
       liveMintReady,
       contractAddress,
       walletAddress,
       mode: liveMintReady ? 'LIVE' : 'UNAVAILABLE',
       message: liveMintReady
-        ? 'Live minting enabled against Ethereum Sepolia with configured signer and CaprovAssetToken contract.'
+        ? `Live minting enabled against ${config.chainName} with configured signer and CaprovAssetToken contract.`
         : contractAddress
-          ? 'Wallet-signed Sepolia minting is available in Marketplace. Connect an authorized MetaMask account to mint; the API does not hold or require a private key for this flow.'
-          : 'Ethereum Sepolia tokenization is unavailable because ETHEREUM_TOKEN_CONTRACT is not configured.',
+          ? `Wallet-signed ${config.chainName} minting is available in Marketplace. Connect an authorized MetaMask account to mint; the API does not hold or require a private key for this flow.`
+          : `${config.chainName} tokenization is unavailable because its asset-token contract is not configured.`,
     };
   }
 
   async probeRpc(): Promise<{ ok: boolean; chainId?: number; error?: string }> {
-    const rpcUrl =
-      process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() ||
-      DEFAULT_ETHEREUM_SEPOLIA_RPC;
+    const status = this.getNetworkStatus();
     try {
-      const provider = new JsonRpcProvider(rpcUrl, ETHEREUM_SEPOLIA_CHAIN_ID);
+      const provider = new JsonRpcProvider(status.rpcUrl, status.chainId);
       const network = await provider.getNetwork();
       return { ok: true, chainId: Number(network.chainId) };
     } catch (error) {
@@ -215,7 +214,7 @@ export class EthereumSepoliaTokenService {
 
     try {
       const provider = new JsonRpcProvider(status.rpcUrl, status.chainId);
-      const wallet = this.buildWallet(status.rpcUrl, provider);
+      const wallet = this.buildWallet(this.networks.selected(), provider);
       const contract = new Contract(
         status.contractAddress!,
         CAPROV_TOKEN_ABI,
@@ -226,7 +225,7 @@ export class EthereumSepoliaTokenService {
       // makes every asset's supply immutable after its first tokenization.
       const tokenId = BigInt(this.tokenIdForAsset(request.assetId));
       const mintFn = contract.getFunction('mintAsset');
-      const tx = await mintFn(to, tokenId, BigInt(request.supply), request.assetId);
+      const tx = await mintFn(to, tokenId, BigInt(request.supply), request.assetId, this.transactionOverrides());
       const receipt = await tx.wait();
       const txHash = receipt?.hash ?? tx.hash;
       this.logger.log(`Minted Caprov token on Sepolia tx=${txHash}`);
@@ -239,7 +238,7 @@ export class EthereumSepoliaTokenService {
         supply: request.supply,
         recipientAddress: to,
         txHash,
-        explorerUrl: sepoliaTxExplorerUrl(txHash) ?? `${status.explorerBase}/tx/${txHash}`,
+        explorerUrl: this.explorerUrl(txHash, status),
         status: 'CONFIRMED',
       };
     } catch (error) {
@@ -272,18 +271,19 @@ export class EthereumSepoliaTokenService {
         chainId: status.chainId,
         chainName: status.chainName,
         txHash,
-        explorerUrl: sepoliaTxExplorerUrl(txHash) ?? `${status.explorerBase}/tx/${txHash}`,
+        explorerUrl: this.explorerUrl(txHash, status),
         status: 'SIMULATED',
       };
     }
 
     try {
       const provider = new JsonRpcProvider(status.rpcUrl, status.chainId);
-      const wallet = this.buildWallet(status.rpcUrl, provider);
+      const wallet = this.buildWallet(this.networks.selected(), provider);
       const tx = await wallet.sendTransaction({
         to: wallet.address,
         value: 0n,
         data: `0x${request.hashValue}`,
+        ...this.transactionOverrides(),
       });
       const receipt = await tx.wait();
       const txHash = receipt?.hash ?? tx.hash;
@@ -293,7 +293,7 @@ export class EthereumSepoliaTokenService {
         chainId: status.chainId,
         chainName: status.chainName,
         txHash,
-        explorerUrl: sepoliaTxExplorerUrl(txHash) ?? `${status.explorerBase}/tx/${txHash}`,
+        explorerUrl: this.explorerUrl(txHash, status),
         status: 'CONFIRMED',
       };
     } catch (error) {
@@ -311,26 +311,31 @@ export class EthereumSepoliaTokenService {
         chainId: status.chainId,
         chainName: status.chainName,
         txHash,
-        explorerUrl: sepoliaTxExplorerUrl(txHash) ?? `${status.explorerBase}/tx/${txHash}`,
+        explorerUrl: this.explorerUrl(txHash, status),
         status: 'SIMULATED',
         error: message,
       };
     }
   }
 
+  private explorerUrl(txHash: string, status: TokenNetworkStatus) {
+    return status.explorerBase ? `${status.explorerBase.replace(/\/$/, '')}/tx/${txHash}` : sepoliaTxExplorerUrl(txHash) ?? '';
+  }
+  private transactionOverrides() { return this.networks.selected().zeroGas ? { gasPrice: 0n } : {}; }
+
   private buildWallet(
-    rpcUrl: string,
+    config: BlockchainNetworkConfig,
     provider?: JsonRpcProvider,
   ): Wallet | HDNodeWallet {
-    const mnemonic = process.env.ETHEREUM_SEPOLIA_MNEMONIC?.trim();
+    const mnemonic = config.mnemonic;
     if (mnemonic) {
       const wallet = HDNodeWallet.fromPhrase(mnemonic);
       return provider ? wallet.connect(provider) : wallet;
     }
-    const privateKey = process.env.ETHEREUM_SEPOLIA_PRIVATE_KEY?.trim();
+    const privateKey = config.privateKey;
     if (!privateKey) {
       throw new Error(
-        `Missing ETHEREUM_SEPOLIA_PRIVATE_KEY or ETHEREUM_SEPOLIA_MNEMONIC for ${rpcUrl}`,
+        `Missing signer credentials for ${config.chainName}`,
       );
     }
     return new Wallet(privateKey, provider);

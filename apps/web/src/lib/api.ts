@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { selectedBlockchainNetwork } from './blockchain-network';
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api',
@@ -6,6 +7,7 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
+    config.headers['X-Caprov-Network'] = selectedBlockchainNetwork().id;
     const token = localStorage.getItem('caprov-auth')
       ? (JSON.parse(localStorage.getItem('caprov-auth') as string)?.state?.token as string | undefined)
       : undefined;

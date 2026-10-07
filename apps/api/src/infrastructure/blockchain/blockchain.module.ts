@@ -4,9 +4,11 @@ import { EthereumSepoliaDocumentRegistryService } from './ethereum-sepolia-docum
 import { EthereumSepoliaTokenService } from './ethereum-sepolia-token.service';
 import { EthereumSepoliaMarketplaceService } from './ethereum-sepolia-marketplace.service';
 import { EthereumSepoliaCollateralVaultService } from './ethereum-sepolia-collateral-vault.service';
+import { BlockchainNetworkService } from './blockchain-network.service';
 
 @Module({
   providers: [
+    BlockchainNetworkService,
     EthereumSepoliaTokenService,
     EthereumSepoliaMarketplaceService,
     EthereumSepoliaCollateralVaultService,
@@ -17,6 +19,7 @@ import { EthereumSepoliaCollateralVaultService } from './ethereum-sepolia-collat
     },
   ],
   exports: [
+    BlockchainNetworkService,
     EthereumSepoliaTokenService,
     EthereumSepoliaMarketplaceService,
     EthereumSepoliaCollateralVaultService,

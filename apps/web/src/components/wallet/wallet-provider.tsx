@@ -1,6 +1,7 @@
 'use client';
 
-import { connectMetaMaskWallet, selectMetaMaskAccount } from '@/lib/sepolia-marketplace';
+import { connectMetaMaskWallet, selectMetaMaskAccount, switchWalletToSelectedNetwork } from '@/lib/sepolia-marketplace';
+import { selectedBlockchainNetwork, setSelectedBlockchainNetwork, type BlockchainNetworkId } from '@/lib/blockchain-network';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 type InjectedProvider = {
@@ -14,6 +15,8 @@ type WalletContextValue = {
   accounts: string[];
   busy: boolean;
   message?: string;
+  networkId: BlockchainNetworkId;
+  selectNetwork: (networkId: BlockchainNetworkId) => Promise<void>;
   connect: () => Promise<string | undefined>;
   selectAccount: (address: string) => Promise<void>;
 };
@@ -25,6 +28,21 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [accounts, setAccounts] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string>();
+  const [networkId, setNetworkId] = useState<BlockchainNetworkId>('sepolia');
+  useEffect(() => { setNetworkId(selectedBlockchainNetwork().id); }, []);
+  const selectNetwork = useCallback(async (next: BlockchainNetworkId) => {
+    setSelectedBlockchainNetwork(next);
+    setNetworkId(next);
+    const network = selectedBlockchainNetwork();
+    try {
+      await switchWalletToSelectedNetwork();
+      setMessage(`Selected ${network.chainName} and switched MetaMask to that network.`);
+    } catch {
+      // Network selection still applies to API reads. A wallet is optional until
+      // the user performs a browser-signed transaction.
+      setMessage(`Selected ${network.chainName}. Connect MetaMask and switch it to this network before signing.`);
+    }
+  }, []);
 
   const connect = useCallback(async () => {
     setBusy(true);
@@ -33,7 +51,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const connection = await connectMetaMaskWallet();
       setAddress(connection.address);
       setAccounts(connection.accounts);
-      setMessage('Wallet connected on Ethereum Sepolia.');
+      setMessage(`Wallet connected for ${selectedBlockchainNetwork().chainName}.`);
       return connection.address;
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'MetaMask connection could not be completed.');
@@ -56,16 +74,19 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setAccounts(next);
       setAddress((current) => next.find((item) => item.toLowerCase() === current?.toLowerCase()) ?? next[0]);
     };
-    void ethereum.request({ method: 'eth_accounts' }).then((result: unknown) => updateAccounts(result as string[])).catch(() => undefined);
+    // Do not probe an injected provider during page load. Some browser wallet
+    // extensions reject even `eth_accounts` until explicitly selected by the
+    // user, and an extension-level rejection can otherwise trigger Next's
+    // development error overlay. Account access begins from the Connect button.
     ethereum.on?.('accountsChanged', updateAccounts);
-    ethereum.on?.('chainChanged', () => setMessage('Wallet network changed. Use Ethereum Sepolia for CAPROV transactions.'));
+    ethereum.on?.('chainChanged', () => setMessage(`Wallet network changed. Use ${selectedBlockchainNetwork().chainName} for CAPROV transactions.`));
     return () => {
       ethereum.removeListener?.('accountsChanged', updateAccounts);
       ethereum.removeListener?.('chainChanged', () => undefined);
     };
   }, []);
 
-  const value = useMemo(() => ({ address, accounts, busy, message, connect, selectAccount }), [address, accounts, busy, message, connect, selectAccount]);
+  const value = useMemo(() => ({ address, accounts, busy, message, networkId, selectNetwork, connect, selectAccount }), [address, accounts, busy, message, networkId, selectNetwork, connect, selectAccount]);
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
 }
 

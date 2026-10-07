@@ -11,6 +11,28 @@ import { IdempotencyInterceptor } from './common/interceptors/idempotency.interc
 import { IdempotencyService } from './common/services/idempotency.service';
 import { json, urlencoded } from 'express';
 
+function corsOrigin(
+  origin: string | undefined,
+  callback: (error: Error | null, allowed?: boolean) => void,
+) {
+  // Requests made without an Origin header (for example curl and server-to-server
+  // calls) do not need browser CORS protection.
+  if (!origin) {
+    callback(null, true);
+    return;
+  }
+
+  const configuredOrigins = process.env.WEB_ORIGIN?.split(',') ?? [
+    'http://localhost:3000',
+  ];
+  const isConfiguredOrigin = configuredOrigins.includes(origin);
+  const isLocalDevelopmentOrigin =
+    process.env.NODE_ENV !== 'production' &&
+    /^https?:\/\/(localhost|127\.0\.0\.1)(?::\d+)?$/.test(origin);
+
+  callback(null, isConfiguredOrigin || isLocalDevelopmentOrigin);
+}
+
 loadEnv({
   path: resolve(__dirname, '../.env'),
   override: true,
@@ -29,7 +51,7 @@ async function bootstrap() {
   app.use(helmet({ contentSecurityPolicy: false }));
   app.use(compression());
   app.enableCors({
-    origin: process.env.WEB_ORIGIN?.split(',') ?? ['http://localhost:3000'],
+    origin: corsOrigin,
     credentials: true,
   });
   app.setGlobalPrefix('api');

@@ -1,5 +1,5 @@
 import { resolve } from 'node:path';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { HealthModule } from './common/health/health.module';
 import { ReservedModule } from './common/reserved/reserved.module';
@@ -27,6 +27,7 @@ import { SettlementModule } from './modules/settlement/settlement.module';
 import { TokenizationModule } from './modules/tokenization/tokenization.module';
 import { TradingModule } from './modules/trading/trading.module';
 import { UsersModule } from './modules/users/users.module';
+import { BlockchainNetworkMiddleware } from './infrastructure/blockchain/blockchain-network.service';
 
 @Module({
   imports: [
@@ -63,4 +64,8 @@ import { UsersModule } from './modules/users/users.module';
   ],
   providers: [IdempotencyService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(BlockchainNetworkMiddleware).forRoutes('*');
+  }
+}

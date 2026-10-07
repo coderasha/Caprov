@@ -4,6 +4,7 @@ import {
   DEFAULT_ETHEREUM_SEPOLIA_RPC,
   ETHEREUM_SEPOLIA_CHAIN_ID,
 } from './ethereum-sepolia-token.service';
+import { BlockchainNetworkService } from './blockchain-network.service';
 
 const MARKETPLACE_ABI = [
   'function assetToken() view returns (address)',
@@ -26,13 +27,14 @@ export interface OnChainListing {
 /** Read-only verification of MetaMask-signed marketplace activity. */
 @Injectable()
 export class EthereumSepoliaMarketplaceService {
+  constructor(private readonly networks: BlockchainNetworkService) {}
   private address(): string | undefined {
-    const value = process.env.ETHEREUM_MARKETPLACE_CONTRACT?.trim();
+    const value = this.networks.selected().marketplaceContract;
     return value && isAddress(value) ? getAddress(value) : undefined;
   }
 
   isConfigured() {
-    return Boolean(this.address() && process.env.ETHEREUM_PAYMENT_TOKEN_CONTRACT?.trim());
+    return Boolean(this.address() && this.networks.selected().paymentTokenContract);
   }
 
   /** The marketplace's immutable ERC-1155 address is the source of truth. */
@@ -40,8 +42,7 @@ export class EthereumSepoliaMarketplaceService {
     const address = this.address();
     if (!address) return null;
     const provider = new JsonRpcProvider(
-      process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC,
-      ETHEREUM_SEPOLIA_CHAIN_ID,
+      this.networks.selected().rpcUrl, this.networks.selected().chainId,
     );
     const market = new Contract(address, MARKETPLACE_ABI, provider);
     return getAddress(await market.getFunction('assetToken')());
@@ -51,8 +52,7 @@ export class EthereumSepoliaMarketplaceService {
     const address = this.address();
     if (!address) return null;
     const provider = new JsonRpcProvider(
-      process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC,
-      ETHEREUM_SEPOLIA_CHAIN_ID,
+      this.networks.selected().rpcUrl, this.networks.selected().chainId,
     );
     const market = new Contract(address, MARKETPLACE_ABI, provider);
     const row = await market.getFunction('listings')(BigInt(listingId));
@@ -76,8 +76,7 @@ export class EthereumSepoliaMarketplaceService {
     const address = this.address();
     if (!address) return false;
     const provider = new JsonRpcProvider(
-      process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC,
-      ETHEREUM_SEPOLIA_CHAIN_ID,
+      this.networks.selected().rpcUrl, this.networks.selected().chainId,
     );
     const receipt = await provider.getTransactionReceipt(input.txHash);
     if (!receipt || receipt.status !== 1) return false;
@@ -99,7 +98,7 @@ export class EthereumSepoliaMarketplaceService {
   async verifyPurchaseTransaction(input: { txHash: string; purchaseId: string; listingId: string; buyer: string; units: string }) {
     const address = this.address();
     if (!address) return false;
-    const provider = new JsonRpcProvider(process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC, ETHEREUM_SEPOLIA_CHAIN_ID);
+    const provider = new JsonRpcProvider(this.networks.selected().rpcUrl, this.networks.selected().chainId);
     const receipt = await provider.getTransactionReceipt(input.txHash);
     if (!receipt || receipt.status !== 1) return false;
     const contract = new Contract(address, MARKETPLACE_ABI, provider);
@@ -119,7 +118,7 @@ export class EthereumSepoliaMarketplaceService {
   async verifySettlementTransaction(txHash: string, purchaseId: string, expectedSeller?: string) {
     const address = this.address();
     if (!address) return false;
-    const provider = new JsonRpcProvider(process.env.ETHEREUM_SEPOLIA_RPC_URL?.trim() || DEFAULT_ETHEREUM_SEPOLIA_RPC, ETHEREUM_SEPOLIA_CHAIN_ID);
+    const provider = new JsonRpcProvider(this.networks.selected().rpcUrl, this.networks.selected().chainId);
     const receipt = await provider.getTransactionReceipt(txHash);
     if (!receipt || receipt.status !== 1) return false;
     const contract = new Contract(address, MARKETPLACE_ABI, provider);

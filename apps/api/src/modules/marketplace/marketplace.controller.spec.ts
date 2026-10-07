@@ -16,7 +16,17 @@ describe('MarketplaceController on-chain listings', () => {
     store.tokens.push({ id: 'tok_1', organizationId: 'org_1', assetId: 'ast_1', status: 'CONFIRMED', chainId: 11155111, chainName: 'Ethereum Sepolia', contractAddress: wallet, tokenId: '42', supply: 1000, recipientAddress: wallet, mode: 'LIVE', createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' });
     const db = mockDb(store);
     const market = { isConfigured: jest.fn(() => true), contractAddress: jest.fn(() => wallet), verifyListingTransaction: jest.fn().mockResolvedValue(true) } as unknown as EthereumSepoliaMarketplaceService;
-    const controller = new MarketplaceController(db, { log: jest.fn() } as unknown as AuditService, {} as EthereumSepoliaTokenService, market);
+    const network = {
+      chainId: 11155111,
+      chainName: 'Ethereum Sepolia',
+      contractAddress: wallet,
+    };
+    const controller = new MarketplaceController(
+      db,
+      { log: jest.fn() } as unknown as AuditService,
+      { getNetworkStatus: jest.fn(() => network) } as unknown as EthereumSepoliaTokenService,
+      market,
+    );
     const result = await controller.registerOnChainListing(user, { assetId: 'ast_1', tokenPositionId: 'tok_1', onChainListingId: '7', onChainTxHash: `0x${'a'.repeat(64)}`, listerWalletAddress: wallet, availableTokenUnits: 250, pricePerTokenWei: '1000000000000000000', askPrice: 250 });
     expect(market.verifyListingTransaction).toHaveBeenCalledWith(expect.objectContaining({ listingId: '7', assetTokenId: '42', units: '250' }));
     expect(result.onChainListingId).toBe('7');

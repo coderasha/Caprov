@@ -3,6 +3,7 @@
 import { useWallet } from '@/components/wallet/wallet-provider';
 import { ChevronDown, ShieldCheck, WalletCards, X } from 'lucide-react';
 import { useState } from 'react';
+import { blockchainNetworks } from '@/lib/blockchain-network';
 
 function shortAddress(address: string) {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
@@ -10,7 +11,8 @@ function shortAddress(address: string) {
 
 export function WalletStatus() {
   const [open, setOpen] = useState(false);
-  const { address, accounts, busy, message, connect, selectAccount } = useWallet();
+  const { address, accounts, busy, message, networkId, selectNetwork, connect, selectAccount } = useWallet();
+  const network = blockchainNetworks().find((item) => item.id === networkId)!;
   async function changeAccount(nextAddress: string) {
     try {
       await selectAccount(nextAddress);
@@ -35,7 +37,7 @@ export function WalletStatus() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-[var(--ink)]">Wallet access</p>
-              <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Use MetaMask to sign CAPROV’s Sepolia transactions.</p>
+              <p className="mt-1 text-xs leading-5 text-[var(--muted)]">Choose the network used for CAPROV transactions.</p>
             </div>
             <button type="button" onClick={() => setOpen(false)} aria-label="Close wallet panel" className="rounded-lg p-1 text-[var(--muted)] hover:bg-black/[0.04] hover:text-[var(--ink)]">
               <X size={16} />
@@ -45,12 +47,17 @@ export function WalletStatus() {
           <div className="mt-4 rounded-xl border border-[var(--line)] bg-[var(--paper)]/70 px-3 py-3">
             <div className="flex items-center gap-2 text-xs font-medium text-[var(--ink)]">
               <ShieldCheck size={15} className="text-[var(--teal)]" />
-              Ethereum Sepolia
+              {network.chainName}{network.zeroGas ? ' · zero-fee' : ''}
             </div>
             <p className="mt-1.5 font-mono text-xs text-[var(--muted)]">
               {address ?? 'No MetaMask account connected'}
             </p>
           </div>
+          <label className="mt-3 block text-xs font-medium text-[var(--muted)]">Blockchain network
+            <select value={networkId} onChange={(event) => void selectNetwork(event.target.value as typeof networkId)} className="mt-1.5 min-h-10 w-full rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 text-xs text-[var(--ink)] outline-none focus:border-[var(--teal)]">
+              {blockchainNetworks().map((item) => <option key={item.id} value={item.id}>{item.chainName}{item.zeroGas ? ' (zero-fee)' : ''}</option>)}
+            </select>
+          </label>
 
           {accounts.length > 1 ? (
             <label className="mt-3 block text-xs font-medium text-[var(--muted)]">

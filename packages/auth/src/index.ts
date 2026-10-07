@@ -39,6 +39,16 @@ export const ROLE_SCOPES: Record<MembershipRole, string[]> = {
     AUTH_SCOPES.portfolioWrite,
     AUTH_SCOPES.auditRead,
   ],
+  // Bankers underwrite and service collateralized facilities. They need to
+  // inspect the asset, document, portfolio, and audit evidence supporting a
+  // loan, but do not receive organization-administration or asset-edit rights.
+  BANKER: [
+    AUTH_SCOPES.assetRead,
+    AUTH_SCOPES.documentRead,
+    AUTH_SCOPES.intelligenceRead,
+    AUTH_SCOPES.portfolioRead,
+    AUTH_SCOPES.auditRead,
+  ],
   COMPLIANCE: [
     AUTH_SCOPES.assetRead,
     AUTH_SCOPES.documentRead,
