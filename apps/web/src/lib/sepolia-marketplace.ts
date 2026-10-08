@@ -102,16 +102,24 @@ export async function availableSepoliaWallets(): Promise<Array<WalletOption & { 
 export async function connectMetaMaskWallet() {
   const metaMask = await metaMaskWallet();
   activeWallet = { id: metaMask.id, provider: metaMask.provider };
-  // Explicitly request the eth_accounts permission from a user click. MetaMask
-  // uses this native flow to let the user choose which account(s) CAPROV may use.
-  await metaMask.provider.request({
-    method: 'wallet_requestPermissions',
-    params: [{ eth_accounts: {} }],
-  });
-  activeAccount = undefined;
-  const connectedSigner = await signer();
-  const address = await connectedSigner.getAddress();
-  const accounts = await metaMask.provider.request({ method: 'eth_accounts' }) as string[];
+  // Use the standard EIP-1102 connection request. Calling
+  // `wallet_requestPermissions` immediately before `eth_requestAccounts`
+  // creates a duplicate MetaMask approval flow and can make the extension's
+  // connection window fail before it receives the page origin.
+  const accounts = await metaMask.provider.request({ method: 'eth_requestAccounts' }) as string[];
+  if (!accounts[0]) throw new Error('MetaMask did not expose an account to CAPROV.');
+  activeAccount = accounts[0];
+  // A connection is only useful when the signer is on the network CAPROV has
+  // selected. In particular, choosing Ethereum Sepolia must move MetaMask to
+  // chain 11155111 before the signer is resolved.
+  await switchWalletToSelectedNetwork();
+  const provider = new BrowserProvider(metaMask.provider);
+  const network = await provider.getNetwork();
+  const selected = selectedBlockchainNetwork();
+  if (network.chainId !== BigInt(selected.chainId)) {
+    throw new Error(`MetaMask did not switch to ${selected.chainName} (chain ID ${selected.chainId}).`);
+  }
+  const address = await (await provider.getSigner(activeAccount)).getAddress();
   return { address, accounts };
 }
 
@@ -189,6 +197,12 @@ export async function switchWalletToSelectedNetwork() {
       ? (error as { code?: number }).code
       : undefined;
     if (code !== 4902) throw error;
+    // MetaMask does not need an explorer to add a chain. In particular, avoid
+    // passing a loopback Blockscout URL: some extension builds fail while
+    // resolving its origin before the RPC request is made.
+    const blockExplorerUrls = network.blockExplorerUrl && !isLoopbackUrl(network.blockExplorerUrl)
+      ? { blockExplorerUrls: [network.blockExplorerUrl] }
+      : {};
     await provider.request({
       method: 'wallet_addEthereumChain',
       params: [{
@@ -200,9 +214,18 @@ export async function switchWalletToSelectedNetwork() {
           symbol: network.id === 'besu' ? 'BESU' : 'SEP',
           decimals: 18,
         },
-        blockExplorerUrls: network.blockExplorerUrl ? [network.blockExplorerUrl] : [],
+        ...blockExplorerUrls,
       }],
     });
+  }
+}
+
+function isLoopbackUrl(value: string) {
+  try {
+    const hostname = new URL(value).hostname;
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+  } catch {
+    return false;
   }
 }
 

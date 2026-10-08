@@ -881,6 +881,10 @@ async function ensureSepoliaNetwork(
     if (code !== 4902) {
       throw error;
     }
+    const explorerUrl = network?.explorerBase ?? selected.blockExplorerUrl;
+    const blockExplorerUrls = explorerUrl && !isLoopbackUrl(explorerUrl)
+      ? { blockExplorerUrls: [explorerUrl] }
+      : {};
     await provider.request({
       method: 'wallet_addEthereumChain',
       params: [
@@ -893,10 +897,19 @@ async function ensureSepoliaNetwork(
             symbol: selected.id === 'besu' ? 'BESU' : 'SEP',
             decimals: 18,
           },
-          blockExplorerUrls: network?.explorerBase ? [network.explorerBase] : selected.blockExplorerUrl ? [selected.blockExplorerUrl] : [],
+          ...blockExplorerUrls,
         },
       ],
     });
+  }
+}
+
+function isLoopbackUrl(value: string) {
+  try {
+    const hostname = new URL(value).hostname;
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+  } catch {
+    return false;
   }
 }
 
