@@ -2,7 +2,7 @@
 
 import { CaprovWordmark } from '@/components/brand/caprov-logo';
 import { cn } from '@/lib/utils';
-import { X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -43,12 +43,9 @@ export function LandingHeader() {
                 className="font-display text-lg font-semibold tracking-[-0.04em] text-[var(--ink)] transition group-hover:opacity-85 sm:text-xl"
                 markClassName="text-[var(--gold)]"
               />
-              <p className="landing-header__tagline mt-1 hidden text-[10px] uppercase tracking-[0.22em] text-[var(--muted)] sm:block">
-                Evidence-led private asset operations
-              </p>
             </Link>
 
-            <nav className="landing-header__nav hidden items-center gap-7 xl:flex" aria-label="Primary">
+            <nav className="landing-header__nav hidden items-center gap-8 lg:flex" aria-label="Primary">
               {navLinks.map((link) => (
                 <a key={link.href} href={link.href} className="landing-header__link">
                   {link.label}
@@ -57,7 +54,7 @@ export function LandingHeader() {
             </nav>
 
             <div className="landing-header__actions">
-              <div className="landing-header__auth hidden items-center gap-2 sm:flex">
+              <div className="landing-header__auth hidden items-center gap-1 sm:flex">
                 <Link href="/login" className="landing-header__signin">
                   Sign in
                 </Link>
@@ -65,7 +62,16 @@ export function LandingHeader() {
                   Request access
                 </Link>
               </div>
-
+              <button
+                type="button"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--ink)]/8 bg-white text-[var(--ink)] lg:hidden"
+                aria-label="Open menu"
+                aria-expanded={menuOpen}
+                aria-controls="landing-mobile-menu"
+                onClick={() => setMenuOpen(true)}
+              >
+                <Menu className="h-4 w-4" />
+              </button>
             </div>
           </div>
         </div>
@@ -73,7 +79,7 @@ export function LandingHeader() {
 
       <div
         id="landing-mobile-menu"
-        className={cn('landing-mobile-menu xl:hidden', menuOpen && 'landing-mobile-menu--open')}
+        className={cn('landing-mobile-menu lg:hidden', menuOpen && 'landing-mobile-menu--open')}
         aria-hidden={!menuOpen}
       >
         <button type="button" className="landing-mobile-menu__backdrop" aria-label="Close menu" onClick={closeMenu} />

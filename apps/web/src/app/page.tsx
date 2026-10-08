@@ -3,7 +3,6 @@ import { LandingAssetCarousel } from '@/components/landing/landing-asset-carouse
 import { LandingHeader } from '@/components/landing/landing-header';
 import { LandingReveal } from '@/components/landing/landing-reveal';
 import { LandingSectionHeader } from '@/components/landing/landing-section-header';
-import { LandingStat } from '@/components/landing/landing-stat';
 import {
   ArrowRight,
   BadgeCheck,
@@ -11,25 +10,31 @@ import {
   FileSearch,
   Scale,
   ShieldCheck,
-  Sparkles,
   Store,
   Workflow,
 } from 'lucide-react';
 import Link from 'next/link';
 
 const proofPoints = [
-  { label: 'Intelligence', value: 'Document-grounded Asset DNA' },
-  { label: 'Access', value: 'Tokenized fractional interests' },
-  { label: 'Credit', value: 'Evidence-led asset lending' },
+  { label: 'Intelligence', value: 'Asset DNA from source files' },
+  { label: 'Access', value: 'Fractional token interests' },
+  { label: 'Credit', value: 'Collateralized facilities' },
 ] as const;
 
-const trustMarquee = [
+const audiences = [
   'Family offices',
   'Private credit',
   'Asset managers',
   'Fund administrators',
-  'Compliance teams',
+  'Compliance',
   'Portfolio operations',
+] as const;
+
+const operatingStages = [
+  { label: 'Evidence', detail: 'Source files, classified and preserved' },
+  { label: 'Asset DNA', detail: 'Versioned facts, marks, and risk' },
+  { label: 'Markets', detail: 'Fractional interests, orders, settlement' },
+  { label: 'Credit', detail: 'Collateral review and facilities' },
 ] as const;
 
 const platformModules = [
@@ -100,16 +105,13 @@ export default function Home() {
           <div className="landing-shell pb-14 pt-8 sm:pb-20 sm:pt-10">
             <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-14">
               <div className="landing-fade landing-fade--delay-1 min-w-0">
-                <p className="landing-kicker inline-flex items-center gap-2">
-                  <Sparkles className="h-3.5 w-3.5 text-[var(--gold)]" aria-hidden="true" />
-                  Evidence-led private asset operations
-                </p>
-                <h1 className="landing-hero-title mt-6">
+                <p className="landing-kicker">Private-asset operating system</p>
+                <h1 className="landing-hero-title mt-5">
                   Turn private-asset evidence into market access.
                 </h1>
                 <p className="landing-lead landing-read mt-5">
-                  CAPROV extracts trusted intelligence from private-asset documents to create Asset DNA—then carries
-                  that evidence into tokenization, fractional marketplace trading, and collateralized lending.
+                  CAPROV turns source documents into a reviewable Asset DNA record, then carries that evidence into
+                  tokenization, fractional trading, and collateralized lending.
                 </p>
                 <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                   <Link href="/login" className="landing-btn landing-btn--primary group w-full sm:w-auto">
@@ -139,23 +141,29 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="landing-marquee border-y border-[var(--line)]/80 bg-[var(--card)]" aria-label="Built for institutional teams">
-        <div className="landing-marquee__track py-4">
-          {[...trustMarquee, ...trustMarquee].map((item, index) => (
-            <span key={`${item}-${index}`} className="landing-marquee__item">
-              {item}
-            </span>
-          ))}
+      <section className="border-y border-[var(--line)]/80 bg-[var(--card)]" aria-label="Built for institutional teams">
+        <div className="landing-shell flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="landing-metric-label shrink-0">Built for</p>
+          <ul className="flex flex-wrap gap-x-6 gap-y-2">
+            {audiences.map((item) => (
+              <li key={item} className="text-sm font-medium text-[var(--ink)]">
+                {item}
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
-      <section className="landing-section border-b border-[var(--line)]/80 bg-[var(--paper)] py-12 sm:py-14">
-        <div className="landing-shell">
-          <div className="landing-stats grid grid-cols-2 gap-8 lg:grid-cols-4">
-            <LandingStat value={4} label="Connected operating stages" />
-            <LandingStat value={1} label="Versioned asset record" />
-            <LandingStat value={3} label="Ownership interest types" />
-            <LandingStat value={2} label="Execution modes: simulated or live" />
+      <section className="border-b border-[var(--line)]/80 bg-[var(--paper)]">
+        <div className="landing-shell py-10 sm:py-12">
+          <div className="landing-stats grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--line)] lg:grid-cols-4">
+            {operatingStages.map((item, index) => (
+              <div key={item.label} className="bg-[var(--card)] px-5 py-6 sm:px-6">
+                <p className="font-mono text-[11px] tracking-[0.18em] text-[var(--gold)]">0{index + 1}</p>
+                <p className="mt-3 font-display text-xl font-semibold tracking-[-0.03em] text-[var(--ink)]">{item.label}</p>
+                <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{item.detail}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -282,7 +290,7 @@ export default function Home() {
               <p className="landing-kicker text-[var(--gold-soft)]/90">A better operating record starts here</p>
               <h2 className="landing-title mt-4 text-white">Bring clarity to every private asset decision</h2>
               <p className="mx-auto mt-5 max-w-lg text-base leading-7 text-white/65">
-                Explore the workspace, create your organization, and see how evidence becomes Asset DNA—and Asset DNA becomes a foundation for action.
+                Open the workspace or request an organization. Evidence becomes Asset DNA, and that record supports markets and credit.
               </p>
               <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
                 <Link href="/login" className="landing-btn landing-btn--light group w-full sm:w-auto">
@@ -304,7 +312,7 @@ export default function Home() {
             <div className="landing-footer__brand min-w-0">
               <CaprovWordmark className="font-display text-lg font-semibold text-white" markClassName="text-[var(--gold)]" />
               <p className="mt-4 max-w-sm text-sm leading-7 text-white/50">
-                The operating system for evidence-led private asset decisions.
+                Evidence, markets, and credit on one private-asset record.
               </p>
             </div>
             <div className="landing-footer__links lg:text-right">

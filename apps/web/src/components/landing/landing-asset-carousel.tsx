@@ -128,12 +128,12 @@ export function LandingAssetCarousel() {
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <div className="flex items-center justify-between gap-4 border-b border-[var(--ink)]/6 px-6 py-5 sm:px-7">
-        <div>
-          <p className="landing-kicker">Private asset universe</p>
-         
+      <div className="flex items-center justify-between gap-4 border-b border-[var(--ink)]/6 px-6 py-4 sm:px-7">
+        <div className="min-w-0">
+          <p className="landing-kicker">Illustrative book</p>
+          <p className="mt-1 text-sm text-[var(--muted)]">Sample records across private-asset classes</p>
         </div>
-        <span className="landing-badge landing-badge--teal shrink-0">Auto-rotating</span>
+        <span className="landing-badge landing-badge--teal shrink-0">Sample</span>
       </div>
 
       <div className="landing-asset-carousel__viewport relative px-6 py-6 sm:px-7">
@@ -184,7 +184,7 @@ export function LandingAssetCarousel() {
                 </div>
                 <div className="bg-[var(--paper)] px-5 py-4 sm:col-span-1">
                   <p className="landing-metric-label">Record status</p>
-                  <p className="mt-2 text-sm text-[var(--ink)]">Illustrative · Evidence-aware</p>
+                  <p className="mt-2 text-sm font-medium text-[var(--ink)]">Review ready</p>
                 </div>
               </div>
             </article>

@@ -558,7 +558,7 @@ canvas {
   width: 100%;
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1024px) {
   .landing-header__inner {
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     column-gap: 2rem;

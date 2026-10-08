@@ -311,14 +311,14 @@ export class DocumentsService {
     const network = this.blockchain.getDocumentNetworkStatus();
     if (!network.contractAddress) {
       throw new BadRequestException(
-        'Ethereum Sepolia document registry contract is not configured.',
+        `The ${network.chainName} document registry contract is not configured.`,
       );
     }
 
     const onChain = await this.findOnChainDocumentVersion(document);
     if (!onChain) {
       throw new BadRequestException(
-        'The document version could not be found on Ethereum Sepolia.',
+        `The document version could not be found on ${network.chainName}.`,
       );
     }
     if (onChain.documentHash.toLowerCase() !== normalizeStoredHash(document.documentHash)) {
@@ -331,12 +331,12 @@ export class DocumentsService {
     const transactionHash = onChain.transactionHash;
     if (!transactionHash) {
       throw new BadRequestException(
-        'Ethereum Sepolia transaction hash could not be verified. Please anchor the document again.',
+        `${network.chainName} transaction hash could not be verified. Please anchor the document again.`,
       );
     }
     if (input.transactionHash.toLowerCase() !== transactionHash.toLowerCase()) {
       throw new BadRequestException(
-        'The submitted transaction hash does not match the verified Ethereum Sepolia anchor transaction.',
+        `The submitted transaction hash does not match the verified ${network.chainName} anchor transaction.`,
       );
     }
 
@@ -358,7 +358,7 @@ export class DocumentsService {
       // Prevent duplicate anchoring of the same document
       if (target.anchorStatus === 'BLOCKCHAIN_ANCHORED' && target.anchorTxHash) {
         throw new BadRequestException(
-          'This document version has already been anchored on Ethereum Sepolia.',
+          `This document version has already been anchored on ${network.chainName}.`,
         );
       }
 

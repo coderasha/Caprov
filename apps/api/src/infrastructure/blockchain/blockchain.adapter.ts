@@ -54,6 +54,8 @@ export interface AnchoredDocumentVersionRecord {
 }
 
 export interface BlockchainAdapterNetworkStatus {
+  /** The CAPROV selector value that produced this status. */
+  networkId?: 'sepolia' | 'besu';
   chainId: number;
   chainName: string;
   rpcUrl: string;

@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { api } from '@/lib/api';
 import { documentTypeLabel, formatDate, formatDateTime } from '@/lib/format';
-import { sepoliaTxExplorerUrl } from '@/lib/explorer';
+import { transactionExplorerUrl } from '@/lib/explorer';
 import type { DocumentType } from '@caprov/types';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
@@ -114,14 +114,15 @@ export default function DocumentDetailPage() {
   const transactionId = verify?.transactionHash ?? document.anchorTxHash;
   const explorerUrl =
     effectiveAnchorMode === 'LIVE'
-      ? sepoliaTxExplorerUrl(transactionId) ??
-        sepoliaTxExplorerUrl(verify?.explorerUrl) ??
-        sepoliaTxExplorerUrl(document.anchorExplorerUrl)
+      ? transactionExplorerUrl(
+          transactionId,
+          verify?.explorerUrl ?? document.anchorExplorerUrl,
+        )
       : undefined;
   const anchoredAt = verify?.anchoredAt ?? document.anchoredAt;
   const transactionDisplay =
     transactionId ??
-    (effectiveAnchorStatus === 'PENDING' ? 'Pending Sepolia anchor' : undefined);
+    (effectiveAnchorStatus === 'PENDING' ? 'Pending blockchain anchor' : undefined);
   const anchoredAtDisplay =
     anchoredAt
       ? formatDateTime(anchoredAt)
@@ -275,9 +276,9 @@ export default function DocumentDetailPage() {
                       <div className="space-y-1">
                         <div className="break-all font-mono text-xs">{item.anchorTxHash}</div>
                         {item.anchorMode === 'LIVE' &&
-                        sepoliaTxExplorerUrl(item.anchorTxHash ?? item.anchorExplorerUrl) ? (
+                        transactionExplorerUrl(item.anchorTxHash, item.anchorExplorerUrl) ? (
                           <a
-                            href={sepoliaTxExplorerUrl(item.anchorTxHash ?? item.anchorExplorerUrl)}
+                            href={transactionExplorerUrl(item.anchorTxHash, item.anchorExplorerUrl)}
                             target="_blank"
                             rel="noreferrer"
                             className="text-xs underline"

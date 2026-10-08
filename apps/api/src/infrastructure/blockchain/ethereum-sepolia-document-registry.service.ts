@@ -57,6 +57,7 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
       (privateKey || mnemonic) && contractAddress && walletAddress,
     );
     return {
+      networkId: config.id,
       chainId: config.chainId,
       chainName: config.chainName,
       rpcUrl,
@@ -264,20 +265,32 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
     offChainUri: string;
   }): Promise<{ transactionHash?: string; explorerUrl?: string }> {
     try {
-      const event = input.contract.getEvent('DocumentVersionAnchored');
       const expectedHash = normalizeHash(input.documentHash).toLowerCase();
       const latestBlock = await input.provider.getBlockNumber();
       const maxLookback = 100_000;
-      const maxRange = 50_000;
+      // Besu nodes commonly enforce a tight eth_getLogs range. Filter by the
+      // indexed lineage key and keep each request deliberately small so an
+      // old, valid anchor remains recoverable and its transaction hash can be
+      // persisted for the document UI.
+      const maxRange = 500;
       const startBlock = Math.max(0, latestBlock - maxLookback);
+      const filter = input.contract.filters.DocumentVersionAnchored!(
+        input.blockchainReference,
+      );
 
       for (let toBlock = latestBlock; toBlock >= startBlock; toBlock -= maxRange) {
         const fromBlock = Math.max(startBlock, toBlock - maxRange + 1);
-        const logs = await input.contract.queryFilter(
-          event,
-          fromBlock,
-          toBlock,
-        );
+        let logs;
+        try {
+          logs = await input.contract.queryFilter(filter, fromBlock, toBlock);
+        } catch (rangeError) {
+          const message =
+            rangeError instanceof Error ? rangeError.message : 'unknown log lookup error';
+          this.logger.warn(
+            `Anchor event lookup failed for blocks ${fromBlock}-${toBlock}: ${message}`,
+          );
+          continue;
+        }
         const match = [...logs]
           .reverse()
           .find((log) => {
@@ -312,7 +325,7 @@ export class EthereumSepoliaDocumentRegistryService implements BlockchainAdapter
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'anchor event lookup failed';
-      this.logger.warn(`Sepolia anchor event lookup failed: ${message}`);
+      this.logger.warn(`Document anchor event lookup failed: ${message}`);
       return {};
     }
   }

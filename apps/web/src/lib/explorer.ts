@@ -19,3 +19,17 @@ export function sepoliaTxExplorerUrl(hashOrUrl?: string | null): string | undefi
   const explorer = selectedBlockchainNetwork().blockExplorerUrl;
   return explorer ? `${explorer.replace(/\/$/, '')}/tx/${hash}` : undefined;
 }
+
+/** Uses the explorer recorded with the transaction, falling back to the active network. */
+export function transactionExplorerUrl(
+  hashOrUrl?: string | null,
+  explorerUrl?: string | null,
+): string | undefined {
+  if (explorerUrl?.trim()) {
+    const recorded = explorerUrl.trim();
+    if (/^https?:\/\//i.test(recorded)) {
+      return recorded;
+    }
+  }
+  return sepoliaTxExplorerUrl(hashOrUrl);
+}
