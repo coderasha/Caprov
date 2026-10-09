@@ -10,8 +10,10 @@ import { Field, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { money, riskTone } from '@/lib/format';
 import type { HydratedAsset } from '@/lib/types';
+import { useAuthStore } from '@/stores/auth-store';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface CopilotMessage {
   id: string;
@@ -45,7 +47,12 @@ const SUGGESTIONS = [
 ];
 
 export default function CopilotPage() {
-  const [assetId, setAssetId] = useState('ast_harbourview');
+  const searchParams = useSearchParams();
+  const requestedAssetId = searchParams.get('asset') ?? '';
+  const requestedLock = searchParams.get('locked') === '1';
+  const roles = useAuthStore((state) => state.roles);
+  const bankerOnly = roles.includes('BANKER') && !roles.some((role) => ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN', 'BUYER'].includes(role));
+  const [assetId, setAssetId] = useState('');
   const [message, setMessage] = useState('What is the current value and main risk?');
   const [threadId, setThreadId] = useState<string>();
   const [messages, setMessages] = useState<CopilotMessage[]>([]);
@@ -66,32 +73,47 @@ export default function CopilotPage() {
     },
   });
 
+  useEffect(() => {
+    const assets = assetsQuery.data ?? [];
+    if (!assets.length) return;
+    const requested = assets.find((asset) => asset.id === requestedAssetId);
+    const nextAssetId = requested?.id ?? assets.find((asset) => asset.id === assetId)?.id ?? assets[0]?.id ?? '';
+    if (nextAssetId !== assetId) {
+      setAssetId(nextAssetId);
+      setThreadId(undefined);
+      setMessages([]);
+    }
+  }, [assetId, assetsQuery.data, requestedAssetId]);
+
   const selectedAsset = (assetsQuery.data ?? []).find((asset) => asset.id === assetId);
+  // A collateral-review launch is deliberately fixed to its reviewed asset.
+  // Standalone Copilot remains the place to choose among permitted collateral.
+  const lockedToCollateralAsset = bankerOnly && requestedLock && Boolean(selectedAsset && selectedAsset.id === requestedAssetId);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <PageHeader
         eyebrow="Copilot"
         title="Asset intelligence copilot"
-        description="Ask focused questions and receive a source-aware briefing grounded in the selected asset’s current DNA."
+        description={lockedToCollateralAsset ? `Ask credit questions about ${selectedAsset?.name}. This conversation is locked to the collateral asset under review.` : bankerOnly ? 'Ask credit questions about collateral-backed assets. Answers are grounded in the selected asset’s current DNA and source evidence.' : 'Ask focused questions and receive a source-aware briefing grounded in the selected asset’s current DNA.'}
       />
 
       <div className="grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)]">
         <div className="space-y-6">
-          <Card className="p-5">
-            <LlmModelPicker compact />
-          </Card>
+          <Card className="p-5"><LlmModelPicker compact /></Card>
           <Card className="p-5">
             <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-[var(--gold)]">Research context</p>
-            <Field label="Asset context">
-              <Select value={assetId} onChange={(e) => setAssetId(e.target.value)}>
+            {lockedToCollateralAsset ? (
+              <div className="mt-3 rounded-xl border border-[var(--line)] bg-[var(--paper)]/70 px-3 py-3"><p className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--muted)]">Locked collateral context</p><p className="mt-1 font-medium text-[var(--ink)]">{selectedAsset?.name}</p></div>
+            ) : <Field label={bankerOnly ? 'Collateral asset context' : 'Asset context'}>
+              <Select value={assetId} onChange={(e) => { setAssetId(e.target.value); setThreadId(undefined); setMessages([]); }}>
                 {(assetsQuery.data ?? []).map((asset) => (
                   <option key={asset.id} value={asset.id}>
                     {asset.name}
                   </option>
                 ))}
               </Select>
-            </Field>
+            </Field>}
             {selectedAsset ? (
               <div className="mt-4 rounded-xl bg-[var(--paper)]/70 p-3">
                 <p className="font-medium text-[var(--ink)]">{selectedAsset.name}</p>
@@ -186,7 +208,7 @@ export default function CopilotPage() {
             />
             <div className="flex items-center justify-between gap-3">
               <p className="text-xs text-[var(--muted)]">Answers are grounded in the selected asset’s stored DNA.</p>
-              <Button type="submit" disabled={chat.isPending || !message.trim()}>
+              <Button type="submit" disabled={chat.isPending || !assetId || !message.trim()}>
                 {chat.isPending ? 'Preparing briefing…' : 'Ask copilot'}
               </Button>
             </div>

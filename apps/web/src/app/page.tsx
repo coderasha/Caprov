@@ -5,9 +5,13 @@ import { LandingReveal } from '@/components/landing/landing-reveal';
 import { LandingSectionHeader } from '@/components/landing/landing-section-header';
 import {
   ArrowRight,
+  ArrowUpRight,
   BadgeCheck,
   Building2,
+  Check,
+  Database,
   FileSearch,
+  FileText,
   Scale,
   ShieldCheck,
   Store,
@@ -21,13 +25,13 @@ const proofPoints = [
   { label: 'Credit', value: 'Collateralized facilities' },
 ] as const;
 
-const audiences = [
-  'Family offices',
-  'Private credit',
-  'Asset managers',
-  'Fund administrators',
-  'Compliance',
-  'Portfolio operations',
+const partnerMarks = [
+  { name: 'Aurelia', role: 'Private capital', monogram: 'A' },
+  { name: 'Northstar', role: 'Institutional investor', monogram: 'N' },
+  { name: 'Meridian', role: 'Asset management', monogram: 'M' },
+  { name: 'Vantage', role: 'Private credit', monogram: 'V' },
+  { name: 'Harbour', role: 'Real assets', monogram: 'H' },
+  { name: 'Aster', role: 'Fund operations', monogram: 'A' },
 ] as const;
 
 const operatingStages = [
@@ -79,14 +83,17 @@ const workflowSteps = [
 
 const platformPillars = [
   {
+    icon: FileText,
     title: 'Evidence you can inspect',
     body: 'Title, transaction, valuation, KYC, and supporting files become reviewable facts linked back to their source.',
   },
   {
+    icon: Database,
     title: 'A record that evolves with the asset',
     body: 'Asset DNA keeps material changes versioned, traceable, and ready for the next decision.',
   },
   {
+    icon: Workflow,
     title: 'Controls built into the workflow',
     body: 'Roles, approvals, portfolios, and audit history stay with the operating record—not in disconnected tools.',
   },
@@ -107,18 +114,18 @@ export default function Home() {
               <div className="landing-fade landing-fade--delay-1 min-w-0">
                 <div className="landing-hero__overline">
                   <span className="landing-hero__pulse" aria-hidden="true" />
-                  Private-asset operating system
+                  Private assets. Digitized. Verified. Liquid.
                 </div>
                 <h1 className="landing-hero-title mt-5">
-                  Intelligence for private assets. Built to execute.
+                  Intelligence for <span className="landing-hero-title__gold">private assets.</span> Built to execute.
                 </h1>
                 <p className="landing-lead landing-read mt-5">
-                  CAPROV turns source documents into a reviewable Asset DNA record, then carries that evidence into
-                  controlled tokenization, fractional trading, and collateralized lending.
+                  CAPROV turns complex private-asset documents into verified digital records—then carries that evidence
+                  into controlled tokenization, marketplace trading, and collateralized lending.
                 </p>
                 <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                   <Link href="/login" className="landing-btn landing-btn--primary group w-full sm:w-auto">
-                    Explore the workspace
+                    Explore the platform
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden="true" />
                   </Link>
                   <Link href="/register" className="landing-btn landing-btn--ghost w-full sm:w-auto">
@@ -135,9 +142,10 @@ export default function Home() {
                   ))}
                 </div>
                 <div className="landing-hero__assurance mt-8">
-                  <span>Source-linked records</span>
-                  <span>Role-aware controls</span>
-                  <span>Network-aware provenance</span>
+                  <span>AI document intelligence</span>
+                  <span>Asset tokenization</span>
+                  <span>Private marketplace</span>
+                  <span>Collateralized lending</span>
                 </div>
               </div>
 
@@ -149,16 +157,23 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="landing-audience-band border-y border-[var(--line)]/80 bg-[var(--card)]" aria-label="Built for institutional teams">
-        <div className="landing-shell flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="landing-metric-label shrink-0">Built for</p>
-          <ul className="flex flex-wrap gap-x-6 gap-y-2">
-            {audiences.map((item) => (
-              <li key={item} className="text-sm font-medium text-[var(--ink)]">
-                {item}
-              </li>
+      <section className="landing-partners-section landing-partners-section--hero" aria-labelledby="partner-network-title">
+        <div className="landing-shell flex flex-col gap-2 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="landing-kicker">Trusted network</p>
+            <h2 id="partner-network-title" className="mt-1 font-display text-base font-semibold tracking-[-0.025em] text-[var(--ink)]">Built for the teams moving private capital</h2>
+          </div>
+          <p className="text-xs font-medium text-[var(--muted)]">Selected partners &amp; investors</p>
+        </div>
+        <div className="landing-logo-marquee" tabIndex={0} aria-label="Selected partner and investor network">
+          <div className="landing-logo-marquee__track">
+            {[...partnerMarks, ...partnerMarks].map((partner, index) => (
+              <div className="landing-logo-marquee__item" key={`${partner.name}-${index}`} aria-hidden={index >= partnerMarks.length}>
+                <span className="landing-logo-marquee__mark">{partner.monogram}</span>
+                <span><strong>{partner.name}</strong><small>{partner.role}</small></span>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       </section>
 
@@ -176,29 +191,42 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="platform" className="landing-section border-b border-[var(--line)]/80 bg-[var(--paper)]">
+      <section id="platform" className="landing-platform-section landing-section border-b border-[var(--line)]/80">
         <div className="landing-shell">
           <LandingReveal>
-            <LandingSectionHeader
-              kicker="Platform"
-              title="One operating record from document to market and credit"
-              description="CAPROV gives asset owners, investors, banks, and control teams a shared place to establish evidence, review intelligence, tokenize fractional interests, and act with appropriate controls."
-            />
-            <div className="mt-12 grid gap-4 md:grid-cols-3">
-              {platformPillars.map((item, index) => (
-                <LandingReveal key={item.title} delay={index * 80}>
-                  <article className="landing-surface landing-surface--flat h-full p-6">
-                    <h3 className="text-base font-semibold text-[var(--ink)]">{item.title}</h3>
-                    <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{item.body}</p>
-                  </article>
-                </LandingReveal>
-              ))}
-            </div>
+            <>
+              <div className="landing-platform-hero relative overflow-hidden rounded-[1.5rem] border border-white/70 px-6 py-10 sm:px-10 lg:min-h-[37rem] lg:px-12 lg:py-14">
+                <div className="landing-platform-hero__image" aria-hidden="true" />
+                <div className="landing-platform-hero__wash" aria-hidden="true" />
+                <div className="relative z-10 max-w-[42rem]">
+                  <LandingSectionHeader
+                    kicker="Platform"
+                    title="One operating record from document to market and credit"
+                    description="CAPROV gives asset owners, investors, banks, and control teams a shared place to establish evidence, review intelligence, tokenize fractional interests, and act with appropriate controls."
+                  />
+                </div>
+                <div className="landing-platform-pillars relative z-10 mt-10 grid gap-4 md:grid-cols-3 lg:absolute lg:inset-x-8 lg:bottom-8 lg:mt-0">
+                  {platformPillars.map((item, index) => {
+                    const Icon = item.icon;
+                    return (
+                      <LandingReveal key={item.title} delay={index * 80}>
+                        <article className="landing-pillar-card h-full p-6">
+                          <div className="landing-pillar-card__icon"><Icon className="h-5 w-5" /></div>
+                          <h3 className="mt-5 font-display text-lg font-semibold tracking-[-0.025em] text-[var(--ink)]">{item.title}</h3>
+                          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{item.body}</p>
+                          <ArrowUpRight className="landing-pillar-card__arrow" aria-hidden="true" />
+                        </article>
+                      </LandingReveal>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
           </LandingReveal>
         </div>
       </section>
 
-      <section id="workflow" className="landing-section border-b border-[var(--line)]/80 bg-[var(--card)]">
+      <section id="workflow" className="landing-workflow-section landing-section border-b border-[var(--line)]/80">
         <div className="landing-shell">
           <LandingReveal>
             <LandingSectionHeader
@@ -210,7 +238,7 @@ export default function Home() {
           <div className="landing-workflow mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {workflowSteps.map((item, index) => (
               <LandingReveal key={item.step} delay={index * 90}>
-                <article className="landing-surface landing-surface--flat landing-workflow-step relative h-full p-6">
+                <article className="landing-workflow-card landing-workflow-step relative h-full p-6">
                   <p className="font-mono text-xs tracking-[0.18em] text-[var(--gold)]">{item.step}</p>
                   <h3 className="mt-4 text-lg font-semibold text-[var(--ink)]">{item.title}</h3>
                   <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{item.detail}</p>
@@ -224,28 +252,22 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="markets" className="landing-section border-b border-[var(--line)]/80 bg-[var(--paper)]">
+      <section id="markets" className="landing-markets-section landing-section border-b border-[var(--line)]/80">
         <div className="landing-shell">
           <LandingReveal>
-            <LandingSectionHeader
-              kicker="Capital markets"
-              title="Turn validated intelligence into fractional access and credit"
-              description="Once Asset DNA is reviewed, owners can tokenize and list fractional interests. The same documents, valuation, and risk context support collateral review and bank-approved lending."
-              action={
-                <Link href="/login" className="landing-btn landing-btn--ghost w-full sm:w-auto">
-                  Explore the workspace
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              }
-            />
-          </LandingReveal>
-
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="landing-markets-panel overflow-hidden rounded-[1.5rem] p-6 sm:p-10">
+              <LandingSectionHeader
+                kicker="Capital markets"
+                title="Turn validated intelligence into fractional access and credit"
+                description="Once Asset DNA is reviewed, owners can tokenize and list fractional interests. The same documents, valuation, and risk context support collateral review and bank-approved lending."
+                action={<Link href="/login" className="landing-btn landing-btn--light w-full sm:w-auto">Explore the workspace <ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>}
+              />
+              <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {platformModules.map((item, index) => {
               const Icon = item.icon;
               return (
                 <LandingReveal key={item.title} delay={index * 60}>
-                  <article className="landing-surface landing-module-card group h-full p-6">
+                  <article className="landing-market-module landing-module-card group h-full p-6">
                     <div className="landing-module-icon">
                       <Icon className="h-5 w-5" aria-hidden="true" />
                     </div>
@@ -255,14 +277,16 @@ export default function Home() {
                 </LandingReveal>
               );
             })}
+              </div>
+            </div>
+          </LandingReveal>
           </div>
-        </div>
       </section>
 
-      <section id="security" className="landing-section border-b border-[var(--line)]/80 bg-[var(--card)]">
+      <section id="security" className="landing-security-section landing-section border-b border-[var(--line)]/80">
         <div className="landing-shell">
           <LandingReveal>
-            <div className="landing-surface grid gap-8 p-6 sm:p-8 lg:grid-cols-[0.85fr_1.15fr] lg:p-10">
+            <div className="landing-security-panel grid gap-8 p-6 sm:p-8 lg:grid-cols-[0.85fr_1.15fr] lg:p-10">
               <div>
                 <div className="landing-badge landing-badge--teal inline-flex items-center gap-2">
                   <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />
@@ -280,8 +304,8 @@ export default function Home() {
                   'Versioned Asset DNA with source and provenance references',
                   'Activity history across intelligence and capital-markets workflows',
                 ].map((item) => (
-                  <div key={item} className="rounded-xl border border-[var(--ink)]/6 bg-[var(--paper)] px-4 py-4 text-sm leading-6 text-[var(--ink)]">
-                    {item}
+                  <div key={item} className="landing-security-check rounded-xl px-4 py-4 text-sm leading-6 text-[var(--ink)]">
+                    <Check className="h-4 w-4 shrink-0 text-[var(--gold)]" aria-hidden="true" />{item}
                   </div>
                 ))}
               </div>
@@ -290,14 +314,14 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="landing-cta-band relative overflow-hidden">
+      <section className="landing-cta-band">
         <div className="landing-cta-band__glow" aria-hidden="true" />
         <div className="landing-shell landing-section relative">
           <LandingReveal>
             <div className="mx-auto max-w-2xl text-center">
-              <p className="landing-kicker text-[var(--gold-soft)]/90">A better operating record starts here</p>
-              <h2 className="landing-title mt-4 text-white">Bring clarity to every private asset decision</h2>
-              <p className="mx-auto mt-5 max-w-lg text-base leading-7 text-white/65">
+              <p className="landing-kicker">A better operating record starts here</p>
+              <h2 className="landing-title mt-4">Bring clarity to every private asset decision</h2>
+              <p className="landing-cta-band__copy mx-auto mt-5 max-w-lg text-base leading-7">
                 Open the workspace or request an organization. Evidence becomes Asset DNA, and that record supports markets and credit.
               </p>
               <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
@@ -314,34 +338,37 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="bg-[var(--ink)] text-white/65">
-        <div className="landing-shell landing-section">
-          <div className="landing-footer__grid grid gap-10 lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-start lg:justify-between">
-            <div className="landing-footer__brand min-w-0">
-              <CaprovWordmark className="font-display text-lg font-semibold text-white" markClassName="text-[var(--gold)]" />
-              <p className="mt-4 max-w-sm text-sm leading-7 text-white/50">
+      <footer id="company" className="landing-footer">
+        <div className="landing-footer__glow" aria-hidden="true" />
+        <div className="landing-shell landing-footer__inner">
+          <div className="landing-footer__top">
+            <div className="landing-footer__brand">
+              <CaprovWordmark className="font-display text-xl font-semibold text-white" markClassName="text-[var(--gold-soft)]" />
+              <p className="landing-footer__tagline">
                 Evidence, markets, and credit on one private-asset record.
               </p>
             </div>
-            <div className="landing-footer__links lg:text-right">
-              <p className="landing-metric-label text-white/35">Platform</p>
-              <ul className="mt-4 space-y-2.5 text-sm">
-                <li><Link href="/login" className="transition hover:text-white">Demo workspace</Link></li>
-                <li><a href="#platform" className="transition hover:text-white">Capabilities</a></li>
-                <li><a href="#markets" className="transition hover:text-white">Capital markets</a></li>
-              </ul>
-            </div>
-            <div className="landing-footer__account lg:text-right">
-              <p className="landing-metric-label text-white/35">Account</p>
-              <ul className="mt-4 space-y-2.5 text-sm">
-                <li><Link href="/login" className="transition hover:text-white">Sign in</Link></li>
-                <li><Link href="/register" className="transition hover:text-white">Register organization</Link></li>
-              </ul>
-            </div>
+            <nav className="landing-footer__nav" aria-label="Footer">
+              <div className="landing-footer__col">
+                <p className="landing-footer__label">Platform</p>
+                <ul>
+                  <li><Link href="/login">Demo workspace</Link></li>
+                  <li><a href="#platform">Capabilities</a></li>
+                  <li><a href="#markets">Capital markets</a></li>
+                </ul>
+              </div>
+              <div className="landing-footer__col">
+                <p className="landing-footer__label">Account</p>
+                <ul>
+                  <li><Link href="/login">Sign in</Link></li>
+                  <li><Link href="/register">Register organization</Link></li>
+                </ul>
+              </div>
+            </nav>
           </div>
-          <div className="mt-10 flex flex-col gap-3 border-t border-white/8 pt-6 text-xs text-white/35 sm:flex-row sm:items-center sm:justify-between">
-            <p>© {new Date().getFullYear()} CAPROV. All rights reserved.</p>
-            <p>Evidence-led private asset operations</p>
+          <div className="landing-footer__bottom">
+            <p>© {new Date().getFullYear()} CAPROV</p>
+            <p className="landing-footer__bottom-note">Evidence-led private asset operations</p>
           </div>
         </div>
       </footer>

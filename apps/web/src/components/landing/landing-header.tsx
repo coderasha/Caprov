@@ -8,9 +8,10 @@ import { useEffect, useState } from 'react';
 
 const navLinks = [
   { href: '#platform', label: 'Platform' },
-  { href: '#workflow', label: 'Workflow' },
-  { href: '#markets', label: 'Markets' },
-  { href: '#security', label: 'Security' },
+  { href: '#workflow', label: 'Capabilities' },
+  { href: '#markets', label: 'Capital markets' },
+  { href: '#security', label: 'Governance' },
+  { href: '#company', label: 'Company' },
 ] as const;
 
 export function LandingHeader() {
@@ -40,12 +41,12 @@ export function LandingHeader() {
           <div className="landing-header__inner">
             <Link href="/" className="landing-header__brand group min-w-0">
               <CaprovWordmark
-                className="font-display text-lg font-semibold tracking-[-0.04em] text-[var(--ink)] transition group-hover:opacity-85 sm:text-xl"
+                className="font-display text-xl font-bold tracking-[-0.045em] text-[var(--ink)] transition group-hover:opacity-85 sm:text-2xl"
                 markClassName="text-[var(--gold)]"
               />
             </Link>
 
-            <nav className="landing-header__nav hidden items-center gap-8 lg:flex" aria-label="Primary">
+            <nav className="landing-header__nav hidden items-center gap-9 lg:flex" aria-label="Primary">
               {navLinks.map((link) => (
                 <a key={link.href} href={link.href} className="landing-header__link">
                   {link.label}

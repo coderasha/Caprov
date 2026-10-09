@@ -2,13 +2,15 @@
 
 import { CaprovWordmark } from '@/components/brand/caprov-logo';
 import { WalletStatus } from '@/components/layout/wallet-status';
-import { WalletProvider } from '@/components/wallet/wallet-provider';
+import { WalletProvider, useWallet } from '@/components/wallet/wallet-provider';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth-store';
 import {
   Activity,
   ArrowLeftRight,
+  Bell,
   Building2,
+  ChevronDown,
   ChevronRight,
   FileStack,
   FolderKanban,
@@ -19,7 +21,9 @@ import {
   Menu,
   MessageSquareText,
   Scale,
+  Search,
   Shield,
+  ShieldCheck,
   Sparkles,
   Store,
   Wallet,
@@ -31,7 +35,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 
 const navSections = [
   {
-    title: 'Start here',
+    title: 'Main',
     items: [
       { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
       { href: '/assets', label: 'Assets', icon: Building2 },
@@ -41,7 +45,7 @@ const navSections = [
     ],
   },
   {
-    title: 'Portfolio and execution',
+    title: 'Portfolio & execution',
     items: [
       { href: '/portfolios', label: 'Portfolios', icon: Wallet },
       { href: '/marketplace', label: 'Listings', icon: Store },
@@ -56,6 +60,7 @@ const navSections = [
     title: 'Workspace',
     items: [
       { href: '/organization', label: 'Organization', icon: FolderKanban },
+      { href: '/compliance', label: 'Compliance', icon: ShieldCheck },
       { href: '/audit', label: 'Audit', icon: Activity },
     ],
   },
@@ -80,6 +85,7 @@ const bankerNavSections = [
     items: [
       { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
       { href: '/collateral', label: 'Collateral review', icon: HandCoins },
+      { href: '/intelligence/copilot', label: 'Ask AI', icon: MessageSquareText },
       { href: '/lending', label: 'Loans', icon: Landmark },
       { href: '/settlement', label: 'Settlement', icon: Scale },
     ],
@@ -110,6 +116,16 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function initials(name?: string) {
+  if (!name) return 'CA';
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
 function SidebarContent({
   pathname,
   onNavigate,
@@ -122,7 +138,6 @@ function SidebarContent({
   showClose?: boolean;
 }) {
   const router = useRouter();
-  const user = useAuthStore((state) => state.user);
   const organization = useAuthStore((state) => state.organization);
   const roles = useAuthStore((state) => state.roles);
   const logout = useAuthStore((state) => state.logout);
@@ -149,7 +164,7 @@ function SidebarContent({
   }, [bankerOnly, buyerOnly, roles]);
 
   return (
-    <div className="flex h-full min-h-0 flex-col px-4 py-5 sm:px-5 sm:py-7">
+    <div className="flex h-full min-h-0 flex-col px-4 py-5 sm:px-5 sm:py-6">
       <div className="flex items-start justify-between gap-3 px-2">
         <Link href="/dashboard" className="min-w-0" onClick={onNavigate}>
           <CaprovWordmark
@@ -208,16 +223,31 @@ function SidebarContent({
         </div>
       </nav>
 
-      <div className="mt-auto border-t border-white/10 pt-5">
-        <p className="truncate px-2 text-[13px] font-medium text-white/90">{organization?.name}</p>
-        <p className="mt-1 truncate px-2 text-[12px] text-white/40">{user?.fullName}</p>
+      <div className="mt-auto space-y-3 border-t border-white/10 pt-4">
+        {!buyerOnly && !bankerOnly ? (
+          <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3">
+            <div className="flex items-start gap-2.5">
+              <span className="mt-0.5 grid h-8 w-8 place-items-center rounded-lg bg-[var(--gold)]/15 text-[var(--gold)]">
+                <Building2 size={15} />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-[13px] font-medium text-white/90">
+                  {organization?.name ?? 'Organization'}
+                </p>
+                <p className="mt-0.5 text-[11px] text-white/40">Institutional account</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p className="truncate px-2 text-[13px] font-medium text-white/90">{organization?.name}</p>
+        )}
         <button
           type="button"
           onClick={() => {
             logout();
             router.push('/login');
           }}
-          className="mt-4 inline-flex items-center gap-2 rounded-xl px-2 py-2 text-[12px] text-white/45 transition hover:bg-white/[0.06] hover:text-white"
+          className="inline-flex items-center gap-2 rounded-xl px-2 py-2 text-[12px] text-white/45 transition hover:bg-white/[0.06] hover:text-white"
         >
           <LogOut size={14} />
           Sign out
@@ -227,11 +257,97 @@ function SidebarContent({
   );
 }
 
+function OperatorHeader({
+  buyerOnly,
+  bankerOnly,
+  navOpen,
+  onOpenNav,
+}: {
+  buyerOnly: boolean;
+  bankerOnly: boolean;
+  navOpen: boolean;
+  onOpenNav: () => void;
+}) {
+  const user = useAuthStore((state) => state.user);
+  const { network, address } = useWallet();
+  const consoleLabel = buyerOnly ? 'Buyer desk' : bankerOnly ? 'Credit desk' : 'Operator Console';
+  const roleLabel = user?.title ?? (buyerOnly ? 'Buyer' : bankerOnly ? 'Banker' : 'Managing Partner');
+
+  return (
+    <header className="sticky top-0 z-20 shrink-0 border-b border-[var(--line)]/80 bg-[color-mix(in_srgb,var(--paper)_86%,white)] backdrop-blur-md">
+      <div className="flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-3.5 xl:px-8">
+        <button
+          type="button"
+          className="caprov-touch-target inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--card)] text-[var(--ink)] transition hover:border-[var(--ink)]/25 xl:hidden"
+          aria-label="Open navigation"
+          aria-expanded={navOpen}
+          onClick={onOpenNav}
+        >
+          <Menu size={18} />
+        </button>
+
+        <div className="hidden min-w-0 items-center gap-2 lg:flex">
+          <p className="text-sm font-medium text-[var(--ink)]">{consoleLabel}</p>
+          <span className="text-[var(--line)]">/</span>
+          <button
+            type="button"
+            className="inline-flex items-center gap-1.5 rounded-lg px-1.5 py-1 text-sm text-[var(--muted)] transition hover:bg-black/[0.03] hover:text-[var(--ink)]"
+          >
+            {roleLabel}
+            <ChevronDown size={14} />
+          </button>
+        </div>
+
+        <label className="relative mx-auto hidden min-w-0 max-w-xl flex-1 md:block">
+          <span className="sr-only">Search</span>
+          <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
+          <input
+            type="search"
+            placeholder="Search assets, documents, users, transactions…"
+            className="h-11 w-full rounded-xl border border-[var(--line)] bg-white/80 pl-10 pr-14 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--muted)]/80 focus:border-[var(--ink)]/25 focus:bg-white"
+          />
+          <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-md border border-[var(--line)] bg-[var(--paper)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--muted)]">
+            ⌘K
+          </kbd>
+        </label>
+
+        <div className="ml-auto flex items-center gap-2 sm:gap-2.5">
+          <div className="hidden items-center gap-2 rounded-full border border-[var(--line)] bg-white/90 px-3 py-1.5 text-xs font-medium text-[var(--ink)] lg:inline-flex">
+            <span className={cn('h-1.5 w-1.5 rounded-full', address ? 'bg-[var(--ok)]' : 'bg-[var(--warn)]')} />
+            {network.chainName}
+          </div>
+          <WalletStatus />
+          <button
+            type="button"
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--line)] bg-white/90 text-[var(--ink)] transition hover:border-[var(--ink)]/20"
+            aria-label="Notifications"
+          >
+            <Bell size={16} />
+            <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-[var(--danger)] px-1 text-[9px] font-semibold text-white">
+              3
+            </span>
+          </button>
+          <div className="hidden items-center gap-2.5 rounded-xl border border-[var(--line)] bg-white/90 py-1.5 pl-1.5 pr-3 sm:flex">
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--ink)] text-[11px] font-semibold text-white">
+              {initials(user?.fullName)}
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium leading-tight text-[var(--ink)]">
+                {user?.fullName ?? 'Operator'}
+              </p>
+              <p className="truncate text-[11px] text-[var(--muted)]">{roleLabel}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
-  const user = useAuthStore((state) => state.user);
   const roles = useAuthStore((state) => state.roles);
   const buyerOnly = isBuyerOnly(roles);
   const bankerOnly = isBankerOnly(roles);
@@ -274,76 +390,57 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <WalletProvider>
-    <div className="min-h-screen xl:grid xl:grid-cols-[272px_minmax(0,1fr)]">
-      <aside className="platform-sidebar hidden text-white xl:sticky xl:top-0 xl:flex xl:h-screen xl:w-[272px] xl:flex-col">
-        <SidebarContent pathname={pathname} />
-      </aside>
-
-      <div
-        className={cn(
-          'fixed inset-0 z-40 xl:hidden',
-          navOpen ? 'pointer-events-auto' : 'pointer-events-none',
-        )}
-        aria-hidden={!navOpen}
-      >
-        <button
-          type="button"
-          tabIndex={navOpen ? 0 : -1}
-          className={cn(
-            'absolute inset-0 bg-[var(--ink)]/55 backdrop-blur-[2px] transition-opacity duration-200',
-            navOpen ? 'opacity-100' : 'opacity-0',
-          )}
-          aria-label="Dismiss navigation"
-          onClick={() => setNavOpen(false)}
-        />
-        <aside
-          className={cn(
-            'platform-sidebar absolute inset-y-0 left-0 flex w-[min(100%,20rem)] max-w-[85vw] flex-col text-white shadow-2xl transition-transform duration-200 ease-out',
-            navOpen ? 'translate-x-0' : '-translate-x-full',
-          )}
-        >
-          {navOpen ? (
-            <SidebarContent
-              pathname={pathname}
-              showClose
-              onClose={() => setNavOpen(false)}
-              onNavigate={() => setNavOpen(false)}
-            />
-          ) : null}
+      <div className="min-h-screen xl:grid xl:grid-cols-[272px_minmax(0,1fr)]">
+        <aside className="platform-sidebar hidden text-white xl:sticky xl:top-0 xl:flex xl:h-screen xl:w-[272px] xl:flex-col">
+          <SidebarContent pathname={pathname} />
         </aside>
-      </div>
 
-      <div className="platform-canvas min-w-0">
-        <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-[var(--line)]/80 bg-[color-mix(in_srgb,var(--paper)_78%,transparent)] px-4 py-3 backdrop-blur-md sm:px-6 sm:py-4 xl:px-10">
-          <div className="flex min-w-0 items-center gap-3">
-            <button
-              type="button"
-              className="caprov-touch-target inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--card)] text-[var(--ink)] transition hover:border-[var(--ink)]/25 xl:hidden"
-              aria-label="Open navigation"
-              aria-expanded={navOpen}
-              onClick={() => setNavOpen(true)}
-            >
-              <Menu size={18} />
-            </button>
-            <div className="min-w-0">
-              <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--muted)]">
-                {buyerOnly ? 'Buyer desk' : bankerOnly ? 'Credit desk' : 'Operator console'}
-              </p>
-              <p className="mt-0.5 truncate text-sm font-medium text-[var(--ink)] sm:mt-1">
-                {user?.title ?? (buyerOnly ? 'Buyer' : bankerOnly ? 'Banker workspace' : 'Operator workspace')}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden rounded-xl border border-[var(--line)] bg-[var(--card)]/90 px-3.5 py-2 text-[11px] uppercase tracking-[0.16em] text-[var(--muted)] md:block">
-              {buyerOnly ? 'Review → Buy → Settle' : bankerOnly ? 'Review → Underwrite → Disburse' : 'Collect → Review → Act'}
-            </div>
-            <WalletStatus />
-          </div>
-        </header>
-        <main className="px-4 py-6 sm:px-6 sm:py-9 xl:px-10 xl:py-10">{children}</main>
+        <div
+          className={cn(
+            'fixed inset-0 z-40 xl:hidden',
+            navOpen ? 'pointer-events-auto' : 'pointer-events-none',
+          )}
+          aria-hidden={!navOpen}
+        >
+          <button
+            type="button"
+            tabIndex={navOpen ? 0 : -1}
+            className={cn(
+              'absolute inset-0 bg-[var(--ink)]/55 backdrop-blur-[2px] transition-opacity duration-200',
+              navOpen ? 'opacity-100' : 'opacity-0',
+            )}
+            aria-label="Dismiss navigation"
+            onClick={() => setNavOpen(false)}
+          />
+          <aside
+            className={cn(
+              'platform-sidebar absolute inset-y-0 left-0 flex w-[min(100%,20rem)] max-w-[85vw] flex-col text-white shadow-2xl transition-transform duration-200 ease-out',
+              navOpen ? 'translate-x-0' : '-translate-x-full',
+            )}
+          >
+            {navOpen ? (
+              <SidebarContent
+                pathname={pathname}
+                showClose
+                onClose={() => setNavOpen(false)}
+                onNavigate={() => setNavOpen(false)}
+              />
+            ) : null}
+          </aside>
+        </div>
+
+        <div className="platform-canvas flex min-h-svh min-w-0 flex-col xl:h-svh xl:min-h-0 xl:overflow-hidden">
+          <OperatorHeader
+            buyerOnly={buyerOnly}
+            bankerOnly={bankerOnly}
+            navOpen={navOpen}
+            onOpenNav={() => setNavOpen(true)}
+          />
+          <main className="flex min-h-0 flex-1 flex-col overflow-auto px-4 py-4 sm:px-6 sm:py-5 xl:px-8 xl:py-5">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
     </WalletProvider>
   );
 }

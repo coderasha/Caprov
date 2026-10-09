@@ -71,7 +71,7 @@ export class IntelligenceController {
   }
 
   @Patch('models')
-  @Roles('ORG_ADMIN', 'PLATFORM_ADMIN', 'ANALYST')
+  @Roles('ORG_ADMIN', 'PLATFORM_ADMIN', 'ANALYST', 'BANKER')
   selectModel(@CurrentUser() user: AuthUser, @Body() dto: SelectModelDto) {
     return dto.purpose === 'DNA'
       ? this.llmModels.selectDna(user.organizationId, user.id, dto.modelId)

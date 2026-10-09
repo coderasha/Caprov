@@ -454,6 +454,9 @@ export default function CollateralPage() {
                       <Link href={`/intelligence/dna/${item.assetId}`}>
                         <Button variant="secondary">Check valuation</Button>
                       </Link>
+                      <Link href={`/intelligence/copilot?asset=${encodeURIComponent(item.assetId)}&locked=1`}>
+                        <Button variant="secondary">Ask AI about asset</Button>
+                      </Link>
                     </div>
                   ) : null}
                 </div>

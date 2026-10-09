@@ -1,228 +1,63 @@
 'use client';
 
-import { assetClassLabel } from '@/lib/format';
-import type { AssetClass } from '@caprov/types';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
+import { ArrowRight, BadgeCheck, Bookmark, Building2, ChevronLeft, ChevronRight, Globe2, MapPin, Users, WalletCards } from 'lucide-react';
 import Image from 'next/image';
-import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
-type ShowcaseAsset = {
-  id: string;
-  name: string;
-  assetClass: AssetClass;
-  location: string;
-  mark: string;
-  markLabel: string;
-  confidence: number;
-  risk: 'LOW' | 'MODERATE' | 'ELEVATED';
-  accent: string;
-  highlight: string;
-};
+const assets = [
+  { id: 'real-estate', type: 'Real estate', name: 'Harbourview Tower', location: 'Canary Wharf, London, UK', image: '/private-assets-hero-v2.png', alt: 'Illustrative waterfront office tower', value: '$92.80M', metrics: [['Expected yield', '8.7%'], ['Occupancy', '94%'], ['Risk profile', 'Moderate']], network: 'Live on Ethereum', progress: '40% available', progressValue: '60%', tokens: [['Total tokens', '928,000'], ['Token price', '$100'], ['Available', '371,200']] },
+  { id: 'machinery', type: 'Machinery', name: 'Apex Precision Works', location: 'Stuttgart, Germany', image: '/industrial-machinery-platform.png', alt: 'Precision CNC machinery in a modern production facility', value: '$34.60M', metrics: [['Expected yield', '10.2%'], ['Utilization', '91%'], ['Risk profile', 'Moderate']], network: 'Live on Besu', progress: '32% available', progressValue: '68%', tokens: [['Total tokens', '346,000'], ['Token price', '$100'], ['Available', '110,720']] },
+  { id: 'land', type: 'Development land', name: 'Riverside Development Parcel', location: 'Austin, Texas, USA', image: '/development-land-featured.png', alt: 'Illustrative aerial view of a development land asset', value: '$18.40M', metrics: [['Target IRR', '14.1%'], ['Entitlement', 'Advanced'], ['Risk profile', 'Balanced']], network: 'Live on Ethereum', progress: '55% available', progressValue: '45%', tokens: [['Total tokens', '184,000'], ['Token price', '$100'], ['Available', '101,200']] },
+  { id: 'private-equity', type: 'Private equity', name: 'Nova Biosystems', location: 'Cambridge, Massachusetts, USA', image: '/private-equity-featured.png', alt: 'Illustrative advanced life sciences portfolio company campus', value: '$47.20M', metrics: [['Revenue growth', '22.4%'], ['EBITDA margin', '31%'], ['Risk profile', 'Growth']], network: 'Live on Besu', progress: '28% available', progressValue: '72%', tokens: [['Total tokens', '472,000'], ['Token price', '$100'], ['Available', '132,160']] },
+] as const;
 
-const showcaseAssets: ShowcaseAsset[] = [
-  {
-    id: 'harbourview',
-    name: 'Harbourview Tower',
-    assetClass: 'REAL_ESTATE',
-    location: 'Canary Wharf, London',
-    mark: '$92.80m',
-    markLabel: 'Market mark',
-    confidence: 0.94,
-    risk: 'MODERATE',
-    accent: 'from-[#151c2c] via-[#1f2a3f] to-[#0e1420]',
-    highlight: 'Grade A office · 94% occupancy',
-  },
-  {
-    id: 'aurelia',
-    name: 'Aurelia Private Credit Fund III',
-    assetClass: 'PRIVATE_CREDIT',
-    location: 'Delaware · LP commitment',
-    mark: '$48.25m',
-    markLabel: 'Latest NAV',
-    confidence: 0.91,
-    risk: 'MODERATE',
-    accent: 'from-[#18140f] via-[#2e2418] to-[#100d08]',
-    highlight: '11.4% current yield · 96% called',
-  },
-  {
-    id: 'soleil',
-    name: 'Domaine Soleil',
-    assetClass: 'AGRICULTURE',
-    location: 'Saint-Émilion, France',
-    mark: '€18.60m',
-    markLabel: 'Market mark',
-    confidence: 0.89,
-    risk: 'LOW',
-    accent: 'from-[#141a13] via-[#243824] to-[#0c100c]',
-    highlight: '42 hectares · Grand Cru classé',
-  },
-  {
-    id: 'nimbus',
-    name: 'Nimbus G650ER',
-    assetClass: 'AVIATION',
-    location: 'Isle of Man registry',
-    mark: '$31.40m',
-    markLabel: 'Market mark',
-    confidence: 0.92,
-    risk: 'LOW',
-    accent: 'from-[#0e141c] via-[#182634] to-[#080c12]',
-    highlight: '2,140 airframe hours · JSSI enrolled',
-  },
-  {
-    id: 'kline',
-    name: 'Kline Collection — Untitled (1967)',
-    assetClass: 'ART',
-    location: 'Geneva freeport',
-    mark: '$6.75m',
-    markLabel: 'Fair value',
-    confidence: 0.88,
-    risk: 'LOW',
-    accent: 'from-[#1c1412] via-[#342018] to-[#100c0a]',
-    highlight: 'Condition: excellent · Insured',
-  },
-  {
-    id: 'cedar',
-    name: 'Cedar Ridge Industrial Park',
-    assetClass: 'INFRASTRUCTURE',
-    location: 'Tuas, Singapore',
-    mark: 'S$64.20m',
-    markLabel: 'Market mark',
-    confidence: 0.93,
-    risk: 'MODERATE',
-    accent: 'from-[#101418] via-[#1c2834] to-[#080a0e]',
-    highlight: 'Logistics · 100% leased',
-  },
-];
-
-const riskLabel = {
-  LOW: 'Low',
-  MODERATE: 'Moderate',
-  ELEVATED: 'Elevated',
-} as const;
-
+/** Illustrative records rotate together so facts and imagery always remain coherent. */
 export function LandingAssetCarousel() {
-  const [active, setActive] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-
-  const goTo = useCallback((index: number) => {
-    setActive((index + showcaseAssets.length) % showcaseAssets.length);
-  }, []);
-
-  const next = useCallback(() => goTo(active + 1), [active, goTo]);
-  const prev = useCallback(() => goTo(active - 1), [active, goTo]);
+  const asset = assets[activeIndex]!;
+  const select = (index: number) => setActiveIndex((index + assets.length) % assets.length);
 
   useEffect(() => {
     if (paused) return;
-    const timer = window.setInterval(next, 7000);
+    const timer = window.setInterval(() => setActiveIndex((current) => (current + 1) % assets.length), 6500);
     return () => window.clearInterval(timer);
-  }, [next, paused]);
-
-  const activeAsset = showcaseAssets[active] ?? showcaseAssets[0]!;
+  }, [paused]);
 
   return (
-    <div
-      className="landing-asset-carousel landing-surface flex w-full min-w-0 flex-col overflow-hidden"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
-    >
-      <div className="flex items-center justify-between gap-4 border-b border-[var(--ink)]/6 px-6 py-4 sm:px-7">
-        <div className="min-w-0">
-          <p className="landing-kicker">Illustrative book</p>
-          <p className="mt-1 text-sm text-[var(--muted)]">Sample records across private-asset classes</p>
+    <div className="landing-featured-asset" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={() => setPaused(false)}>
+      <div className="landing-featured-asset__record" key={asset.id}>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="landing-featured-asset__eyebrow"><span aria-hidden="true" /> Featured asset <b><BadgeCheck size={11} /> Verified</b></div>
+            <h2>{asset.name}</h2>
+            <p className="landing-featured-asset__location"><MapPin size={13} /> {asset.location}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="landing-featured-asset__type">{asset.type}</span>
+            <div className="landing-featured-asset__controls" aria-label="Featured assets">
+              <button type="button" onClick={() => select(activeIndex - 1)} aria-label="Previous featured asset"><ChevronLeft size={15} /></button>
+              <button type="button" onClick={() => select(activeIndex + 1)} aria-label="Next featured asset"><ChevronRight size={15} /></button>
+            </div>
+          </div>
         </div>
-        <span className="landing-badge landing-badge--teal shrink-0">Sample</span>
-      </div>
-
-      <div className="landing-asset-carousel__viewport relative px-6 py-6 sm:px-7">
-        {showcaseAssets.map((item, index) => {
-          const isActive = index === active;
-          return (
-            <article
-              key={item.id}
-              aria-hidden={!isActive}
-              className={`landing-asset-carousel__slide ${isActive ? 'landing-asset-carousel__slide--active' : ''}`}
-            >
-              <div className={`landing-asset-carousel__visual bg-gradient-to-br ${item.accent}`}>
-                <Image
-                  src="/private-assets-hero.png"
-                  alt=""
-                  fill
-                  priority={index === 0}
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                  className="object-cover opacity-35 mix-blend-luminosity"
-                />
-                <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,15,26,0.55),rgba(10,15,26,0.16),rgba(10,15,26,0.42))]" aria-hidden="true" />
-                <div className="landing-asset-carousel__visual-shine" aria-hidden="true" />
-                <div className="relative z-10 flex h-full min-h-[12.5rem] flex-col justify-between p-6 sm:min-h-[14rem]">
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="landing-badge landing-badge--glass">{assetClassLabel[item.assetClass]}</span>
-                    <span className="text-[11px] uppercase tracking-[0.16em] text-white/50">
-                      {Math.round(item.confidence * 100)}% confidence
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-white/45">{item.location}</p>
-                    <h3 className="mt-2 font-display text-[1.65rem] font-semibold leading-tight tracking-[-0.03em] text-white sm:text-[1.85rem]">
-                      {item.name}
-                    </h3>
-                    <p className="mt-2 text-sm text-white/60">{item.highlight}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-5 grid gap-px overflow-hidden rounded-2xl border border-[var(--ink)]/6 bg-[var(--ink)]/6 sm:grid-cols-3">
-                <div className="bg-white px-5 py-4">
-                  <p className="landing-metric-label">{item.markLabel}</p>
-                  <p className="landing-metric-value mt-2">{item.mark}</p>
-                </div>
-                <div className="bg-white px-5 py-4">
-                  <p className="landing-metric-label">Risk profile</p>
-                  <p className="mt-2 text-sm font-medium text-[var(--ink)]">{riskLabel[item.risk]}</p>
-                </div>
-                <div className="bg-[var(--paper)] px-5 py-4 sm:col-span-1">
-                  <p className="landing-metric-label">Record status</p>
-                  <p className="mt-2 text-sm font-medium text-[var(--ink)]">Review ready</p>
-                </div>
-              </div>
-            </article>
-          );
-        })}
-      </div>
-
-      <div className="flex items-center justify-between gap-4 border-t border-[var(--ink)]/6 px-6 py-4 sm:px-7">
-        <div className="flex items-center gap-2">
-          <button type="button" className="landing-icon-btn" aria-label="Previous asset" onClick={prev}>
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <button type="button" className="landing-icon-btn" aria-label="Next asset" onClick={next}>
-            <ChevronRight className="h-4 w-4" />
-          </button>
+        <div className="landing-featured-asset__body">
+          <div className="landing-featured-asset__gallery">
+            <div className="landing-featured-asset__main-image"><Image src={asset.image} alt={asset.alt} fill priority={activeIndex === 0} sizes="(min-width: 1024px) 24rem, 100vw" className="object-cover" /></div>
+            <div className="landing-featured-asset__thumbs" aria-hidden="true">{['20% 65%', '80% 45%', '62% 80%'].map((position) => <div key={position}><Image src={asset.image} alt="" fill sizes="4rem" className="object-cover" style={{ objectPosition: position }} /></div>)}</div>
+          </div>
+          <div className="landing-featured-asset__facts">
+            <div className="landing-featured-asset__value"><p>Total asset value</p><strong>{asset.value}</strong></div>
+            <div className="landing-featured-asset__metric-grid">{asset.metrics.map(([label, value]) => <div key={label}><p>{label}</p><strong>{value}</strong></div>)}</div>
+            <div className="landing-featured-asset__tokenization"><div><p>Tokenization</p><strong>{asset.network}</strong></div><div className="landing-featured-asset__progress"><span style={{ width: asset.progressValue }} /></div><p>{asset.progress}</p></div>
+            <div className="landing-featured-asset__token-stats">{asset.tokens.map(([label, value]) => <div key={label}><p>{label}</p><strong>{value}</strong></div>)}</div>
+          </div>
         </div>
-        <div className="landing-asset-carousel__dots flex items-center gap-2">
-          {showcaseAssets.map((item, index) => (
-            <button
-              key={item.id}
-              type="button"
-              aria-label={'View ' + assetClassLabel[item.assetClass] + ' category: ' + item.name}
-              aria-current={index === active ? 'true' : undefined}
-              className={`landing-asset-carousel__dot ${index === active ? 'landing-asset-carousel__dot--active' : ''}`}
-              onClick={() => goTo(index)}
-            />
-          ))}
-        </div>
+        <div className="landing-featured-asset__actions"><Link href="/login">View asset details <ArrowRight size={15} /></Link><button type="button"><Bookmark size={15} /> Add to watchlist</button></div>
+        <div className="landing-featured-asset__dots" aria-label="Choose featured asset">{assets.map((item, index) => <button key={item.id} type="button" onClick={() => select(index)} aria-label={`Show ${item.name}`} aria-current={index === activeIndex}><span /></button>)}</div>
       </div>
-
-      <div className="flex flex-col gap-2 border-t border-[var(--ink)]/6 bg-[var(--paper)]/70 px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-        <p className="text-xs text-[var(--muted)]">
-          {assetClassLabel[activeAsset.assetClass]} · {active + 1} of {showcaseAssets.length}
-        </p>
-        <Link href="/login" className="landing-text-link text-sm">
-          Explore Asset DNA
-        </Link>
-      </div>
+      <div className="landing-featured-asset__proof"><div><Building2 /><span><b>1,200+</b>Verified assets</span></div><div><Users /><span><b>$12.4B+</b>Total asset value</span></div><div><WalletCards /><span><b>320+</b>Institutional investors</span></div><div><Globe2 /><span><b>25+</b>Countries</span></div></div>
     </div>
   );
 }

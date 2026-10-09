@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type {
   AssetDnaEnvelope,
   IntelligenceJobType,
@@ -251,7 +251,7 @@ export class IntelligenceService {
     input: { message: string; assetId?: string; threadId?: string },
   ) {
     const asset = input.assetId
-      ? this.assertAsset(user.organizationId, input.assetId)
+      ? this.assertAsset(this.organizationForAssetRead(user, input.assetId), input.assetId)
       : undefined;
     const documents = input.assetId
       ? this.db.snapshot.documents.filter(
@@ -291,14 +291,20 @@ export class IntelligenceService {
           : resolved.answer;
 
     const now = new Date().toISOString();
-    const thread =
-      (input.threadId &&
-        this.db.snapshot.copilotThreads.find(
+    const existingThread = input.threadId && this.db.snapshot.copilotThreads.find(
           (item) =>
             item.id === input.threadId &&
             item.organizationId === user.organizationId,
-        )) ||
-      this.db.mutate((draft) => {
+        );
+    if (input.threadId && !existingThread) {
+      throw new NotFoundException('Copilot thread not found');
+    }
+    // A thread is permanently bound to its original asset context. This avoids
+    // accidental evidence mixing when a user changes the selected asset.
+    if (existingThread && existingThread.assetId !== input.assetId) {
+      throw new BadRequestException('This Copilot thread belongs to a different asset. Start a new conversation for the selected asset.');
+    }
+    const thread = existingThread || this.db.mutate((draft) => {
         const created = {
           id: createId('thd'),
           organizationId: user.organizationId,
@@ -310,7 +316,7 @@ export class IntelligenceService {
         };
         draft.copilotThreads.unshift(created);
         return created;
-      });
+    });
 
     this.db.mutate((draft) => {
       draft.copilotMessages.push(
