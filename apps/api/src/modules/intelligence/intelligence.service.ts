@@ -248,16 +248,25 @@ export class IntelligenceService {
 
   async chat(
     user: AuthUser,
-    input: { message: string; assetId?: string; threadId?: string },
+    input: {
+      message: string;
+      assetId?: string;
+      threadId?: string;
+      searchDocuments?: boolean;
+      includeMarketData?: boolean;
+    },
   ) {
+    const searchDocuments = input.searchDocuments !== false;
+    const includeMarketData = input.includeMarketData !== false;
     const asset = input.assetId
       ? this.assertAsset(this.organizationForAssetRead(user, input.assetId), input.assetId)
       : undefined;
-    const documents = input.assetId
+    const allDocuments = input.assetId
       ? this.db.snapshot.documents.filter(
           (item) => item.assetId === input.assetId && item.isCurrent !== false,
         )
       : [];
+    const documents = searchDocuments ? allDocuments : [];
     const envelope = input.assetId
       ? this.db.snapshot.dnaSnapshots
           .filter((item) => item.assetId === input.assetId)
@@ -270,7 +279,10 @@ export class IntelligenceService {
       envelope,
       documents,
     );
-    const context = this.buildCopilotContext(envelope, documents, asset?.name);
+    const context = this.buildCopilotContext(envelope, documents, asset?.name, {
+      includeMarketData,
+      searchDocuments,
+    });
     const resolved = await resolveCopilotAnswer({
       model: selectedModel,
       question: input.message,
@@ -281,14 +293,10 @@ export class IntelligenceService {
     const briefing =
       resolved.mode === 'deterministic'
         ? local.briefing
-        : createSynthesisBriefing(resolved.answer, resolved.note);
+        : createSynthesisBriefing(resolved.answer);
 
     const answer =
-      resolved.mode === 'deterministic'
-        ? local.answer
-        : resolved.note
-          ? `${resolved.answer}\n\n${resolved.note}`
-          : resolved.answer;
+      resolved.mode === 'deterministic' ? local.answer : resolved.answer;
 
     const now = new Date().toISOString();
     const existingThread = input.threadId && this.db.snapshot.copilotThreads.find(
@@ -417,7 +425,10 @@ export class IntelligenceService {
     envelope: AssetDnaEnvelope | undefined,
     documents: PipelineDocument[],
     assetName?: string,
+    options: { includeMarketData?: boolean; searchDocuments?: boolean } = {},
   ): string {
+    const includeMarketData = options.includeMarketData !== false;
+    const searchDocuments = options.searchDocuments !== false;
     const lines: string[] = [];
     if (assetName) {
       lines.push(`Asset: ${assetName}`);
@@ -425,7 +436,7 @@ export class IntelligenceService {
     if (envelope?.summary) {
       lines.push(`Summary: ${envelope.summary}`);
     }
-    if (envelope?.valuation) {
+    if (includeMarketData && envelope?.valuation) {
       lines.push(
         `Valuation: ${envelope.valuation.amount} ${envelope.valuation.currency} (${envelope.valuation.asOf})`,
       );
@@ -434,12 +445,20 @@ export class IntelligenceService {
       lines.push(`Risk: ${envelope.risk.rating} (${envelope.risk.overall})`);
     }
     for (const fact of envelope?.facts?.slice(0, 24) ?? []) {
+      if (
+        !includeMarketData &&
+        /market|valuation|nav|price|mark/i.test(fact.key)
+      ) {
+        continue;
+      }
       lines.push(`Fact ${fact.key}: ${String(fact.value)}`);
     }
-    for (const document of documents.slice(0, 8)) {
-      const excerpt = (document.extractedText ?? '').slice(0, 400);
-      if (excerpt) {
-        lines.push(`Document ${document.name}: ${excerpt}`);
+    if (searchDocuments) {
+      for (const document of documents.slice(0, 8)) {
+        const excerpt = (document.extractedText ?? '').slice(0, 400);
+        if (excerpt) {
+          lines.push(`Document ${document.name}: ${excerpt}`);
+        }
       }
     }
     return lines.join('\n').slice(0, 12_000);
@@ -685,7 +704,7 @@ export class IntelligenceService {
   }
 }
 
-function createSynthesisBriefing(answer: string, note?: string) {
+function createSynthesisBriefing(answer: string) {
   const parts = answer
     .split(/^\s*#{1,3}\s+/m)
     .map((part) => part.trim())
@@ -706,13 +725,11 @@ function createSynthesisBriefing(answer: string, note?: string) {
     sections[0] ??
     { title: 'Answer', body: 'No response returned.', kind: 'detail' as const };
   return {
-    title: 'Model synthesis',
+    title: 'Briefing',
     headline: answerSection?.body.split(/[\n.!?]/)[0]?.trim() || 'Response prepared from the current Asset DNA context.',
-    sections: [
-      ...sections,
-      ...(note ? [{ title: 'Service note', body: note, kind: 'note' as const }] : []),
-    ],
-    disclaimer: 'Remote-model synthesis over Asset DNA context. Verify material conclusions against source documents.',
+    sections,
+    disclaimer:
+      'Briefing grounded in the selected asset DNA and authorized sources. Verify material conclusions against source documents.',
   };
 }
 

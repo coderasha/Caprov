@@ -54,6 +54,7 @@ export interface DocumentRow {
   sizeBytes: number;
   createdAt: string;
   extractedText?: string;
+  hasExtractedText?: boolean;
   version?: number;
   isCurrent?: boolean;
   versionStatus?: 'CURRENT' | 'PREVIOUS';

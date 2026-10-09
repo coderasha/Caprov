@@ -1,5 +1,6 @@
 'use client';
 
+import { BuyerMarketplace } from '@/components/marketplace/buyer-marketplace';
 import { PageHeader } from '@/components/layout/page-header';
 import { useWallet } from '@/components/wallet/wallet-provider';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +19,15 @@ import axios from 'axios';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
+
+function isBuyerOnly(roles: string[]) {
+  return (
+    roles.includes('BUYER') &&
+    !roles.some((role) =>
+      ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN', 'BANKER'].includes(role),
+    )
+  );
+}
 
 interface Listing {
   id: string;
@@ -92,8 +102,17 @@ const shortTokenId = (tokenId: string) =>
   tokenId.length > 14 ? `${tokenId.slice(0, 6)}…${tokenId.slice(-4)}` : tokenId;
 
 export default function MarketplacePage() {
+  const roles = useAuthStore((state) => state.roles);
+  if (isBuyerOnly(roles)) {
+    return <BuyerMarketplace />;
+  }
+  return <ListerMarketplace />;
+}
+
+function ListerMarketplace() {
   const client = useQueryClient();
-  const canList = useAuthStore((state) => state.roles).some((role) =>
+  const roles = useAuthStore((state) => state.roles);
+  const canList = roles.some((role) =>
     ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN'].includes(role),
   );
   const { address: connectedWallet = '', network: selectedNetwork } = useWallet();

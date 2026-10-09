@@ -109,8 +109,8 @@ export default function Home() {
         <div className="relative z-10 w-full">
           <LandingHeader />
 
-          <div className="landing-shell pb-14 pt-8 sm:pb-20 sm:pt-10">
-            <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-14">
+          <div className="landing-shell pb-12 pt-6 sm:pb-16 sm:pt-8 lg:pb-20">
+            <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-10 xl:gap-12">
               <div className="landing-fade landing-fade--delay-1 min-w-0">
                 <div className="landing-hero__overline">
                   <span className="landing-hero__pulse" aria-hidden="true" />
@@ -343,7 +343,11 @@ export default function Home() {
         <div className="landing-shell landing-footer__inner">
           <div className="landing-footer__top">
             <div className="landing-footer__brand">
-              <CaprovWordmark className="font-display text-xl font-semibold text-white" markClassName="text-[var(--gold-soft)]" />
+              <CaprovWordmark
+                tone="dark"
+                variant="full"
+                className="landing-footer__logo"
+              />
               <p className="landing-footer__tagline">
                 Evidence, markets, and credit on one private-asset record.
               </p>

@@ -213,6 +213,19 @@ export async function switchWalletToSelectedNetwork() {
   const provider = await selectedProvider();
   const network = selectedBlockchainNetwork();
   const chainId = `0x${network.chainId.toString(16)}`;
+
+  // Sepolia is usually already present in MetaMask. Prefer a silent no-op when
+  // the wallet is already on the selected chain — re-prompting switch/add can
+  // crash some MetaMask builds while they resolve the page origin.
+  try {
+    const current = await provider.request({ method: 'eth_chainId' });
+    if (typeof current === 'string' && current.toLowerCase() === chainId.toLowerCase()) {
+      return;
+    }
+  } catch {
+    // Fall through to an explicit switch if the chain-id probe fails.
+  }
+
   try {
     await provider.request({
       method: 'wallet_switchEthereumChain',
@@ -226,6 +239,11 @@ export async function switchWalletToSelectedNetwork() {
     // MetaMask does not need an explorer to add a chain. In particular, avoid
     // passing a loopback Blockscout URL: some extension builds fail while
     // resolving its origin before the RPC request is made.
+    if (!network.rpcUrl || !/^https?:\/\//i.test(network.rpcUrl) || isLoopbackUrl(network.rpcUrl)) {
+      throw new Error(
+        `${network.chainName} RPC URL is invalid for MetaMask. Set a public HTTPS RPC in NEXT_PUBLIC_ETHEREUM_SEPOLIA_RPC_URL (or Besu equivalent).`,
+      );
+    }
     const blockExplorerUrls = network.blockExplorerUrl && !isLoopbackUrl(network.blockExplorerUrl)
       ? { blockExplorerUrls: [network.blockExplorerUrl] }
       : {};
@@ -236,14 +254,20 @@ export async function switchWalletToSelectedNetwork() {
         chainName: network.chainName,
         rpcUrls: [network.rpcUrl],
         nativeCurrency: {
-          name: network.chainName,
-          symbol: network.id === 'besu' ? 'BESU' : 'SEP',
+          name: network.id === 'besu' ? network.chainName : 'Sepolia Ether',
+          symbol: network.id === 'besu' ? 'BESU' : 'ETH',
           decimals: 18,
         },
         ...blockExplorerUrls,
       }],
     });
   }
+}
+
+/** Switch MetaMask to the CAPROV-selected chain without reopening the connect prompt. */
+export async function alignMetaMaskToSelectedNetwork() {
+  await selectedProvider();
+  await switchWalletToSelectedNetwork();
 }
 
 function isLoopbackUrl(value: string) {

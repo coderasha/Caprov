@@ -1,4 +1,5 @@
-import { spawnSync } from 'node:child_process';
+import { accessSync, constants } from 'node:fs';
+import { delimiter, join } from 'node:path';
 import type { LlmModelOption } from '@caprov/types';
 
 export const DEFAULT_LLM_MODEL_ID = 'caprov-deterministic';
@@ -163,15 +164,35 @@ export const LLM_MODEL_CATALOG: LlmModelOption[] = [
   },
 ];
 
+function resolveOnPath(bin: string): string | undefined {
+  if (bin.includes('/') || bin.includes('\\')) {
+    try {
+      accessSync(bin, constants.X_OK);
+      return bin;
+    } catch {
+      return undefined;
+    }
+  }
+  for (const dir of (process.env.PATH ?? '').split(delimiter)) {
+    if (!dir) continue;
+    const candidate = join(dir, bin);
+    try {
+      accessSync(candidate, constants.X_OK);
+      return candidate;
+    } catch {
+      // keep scanning PATH
+    }
+  }
+  return undefined;
+}
+
 function hasCursorAgentBinary(): boolean {
   if (cursorAgentAvailable !== undefined) {
     return cursorAgentAvailable;
   }
-
-  const probe = spawnSync(CURSOR_AGENT_BINARY, ['--version'], {
-    stdio: 'ignore',
-  });
-  cursorAgentAvailable = probe.status === 0;
+  // PATH lookup only — avoid spawnSync, which can stall for hundreds of ms
+  // when the CLI is missing and block intelligence model listing.
+  cursorAgentAvailable = Boolean(resolveOnPath(CURSOR_AGENT_BINARY));
   return cursorAgentAvailable;
 }
 

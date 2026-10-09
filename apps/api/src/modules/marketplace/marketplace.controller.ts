@@ -34,6 +34,7 @@ import { EthereumSepoliaTokenService } from '../../infrastructure/blockchain/eth
 import { EthereumSepoliaMarketplaceService } from '../../infrastructure/blockchain/ethereum-sepolia-marketplace.service';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import { createId } from '../../infrastructure/database/ids';
+import { persistImageUrl } from '../../infrastructure/media/media-urls';
 import { AuditService } from '../audit/audit.service';
 
 class CreateListingDto {
@@ -208,7 +209,13 @@ export class MarketplaceController {
       ...(sourceListing ?? {}),
       id: createId('lst'), organizationId: user.organizationId, assetId: asset.id,
       title: dto.title?.trim() || sourceListing?.title || `${asset.name} token units`, offeringType: 'SALE', status: 'OPEN',
-      summary: dto.summary?.trim() ?? sourceListing?.summary, imageUrl: dto.imageUrl?.trim() || sourceListing?.imageUrl || asset.primaryImageUrl || asset.imageUrls?.[0],
+      summary: dto.summary?.trim() ?? sourceListing?.summary,
+      imageUrl: persistImageUrl(
+        dto.imageUrl?.trim() ||
+          sourceListing?.imageUrl ||
+          asset.primaryImageUrl ||
+          asset.imageUrls?.[0],
+      ),
       askPrice: dto.askPrice, currency: 'USD', quantityBps: 0, remainingBps: 0,
       tokenPositionId: token.id, tokenizationMode: token.mode, assetTokenId: token.tokenId,
       totalTokenSupply: token.supply, availableTokenUnits: dto.availableTokenUnits,
@@ -366,8 +373,9 @@ export class MarketplaceController {
       offeringType,
       status: 'OPEN',
       summary: dto.summary?.trim(),
-      imageUrl:
+      imageUrl: persistImageUrl(
         dto.imageUrl?.trim() || asset.primaryImageUrl || asset.imageUrls?.[0],
+      ),
       askPrice,
       currency: 'USD',
       leaseRate:
@@ -438,9 +446,22 @@ export class MarketplaceController {
   }
 
   private hydrate(listing: MarketplaceListing) {
-    const asset =
+    const rawAsset =
       this.db.snapshot.assets.find((item) => item.id === listing.assetId) ??
       null;
+    const asset = rawAsset
+      ? {
+          id: rawAsset.id,
+          name: rawAsset.name,
+          assetClass: rawAsset.assetClass,
+          currency: rawAsset.currency,
+          location: rawAsset.location,
+          jurisdiction: rawAsset.jurisdiction,
+          description: rawAsset.description,
+          primaryImageUrl: rawAsset.primaryImageUrl,
+          imageUrls: rawAsset.imageUrls?.slice(0, 1),
+        }
+      : null;
     const valuation =
       this.db.snapshot.valuations
         .filter((item) => item.assetId === listing.assetId)
@@ -457,6 +478,10 @@ export class MarketplaceController {
         .filter((item) => item.assetId === listing.assetId)
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] ??
       null;
-    return { ...listing, asset, valuation, risk, token };
+    const imageUrl =
+      persistImageUrl(listing.imageUrl) ??
+      asset?.primaryImageUrl ??
+      asset?.imageUrls?.[0];
+    return { ...listing, imageUrl, asset, valuation, risk, token };
   }
 }

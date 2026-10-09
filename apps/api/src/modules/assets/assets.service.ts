@@ -7,9 +7,18 @@ import type {
 } from '@caprov/types';
 import type { AuthUser } from '../../common/types/auth-user';
 import { DatabaseService } from '../../infrastructure/database/database.service';
+import type {
+  AssetDnaSnapshotRecord,
+  CaprovData,
+} from '../../infrastructure/database/models';
 import { createId } from '../../infrastructure/database/ids';
 import { AuditService } from '../audit/audit.service';
 import { IntelligenceService } from '../intelligence/intelligence.service';
+import {
+  MAX_IMAGE_BYTES,
+  persistImageUrl,
+  persistImageUrls,
+} from '../../infrastructure/media/media-urls';
 
 export interface CreateAssetInput {
   name: string;
@@ -41,9 +50,10 @@ export class AssetsService {
   ) {}
 
   list(organizationId: string) {
-    return this.db.snapshot.assets
-      .filter((asset) => asset.organizationId === organizationId)
-      .map((asset) => this.hydrate(asset.id));
+    return this.hydrateMany(
+      this.db.snapshot.assets.filter((asset) => asset.organizationId === organizationId),
+      { slim: true },
+    );
   }
 
   /** A lender's inventory is only the assets actively presented for credit review. */
@@ -54,9 +64,10 @@ export class AssetsService {
           .filter((position) => ['PENDING_APPROVAL', 'ACTIVE'].includes(position.status))
           .map((position) => position.assetId),
       );
-      return this.db.snapshot.assets
-        .filter((asset) => collateralAssetIds.has(asset.id))
-        .map((asset) => this.hydrate(asset.id));
+      return this.hydrateMany(
+        this.db.snapshot.assets.filter((asset) => collateralAssetIds.has(asset.id)),
+        { slim: true },
+      );
     }
     return this.list(user.organizationId);
   }
@@ -99,6 +110,12 @@ export class AssetsService {
 
   create(user: AuthUser, input: CreateAssetInput) {
     const now = new Date().toISOString();
+    const imageUrls = persistImageUrls(
+      normalizeImageUrls(input.imageUrls, input.primaryImageUrl),
+    );
+    const primaryImageUrl =
+      persistImageUrl(input.primaryImageUrl) ?? imageUrls[0];
+    assertImageBudget(input.primaryImageUrl, input.imageUrls);
     const asset = {
       id: createId('ast'),
       organizationId: user.organizationId,
@@ -110,8 +127,8 @@ export class AssetsService {
       location: input.location,
       description: input.description,
       creationDate: input.creationDate,
-      primaryImageUrl: input.primaryImageUrl,
-      imageUrls: normalizeImageUrls(input.imageUrls, input.primaryImageUrl),
+      primaryImageUrl,
+      imageUrls,
       createdAt: now,
       updatedAt: now,
     };
@@ -130,23 +147,33 @@ export class AssetsService {
 
   update(user: AuthUser, assetId: string, input: Partial<CreateAssetInput>) {
     this.get(user.organizationId, assetId);
+    if (input.primaryImageUrl != null || input.imageUrls != null) {
+      assertImageBudget(input.primaryImageUrl, input.imageUrls);
+    }
     this.db.mutate((draft) => {
       const asset = draft.assets.find((item) => item.id === assetId);
       if (!asset) {
         return;
       }
+      const nextImageUrls =
+        input.imageUrls != null || input.primaryImageUrl != null
+          ? persistImageUrls(
+              normalizeImageUrls(
+                input.imageUrls,
+                input.primaryImageUrl ?? asset.primaryImageUrl,
+              ),
+            )
+          : asset.imageUrls;
+      const nextPrimary =
+        input.primaryImageUrl != null || input.imageUrls != null
+          ? persistImageUrl(input.primaryImageUrl) ?? nextImageUrls?.[0]
+          : asset.primaryImageUrl;
       Object.assign(asset, {
         ...input,
         status: input.status ?? asset.status,
         currency: 'USD',
-        primaryImageUrl: input.primaryImageUrl ?? asset.primaryImageUrl,
-        imageUrls:
-          input.imageUrls != null || input.primaryImageUrl != null
-            ? normalizeImageUrls(
-                input.imageUrls,
-                input.primaryImageUrl ?? asset.primaryImageUrl,
-              )
-            : asset.imageUrls,
+        primaryImageUrl: nextPrimary,
+        imageUrls: nextImageUrls,
         updatedAt: new Date().toISOString(),
       });
     });
@@ -204,38 +231,128 @@ export class AssetsService {
   }
 
   hydrate(assetId: string) {
-    const asset = this.db.snapshot.assets.find((item) => item.id === assetId);
-    if (!asset) {
-      return null;
-    }
-    const ownerships = this.db.snapshot.ownerships.filter(
-      (item) => item.assetId === assetId,
+    return (
+      this.hydrateMany(
+        this.db.snapshot.assets.filter((item) => item.id === assetId),
+        { slim: false },
+      )[0] ?? null
     );
-    const documents = this.db.snapshot.documents.filter(
-      (item) => item.assetId === assetId && item.isCurrent !== false,
-    );
-    const dna = this.db.snapshot.dnaSnapshots
-      .filter((item) => item.assetId === assetId)
-      .sort((a, b) => b.version - a.version)[0];
-    const valuation = this.db.snapshot.valuations
-      .filter((item) => item.assetId === assetId)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
-    const risk = this.db.snapshot.risks
-      .filter((item) => item.assetId === assetId)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
-    const jobs = this.db.snapshot.jobs.filter(
-      (item) => item.assetId === assetId,
-    );
-    return {
-      ...asset,
-      ownerships,
-      documentCount: documents.length,
-      latestDna: dna ?? null,
-      latestValuation: valuation ?? null,
-      latestRisk: risk ?? null,
-      jobCount: jobs.length,
-    };
   }
+
+  /**
+   * Batch hydrate with one pass over related collections. List responses use a
+   * slim DNA envelope so the platform shell stays responsive under large orgs.
+   */
+  private hydrateMany(
+    assets: CaprovData['assets'],
+    options: { slim: boolean },
+  ) {
+    if (!assets.length) return [];
+    const assetIds = new Set(assets.map((asset) => asset.id));
+    const ownershipsByAsset = groupByAssetId(
+      this.db.snapshot.ownerships.filter((item) => assetIds.has(item.assetId)),
+    );
+    const documentCountByAsset = countByAssetId(
+      this.db.snapshot.documents.filter(
+        (item): item is typeof item & { assetId: string } =>
+          Boolean(item.assetId) &&
+          assetIds.has(item.assetId as string) &&
+          item.isCurrent !== false,
+      ),
+    );
+    const latestDnaByAsset = latestByAssetId(
+      this.db.snapshot.dnaSnapshots.filter((item) => assetIds.has(item.assetId)),
+      (item) => item.version,
+    );
+    const latestValuationByAsset = latestByAssetId(
+      this.db.snapshot.valuations.filter((item) => assetIds.has(item.assetId)),
+      (item) => item.createdAt,
+    );
+    const latestRiskByAsset = latestByAssetId(
+      this.db.snapshot.risks.filter((item) => assetIds.has(item.assetId)),
+      (item) => item.createdAt,
+    );
+    const jobCountByAsset = countByAssetId(
+      this.db.snapshot.jobs.filter(
+        (item): item is typeof item & { assetId: string } =>
+          Boolean(item.assetId) && assetIds.has(item.assetId as string),
+      ),
+    );
+
+    return assets.map((asset) => {
+      const dna = latestDnaByAsset.get(asset.id) ?? null;
+      return {
+        ...asset,
+        ownerships: ownershipsByAsset.get(asset.id) ?? [],
+        documentCount: documentCountByAsset.get(asset.id) ?? 0,
+        latestDna: options.slim ? slimDnaSnapshot(dna) : dna,
+        latestValuation: latestValuationByAsset.get(asset.id) ?? null,
+        latestRisk: latestRiskByAsset.get(asset.id) ?? null,
+        jobCount: jobCountByAsset.get(asset.id) ?? 0,
+      };
+    });
+  }
+}
+
+function groupByAssetId<T extends { assetId: string }>(items: T[]) {
+  const map = new Map<string, T[]>();
+  for (const item of items) {
+    const bucket = map.get(item.assetId);
+    if (bucket) bucket.push(item);
+    else map.set(item.assetId, [item]);
+  }
+  return map;
+}
+
+function countByAssetId<T extends { assetId: string }>(items: T[]) {
+  const map = new Map<string, number>();
+  for (const item of items) {
+    map.set(item.assetId, (map.get(item.assetId) ?? 0) + 1);
+  }
+  return map;
+}
+
+function latestByAssetId<T extends { assetId: string }>(
+  items: T[],
+  rank: (item: T) => string | number,
+) {
+  const map = new Map<string, T>();
+  for (const item of items) {
+    const current = map.get(item.assetId);
+    if (!current || rank(item) > rank(current)) {
+      map.set(item.assetId, item);
+    }
+  }
+  return map;
+}
+
+function slimDnaSnapshot(dna: AssetDnaSnapshotRecord | null) {
+  if (!dna) return null;
+  const facts = (dna.envelope?.facts ?? [])
+    .filter((fact) =>
+      /occupancy|market_value|purchase_price|legal_ownership|nav/i.test(fact.key),
+    )
+    .slice(0, 8)
+    .map((fact) => ({
+      id: fact.id,
+      key: fact.key,
+      label: fact.label,
+      value: fact.value,
+      confidence: fact.confidence,
+    }));
+  return {
+    id: dna.id,
+    assetId: dna.assetId,
+    version: dna.version,
+    createdAt: dna.createdAt,
+    envelope: {
+      summary: dna.envelope?.summary,
+      confidence: dna.envelope?.confidence,
+      facts,
+      valuation: dna.envelope?.valuation,
+      risk: dna.envelope?.risk,
+    },
+  };
 }
 
 function normalizeImageUrls(
@@ -249,5 +366,23 @@ function normalizeImageUrls(
         .filter((value): value is string => Boolean(value)),
     ),
   );
-  return urls;
+  return urls.slice(0, 6);
+}
+
+function assertImageBudget(
+  primaryImageUrl?: string,
+  imageUrls?: string[],
+): void {
+  const candidates = [primaryImageUrl, ...(imageUrls ?? [])].filter(Boolean);
+  for (const value of candidates) {
+    if (!value?.startsWith('data:')) continue;
+    const comma = value.indexOf(',');
+    if (comma < 0) continue;
+    const approxBytes = Math.floor(((value.length - comma - 1) * 3) / 4);
+    if (approxBytes > MAX_IMAGE_BYTES) {
+      throw new BadRequestException(
+        `Images must be under ${Math.floor(MAX_IMAGE_BYTES / 1024)}KB. Compress the file and try again.`,
+      );
+    }
+  }
 }

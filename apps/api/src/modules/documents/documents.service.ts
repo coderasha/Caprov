@@ -559,13 +559,18 @@ export class DocumentsService {
   }
 
   private toDocumentRow(document: DocumentRecord) {
+    // List/history payloads must stay light. Full extracted text belongs on the
+    // document detail endpoint only — shipping it on every /documents list call
+    // can move hundreds of KB per request and stall the web app.
+    const { extractedText: _extractedText, ...rest } = document;
     return {
-      ...document,
+      ...rest,
       uploadedBy:
         this.db.snapshot.users.find((item) => item.id === document.uploadedByUserId)
           ?.fullName ?? null,
       versionStatus: document.isCurrent ? 'CURRENT' : 'PREVIOUS',
       folderName: documentFolderName(document.type),
+      hasExtractedText: Boolean(document.extractedText?.trim()),
     };
   }
 

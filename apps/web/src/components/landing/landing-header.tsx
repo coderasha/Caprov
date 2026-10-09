@@ -41,8 +41,10 @@ export function LandingHeader() {
           <div className="landing-header__inner">
             <Link href="/" className="landing-header__brand group min-w-0">
               <CaprovWordmark
-                className="font-display text-xl font-bold tracking-[-0.045em] text-[var(--ink)] transition group-hover:opacity-85 sm:text-2xl"
-                markClassName="text-[var(--gold)]"
+                tone="light"
+                variant="compact"
+                priority
+                className="landing-header__logo transition group-hover:opacity-90"
               />
             </Link>
 
@@ -86,7 +88,7 @@ export function LandingHeader() {
         <button type="button" className="landing-mobile-menu__backdrop" aria-label="Close menu" onClick={closeMenu} />
         <div className="landing-mobile-menu__panel">
           <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4">
-            <CaprovWordmark className="font-display text-lg font-semibold text-[var(--ink)]" markClassName="text-[var(--gold)]" />
+            <CaprovWordmark tone="light" variant="compact" className="landing-header__logo" />
             <button type="button" className="landing-icon-btn" aria-label="Close menu" onClick={closeMenu}>
               <X className="h-4 w-4" />
             </button>

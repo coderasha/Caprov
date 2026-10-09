@@ -500,6 +500,16 @@ export function answerCopilot(
   const wantsRisk = /(risk|concern|flag|lease)/.test(q);
   const wantsOwnership = /(owner|ownership|who owns|title)/.test(q);
   const wantsOccupancy = /occupancy/.test(q);
+  const wantsDocuments =
+    /(document|documents|evidence|file|files|memo|pack|source)/.test(q) &&
+    /(key|list|summar|what|which|show|available)/.test(q);
+  const wantsDnaSummary =
+    /(asset dna|dna snapshot|summarize|summary|overview|brief me)/.test(q) &&
+    !wantsValue &&
+    !wantsRisk &&
+    !wantsOwnership &&
+    !wantsProjection &&
+    !wantsDocuments;
   const multi =
     [
       wantsProjection,
@@ -684,6 +694,77 @@ export function answerCopilot(
           body: occupancy.value,
           kind: 'detail',
         });
+      }
+    }
+  }
+
+  if (wantsDocuments) {
+    if (!documents.length) {
+      return replyFromBriefing(
+        {
+          title: 'Source documents',
+          headline: 'No current source documents are linked to this asset yet.',
+          sections: [
+            {
+              title: 'Next step',
+              body: 'Upload evidence in Documents, then re-run Asset DNA before asking for a document briefing.',
+              kind: 'note',
+            },
+          ],
+        },
+        citations,
+      );
+    }
+    for (const document of documents.slice(0, 12)) {
+      citations.push({ label: document.name, documentId: document.id });
+    }
+    title = 'Source documents';
+    headline = `${documents.length} current source ${documents.length === 1 ? 'file' : 'files'} linked to this asset.`;
+    metric = String(documents.length);
+    metricLabel = 'Documents';
+    confidence = envelope.confidence.overall;
+    sections.push({
+      title: 'Key files',
+      body: documents
+        .slice(0, 12)
+        .map((document) => `${document.name} · ${document.type}`)
+        .join('\n'),
+      kind: 'list',
+    });
+  }
+
+  if (wantsDnaSummary && !sections.length && !metric) {
+    title = 'Asset DNA summary';
+    headline = envelope.summary;
+    confidence = envelope.confidence.overall;
+    if (envelope.valuation) {
+      sections.push({
+        title: 'Valuation',
+        body: formatMoney(envelope.valuation.amount, envelope.valuation.currency),
+        kind: 'detail',
+      });
+    }
+    if (envelope.risk) {
+      sections.push({
+        title: 'Risk',
+        body: `${envelope.risk.rating} (${envelope.risk.overall}/100)`,
+        kind: 'detail',
+      });
+    }
+    const highlightFacts = envelope.facts.slice(0, 8);
+    if (highlightFacts.length) {
+      sections.push({
+        title: 'Key facts',
+        body: highlightFacts
+          .map((fact) => `${fact.label}: ${fact.value}`)
+          .join('\n'),
+        kind: 'list',
+      });
+    }
+    for (const fact of highlightFacts) {
+      const documentId = fact.provenance[0]?.sourceDocumentId;
+      if (documentId) {
+        citations.push({ label: fact.label, documentId });
       }
     }
   }

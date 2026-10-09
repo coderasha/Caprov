@@ -34,9 +34,11 @@ export function Sparkline({
 export function MiniBars({
   values,
   className,
+  tone = 'gold',
 }: {
   values: number[];
   className?: string;
+  tone?: 'gold' | 'danger';
 }) {
   const max = Math.max(...values, 1);
   return (
@@ -44,7 +46,10 @@ export function MiniBars({
       {values.map((value, index) => (
         <span
           key={index}
-          className="w-1.5 rounded-sm bg-[var(--gold)]/80"
+          className={cn(
+            'w-1.5 rounded-sm',
+            tone === 'danger' ? 'bg-[var(--danger)]/75' : 'bg-[var(--gold)]/80',
+          )}
           style={{ height: `${Math.max(18, (value / max) * 100)}%` }}
         />
       ))}

@@ -25,9 +25,11 @@ export function CopilotBriefingCard({
 }) {
   return (
     <article className="overflow-hidden rounded-[1.35rem] border border-[var(--line)] bg-[var(--card)] shadow-[var(--shadow)]">
-      <div className="border-b border-[var(--line)]/80 bg-gradient-to-r from-[var(--ink)] to-[#182238] px-5 py-4 text-white">
-        <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-white/45">{briefing.title}</p>
-        <p className="mt-2 text-sm leading-6 text-white/75">{briefing.headline}</p>
+      <div className="border-b border-[var(--line)]/80 bg-gradient-to-r from-[var(--gold-soft)] via-[#f7f1e4] to-[var(--card)] px-5 py-4">
+        <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--gold)]">
+          {briefing.title}
+        </p>
+        <p className="mt-2 text-sm leading-6 text-[var(--ink)]/80">{briefing.headline}</p>
       </div>
 
       {briefing.metric ? (

@@ -147,3 +147,4 @@ apps/api/storage/
 # ==========================================
 
 docker-data/
+data/media/

@@ -10,6 +10,7 @@ import { PrismaModule } from './infrastructure/prisma/prisma.module';
 import { QueueModule } from './infrastructure/queue/queue.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 import { StorageModule } from './infrastructure/storage/storage.module';
+import { MediaModule } from './infrastructure/media/media.module';
 import { AssetsModule } from './modules/assets/assets.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -42,6 +43,7 @@ import { BlockchainNetworkMiddleware } from './infrastructure/blockchain/blockch
     RedisModule,
     QueueModule,
     StorageModule,
+    MediaModule,
     HealthModule,
     AuthModule,
     OrganizationsModule,

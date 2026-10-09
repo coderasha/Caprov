@@ -1,39 +1,100 @@
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
-export function CaprovMark({ className }: { className?: string }) {
+type LogoTone = 'light' | 'dark';
+type LogoVariant = 'full' | 'compact' | 'mark';
+
+const ASSETS = {
+  full: {
+    light: { src: '/brand/caprov-logo.png', width: 887, height: 313 },
+    dark: { src: '/brand/caprov-logo-on-dark.png', width: 887, height: 313 },
+  },
+  compact: {
+    light: { src: '/brand/caprov-logo-compact.png', width: 863, height: 236 },
+    dark: { src: '/brand/caprov-logo-compact-on-dark.png', width: 863, height: 236 },
+  },
+  mark: {
+    light: { src: '/brand/caprov-mark.png', width: 320, height: 290 },
+    dark: { src: '/brand/caprov-mark-on-dark.png', width: 320, height: 290 },
+  },
+} as const;
+
+/** Caprov brand image. Prefer `compact` in nav bars; `full` for login/footer. */
+export function CaprovLogo({
+  tone = 'light',
+  variant = 'full',
+  className,
+  priority = false,
+  alt = 'CAPROV — Private Asset Intelligence',
+}: {
+  tone?: LogoTone;
+  variant?: LogoVariant;
+  className?: string;
+  priority?: boolean;
+  alt?: string;
+}) {
+  const asset = ASSETS[variant][tone];
   return (
-    <svg
-      viewBox="0 0 40 40"
-      fill="none"
-      aria-hidden="true"
-      className={cn('shrink-0', className)}
-    >
-      <rect width="40" height="40" rx="10" fill="currentColor" opacity="0.08" />
-      <path
-        d="M8 28V12h8.2c4.6 0 7.4 2.5 7.4 6.4 0 3.9-2.8 6.4-7.4 6.4H12.6V28H8Zm4.6-7.4h3.3c2.1 0 3.3-1 3.3-2.6s-1.2-2.6-3.3-2.6h-3.3v5.2Z"
-        fill="currentColor"
-      />
-      <path
-        d="M25.2 28 31.8 12h4.4L29.4 28h-4.2Z"
-        fill="currentColor"
-        opacity="0.55"
-      />
-      <circle cx="30.8" cy="28" r="2.2" fill="currentColor" />
-    </svg>
+    <Image
+      src={asset.src}
+      alt={alt}
+      width={asset.width}
+      height={asset.height}
+      priority={priority}
+      sizes="(max-width: 640px) 140px, 180px"
+      className={cn(
+        'block h-8 w-auto max-h-8 max-w-[10.5rem] object-contain object-left',
+        className,
+      )}
+    />
   );
 }
 
+/** Icon-only mark for compact slots. */
+export function CaprovMark({
+  tone = 'light',
+  className,
+  alt = '',
+}: {
+  tone?: LogoTone;
+  className?: string;
+  /** @deprecated Kept for call-site compatibility; image mark ignores text color. */
+  markClassName?: string;
+  alt?: string;
+}) {
+  return (
+    <CaprovLogo
+      tone={tone}
+      variant="mark"
+      alt={alt}
+      className={cn('max-h-7 max-w-[1.85rem]', className)}
+    />
+  );
+}
+
+/**
+ * Brand lockup used across shell, login, and marketing.
+ * Prefer `tone` for background contrast; `variant="compact"` for headers.
+ */
 export function CaprovWordmark({
   className,
-  markClassName,
+  markClassName: _markClassName,
+  tone = 'light',
+  variant = 'compact',
+  priority = false,
 }: {
   className?: string;
   markClassName?: string;
+  tone?: LogoTone;
+  variant?: Exclude<LogoVariant, 'mark'>;
+  priority?: boolean;
 }) {
   return (
-    <span className={cn('inline-flex items-center gap-[0.35em]', className)}>
-      <CaprovMark className={cn('h-[0.92em] w-[0.92em]', markClassName)} />
-      <span className="tracking-[-0.04em]">CAPROV</span>
-    </span>
+    <CaprovLogo
+      tone={tone}
+      variant={variant}
+      priority={priority}
+      className={className}
+    />
   );
 }

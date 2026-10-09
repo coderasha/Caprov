@@ -70,11 +70,10 @@ const platformAdminNav = { href: '/platform-admin', label: 'Platform admin', ico
 
 const buyerNavSections = [
   {
-    title: 'Buy',
+    title: 'Buyer',
     items: [
-      { href: '/marketplace', label: 'Listings', icon: Store },
-      { href: '/trading', label: 'Orders', icon: ArrowLeftRight },
-      { href: '/settlement', label: 'Settlement', icon: Scale },
+      { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/marketplace', label: 'Marketplace', icon: Store },
     ],
   },
 ] as const;
@@ -138,12 +137,14 @@ function SidebarContent({
   showClose?: boolean;
 }) {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
   const organization = useAuthStore((state) => state.organization);
   const roles = useAuthStore((state) => state.roles);
   const logout = useAuthStore((state) => state.logout);
 
   const buyerOnly = isBuyerOnly(roles);
   const bankerOnly = isBankerOnly(roles);
+  const roleLabel = user?.title ?? (buyerOnly ? 'Buyer' : bankerOnly ? 'Banker' : 'Operator');
   const sections = useMemo(() => {
     if (buyerOnly) {
       return buyerNavSections;
@@ -168,12 +169,18 @@ function SidebarContent({
       <div className="flex items-start justify-between gap-3 px-2">
         <Link href="/dashboard" className="min-w-0" onClick={onNavigate}>
           <CaprovWordmark
-            className="font-display text-[1.35rem] font-semibold tracking-[-0.04em] text-white"
-            markClassName="text-[var(--gold)]"
+            tone="dark"
+            variant="compact"
+            priority
+            className="h-8 max-h-8 w-auto max-w-[9.75rem]"
           />
-          <p className="mt-2 text-[12px] leading-5 text-white/45">
-            {buyerOnly ? 'Buyer desk' : bankerOnly ? 'Credit desk' : 'Private-asset intelligence'}
-          </p>
+          {buyerOnly ? (
+            <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-white/40">
+              Private Asset Intelligence
+            </p>
+          ) : bankerOnly ? (
+            <p className="mt-2 text-[12px] leading-5 text-white/45">Credit desk</p>
+          ) : null}
         </Link>
         {showClose ? (
           <button
@@ -205,6 +212,9 @@ function SidebarContent({
                       className={cn(
                         'platform-nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] text-white/55 transition hover:bg-white/[0.06] hover:text-white',
                         active && 'bg-white/[0.08] font-medium text-white',
+                        buyerOnly &&
+                          active &&
+                          'border border-[var(--gold)]/55 bg-white/[0.06] shadow-[inset_0_0_0_1px_rgba(157,107,36,0.12)]',
                       )}
                     >
                       <Icon
@@ -213,7 +223,9 @@ function SidebarContent({
                         className={active ? 'text-[var(--gold)]' : undefined}
                       />
                       <span className="flex-1">{item.label}</span>
-                      {active ? <ChevronRight size={14} className="text-[var(--gold)]" /> : null}
+                      {active && !buyerOnly ? (
+                        <ChevronRight size={14} className="text-[var(--gold)]" />
+                      ) : null}
                     </Link>
                   );
                 })}
@@ -224,7 +236,22 @@ function SidebarContent({
       </nav>
 
       <div className="mt-auto space-y-3 border-t border-white/10 pt-4">
-        {!buyerOnly && !bankerOnly ? (
+        {buyerOnly ? (
+          <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3">
+            <div className="flex items-center gap-2.5">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--gold)]/18 text-[11px] font-semibold text-[var(--gold)]">
+                {initials(user?.fullName)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-medium text-white/90">
+                  {user?.fullName ?? 'Buyer'}
+                </p>
+                <p className="mt-0.5 text-[11px] text-white/40">{roleLabel}</p>
+              </div>
+              <ChevronRight size={14} className="shrink-0 text-white/35" />
+            </div>
+          </div>
+        ) : !bankerOnly ? (
           <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3">
             <div className="flex items-start gap-2.5">
               <span className="mt-0.5 grid h-8 w-8 place-items-center rounded-lg bg-[var(--gold)]/15 text-[var(--gold)]">
@@ -287,15 +314,27 @@ function OperatorHeader({
         </button>
 
         <div className="hidden min-w-0 items-center gap-2 lg:flex">
-          <p className="text-sm font-medium text-[var(--ink)]">{consoleLabel}</p>
-          <span className="text-[var(--line)]">/</span>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1.5 rounded-lg px-1.5 py-1 text-sm text-[var(--muted)] transition hover:bg-black/[0.03] hover:text-[var(--ink)]"
-          >
-            {roleLabel}
-            <ChevronDown size={14} />
-          </button>
+          {buyerOnly ? (
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 rounded-lg px-1.5 py-1 text-sm font-medium text-[var(--ink)] transition hover:bg-black/[0.03]"
+            >
+              Buyer desk
+              <ChevronDown size={14} className="text-[var(--muted)]" />
+            </button>
+          ) : (
+            <>
+              <p className="text-sm font-medium text-[var(--ink)]">{consoleLabel}</p>
+              <span className="text-[var(--line)]">/</span>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 rounded-lg px-1.5 py-1 text-sm text-[var(--muted)] transition hover:bg-black/[0.03] hover:text-[var(--ink)]"
+              >
+                {roleLabel}
+                <ChevronDown size={14} />
+              </button>
+            </>
+          )}
         </div>
 
         <label className="relative mx-auto hidden min-w-0 max-w-xl flex-1 md:block">
@@ -303,8 +342,12 @@ function OperatorHeader({
           <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
           <input
             type="search"
-            placeholder="Search assets, documents, users, transactions…"
-            className="h-11 w-full rounded-xl border border-[var(--line)] bg-white/80 pl-10 pr-14 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--muted)]/80 focus:border-[var(--ink)]/25 focus:bg-white"
+            placeholder={
+              buyerOnly
+                ? 'Search assets, locations, asset class, or keywords...'
+                : 'Search assets, documents, users, transactions…'
+            }
+            className="h-11 w-full rounded-full border border-[var(--line)] bg-white/80 pl-10 pr-14 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--muted)]/80 focus:border-[var(--ink)]/25 focus:bg-white"
           />
           <kbd className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded-md border border-[var(--line)] bg-[var(--paper)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--muted)]">
             ⌘K
@@ -327,7 +370,7 @@ function OperatorHeader({
               3
             </span>
           </button>
-          <div className="hidden items-center gap-2.5 rounded-xl border border-[var(--line)] bg-white/90 py-1.5 pl-1.5 pr-3 sm:flex">
+          <div className="hidden items-center gap-2.5 rounded-xl border border-[var(--line)] bg-white/90 py-1.5 pl-1.5 pr-2.5 sm:flex">
             <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--ink)] text-[11px] font-semibold text-white">
               {initials(user?.fullName)}
             </span>
@@ -337,6 +380,7 @@ function OperatorHeader({
               </p>
               <p className="truncate text-[11px] text-[var(--muted)]">{roleLabel}</p>
             </div>
+            <ChevronDown size={14} className="shrink-0 text-[var(--muted)]" />
           </div>
         </div>
       </div>

@@ -1,6 +1,11 @@
 'use client';
 
-import { chooseMetaMaskAccount, connectMetaMaskWallet, selectMetaMaskAccount } from '@/lib/sepolia-marketplace';
+import {
+  alignMetaMaskToSelectedNetwork,
+  chooseMetaMaskAccount,
+  connectMetaMaskWallet,
+  selectMetaMaskAccount,
+} from '@/lib/sepolia-marketplace';
 import { selectedBlockchainNetwork, setSelectedBlockchainNetwork, type BlockchainNetworkId, type BrowserNetwork } from '@/lib/blockchain-network';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
@@ -37,22 +42,30 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setNetworkId(next);
     const network = selectedBlockchainNetwork();
     setBusy(true);
-    setMessage(`Connecting MetaMask to ${network.chainName}…`);
-    try {
-      const connection = await connectMetaMaskWallet();
-      setAddress(connection.address);
-      setAccounts(connection.accounts);
-      setMessage(`Connected MetaMask to ${network.chainName} (chain ID ${network.chainId}).`);
-    } catch (error) {
-      // The app selection still applies to API reads when a user declines the
-      // wallet prompt or does not have MetaMask installed.
-      setMessage(error instanceof Error
-        ? `Selected ${network.chainName}, but wallet connection was not completed: ${error.message}`
-        : `Selected ${network.chainName}. Connect MetaMask before signing a transaction.`);
-    } finally {
-      setBusy(false);
+    // If MetaMask is already connected, only align the chain. Forcing a full
+    // eth_requestAccounts on every network change can crash MetaMask's popup
+    // while it resolves the page origin ("Cannot read properties of undefined
+    // (reading 'origin')").
+    if (address) {
+      setMessage(`Switching MetaMask to ${network.chainName}…`);
+      try {
+        await alignMetaMaskToSelectedNetwork();
+        setMessage(`MetaMask is on ${network.chainName} (chain ID ${network.chainId}).`);
+      } catch (error) {
+        setMessage(
+          error instanceof Error
+            ? `Selected ${network.chainName}, but MetaMask did not switch: ${error.message}`
+            : `Selected ${network.chainName}. Open MetaMask and switch network manually, then reconnect.`,
+        );
+      } finally {
+        setBusy(false);
+      }
+      return;
     }
-  }, []);
+
+    setMessage(`Selected ${network.chainName}. Connect MetaMask when you are ready to sign.`);
+    setBusy(false);
+  }, [address]);
 
   const connect = useCallback(async () => {
     setBusy(true);

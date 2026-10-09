@@ -194,10 +194,11 @@ export default function LoginPage() {
         <div className="auth-login__brand-content">
           <Link href="/" className="auth-login__brand-logo">
             <CaprovWordmark
-              className="font-display text-[1.35rem] font-semibold text-white"
-              markClassName="text-[#d4b07a]"
+              tone="dark"
+              variant="full"
+              priority
+              className="h-10 max-h-10 w-auto max-w-[12.5rem]"
             />
-            <span className="auth-login__brand-logo-sub">Private-asset intelligence</span>
           </Link>
 
           <div className="auth-login__brand-body">
@@ -245,10 +246,11 @@ export default function LoginPage() {
         <div className="auth-login__card">
           <div className="auth-login__card-header">
             <CaprovWordmark
-              className="font-display text-lg font-semibold text-[var(--ink)]"
-              markClassName="text-[var(--gold)]"
+              tone="light"
+              variant="full"
+              priority
+              className="h-9 max-h-9 w-auto max-w-[11.5rem]"
             />
-            <p className="auth-login__card-tagline">Private-asset intelligence</p>
             <h2 className="auth-login__card-title">Sign in</h2>
             <p className="auth-login__card-subtitle">Access your private asset workspace</p>
           </div>

@@ -38,7 +38,7 @@ export function LlmModelPicker({
       ? model.capabilities.includes('asset_dna')
       : model.capabilities.includes('copilot'),
   );
-  const title = purpose === 'DNA' ? 'Asset DNA extraction model' : 'Copilot model';
+  const title = purpose === 'DNA' ? 'Asset DNA extraction model' : compact ? 'AI model' : 'Copilot model';
   const description =
     purpose === 'DNA'
       ? 'Choose the primary model for Asset DNA extraction. Every accepted fact must match an uploaded source fragment; the deterministic core is used only when the model is unavailable or produces no validated facts.'
@@ -54,10 +54,12 @@ export function LlmModelPicker({
   if (compact) {
     return (
       <div className="grid gap-2">
-        <label className="grid gap-2 text-sm">
-          <span className="font-medium text-[var(--muted)]">{title}</span>
+        <label className="grid gap-1.5 text-sm">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+            {title}
+          </span>
           <select
-            className="w-full rounded-2xl border border-[var(--line)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--ink)]"
+            className="w-full rounded-xl border border-[var(--line)] bg-white px-3.5 py-2.5 text-sm font-medium text-[var(--ink)] outline-none transition focus:border-[var(--ink)]/35 focus:shadow-[0_0_0_3px_rgba(157,107,36,0.12)]"
             value={selectedModelId}
             disabled={select.isPending}
             onChange={(event) => {
@@ -77,10 +79,19 @@ export function LlmModelPicker({
             })}
           </select>
         </label>
-        <p className="text-xs text-[var(--muted)]">
-          {data.availability[selectedModelId ?? '']?.reason}
-          {select.isPending && pendingId ? ' Saving…' : null}
-        </p>
+        {(() => {
+          const availability = data.availability[selectedModelId ?? ''];
+          const showReason = Boolean(
+            (select.isPending && pendingId) || (availability && !availability.available),
+          );
+          if (!showReason) return null;
+          return (
+            <p className="text-xs text-[var(--muted)]">
+              {availability?.reason}
+              {select.isPending && pendingId ? ' Saving…' : null}
+            </p>
+          );
+        })()}
       </div>
     );
   }

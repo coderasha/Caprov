@@ -43,12 +43,20 @@ async function bootstrap() {
     bodyParser: false,
     rawBody: true,
   });
-  const maxPayloadBytes = '250mb';
+  // Images are persisted to disk as short media URLs; keep JSON bodies modest.
+  const maxPayloadBytes = '8mb';
   app.useBodyParser('json', { limit: maxPayloadBytes });
   app.useBodyParser('urlencoded', { limit: maxPayloadBytes, extended: true });
   app.use(json({ limit: maxPayloadBytes }));
   app.use(urlencoded({ limit: maxPayloadBytes, extended: true }));
-  app.use(helmet({ contentSecurityPolicy: false }));
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      // Media is served from the API origin and embedded by the web app on
+      // another origin (e.g. :3000 → :3001). same-origin CORP blocks <img>.
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
   app.use(compression());
   app.enableCors({
     origin: corsOrigin,

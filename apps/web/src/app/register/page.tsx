@@ -1,5 +1,6 @@
 'use client';
 
+import { CaprovWordmark } from '@/components/brand/caprov-logo';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Field, Input } from '@/components/ui/input';
@@ -41,10 +42,17 @@ export default function RegisterPage() {
   return (
     <main className="platform-canvas grid min-h-screen place-items-center px-4 py-8">
       <div className="hub-auth-shell">
-        <p className="text-center font-mono text-[11px] uppercase tracking-[0.32em] text-[var(--muted)]">
-          Caprov
-        </p>
-        <h1 className="mt-3 text-center text-3xl font-semibold tracking-tight">Request organization access</h1>
+        <div className="flex justify-center">
+          <Link href="/" aria-label="CAPROV home">
+            <CaprovWordmark
+              tone="light"
+              variant="full"
+              priority
+              className="h-10 max-h-10 w-auto max-w-[12.5rem]"
+            />
+          </Link>
+        </div>
+        <h1 className="mt-5 text-center text-3xl font-semibold tracking-tight">Request organization access</h1>
         <Card className="mt-8 p-6">
           {receipt ? (
             <div className="space-y-4">

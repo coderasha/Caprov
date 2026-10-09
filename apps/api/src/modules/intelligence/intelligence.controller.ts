@@ -7,7 +7,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
 import type { IntelligenceJobType } from '@caprov/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -45,6 +45,14 @@ class CopilotDto {
   @IsOptional()
   @IsString()
   threadId?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  searchDocuments?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  includeMarketData?: boolean;
 }
 
 class SelectModelDto {

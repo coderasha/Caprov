@@ -8,7 +8,14 @@ export function Providers({ children }: { children: ReactNode }) {
     () =>
       new QueryClient({
         defaultOptions: {
-          queries: { retry: 1, refetchOnWindowFocus: false },
+          queries: {
+            retry: 1,
+            refetchOnWindowFocus: false,
+            // Keep platform pages snappy when switching routes; list data is
+            // reused for 45s instead of refetching on every mount.
+            staleTime: 45_000,
+            gcTime: 10 * 60_000,
+          },
         },
       }),
   );

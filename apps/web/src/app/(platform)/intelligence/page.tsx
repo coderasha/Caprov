@@ -65,9 +65,9 @@ function decisionReady(asset: HydratedAsset) {
 function statusPresentation(asset: HydratedAsset) {
   if (decisionReady(asset)) return { label: 'Ready', tone: 'ok' as const };
   if (!asset.latestDna && asset.documentCount > 0) {
-    return { label: 'In Progress', tone: 'info' as const };
+    return { label: 'In progress', tone: 'info' as const };
   }
-  return { label: 'Needs Review', tone: 'warn' as const };
+  return { label: 'Needs review', tone: 'warn' as const };
 }
 
 function keyInsights(asset: HydratedAsset) {
@@ -162,6 +162,9 @@ export default function IntelligencePage() {
   const showingTo = Math.min(currentPage * PAGE_SIZE, filtered.length);
   const pageSelected =
     pageItems.length > 0 && pageItems.every((asset) => selected.includes(asset.id));
+  const jobsInFlight = jobs.filter(
+    (job) => job.status === 'RUNNING' || job.status === 'QUEUED',
+  ).length;
 
   const paginationNumbers = useMemo(() => {
     const maxButtons = 9;
@@ -208,54 +211,60 @@ export default function IntelligencePage() {
             <p className="dna-mgmt__eyebrow">Asset DNA</p>
             <h1 className="dna-mgmt__title">Asset intelligence, ready for review</h1>
             <p className="dna-mgmt__hero-copy">
-              Validate extracted facts, valuation marks, and risk signals against source evidence
-              before they inform a decision or Copilot briefing.
+              Validate the evidence behind each Asset DNA snapshot before it informs a decision
+              or a Copilot briefing. Incomplete packs stay in review until the facts hold.
             </p>
-          </div>
-          <div className="dna-mgmt__hero-actions">
-            <Link href="/documents" className="dna-mgmt__btn dna-mgmt__btn--primary">
-              <Plus size={15} />
-              Add evidence
-            </Link>
-            <Link href="/intelligence/copilot" className="dna-mgmt__btn">
-              <Sparkles size={15} className="text-[var(--gold)]" />
-              Open Copilot
-            </Link>
+            <div className="dna-mgmt__hero-actions">
+              <Link href="/documents" className="dna-mgmt__btn dna-mgmt__btn--primary">
+                <Plus size={15} />
+                Add evidence
+              </Link>
+              <Link href="/intelligence/copilot" className="dna-mgmt__btn">
+                <Sparkles size={15} className="text-[var(--gold)]" />
+                Open Copilot
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       <section className="dna-mgmt__stats">
-        {[
-          {
-            label: 'Assets tracked',
-            value: String(assets.length),
-            hint: 'Available for intelligence review',
-            icon: Building2,
-            bars: [4, 6, 5, 8, 7, 9, 8, 10],
-          },
-          {
-            label: 'Current snapshots',
-            value: String(dnaReady),
-            hint: 'Asset DNA is available',
-            icon: Layers,
-            bars: [3, 5, 6, 7, 8, 8, 9, 10],
-          },
-          {
-            label: 'Evidence needed',
-            value: String(evidenceNeeded),
-            hint: 'Upload or process source files',
-            icon: FileWarning,
-            bars: [8, 7, 6, 5, 5, 4, 3, 3],
-          },
-          {
-            label: 'Risk flagged',
-            value: String(elevatedRisk),
-            hint: 'Requires human assessment',
-            icon: AlertTriangle,
-            bars: [2, 3, 4, 3, 5, 4, 6, 5],
-          },
-        ].map((stat) => (
+        {(
+          [
+            {
+              label: 'Assets tracked',
+              value: String(assets.length),
+              hint: 'Available for intelligence review',
+              icon: Building2,
+              bars: [4, 6, 5, 8, 7, 9, 8, 10] as number[],
+              tone: 'gold' as const,
+            },
+            {
+              label: 'Current snapshots',
+              value: String(dnaReady),
+              hint: 'Asset DNA is available',
+              icon: Layers,
+              bars: [3, 5, 6, 7, 8, 8, 9, 10],
+              tone: 'gold' as const,
+            },
+            {
+              label: 'Evidence needed',
+              value: String(evidenceNeeded),
+              hint: 'Upload or process source files',
+              icon: FileWarning,
+              bars: [8, 7, 6, 5, 5, 4, 3, 3],
+              tone: 'danger' as const,
+            },
+            {
+              label: 'Risk flagged',
+              value: String(elevatedRisk),
+              hint: 'Requires human assessment',
+              icon: AlertTriangle,
+              bars: [2, 3, 4, 3, 5, 4, 6, 5],
+              tone: 'danger' as const,
+            },
+          ] as const
+        ).map((stat) => (
           <article key={stat.label} className="dna-mgmt__stat">
             <div className="flex min-w-0 flex-1 items-start gap-3">
               <span className="dna-mgmt__stat-icon">
@@ -267,7 +276,7 @@ export default function IntelligencePage() {
                 <p className="dna-mgmt__stat-hint">{stat.hint}</p>
               </div>
             </div>
-            <MiniBars className="shrink-0 self-end" values={stat.bars} />
+            <MiniBars className="shrink-0 self-end" values={[...stat.bars]} tone={stat.tone} />
           </article>
         ))}
       </section>
@@ -349,6 +358,13 @@ export default function IntelligencePage() {
                 Clear
               </button>
             )}
+            <details className="dna-mgmt__filter-settings">
+              <summary>AI model settings</summary>
+              <div className="dna-mgmt__filter-settings-body">
+                <LlmModelPicker />
+                <LlmModelPicker purpose="DNA" />
+              </div>
+            </details>
           </div>
         ) : null}
 
@@ -499,9 +515,7 @@ export default function IntelligencePage() {
           <p>
             Showing {showingFrom} to {showingTo} of {filtered.length} assets
             {selected.length ? ` · ${selected.length} selected` : ''}
-            {jobs.length
-              ? ` · ${jobs.filter((job) => job.status === 'RUNNING' || job.status === 'QUEUED').length} jobs in flight`
-              : ''}
+            {jobsInFlight ? ` · ${jobsInFlight} jobs in flight` : ''}
           </p>
           <div className="dna-mgmt__pager">
             <button
@@ -533,20 +547,6 @@ export default function IntelligencePage() {
           </div>
         </footer>
       </section>
-
-      <details className="dna-mgmt__settings">
-        <summary>
-          <span>
-            <strong>Workspace settings</strong>
-            <span>Manage AI model preferences for Copilot and DNA extraction</span>
-          </span>
-          <span aria-hidden="true">+</span>
-        </summary>
-        <div className="dna-mgmt__settings-body">
-          <LlmModelPicker />
-          <LlmModelPicker purpose="DNA" />
-        </div>
-      </details>
     </div>
   );
 }

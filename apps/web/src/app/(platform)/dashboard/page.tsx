@@ -1,5 +1,6 @@
 'use client';
 
+import { BuyerDashboard } from '@/components/dashboard/buyer-dashboard';
 import { OrgAdminDashboard } from '@/components/dashboard/org-admin-dashboard';
 import { PageHeader } from '@/components/layout/page-header';
 import { useWallet } from '@/components/wallet/wallet-provider';
@@ -41,55 +42,7 @@ export default function DashboardPage() {
   });
 
   if (isBuyer) {
-    return (
-      <div className="mx-auto max-w-6xl space-y-8">
-        <PageHeader
-          eyebrow="Buyer"
-          title="Buy fractional interests"
-          description="Review open listings, escrow CAP against a tokenized asset, then follow the trade through settlement."
-          actions={
-            <>
-              <Link href="/marketplace">
-                <Button>View listings</Button>
-              </Link>
-              <Link href="/trading">
-                <Button variant="secondary">Place a buy</Button>
-              </Link>
-            </>
-          }
-        />
-        <section className="grid gap-4 md:grid-cols-3">
-          {[
-            {
-              title: '1. Review listings',
-              body: `Open marketplace listings show the asset, ask, and whether units are escrowed on ${network.chainName}.`,
-              href: '/marketplace',
-            },
-            {
-              title: '2. Escrow CAP',
-              body: 'Choose a tokenized listing and pay CAP from your wallet. That creates a trade waiting for the seller.',
-              href: '/trading',
-            },
-            {
-              title: '3. Follow settlement',
-              body: 'After the seller approves, CAP is released and the asset units move to your wallet.',
-              href: '/settlement',
-            },
-          ].map((step) => (
-            <Card key={step.title} className="p-5">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--gold)]">{step.title}</p>
-              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{step.body}</p>
-              <Link
-                href={step.href}
-                className="mt-4 inline-flex text-sm font-medium text-[var(--ink)] underline underline-offset-4"
-              >
-                Open
-              </Link>
-            </Card>
-          ))}
-        </section>
-      </div>
-    );
+    return <BuyerDashboard />;
   }
 
   if (bankerOnly) {

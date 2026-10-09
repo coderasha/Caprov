@@ -31,7 +31,6 @@ import {
   ChevronRight,
   Clock3,
   CloudUpload,
-  Download,
   FileText,
   Folder,
   LayoutGrid,
@@ -48,6 +47,35 @@ const PAGE_SIZE = 8;
 
 type ViewMode = 'list' | 'grid' | 'folder';
 type StatusFilter = 'ALL' | 'VERIFIED' | 'PENDING' | 'REVIEW';
+type DateFilter = 'ALL' | 'TODAY' | '7D' | '30D' | '90D' | 'YEAR';
+
+const DATE_FILTER_LABEL: Record<DateFilter, string> = {
+  ALL: 'All time',
+  TODAY: 'Today',
+  '7D': 'Last 7 days',
+  '30D': 'Last 30 days',
+  '90D': 'Last 90 days',
+  YEAR: 'This year',
+};
+
+function startOfLocalDay(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
+function matchesDateFilter(createdAt: string, filter: DateFilter) {
+  if (filter === 'ALL') return true;
+  const created = new Date(createdAt).getTime();
+  if (Number.isNaN(created)) return false;
+  const now = Date.now();
+  if (filter === 'TODAY') return created >= startOfLocalDay();
+  if (filter === '7D') return created >= now - 7 * 24 * 60 * 60 * 1000;
+  if (filter === '30D') return created >= now - 30 * 24 * 60 * 60 * 1000;
+  if (filter === '90D') return created >= now - 90 * 24 * 60 * 60 * 1000;
+  if (filter === 'YEAR') {
+    return created >= new Date(new Date().getFullYear(), 0, 1).getTime();
+  }
+  return true;
+}
 
 function formatBytes(size?: number) {
   if (!size || size <= 0) return '—';
@@ -118,6 +146,7 @@ export default function DocumentsPage() {
   const [assetFilter, setAssetFilter] = useState('ALL');
   const [typeFilter, setTypeFilter] = useState<DocumentType | 'ALL'>('ALL');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('ALL');
   const [view, setView] = useState<ViewMode>('list');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string[]>([]);
@@ -177,6 +206,7 @@ export default function DocumentsPage() {
         if (statusFilter === 'VERIFIED' && doc.status !== 'READY') return false;
         if (statusFilter === 'PENDING' && doc.status !== 'UPLOADED') return false;
         if (statusFilter === 'REVIEW' && doc.status !== 'PROCESSING') return false;
+        if (!matchesDateFilter(doc.createdAt, dateFilter)) return false;
         if (!term) return true;
         const assetName = doc.assetId ? assetNameById.get(doc.assetId) : '';
         return [doc.name, doc.originalFilename, documentTypeLabel[doc.type], assetName]
@@ -184,7 +214,7 @@ export default function DocumentsPage() {
           .some((value) => String(value).toLowerCase().includes(term));
       })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [currentDocs, search, assetFilter, typeFilter, statusFilter, assetNameById]);
+  }, [currentDocs, search, assetFilter, typeFilter, statusFilter, dateFilter, assetNameById]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount);
@@ -409,29 +439,6 @@ export default function DocumentsPage() {
     setSelected((ids) => [...new Set([...ids, ...pageItems.map((doc) => doc.id)])]);
   }
 
-  function exportCsv() {
-    const rows = [
-      ['Name', 'Type', 'Asset', 'Version', 'Status', 'Uploaded By', 'Date'],
-      ...filtered.map((doc) => [
-        doc.name,
-        documentTypeLabel[doc.type],
-        doc.assetId ? assetNameById.get(doc.assetId) ?? doc.assetId : '',
-        String(doc.version ?? 1),
-        statusPresentation(doc.status).label,
-        doc.uploadedBy ?? '',
-        formatDateTime(doc.createdAt),
-      ]),
-    ];
-    const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = 'caprov-documents.csv';
-    anchor.click();
-    URL.revokeObjectURL(url);
-  }
-
   return (
     <div className="docs-mgmt docs-mgmt--fit mx-auto w-full max-w-[92rem]">
       <section className="docs-mgmt__hero">
@@ -595,7 +602,21 @@ export default function DocumentsPage() {
                 <option value="PENDING">Pending</option>
                 <option value="REVIEW">In Review</option>
               </select>
-              <span className="docs-mgmt__select docs-mgmt__select--static">Date: All time</span>
+              <select
+                className="docs-mgmt__select"
+                value={dateFilter}
+                onChange={(event) => {
+                  setDateFilter(event.target.value as DateFilter);
+                  setPage(1);
+                }}
+                aria-label="Date uploaded"
+              >
+                {(Object.keys(DATE_FILTER_LABEL) as DateFilter[]).map((value) => (
+                  <option key={value} value={value}>
+                    Date: {DATE_FILTER_LABEL[value]}
+                  </option>
+                ))}
+              </select>
               <div className="docs-mgmt__views" role="group" aria-label="View mode">
                 <button
                   type="button"
@@ -614,10 +635,6 @@ export default function DocumentsPage() {
                   <LayoutGrid size={15} />
                 </button>
               </div>
-              <button type="button" className="docs-mgmt__btn" onClick={exportCsv}>
-                <Download size={14} />
-                Export
-              </button>
             </section>
 
             <section className="docs-mgmt__panel docs-mgmt__table-shell">

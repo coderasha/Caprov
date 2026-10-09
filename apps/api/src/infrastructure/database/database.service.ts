@@ -8,6 +8,10 @@ import {
   DEFAULT_LLM_MODEL_ID,
   getPreferredDefaultLlmModelId,
 } from '../../modules/intelligence/llm-catalog';
+import {
+  persistImageUrl,
+  persistImageUrls,
+} from '../media/media-urls';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit {
@@ -37,7 +41,13 @@ export class DatabaseService implements OnModuleInit {
   /** Backfill fields introduced after an existing local store was created. */
   private normalizeStore(): void {
     let changed = false;
-    const seeded = buildSeedData();
+    // Lazily build seed data — buildSeedData() runs bcrypt and is expensive.
+    // Skip it on the common path when demo users/orgs are already present.
+    let seeded: CaprovData | undefined;
+    const ensureSeeded = () => {
+      seeded ??= buildSeedData();
+      return seeded;
+    };
     const preferredDefaultModelId = getPreferredDefaultLlmModelId();
     const arjun = this.data.users.find(
       (user) => user.email === 'arjun@meridian.caprov',
@@ -49,7 +59,7 @@ export class DatabaseService implements OnModuleInit {
       this.data.organizations.push({ id: bankOrgId, name: 'CAPROV Demo Bank', slug: 'caprov-demo-bank', status: 'ACTIVE', llmModelId: preferredDefaultModelId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); changed = true;
     }
     if (!this.data.users.some((user) => user.id === bankerId)) {
-      this.data.users.push({ id: bankerId, email: 'banker@caprov.demo', passwordHash: seeded.users.find((user) => user.id === bankerId)!.passwordHash, fullName: 'Jordan Lee', title: 'Banker', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); changed = true;
+      this.data.users.push({ id: bankerId, email: 'banker@caprov.demo', passwordHash: ensureSeeded().users.find((user) => user.id === bankerId)!.passwordHash, fullName: 'Jordan Lee', title: 'Banker', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); changed = true;
     }
     if (!this.data.memberships.some((membership) => membership.id === 'mem_bank_demo')) {
       this.data.memberships.push({ id: 'mem_bank_demo', organizationId: bankOrgId, userId: bankerId, role: 'BANKER', createdAt: new Date().toISOString() }); changed = true;
@@ -204,6 +214,19 @@ export class DatabaseService implements OnModuleInit {
         asset.primaryImageUrl = asset.imageUrls[0];
         changed = true;
       }
+      // Move embedded data-URL images out of store.json onto disk so list APIs
+      // stay kilobytes instead of tens of megabytes.
+      const nextUrls = persistImageUrls(asset.imageUrls);
+      const nextPrimary =
+        persistImageUrl(asset.primaryImageUrl) ?? nextUrls[0];
+      const urlsChanged =
+        JSON.stringify(asset.imageUrls ?? []) !== JSON.stringify(nextUrls) ||
+        asset.primaryImageUrl !== nextPrimary;
+      if (urlsChanged) {
+        asset.imageUrls = nextUrls;
+        asset.primaryImageUrl = nextPrimary;
+        changed = true;
+      }
     }
     // CAPROV's operational ledger is USD-only. Historical source documents
     // retain their original currencies as evidence, but all platform marks,
@@ -253,6 +276,13 @@ export class DatabaseService implements OnModuleInit {
         listing.leaseRate = listing.askPrice;
         changed = true;
       }
+      if (
+        listing.imageUrl?.startsWith('data:') ||
+        (listing.imageUrl != null && listing.imageUrl.length > 2_048)
+      ) {
+        listing.imageUrl = persistImageUrl(listing.imageUrl);
+        changed = true;
+      }
     }
     const holdingsByPortfolio = new Map<
       string,
@@ -274,87 +304,102 @@ export class DatabaseService implements OnModuleInit {
         }
       }
     }
-    const seededPlatformOrg = seeded.organizations.find(
-      (item) => item.id === 'org_caprov',
-    );
-    if (seededPlatformOrg) {
-      const existingPlatformOrg = this.data.organizations.find(
-        (item) => item.id === seededPlatformOrg.id,
-      );
-      if (!existingPlatformOrg) {
-        this.data.organizations.unshift(seededPlatformOrg);
-        changed = true;
-      } else {
-        if (existingPlatformOrg.name !== seededPlatformOrg.name) {
-          existingPlatformOrg.name = seededPlatformOrg.name;
-          changed = true;
-        }
-        if (existingPlatformOrg.slug !== seededPlatformOrg.slug) {
-          existingPlatformOrg.slug = seededPlatformOrg.slug;
-          changed = true;
-        }
-        if (!existingPlatformOrg.status) {
-          existingPlatformOrg.status = seededPlatformOrg.status;
-          changed = true;
-        }
-        if (!existingPlatformOrg.llmModelId) {
-          existingPlatformOrg.llmModelId = seededPlatformOrg.llmModelId;
-          changed = true;
-        }
-      }
-    }
-    const seededPlatformAdmin = seeded.users.find(
-      (item) => item.id === 'usr_caprov_admin',
-    );
-    if (seededPlatformAdmin) {
-      const legacyPlatformAdmin = this.data.users.find(
+    const needsPlatformBackfill =
+      !this.data.organizations.some((item) => item.id === 'org_caprov') ||
+      !this.data.users.some((item) => item.id === 'usr_caprov_admin') ||
+      !this.data.memberships.some(
+        (item) =>
+          item.userId === 'usr_caprov_admin' &&
+          item.organizationId === 'org_caprov' &&
+          item.role === 'PLATFORM_ADMIN',
+      ) ||
+      this.data.users.some(
         (item) => item.email.toLowerCase() === 'admin@caprov.io',
       );
-      const existingPlatformAdmin =
-        this.data.users.find((item) => item.id === seededPlatformAdmin.id) ??
-        legacyPlatformAdmin;
-      if (!existingPlatformAdmin) {
-        this.data.users.unshift(seededPlatformAdmin);
-        changed = true;
-      } else {
-        if (existingPlatformAdmin.id !== seededPlatformAdmin.id) {
-          existingPlatformAdmin.id = seededPlatformAdmin.id;
+    if (needsPlatformBackfill) {
+      const seed = ensureSeeded();
+      const seededPlatformOrg = seed.organizations.find(
+        (item) => item.id === 'org_caprov',
+      );
+      if (seededPlatformOrg) {
+        const existingPlatformOrg = this.data.organizations.find(
+          (item) => item.id === seededPlatformOrg.id,
+        );
+        if (!existingPlatformOrg) {
+          this.data.organizations.unshift(seededPlatformOrg);
           changed = true;
-        }
-        if (existingPlatformAdmin.email !== seededPlatformAdmin.email) {
-          existingPlatformAdmin.email = seededPlatformAdmin.email;
-          changed = true;
-        }
-        if (existingPlatformAdmin.fullName !== seededPlatformAdmin.fullName) {
-          existingPlatformAdmin.fullName = seededPlatformAdmin.fullName;
-          changed = true;
-        }
-        if (existingPlatformAdmin.title !== seededPlatformAdmin.title) {
-          existingPlatformAdmin.title = seededPlatformAdmin.title;
-          changed = true;
-        }
-        if (
-          existingPlatformAdmin.passwordHash !==
-          seededPlatformAdmin.passwordHash
-        ) {
-          existingPlatformAdmin.passwordHash = seededPlatformAdmin.passwordHash;
-          changed = true;
+        } else {
+          if (existingPlatformOrg.name !== seededPlatformOrg.name) {
+            existingPlatformOrg.name = seededPlatformOrg.name;
+            changed = true;
+          }
+          if (existingPlatformOrg.slug !== seededPlatformOrg.slug) {
+            existingPlatformOrg.slug = seededPlatformOrg.slug;
+            changed = true;
+          }
+          if (!existingPlatformOrg.status) {
+            existingPlatformOrg.status = seededPlatformOrg.status;
+            changed = true;
+          }
+          if (!existingPlatformOrg.llmModelId) {
+            existingPlatformOrg.llmModelId = seededPlatformOrg.llmModelId;
+            changed = true;
+          }
         }
       }
-    }
-    const seededPlatformMembership = seeded.memberships.find(
-      (item) => item.id === 'mem_caprov_admin',
-    );
-    if (seededPlatformMembership) {
-      const hasPlatformMembership = this.data.memberships.some(
-        (item) =>
-          item.userId === seededPlatformMembership.userId &&
-          item.organizationId === seededPlatformMembership.organizationId &&
-          item.role === 'PLATFORM_ADMIN',
+      const seededPlatformAdmin = seed.users.find(
+        (item) => item.id === 'usr_caprov_admin',
       );
-      if (!hasPlatformMembership) {
-        this.data.memberships.unshift(seededPlatformMembership);
-        changed = true;
+      if (seededPlatformAdmin) {
+        const legacyPlatformAdmin = this.data.users.find(
+          (item) => item.email.toLowerCase() === 'admin@caprov.io',
+        );
+        const existingPlatformAdmin =
+          this.data.users.find((item) => item.id === seededPlatformAdmin.id) ??
+          legacyPlatformAdmin;
+        if (!existingPlatformAdmin) {
+          this.data.users.unshift(seededPlatformAdmin);
+          changed = true;
+        } else {
+          if (existingPlatformAdmin.id !== seededPlatformAdmin.id) {
+            existingPlatformAdmin.id = seededPlatformAdmin.id;
+            changed = true;
+          }
+          if (existingPlatformAdmin.email !== seededPlatformAdmin.email) {
+            existingPlatformAdmin.email = seededPlatformAdmin.email;
+            changed = true;
+          }
+          if (existingPlatformAdmin.fullName !== seededPlatformAdmin.fullName) {
+            existingPlatformAdmin.fullName = seededPlatformAdmin.fullName;
+            changed = true;
+          }
+          if (existingPlatformAdmin.title !== seededPlatformAdmin.title) {
+            existingPlatformAdmin.title = seededPlatformAdmin.title;
+            changed = true;
+          }
+          if (
+            existingPlatformAdmin.passwordHash !==
+            seededPlatformAdmin.passwordHash
+          ) {
+            existingPlatformAdmin.passwordHash = seededPlatformAdmin.passwordHash;
+            changed = true;
+          }
+        }
+      }
+      const seededPlatformMembership = seed.memberships.find(
+        (item) => item.id === 'mem_caprov_admin',
+      );
+      if (seededPlatformMembership) {
+        const hasPlatformMembership = this.data.memberships.some(
+          (item) =>
+            item.userId === seededPlatformMembership.userId &&
+            item.organizationId === seededPlatformMembership.organizationId &&
+            item.role === 'PLATFORM_ADMIN',
+        );
+        if (!hasPlatformMembership) {
+          this.data.memberships.unshift(seededPlatformMembership);
+          changed = true;
+        }
       }
     }
     if (changed) {
@@ -426,7 +471,9 @@ export class DatabaseService implements OnModuleInit {
   }
 
   private saveSync(): void {
-    writeFileSync(this.filePath, JSON.stringify(this.data, null, 2));
+    // Compact JSON — pretty-printing multi‑MB stores on every mutate is a
+    // major source of API lag under document/intelligence writes.
+    writeFileSync(this.filePath, JSON.stringify(this.data));
   }
 
   private dbHasExplicitModelSelection(organizationId: string): boolean {
