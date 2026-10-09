@@ -1,7 +1,7 @@
 'use client';
 
-import { connectMetaMaskWallet, selectMetaMaskAccount } from '@/lib/sepolia-marketplace';
-import { selectedBlockchainNetwork, setSelectedBlockchainNetwork, type BlockchainNetworkId } from '@/lib/blockchain-network';
+import { chooseMetaMaskAccount, connectMetaMaskWallet, selectMetaMaskAccount } from '@/lib/sepolia-marketplace';
+import { selectedBlockchainNetwork, setSelectedBlockchainNetwork, type BlockchainNetworkId, type BrowserNetwork } from '@/lib/blockchain-network';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 type InjectedProvider = {
@@ -16,8 +16,10 @@ type WalletContextValue = {
   busy: boolean;
   message?: string;
   networkId: BlockchainNetworkId;
+  network: BrowserNetwork;
   selectNetwork: (networkId: BlockchainNetworkId) => Promise<void>;
   connect: () => Promise<string | undefined>;
+  chooseAccount: () => Promise<string | undefined>;
   selectAccount: (address: string) => Promise<void>;
 };
 
@@ -69,6 +71,23 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const chooseAccount = useCallback(async () => {
+    setBusy(true);
+    setMessage('Choose the MetaMask account to use for CAPROV.');
+    try {
+      const connection = await chooseMetaMaskAccount();
+      setAddress(connection.address);
+      setAccounts(connection.accounts);
+      setMessage(`Active wallet changed to ${connection.address.slice(0, 6)}…${connection.address.slice(-4)}.`);
+      return connection.address;
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'MetaMask account selection could not be completed.');
+      return undefined;
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
   const selectAccount = useCallback(async (nextAddress: string) => {
     const selected = await selectMetaMaskAccount(nextAddress);
     setAddress(selected);
@@ -94,7 +113,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const value = useMemo(() => ({ address, accounts, busy, message, networkId, selectNetwork, connect, selectAccount }), [address, accounts, busy, message, networkId, selectNetwork, connect, selectAccount]);
+  const network = selectedBlockchainNetwork();
+  const value = useMemo(() => ({ address, accounts, busy, message, networkId, network, selectNetwork, connect, chooseAccount, selectAccount }), [address, accounts, busy, message, networkId, network, selectNetwork, connect, chooseAccount, selectAccount]);
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
 }
 

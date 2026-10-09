@@ -48,7 +48,7 @@ export default function NewAssetPage() {
         </div>
         <Card className="p-6">
           <p className="text-sm leading-6 text-[var(--muted)]">
-            Senior Analysts can review existing assets and use Ask AI, but only organization administrators can create assets.
+            Only organization administrators can create assets. Buyers review listings and place buy interest instead.
           </p>
           <Button className="mt-5" onClick={() => router.push('/assets')}>View assets</Button>
         </Card>

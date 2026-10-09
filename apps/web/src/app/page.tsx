@@ -56,7 +56,7 @@ const platformModules = [
   {
     icon: ShieldCheck,
     title: 'Tokenization',
-    body: 'Create fractional asset-token interests with simulated or live Ethereum Sepolia execution and provenance anchoring.',
+    body: 'Create fractional asset-token interests with simulated or live network execution and provenance anchoring.',
   },
   {
     icon: Scale,
@@ -105,13 +105,16 @@ export default function Home() {
           <div className="landing-shell pb-14 pt-8 sm:pb-20 sm:pt-10">
             <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-14">
               <div className="landing-fade landing-fade--delay-1 min-w-0">
-                <p className="landing-kicker">Private-asset operating system</p>
+                <div className="landing-hero__overline">
+                  <span className="landing-hero__pulse" aria-hidden="true" />
+                  Private-asset operating system
+                </div>
                 <h1 className="landing-hero-title mt-5">
-                  Turn private-asset evidence into market access.
+                  Intelligence for private assets. Built to execute.
                 </h1>
                 <p className="landing-lead landing-read mt-5">
                   CAPROV turns source documents into a reviewable Asset DNA record, then carries that evidence into
-                  tokenization, fractional trading, and collateralized lending.
+                  controlled tokenization, fractional trading, and collateralized lending.
                 </p>
                 <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
                   <Link href="/login" className="landing-btn landing-btn--primary group w-full sm:w-auto">
@@ -131,6 +134,11 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
+                <div className="landing-hero__assurance mt-8">
+                  <span>Source-linked records</span>
+                  <span>Role-aware controls</span>
+                  <span>Network-aware provenance</span>
+                </div>
               </div>
 
               <div className="landing-fade landing-fade--delay-2 min-w-0 w-full">
@@ -141,7 +149,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-y border-[var(--line)]/80 bg-[var(--card)]" aria-label="Built for institutional teams">
+      <section className="landing-audience-band border-y border-[var(--line)]/80 bg-[var(--card)]" aria-label="Built for institutional teams">
         <div className="landing-shell flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="landing-metric-label shrink-0">Built for</p>
           <ul className="flex flex-wrap gap-x-6 gap-y-2">

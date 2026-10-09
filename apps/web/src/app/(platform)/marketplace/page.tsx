@@ -10,7 +10,7 @@ import { api } from '@/lib/api';
 import { sepoliaTxExplorerUrl } from '@/lib/explorer';
 import { readFileAsDataUrl } from '@/lib/files';
 import { assetClassLabel, money } from '@/lib/format';
-import { capPricePerUnitFromTotal, closeOnChainListing, createOnChainListing, mintAssetFromWallet } from '@/lib/sepolia-marketplace';
+import { capPricePerUnitFromTotal, closeOnChainListing, createOnChainListing } from '@/lib/sepolia-marketplace';
 import type { HydratedAsset } from '@/lib/types';
 import { useAuthStore } from '@/stores/auth-store';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -96,7 +96,7 @@ export default function MarketplacePage() {
   const canList = useAuthStore((state) => state.roles).some((role) =>
     ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN'].includes(role),
   );
-  const { address: connectedWallet = '' } = useWallet();
+  const { address: connectedWallet = '', network: selectedNetwork } = useWallet();
   const wallet = connectedWallet;
   const [notice, setNotice] = useState<{ tone: 'ok' | 'danger'; text: string }>();
   const [query, setQuery] = useState('');
@@ -172,7 +172,7 @@ export default function MarketplacePage() {
       if (!Number.isFinite(totalAskPrice) || totalAskPrice < 0.01) throw new Error('Enter a valid total asking price of at least 0.01 USD.');
       if (listingTitle && listingTitle.length < 2) throw new Error('Listing title must contain at least 2 characters.');
       if (form.tokenizeBeforeListing && !network.data?.contractAddress)
-        throw new Error('The Sepolia ERC-1155 token contract is not configured.');
+        throw new Error('The active network ERC-1155 token contract is not configured.');
       if (form.tokenizeBeforeListing) {
         // Requesting account permissions from this click lets MetaMask present
         // its native account chooser instead of relying on a server-held key.
@@ -181,16 +181,14 @@ export default function MarketplacePage() {
         // The form price is the whole offering value. The V2 contract needs a
         // per-unit CAP amount, so derive it before minting any live supply.
         const pricePerToken = capPricePerUnitFromTotal(form.price, form.supply);
-        const mint = await mintAssetFromWallet({
+        // ERC-1155 issuance is intentionally restricted to the suite owner.
+        // The API holds that configured Besu/Sepolia signer and mints directly
+        // to the lister wallet; MetaMask is then used only for its approval and
+        // the escrow/listing transaction.
+        const token = (await api.post<{ id: string; tokenId: string; supply: number }>('/tokenization/tokens', {
           assetId: selectedAsset.id,
           supply: Number(form.supply),
           recipientAddress: listerWallet,
-        });
-        const token = (await api.post<{ id: string; tokenId: string; supply: number }>('/tokenization/tokens/wallet-mints', {
-          assetId: selectedAsset.id,
-          supply: Number(form.supply),
-          recipientAddress: listerWallet,
-          txHash: mint.txHash,
         })).data;
         const onChain = await createOnChainListing({
           assetTokenId: token.tokenId,
@@ -228,7 +226,7 @@ export default function MarketplacePage() {
       setNotice({
         tone: 'ok',
         text: form.tokenizeBeforeListing
-          ? 'ERC-1155 units were escrowed on Sepolia. Buyers can now escrow CAP against the listing.'
+          ? `ERC-1155 units were escrowed on ${selectedNetwork.chainName}. Buyers can now escrow CAP against the listing.`
           : 'Non-tokenized listing published.',
       });
       await client.invalidateQueries({ queryKey: ['marketplace'] });
@@ -251,7 +249,7 @@ export default function MarketplacePage() {
       });
     },
     onSuccess: async () => {
-      setNotice({ tone: 'ok', text: 'Listing closed on Sepolia. Its unsold ERC-1155 units were returned to the lister wallet.' });
+      setNotice({ tone: 'ok', text: `Listing closed on ${selectedNetwork.chainName}. Its unsold ERC-1155 units were returned to the lister wallet.` });
       await client.invalidateQueries({ queryKey: ['marketplace'] });
       await client.invalidateQueries({ queryKey: ['tokenization'] });
     },
@@ -272,7 +270,7 @@ export default function MarketplacePage() {
       <PageHeader
         eyebrow="Marketplace"
         title="Asset marketplace"
-        description="Tokenized listings escrow ERC-1155 units on Sepolia. Buyers escrow CAP, and sellers approve the final on-chain settlement."
+        description={`Tokenized listings escrow ERC-1155 units on ${selectedNetwork.chainName}. Buyers escrow CAP, and sellers approve the final on-chain settlement.`}
       />
 
       {!wallet ? <p className="rounded-xl border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--muted)]">Connect the lister MetaMask wallet from the top-right menu before creating an on-chain listing.</p> : null}
@@ -395,7 +393,7 @@ export default function MarketplacePage() {
         <Card className="h-fit p-6 xl:sticky xl:top-6">
           <h2 className="font-display text-lg font-semibold tracking-[-0.02em] text-[var(--ink)]">Create a listing</h2>
           <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-            Tokenize before publishing to mint the ERC-1155 supply, escrow it in the Sepolia marketplace, and accept CAP-funded purchase requests.
+            Tokenize before publishing to mint the ERC-1155 supply, escrow it in the {selectedNetwork.chainName} marketplace, and accept CAP-funded purchase requests.
           </p>
 
           {!canList ? (
@@ -438,7 +436,7 @@ export default function MarketplacePage() {
                 <span className="min-w-0">
                   <span className="font-medium text-[var(--ink)]">Tokenize before listing</span>
                   <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
-                    Mint a fixed ERC-1155 supply to the connected wallet, then escrow it in the Sepolia marketplace.
+                    Mint a fixed ERC-1155 supply to the connected wallet, then escrow it in the {selectedNetwork.chainName} marketplace.
                   </span>
                 </span>
               </label>
@@ -472,7 +470,7 @@ export default function MarketplacePage() {
                 />
                 {form.tokenizeBeforeListing ? (
                   <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-                    This is the total for all token units. The Sepolia contract derives the per-unit CAP price; 1 CAP = 1 USD.
+                    This is the total for all token units. The {selectedNetwork.chainName} contract derives the per-unit CAP price; 1 CAP = 1 USD.
                   </p>
                 ) : null}
               </Field>
@@ -544,6 +542,7 @@ function ListingCard({
   onClose: (listing: Listing) => void;
   closing: boolean;
 }) {
+  const { network } = useWallet();
   const image = listing.imageUrl || listing.asset?.primaryImageUrl || listing.asset?.imageUrls?.[0];
   const tokenized = isTokenized(listing);
   const explorerUrl = tokenized
@@ -681,13 +680,18 @@ function ListingCard({
                   ? `Closed${listing.closedAt ? ` ${listing.closedAt.slice(0, 10)}` : ''}. ${soldUnits?.toLocaleString('en-GB') ?? 0} units sold; ${returnedUnits.toLocaleString('en-GB')} unsold units returned to the lister wallet.`
                   : 'Tokenized trading and CAP escrow are available from the Trading section.'}
               </p>
+              {!isLister && !isClosed && ['OPEN', 'PARTIALLY_FILLED'].includes(listing.status) ? (
+                <Link href="/trading">
+                  <Button>Buy</Button>
+                </Link>
+              ) : null}
               {isLister && !isClosed && ['OPEN', 'PARTIALLY_FILLED'].includes(listing.status) ? (
                 <Button
                   variant="secondary"
                   onClick={() => onClose(listing)}
                   disabled={closing}
                 >
-                  {closing ? 'Closing on Sepolia…' : 'Close listing'}
+                  {closing ? `Closing on ${network.chainName}…` : 'Close listing'}
                 </Button>
               ) : null}
             </div>

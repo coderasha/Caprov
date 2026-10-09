@@ -39,6 +39,15 @@ export const ROLE_SCOPES: Record<MembershipRole, string[]> = {
     AUTH_SCOPES.portfolioWrite,
     AUTH_SCOPES.auditRead,
   ],
+  // Buyers review listed assets and place buy interest. They do not edit
+  // the seller's records or administer an organization.
+  BUYER: [
+    AUTH_SCOPES.assetRead,
+    AUTH_SCOPES.documentRead,
+    AUTH_SCOPES.intelligenceRead,
+    AUTH_SCOPES.portfolioRead,
+    AUTH_SCOPES.auditRead,
+  ],
   // Bankers underwrite and service collateralized facilities. They need to
   // inspect the asset, document, portfolio, and audit evidence supporting a
   // loan, but do not receive organization-administration or asset-edit rights.

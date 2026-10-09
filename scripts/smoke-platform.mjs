@@ -62,7 +62,7 @@ async function main() {
   // Auth
   const login = await request(API, '/auth/login', {
     method: 'POST',
-    body: { email: 'arjun@meridian.caprov', password: 'CaprovDemo!23' },
+    body: { email: 'elena@meridian.caprov', password: 'CaprovDemo!23' },
   });
   if (!login.ok || !login.data?.token) {
     fail('Auth login', JSON.stringify(login.data));

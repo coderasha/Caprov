@@ -52,6 +52,7 @@ export type MembershipRole =
   | 'PLATFORM_ADMIN'
   | 'ORG_ADMIN'
   | 'ANALYST'
+  | 'BUYER'
   | 'BANKER'
   | 'COMPLIANCE'
   | 'VIEWER';

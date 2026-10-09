@@ -48,7 +48,7 @@ See [docs/README.md](docs/README.md) for the full documentation index.
 | --- | --- | --- | --- |
 | Priya Nair | `priya@caprov.io` | `CaprovDemo!23` | Platform admin |
 | Elena Voss | `elena@meridian.caprov` | `CaprovDemo!23` | Org admin |
-| Arjun Mehta | `arjun@meridian.caprov` | `CaprovDemo!23` | Analyst |
+| Arjun Mehta | `arjun@meridian.caprov` | `CaprovDemo!23` | Buyer |
 | Sofia Laurent | `sofia@meridian.caprov` | `CaprovDemo!23` | Compliance |
 
 ## Run locally

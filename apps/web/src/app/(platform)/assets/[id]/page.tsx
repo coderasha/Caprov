@@ -9,7 +9,10 @@ import { FactSummaryTable } from '@/components/intelligence/fact-summary-table';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { activeMetaMaskConnection } from '@/lib/sepolia-marketplace';
-import { selectedBlockchainNetwork } from '@/lib/blockchain-network';
+import {
+  selectedBlockchainNetwork,
+  type BlockchainNetworkId,
+} from '@/lib/blockchain-network';
 import {
   assetClassLabel,
   assetStatusLabel,
@@ -61,6 +64,7 @@ function folderNameForType(type: DocumentType) {
 }
 
 interface DocumentNetworkStatus {
+  networkId: BlockchainNetworkId;
   chainId: number;
   chainName: string;
   rpcUrl: string;
@@ -119,7 +123,16 @@ export default function AssetDetailPage() {
   const [walletBusy, setWalletBusy] = useState(false);
   const [walletMessage, setWalletMessage] = useState<string | null>(null);
   const [anchorError, setAnchorError] = useState<string | null>(null);
+  const [networkId, setNetworkId] = useState<BlockchainNetworkId>(() =>
+    selectedBlockchainNetwork().id,
+  );
   const { address: connectedWallet } = useWallet();
+
+  useEffect(() => {
+    const handleNetworkChange = () => setNetworkId(selectedBlockchainNetwork().id);
+    window.addEventListener('caprov-network-changed', handleNetworkChange);
+    return () => window.removeEventListener('caprov-network-changed', handleNetworkChange);
+  }, []);
 
   const assetQuery = useQuery({
     queryKey: ['asset', params.id],
@@ -135,7 +148,7 @@ export default function AssetDetailPage() {
       (await api.get<AssetDocumentsTree>(`/documents/assets/${params.id}/folders`)).data,
   });
   const networkQuery = useQuery({
-    queryKey: ['documents-network-status'],
+    queryKey: ['documents-network-status', networkId],
     queryFn: async () =>
       (await api.get<DocumentNetworkStatus>('/documents/network-status')).data,
   });
@@ -282,12 +295,14 @@ export default function AssetDetailPage() {
     await queryClient.invalidateQueries({ queryKey: ['jobs'] });
   }
 
-  async function connectWallet(): Promise<WalletSession> {
+  async function connectWallet(
+    targetNetwork: DocumentNetworkStatus | undefined = network,
+  ): Promise<WalletSession> {
     setWalletBusy(true);
     setAnchorError(null);
     setWalletMessage('Using the wallet connected from the top-right menu…');
     try {
-      const session = await connectMetaMask(network);
+      const session = await connectMetaMask(targetNetwork);
       setWalletSession(session);
       setWalletMessage(`MetaMask connected: ${shortAddress(session.account)}`);
       return session;
@@ -301,18 +316,27 @@ export default function AssetDetailPage() {
     }
   }
 
-  async function anchorDocumentWithWallet(document: DocumentRow, session: WalletSession) {
+  async function anchorDocumentWithWallet(
+    document: DocumentRow,
+    session: WalletSession,
+    targetNetwork: DocumentNetworkStatus = network!,
+  ) {
     if (!document.assetId || !document.documentHash || !document.offChainUri) {
       throw new Error('The uploaded document is missing anchor metadata.');
     }
-    if (!network?.contractAddress) {
-      throw new Error('Sepolia document registry contract is not configured.');
+    if (!targetNetwork?.contractAddress) {
+      throw new Error(`${targetNetwork?.chainName ?? 'Selected network'} document registry contract is not configured.`);
     }
 
-    await ensureSepoliaNetwork(session.provider, network);
-    const signer = await session.browserProvider.getSigner(session.account);
+    assertSelectedNetwork(targetNetwork);
+    await ensureDocumentNetwork(session.provider, targetNetwork);
+    const currentBrowserProvider = new BrowserProvider(
+      session.provider,
+      targetNetwork.chainId,
+    );
+    const signer = await currentBrowserProvider.getSigner(session.account);
     const signerAddress = await signer.getAddress();
-    const contract = new Contract(network.contractAddress, DOCUMENT_REGISTRY_ABI, signer);
+    const contract = new Contract(targetNetwork.contractAddress, DOCUMENT_REGISTRY_ABI, signer);
     const anchorFn = contract.getFunction('anchorDocumentVersion');
     setWalletMessage('Awaiting MetaMask signature…');
     const tx = await anchorFn(
@@ -329,7 +353,7 @@ export default function AssetDetailPage() {
     const receipt = await tx.wait();
     const transactionHash = receipt?.hash ?? tx.hash;
     if (!receipt || Number(receipt.status ?? 0) !== 1) {
-      throw new Error(`Sepolia anchor transaction failed: ${transactionHash}`);
+      throw new Error(`${targetNetwork.chainName} anchor transaction failed: ${transactionHash}`);
     }
 
     await recordAnchor.mutateAsync({
@@ -341,7 +365,7 @@ export default function AssetDetailPage() {
       ...session,
       account: signerAddress,
     });
-    setWalletMessage(`Anchored on Sepolia: ${transactionHash}`);
+    setWalletMessage(`Anchored on ${targetNetwork.chainName}: ${transactionHash}`);
   }
 
   async function handleDocumentSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -353,9 +377,15 @@ export default function AssetDetailPage() {
         ? await uploadDoc.mutateAsync()
         : await ingestDoc.mutateAsync();
 
-      if (canWalletAnchor && liveDocumentAnchoringReady && created.documentHash) {
-        const session = walletSession ?? (await connectWallet());
-        await anchorDocumentWithWallet(created, session);
+      if (canWalletAnchor && created.documentHash) {
+        const currentNetwork = (
+          await api.get<DocumentNetworkStatus>('/documents/network-status')
+        ).data;
+        assertSelectedNetwork(currentNetwork);
+        if (currentNetwork.liveReady && currentNetwork.contractAddress) {
+          const session = walletSession ?? (await connectWallet(currentNetwork));
+          await anchorDocumentWithWallet(created, session, currentNetwork);
+        }
       }
 
       setDoc({ name: '', type: 'OTHER', extractedText: '' });
@@ -610,16 +640,16 @@ export default function AssetDetailPage() {
                   ? 'Processing…'
                   : docFile
                     ? canWalletAnchor && liveDocumentAnchoringReady
-                      ? 'Upload, sign, and anchor on Sepolia'
+                      ? `Upload, sign, and anchor on ${network?.chainName ?? selectedBlockchainNetwork().chainName}`
                       : 'Upload document'
                     : canWalletAnchor && liveDocumentAnchoringReady
-                      ? 'Add document and anchor on Sepolia'
+                      ? `Add document and anchor on ${network?.chainName ?? selectedBlockchainNetwork().chainName}`
                       : 'Add document'}
               </Button>
               <p className="text-xs leading-5 text-[var(--muted)]">
                 Upload a PDF or DOCX to extract text automatically. The file is stored in the asset folder for
                 its category, matching filenames create a new version instead of replacing older ones, and org
-                admins can sign a real Sepolia anchor transaction only when live document anchoring is configured.
+                admins can sign a real {network?.chainName ?? selectedBlockchainNetwork().chainName} anchor transaction only when live document anchoring is configured.
               </p>
             </form>
           </Card>
@@ -844,7 +874,8 @@ function readErrorMessage(error: unknown) {
 async function connectMetaMask(network?: DocumentNetworkStatus): Promise<WalletSession> {
   const { provider, accounts, address: account } = await activeMetaMaskConnection();
   if (!account) throw new Error('Connect MetaMask from the top-right menu before signing an anchor.');
-  await ensureSepoliaNetwork(provider, network);
+  assertSelectedNetwork(network);
+  await ensureDocumentNetwork(provider, network);
   const selected = selectedBlockchainNetwork();
   const browserProvider = new BrowserProvider(provider, network?.chainId ?? selected.chainId);
   if (!account) throw new Error('MetaMask did not expose an account to CAPROV.');
@@ -858,7 +889,19 @@ async function connectMetaMask(network?: DocumentNetworkStatus): Promise<WalletS
   };
 }
 
-async function ensureSepoliaNetwork(
+function assertSelectedNetwork(network?: DocumentNetworkStatus) {
+  if (!network) {
+    throw new Error('The selected blockchain network could not be loaded. Try again before signing.');
+  }
+  const selected = selectedBlockchainNetwork();
+  if (network.networkId !== selected.id || network.chainId !== selected.chainId) {
+    throw new Error(
+      `Network selection changed or is stale. CAPROV selected ${selected.chainName} (chain ID ${selected.chainId}), but the document anchor is configured for ${network.chainName} (chain ID ${network.chainId}). Refresh and try again.`,
+    );
+  }
+}
+
+async function ensureDocumentNetwork(
   provider: WalletProviderLike,
   network?: DocumentNetworkStatus,
 ) {
@@ -901,6 +944,15 @@ async function ensureSepoliaNetwork(
         },
       ],
     });
+  }
+
+  const activeChain = await provider.request({ method: 'eth_chainId' });
+  const activeChainId =
+    typeof activeChain === 'string' ? Number.parseInt(activeChain, 16) : Number(activeChain);
+  if (activeChainId !== chainId) {
+    throw new Error(
+      `Wallet remains on chain ID ${activeChainId}. ${network?.chainName ?? selected.chainName} (chain ID ${chainId}) is required before an anchor can be submitted.`,
+    );
   }
 }
 

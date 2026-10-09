@@ -123,6 +123,32 @@ export async function connectMetaMaskWallet() {
   return { address, accounts };
 }
 
+/**
+ * Opens MetaMask's account-permission chooser again. This is deliberately
+ * separate from the initial connect flow: a user can change the signing
+ * account at any time without silently falling back to another exposed one.
+ */
+export async function chooseMetaMaskAccount() {
+  const provider = await selectedProvider();
+  try {
+    await provider.request({
+      method: 'wallet_requestPermissions',
+      params: [{ eth_accounts: {} }],
+    });
+  } catch (error) {
+    const code = typeof error === 'object' && error !== null && 'code' in error
+      ? (error as { code?: number }).code
+      : undefined;
+    // Some injected wallets do not implement the MetaMask permission method.
+    // They can still expose their account chooser through the standard request.
+    if (code !== -32601 && code !== 4200) throw error;
+  }
+  const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
+  if (!accounts[0]) throw new Error('MetaMask did not expose an account to CAPROV.');
+  activeAccount = accounts[0];
+  return { address: activeAccount, accounts };
+}
+
 /** Selects a MetaMask account that the extension has explicitly exposed to this site. */
 export async function selectMetaMaskAccount(account: string) {
   const provider = await selectedProvider();

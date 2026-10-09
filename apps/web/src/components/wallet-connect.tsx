@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/input';
 import { connectMetaMaskWallet, selectMetaMaskAccount } from '@/lib/sepolia-marketplace';
+import { selectedBlockchainNetwork } from '@/lib/blockchain-network';
 import { useState } from 'react';
 
 export function WalletConnect({ onConnected }: { onConnected?: (address: string) => void }) {
@@ -15,7 +16,7 @@ export function WalletConnect({ onConnected }: { onConnected?: (address: string)
       <div>
         <p className="font-medium">Self-custody wallet</p>
         <p className="text-xs text-[var(--muted)]">
-          {address ? `Sepolia · ${address.slice(0, 6)}…${address.slice(-4)}` : 'Connect the MetaMask wallet that holds your CAP tokens.'}
+          {address ? `${selectedBlockchainNetwork().chainName} · ${address.slice(0, 6)}…${address.slice(-4)}` : 'Connect the MetaMask wallet that holds your CAP tokens.'}
         </p>
       </div>
       <Button className="ml-auto" variant="secondary" onClick={async () => {

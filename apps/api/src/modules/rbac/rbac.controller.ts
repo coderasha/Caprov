@@ -23,6 +23,11 @@ export class RbacController {
         description: 'Create assets, ingest documents and run intelligence.',
       },
       {
+        key: 'BUYER',
+        name: 'Buyer',
+        description: 'Review listings and place buy interest. Cannot edit seller records.',
+      },
+      {
         key: 'COMPLIANCE',
         name: 'Compliance',
         description: 'Review documents, DNA provenance and audit history.',

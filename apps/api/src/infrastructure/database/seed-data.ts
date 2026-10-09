@@ -18,6 +18,7 @@ const now = '2026-08-10T10:00:00.000Z';
 const orgId = 'org_meridian';
 const platformOrgId = 'org_caprov';
 const bankOrgId = 'org_caprov_demo_bank';
+const buyerOrgId = 'org_mehta';
 const elenaId = 'usr_elena';
 const arjunId = 'usr_arjun';
 const sofiaId = 'usr_sofia';
@@ -1018,6 +1019,7 @@ export function buildSeedData(): CaprovData {
         updatedAt: now,
       },
       { id: bankOrgId, name: 'CAPROV Demo Bank', slug: 'caprov-demo-bank', status: 'ACTIVE', llmModelId: defaultLlmModelId, createdAt: now, updatedAt: now },
+      { id: buyerOrgId, name: 'Mehta Family Office', slug: 'mehta-family-office', status: 'ACTIVE', llmModelId: defaultLlmModelId, createdAt: now, updatedAt: now },
     ],
     users: [
       {
@@ -1034,7 +1036,7 @@ export function buildSeedData(): CaprovData {
         email: 'arjun@meridian.caprov',
         passwordHash,
         fullName: 'Arjun Mehta',
-        title: 'Senior Analyst',
+        title: 'Buyer',
         createdAt: '2022-01-18T09:00:00.000Z',
         updatedAt: now,
       },
@@ -1068,9 +1070,9 @@ export function buildSeedData(): CaprovData {
       },
       {
         id: 'mem_arjun',
-        organizationId: orgId,
+        organizationId: buyerOrgId,
         userId: arjunId,
-        role: 'ANALYST',
+        role: 'BUYER',
         createdAt: '2022-01-18T09:00:00.000Z',
       },
       {
@@ -1941,6 +1943,12 @@ export function buildSeedData(): CaprovData {
         balance: 25_000_000,
         updatedAt: '2026-07-26T10:00:00.000Z',
       },
+      {
+        organizationId: buyerOrgId,
+        currency: 'USD',
+        balance: 0,
+        updatedAt: now,
+      },
     ],
     walletTransactions: [
       {
@@ -2016,7 +2024,7 @@ export const DEMO_ACCOUNTS = [
     email: 'arjun@meridian.caprov',
     password: DEMO_PASSWORD,
     name: 'Arjun Mehta',
-    role: 'ANALYST',
+    role: 'Buyer',
   },
   {
     email: 'sofia@meridian.caprov',

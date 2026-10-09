@@ -101,7 +101,7 @@ function errorMessage(error: unknown): string {
 export default function CollateralPage() {
   const queryClient = useQueryClient();
   const roles = useAuthStore((state) => state.roles);
-  const { address: wallet } = useWallet();
+  const { address: wallet, network } = useWallet();
   const [assetId, setAssetId] = useState('');
   const [tokenId, setTokenId] = useState('');
   const [collateralBps, setCollateralBps] = useState('1000');
@@ -376,14 +376,14 @@ export default function CollateralPage() {
               <p className="text-sm text-[var(--muted)]">
                 {(Number(collateralBps) / 100).toFixed(2)}% equals {money(previewPledged, 'USD')} at{' '}
                 {money(marketValuation.data.pricePerTokenUsd, 'USD')} per ERC-1155 unit ({marketValuation.data.sourceLabel}).{' '}
-                {previewUnits.toLocaleString()} ERC-1155 units will be locked in the Sepolia vault. The banker applies the haircut and loan limit during underwriting.
+                {previewUnits.toLocaleString()} ERC-1155 units will be locked in the {network.chainName} vault. The banker applies the haircut and loan limit during underwriting.
               </p>
             ) : null}
             {activeOnChainListing ? (
               <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-3 text-sm text-amber-950">
-                <p>The active Sepolia listing holds this token position in marketplace escrow. Close it to return the unsold units to your wallet before pledging collateral.</p>
+                <p>The active {network.chainName} listing holds this token position in marketplace escrow. Close it to return the unsold units to your wallet before pledging collateral.</p>
                 <Button type="button" className="mt-3" variant="secondary" disabled={closeOnChain.isPending || !wallet} onClick={() => { setFormError(null); closeOnChain.mutate(); }}>
-                  {closeOnChain.isPending ? 'Closing listing on Sepolia…' : 'Close listing and recover units'}
+                  {closeOnChain.isPending ? `Closing listing on ${network.chainName}…` : 'Close listing and recover units'}
                 </Button>
               </div>
             ) : null}
@@ -391,14 +391,14 @@ export default function CollateralPage() {
               <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-3 text-sm text-amber-950">
                 <p>This token position has no collateral reference yet. Publish an on-chain CAP listing to establish its initial USD price, or settle a CAP trade.</p>
                 {existingListing ? <Button type="button" className="mt-3" variant="secondary" disabled={publishOnChain.isPending || !wallet} onClick={() => { setFormError(null); publishOnChain.mutate(); }}>
-                  {publishOnChain.isPending ? 'Publishing on Sepolia…' : `Publish ${existingListing.title} on Sepolia`}
+                  {publishOnChain.isPending ? `Publishing on ${network.chainName}…` : `Publish ${existingListing.title} on ${network.chainName}`}
                 </Button> : <p className="mt-2 text-xs text-amber-900/80">Create an open listing for this token position in Marketplace first.</p>}
                 {existingListing && !wallet ? <p className="mt-2 text-xs text-amber-900/80">Connect the token-holder wallet from the top-right menu to publish.</p> : null}
               </div>
             ) : null}
             {formError ? <p className="text-sm text-red-700">{formError}</p> : null}
             <Button type="submit" disabled={!assetId || !tokenId || !marketValuation.data || Boolean(activeOnChainListing) || create.isPending || !canManageCollateral}>
-              {create.isPending ? 'Waiting for Sepolia confirmation…' : 'Lock collateral on Sepolia'}
+              {create.isPending ? `Waiting for ${network.chainName} confirmation…` : `Lock collateral on ${network.chainName}`}
             </Button>
           </form>
         </Card> : null}
@@ -462,7 +462,7 @@ export default function CollateralPage() {
 
               {item.status === 'PENDING_APPROVAL' ? (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <p className="text-sm text-[var(--muted)]">Locked on Sepolia and awaiting a bank loan offer.</p>
+                  <p className="text-sm text-[var(--muted)]">Locked on {network.chainName} and awaiting a bank loan offer.</p>
                 </div>
               ) : null}
 

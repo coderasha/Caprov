@@ -8,7 +8,6 @@ import { Card } from '@/components/ui/card';
 import { Field, Input, Select } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { sepoliaTxExplorerUrl } from '@/lib/explorer';
-import { mintAssetFromWallet } from '@/lib/sepolia-marketplace';
 import type { HydratedAsset } from '@/lib/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
@@ -39,7 +38,7 @@ interface TokenRow {
 
 export default function TokenizationPage() {
   const queryClient = useQueryClient();
-  const { address: wallet } = useWallet();
+  const { address: wallet, network: selectedNetwork } = useWallet();
   const [assetId, setAssetId] = useState('');
   const [supply, setSupply] = useState('1000000');
   const query = useQuery({
@@ -58,13 +57,13 @@ export default function TokenizationPage() {
   const mint = useMutation({
     mutationFn: async () => {
       if (!wallet) throw new Error('Connect the recipient MetaMask wallet from the top-right menu before minting.');
-      if (!status?.contractAddress) throw new Error('The Sepolia ERC-1155 asset-token contract is not configured.');
-      const transaction = await mintAssetFromWallet({ assetId, supply: Number(supply), recipientAddress: wallet });
-      return api.post('/tokenization/tokens/wallet-mints', {
+      if (!status?.contractAddress) throw new Error('The active network ERC-1155 asset-token contract is not configured.');
+      // Minting is owner-only in CaprovAssetToken. The API's configured
+      // network signer owns the contract and sends the units to this wallet.
+      return api.post('/tokenization/tokens', {
         assetId,
         supply: Number(supply),
         recipientAddress: wallet,
-        txHash: transaction.txHash,
       });
     },
     onSuccess: async () => {
@@ -89,14 +88,14 @@ export default function TokenizationPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader
         eyebrow="Tokenization"
-        title="Ethereum Sepolia asset tokens"
-        description="Mint Caprov economic units on Ethereum Sepolia for any supported asset class using the MetaMask wallet connected from the top-right menu. Assets do not need to be listed first."
+        title={`${selectedNetwork.chainName} asset tokens`}
+        description={`Mint Caprov economic units on ${selectedNetwork.chainName} for any supported asset class using the MetaMask wallet connected from the top-right menu. Assets do not need to be listed first.`}
       />
       <Card className="p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="font-display text-lg font-semibold tracking-[-0.02em]">
-              {status?.chainName ?? 'Ethereum Sepolia'}
+              {status?.chainName ?? selectedNetwork.chainName}
             </h2>
             <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">{status?.message}</p>
           </div>
@@ -139,7 +138,7 @@ export default function TokenizationPage() {
             </p>
             {selectedToken ? <p className="text-sm text-[var(--muted)]">This asset is already tokenized with an immutable supply of {selectedToken.supply.toLocaleString()} units. It can be listed in Marketplace without minting again.</p> : null}
             <Button type="submit" disabled={!assetId || tokenizedAssetIdSet.has(assetId) || mint.isPending || !wallet || !status?.contractAddress}>
-              Mint on Sepolia
+              Mint on {selectedNetwork.chainName}
             </Button>
             {mint.error ? <p className="text-sm text-[var(--danger)]">{axios.isAxiosError(mint.error) ? String(mint.error.response?.data?.message ?? 'Minting failed.') : mint.error instanceof Error ? mint.error.message : 'Minting failed.'}</p> : null}
           </form>

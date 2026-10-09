@@ -1,12 +1,14 @@
 'use client';
 
 import { PageHeader } from '@/components/layout/page-header';
+import { useWallet } from '@/components/wallet/wallet-provider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { api } from '@/lib/api';
 import { assetClassLabel, formatDate, money, riskTone } from '@/lib/format';
 import type { AuditRow, DocumentRow, HydratedAsset, JobRow, PortfolioRow } from '@/lib/types';
+import { useAuthStore } from '@/stores/auth-store';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 
@@ -38,6 +40,11 @@ const workflowSteps = [
 ] as const;
 
 export default function DashboardPage() {
+  const { network } = useWallet();
+  const roles = useAuthStore((state) => state.roles);
+  const isBuyer =
+    roles.includes('BUYER') &&
+    !roles.some((role) => ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN', 'BANKER'].includes(role));
   const assetsQuery = useQuery({
     queryKey: ['assets'],
     queryFn: async () => (await api.get<HydratedAsset[]>('/assets')).data,
@@ -94,6 +101,43 @@ export default function DashboardPage() {
               href: '/portfolios',
               cta: 'Open workflows',
             };
+
+  if (isBuyer) {
+    return (
+      <div className="mx-auto max-w-6xl space-y-8">
+        <PageHeader
+          eyebrow="Buyer"
+          title="Buy fractional interests"
+          description="Review open listings, escrow CAP against a tokenized asset, then follow the trade through settlement."
+          actions={
+            <>
+              <Link href="/marketplace">
+                <Button>View listings</Button>
+              </Link>
+              <Link href="/trading">
+                <Button variant="secondary">Place a buy</Button>
+              </Link>
+            </>
+          }
+        />
+        <section className="grid gap-4 md:grid-cols-3">
+          {[
+            { title: '1. Review listings', body: `Open marketplace listings show the asset, ask, and whether units are escrowed on ${network.chainName}.`, href: '/marketplace' },
+            { title: '2. Escrow CAP', body: 'Choose a tokenized listing and pay CAP from your wallet. That creates a trade waiting for the seller.', href: '/trading' },
+            { title: '3. Follow settlement', body: 'After the seller approves, CAP is released and the asset units move to your wallet.', href: '/settlement' },
+          ].map((step) => (
+            <Card key={step.title} className="p-5">
+              <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--gold)]">{step.title}</p>
+              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">{step.body}</p>
+              <Link href={step.href} className="mt-4 inline-flex text-sm font-medium text-[var(--ink)] underline underline-offset-4">
+                Open
+              </Link>
+            </Card>
+          ))}
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">

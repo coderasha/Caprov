@@ -37,7 +37,7 @@ async function request(path, { method = 'GET', token, body } = {}) {
 async function main() {
   const login = await request('/auth/login', {
     method: 'POST',
-    body: { email: 'arjun@meridian.caprov', password: 'CaprovDemo!23' },
+    body: { email: 'elena@meridian.caprov', password: 'CaprovDemo!23' },
   });
   if (!login.ok || !login.data?.token) {
     fail('login', JSON.stringify(login.data));

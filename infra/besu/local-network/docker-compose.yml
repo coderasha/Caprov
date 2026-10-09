@@ -181,7 +181,8 @@ services:
       - ./config/grafana/provisioning/:/etc/grafana/provisioning/
       - grafana:/var/lib/grafana
     ports:
-      - 3000:3000/tcp
+      # CAPROV web uses localhost:3000; keep Besu monitoring separate.
+      - 3300:3000/tcp
     networks:
       besu-dev-quickstart:
         ipv4_address: 172.16.239.33

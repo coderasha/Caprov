@@ -58,9 +58,18 @@ export class AssetsService {
   getForUser(user: AuthUser, assetId: string) {
     const asset = this.hydrate(assetId);
     if (!asset) throw new NotFoundException('Asset not found');
+    const listedForSale =
+      user.roles.includes('BUYER') &&
+      this.db.snapshot.listings.some(
+        (listing) =>
+          listing.assetId === assetId &&
+          listing.status !== 'CLOSED' &&
+          listing.status !== 'CANCELLED',
+      );
     if (
       asset.organizationId === user.organizationId ||
       user.roles.includes('PLATFORM_ADMIN') ||
+      listedForSale ||
       (user.roles.includes('BANKER') &&
         this.db.snapshot.collateralPositions.some(
           (position) =>

@@ -71,7 +71,7 @@ export class TradingController {
   ) {}
 
   @Post('on-chain-trades/quote')
-  @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
+  @Roles('ORG_ADMIN', 'ANALYST', 'BUYER', 'PLATFORM_ADMIN')
   quoteOnChainTrade(@CurrentUser() user: AuthUser, @Body() dto: OnChainTradeQuoteDto) {
     const listing = this.db.snapshot.listings.find((item) => item.id === dto.listingId && item.onChainListingId && item.pricePerTokenWei);
     if (!listing || !isAddress(dto.buyerWalletAddress)) throw new NotFoundException('Open tokenized listing not found.');
@@ -81,7 +81,7 @@ export class TradingController {
   }
 
   @Post('on-chain-trades')
-  @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN')
+  @Roles('ORG_ADMIN', 'ANALYST', 'BUYER', 'PLATFORM_ADMIN')
   async registerOnChainTrade(@CurrentUser() user: AuthUser, @Body() dto: RegisterOnChainTradeDto) {
     if (!isAddress(dto.buyerWalletAddress) || !/^\d+$/.test(dto.purchaseId) || !/^\d+$/.test(dto.paymentCapWei)) throw new BadRequestException('Invalid purchase reference.');
     const listing = this.db.snapshot.listings.find((item) => item.id === dto.listingId && item.onChainListingId && item.pricePerTokenWei);
@@ -131,7 +131,7 @@ export class TradingController {
   }
 
   @Post('orders')
-  @Roles('ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN', 'COMPLIANCE', 'VIEWER')
+  @Roles('ORG_ADMIN', 'ANALYST', 'BUYER', 'PLATFORM_ADMIN', 'COMPLIANCE', 'VIEWER')
   createOrder(@CurrentUser() user: AuthUser, @Body() dto: CreateOrderDto) {
     const listing = this.db.snapshot.listings.find(
       (item) =>
@@ -148,6 +148,13 @@ export class TradingController {
       throw new BadRequestException(
         'Lease listings are not tradeable. Contact the org admin to lease.',
       );
+    }
+    if (
+      user.roles.includes('BUYER') &&
+      !user.roles.some((role) => ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN'].includes(role)) &&
+      dto.side !== 'BUY'
+    ) {
+      throw new BadRequestException('Buyers can place buy orders only.');
     }
     // A listing represents the seller's offered interest. The seller's tenant
     // cannot take the other side of that listing, even through another user.

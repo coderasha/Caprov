@@ -1,6 +1,7 @@
 'use client';
 
 import { PageHeader } from '@/components/layout/page-header';
+import { useWallet } from '@/components/wallet/wallet-provider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -70,6 +71,7 @@ function exactMoney(amount: number, currency: string) {
 
 export default function LendingPage() {
   const queryClient = useQueryClient();
+  const { network } = useWallet();
   const roles = useAuthStore((state) => state.roles);
   const [collateralId, setCollateralId] = useState('');
   const [principal, setPrincipal] = useState('10000000');
@@ -125,7 +127,7 @@ export default function LendingPage() {
   const disburse = useMutation({
     mutationFn: async (loan: LoanRow) => {
       const collateralId = loan.collateral?.vaultCollateralId;
-      if (!collateralId) throw new Error('This loan does not have a live Sepolia vault collateral record.');
+      if (!collateralId) throw new Error(`This loan does not have a live ${network.chainName} vault collateral record.`);
       try {
         const activation = await activateCollateralLoanOnSepolia({ collateralId, loanId: loan.id });
         return api.post(`/lending/${loan.id}/disburse`, { vaultTxHash: activation.txHash });
@@ -174,7 +176,7 @@ export default function LendingPage() {
   const releaseCollateral = useMutation({
     mutationFn: async (loan: LoanRow) => {
       const collateralId = loan.collateral?.vaultCollateralId;
-      if (!collateralId) throw new Error('This loan does not have a live Sepolia vault collateral record.');
+      if (!collateralId) throw new Error(`This loan does not have a live ${network.chainName} vault collateral record.`);
       const release = await releaseCollateralAfterRepaymentOnSepolia({ collateralId });
       return api.post(`/lending/${loan.id}/release-collateral`, { vaultTxHash: release.txHash });
     },
@@ -216,7 +218,7 @@ export default function LendingPage() {
             <>
               <h2 className="font-display text-lg font-semibold tracking-[-0.02em]">Underwrite collateral</h2>
               <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-                Select Sepolia-locked borrower collateral, set the bank haircut and proposed USD principal, then issue an offer for the asset owner to accept.
+                Select {network.chainName}-locked borrower collateral, set the bank haircut and proposed USD principal, then issue an offer for the asset owner to accept.
               </p>
               <form
                 className="mt-4 grid gap-3"
@@ -338,15 +340,15 @@ export default function LendingPage() {
                 ) : null}
                 {canReleaseCollateral(loan) ? (
                   <Button onClick={() => { setActionError(null); releaseCollateral.mutate(loan); }} disabled={releaseCollateral.isPending}>
-                    Release collateral on Sepolia
+                    Release collateral on {network.chainName}
                   </Button>
                 ) : null}
               </div>
               {loan.status === 'REPAID' && !canApproveDisbursal ? (
-                <p className="mt-3 text-sm text-[var(--muted)]">Repayment is posted. The bank must now release the ERC-1155 collateral on Sepolia.</p>
+                <p className="mt-3 text-sm text-[var(--muted)]">Repayment is posted. The bank must now release the ERC-1155 collateral on {network.chainName}.</p>
               ) : null}
               {canReleaseCollateral(loan) ? (
-                <p className="mt-3 text-sm text-[var(--muted)]">Sign from the configured bank custody (vault-owner) wallet. CAPROV will mark this collateral released only after the Sepolia release event is confirmed.</p>
+                <p className="mt-3 text-sm text-[var(--muted)]">Sign from the configured bank custody (vault-owner) wallet. CAPROV will mark this collateral released only after the {network.chainName} release event is confirmed.</p>
               ) : null}
               {loan.status === 'REPAID' && canApproveDisbursal && loan.collateral?.status === 'RELEASED' ? (
                 <p className="mt-3 text-sm text-[var(--muted)]">Collateral has been released. A new collateral lock for this asset will create a separate release workflow after repayment.</p>
@@ -362,9 +364,9 @@ export default function LendingPage() {
                   Disbursed on {loan.disbursedAt.slice(0, 10)} into the asset-owner wallet.
                 </p>
               ) : null}
-              {isBanker && loan.status === 'ACTIVE' && loan.disbursedAt && (loan.vaultActivationTxHash || loan.collateral?.vaultTxHash) ? (
+              {isBanker && network.blockExplorerUrl && loan.status === 'ACTIVE' && loan.disbursedAt && (loan.vaultActivationTxHash || loan.collateral?.vaultTxHash) ? (
                 <a
-                  href={`https://sepolia.etherscan.io/tx/${loan.vaultActivationTxHash ?? loan.collateral?.vaultTxHash}`}
+                  href={`${network.blockExplorerUrl.replace(/\/$/, '')}/tx/${loan.vaultActivationTxHash ?? loan.collateral?.vaultTxHash}`}
                   target="_blank"
                   rel="noreferrer"
                   className="mt-3 inline-flex text-sm font-medium text-[var(--teal)] underline underline-offset-4"

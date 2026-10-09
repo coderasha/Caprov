@@ -42,7 +42,7 @@ const DEMO_PERSONAS: DemoAccount[] = [
     name: "Arjun Mehta",
     email: "arjun@meridian.caprov",
     password: "CaprovDemo!23",
-    role: "Analyst",
+    role: "Buyer",
   },
   {
     name: "Sofia Laurent",

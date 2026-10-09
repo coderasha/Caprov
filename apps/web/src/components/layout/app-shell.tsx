@@ -63,6 +63,21 @@ const navSections = [
 
 const platformAdminNav = { href: '/platform-admin', label: 'Platform admin', icon: Shield } as const;
 
+const buyerNavSections = [
+  {
+    title: 'Buy',
+    items: [
+      { href: '/marketplace', label: 'Listings', icon: Store },
+      { href: '/trading', label: 'Orders', icon: ArrowLeftRight },
+      { href: '/settlement', label: 'Settlement', icon: Scale },
+    ],
+  },
+] as const;
+
+function isBuyerOnly(roles: string[]) {
+  return roles.includes('BUYER') && !roles.some((role) => ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN', 'BANKER'].includes(role));
+}
+
 function isActivePath(pathname: string, href: string) {
   if (href === '/intelligence') {
     return pathname === '/intelligence' || pathname.startsWith('/intelligence/dna');
@@ -90,7 +105,11 @@ function SidebarContent({
   const roles = useAuthStore((state) => state.roles);
   const logout = useAuthStore((state) => state.logout);
 
+  const buyerOnly = isBuyerOnly(roles);
   const sections = useMemo(() => {
+    if (buyerOnly) {
+      return buyerNavSections;
+    }
     if (!roles.includes('PLATFORM_ADMIN')) {
       return navSections;
     }
@@ -101,7 +120,7 @@ function SidebarContent({
       },
       ...navSections,
     ];
-  }, [roles]);
+  }, [buyerOnly, roles]);
 
   return (
     <div className="flex h-full min-h-0 flex-col px-4 py-5 sm:px-5 sm:py-7">
@@ -111,7 +130,9 @@ function SidebarContent({
             className="font-display text-[1.35rem] font-semibold tracking-[-0.04em] text-white"
             markClassName="text-[var(--gold)]"
           />
-          <p className="mt-2 text-[12px] leading-5 text-white/45">Private-asset intelligence</p>
+          <p className="mt-2 text-[12px] leading-5 text-white/45">
+            {buyerOnly ? 'Buyer desk' : 'Private-asset intelligence'}
+          </p>
         </Link>
         {showClose ? (
           <button
@@ -185,6 +206,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
   const user = useAuthStore((state) => state.user);
+  const roles = useAuthStore((state) => state.roles);
+  const buyerOnly = isBuyerOnly(roles);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const [navOpen, setNavOpen] = useState(false);
 
@@ -277,16 +300,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             </button>
             <div className="min-w-0">
               <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--muted)]">
-                Operator console
+                {buyerOnly ? 'Buyer desk' : 'Operator console'}
               </p>
               <p className="mt-0.5 truncate text-sm font-medium text-[var(--ink)] sm:mt-1">
-                {user?.title ?? 'Analyst workspace'}
+                {user?.title ?? (buyerOnly ? 'Buyer' : 'Operator workspace')}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="hidden rounded-xl border border-[var(--line)] bg-[var(--card)]/90 px-3.5 py-2 text-[11px] uppercase tracking-[0.16em] text-[var(--muted)] md:block">
-              Collect → Review → Act
+              {buyerOnly ? 'Review → Buy → Settle' : 'Collect → Review → Act'}
             </div>
             <WalletStatus />
           </div>

@@ -2,7 +2,7 @@
 
 import { useWallet } from '@/components/wallet/wallet-provider';
 import { ChevronDown, ShieldCheck, WalletCards, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { blockchainNetworks } from '@/lib/blockchain-network';
 
 function shortAddress(address: string) {
@@ -11,8 +11,30 @@ function shortAddress(address: string) {
 
 export function WalletStatus() {
   const [open, setOpen] = useState(false);
-  const { address, accounts, busy, message, networkId, selectNetwork, connect, selectAccount } = useWallet();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const { address, accounts, busy, message, networkId, selectNetwork, connect, chooseAccount, selectAccount } = useWallet();
   const network = blockchainNetworks().find((item) => item.id === networkId)!;
+
+  useEffect(() => {
+    if (!open) return;
+
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (!panelRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+
+    document.addEventListener('pointerdown', closeOnOutsidePointer);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsidePointer);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [open]);
+
   async function changeAccount(nextAddress: string) {
     try {
       await selectAccount(nextAddress);
@@ -20,7 +42,7 @@ export function WalletStatus() {
   }
 
   return (
-    <div className="relative">
+    <div ref={panelRef} className="relative">
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
@@ -59,7 +81,7 @@ export function WalletStatus() {
             </select>
           </label>
 
-          {accounts.length > 1 ? (
+          {address ? (
             <label className="mt-3 block text-xs font-medium text-[var(--muted)]">
               Active MetaMask account
               <select
@@ -70,6 +92,17 @@ export function WalletStatus() {
                 {accounts.map((account) => <option key={account} value={account}>{account}</option>)}
               </select>
             </label>
+          ) : null}
+
+          {address ? (
+            <button
+              type="button"
+              onClick={() => void chooseAccount()}
+              disabled={busy}
+              className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--card)] px-4 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--ink)]/25 disabled:cursor-wait disabled:opacity-60"
+            >
+              {busy ? 'Confirm in MetaMask…' : 'Choose MetaMask account'}
+            </button>
           ) : null}
 
           {message ? <p className="mt-3 text-xs leading-5 text-[var(--muted)]">{message}</p> : null}

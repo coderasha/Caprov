@@ -44,6 +44,7 @@ export class DatabaseService implements OnModuleInit {
     );
     const bankOrgId = 'org_caprov_demo_bank';
     const bankerId = 'usr_bank_demo';
+    const buyerOrgId = 'org_mehta';
     if (!this.data.organizations.some((org) => org.id === bankOrgId)) {
       this.data.organizations.push({ id: bankOrgId, name: 'CAPROV Demo Bank', slug: 'caprov-demo-bank', status: 'ACTIVE', llmModelId: preferredDefaultModelId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); changed = true;
     }
@@ -55,6 +56,21 @@ export class DatabaseService implements OnModuleInit {
     }
     if (!this.data.wallets.some((wallet) => wallet.organizationId === bankOrgId && wallet.currency === 'USD')) {
       this.data.wallets.push({ organizationId: bankOrgId, currency: 'USD', balance: 100_000_000, updatedAt: new Date().toISOString() }); changed = true;
+    }
+    if (!this.data.organizations.some((org) => org.id === buyerOrgId)) {
+      this.data.organizations.push({ id: buyerOrgId, name: 'Mehta Family Office', slug: 'mehta-family-office', status: 'ACTIVE', llmModelId: preferredDefaultModelId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); changed = true;
+    }
+    if (arjun) {
+      if (arjun.title === 'Senior Analyst') {
+        arjun.title = 'Buyer';
+        changed = true;
+      }
+      const membership = this.data.memberships.find((item) => item.id === 'mem_arjun' && item.userId === arjun.id);
+      if (membership && (membership.role !== 'BUYER' || membership.organizationId !== buyerOrgId)) {
+        membership.role = 'BUYER';
+        membership.organizationId = buyerOrgId;
+        changed = true;
+      }
     }
     for (const portfolio of this.data.portfolios) {
       // Preserve existing portfolios, while giving the seeded senior analyst the
@@ -100,6 +116,10 @@ export class DatabaseService implements OnModuleInit {
         (this.data as unknown as Record<string, unknown>)[key] = [];
         changed = true;
       }
+    }
+    if (!this.data.wallets.some((wallet) => wallet.organizationId === buyerOrgId && wallet.currency === 'USD')) {
+      this.data.wallets.push({ organizationId: buyerOrgId, currency: 'USD', balance: 0, updatedAt: new Date().toISOString() });
+      changed = true;
     }
     for (const snapshot of this.data.dnaSnapshots) {
       if (!snapshot.hashAlgorithm) {

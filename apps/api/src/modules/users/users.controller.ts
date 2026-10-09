@@ -29,7 +29,7 @@ class InviteUserDto {
   @MinLength(8)
   password!: string;
 
-  @IsIn(['ORG_ADMIN', 'ANALYST', 'BANKER', 'COMPLIANCE', 'VIEWER'])
+  @IsIn(['ORG_ADMIN', 'ANALYST', 'BUYER', 'BANKER', 'COMPLIANCE', 'VIEWER'])
   role!: MembershipRole;
 
   @IsOptional()

@@ -28,7 +28,7 @@ const errorMessage = (error: unknown) => {
 
 export default function SettlementPage() {
   const queryClient = useQueryClient();
-  const { address: wallet = '' } = useWallet();
+  const { address: wallet = '', network } = useWallet();
   const [tradeId, setTradeId] = useState('');
   const [settlingId, setSettlingId] = useState<string>();
   const [notice, setNotice] = useState<{ tone: 'ok' | 'danger'; text: string }>();
@@ -43,7 +43,7 @@ export default function SettlementPage() {
   });
   const settle = useMutation({
     mutationFn: async (item: SettlementRow) => {
-      if (!item.trade?.onChainPurchaseId) throw new Error('This settlement is not linked to a Sepolia CAP escrow purchase.');
+      if (!item.trade?.onChainPurchaseId) throw new Error(`This settlement is not linked to a ${network.chainName} CAP escrow purchase.`);
       const expectedSeller = item.trade.listing?.listerWalletAddress;
       if (!wallet) throw new Error('Connect the listing wallet from the top-right menu before approving settlement.');
       const signingWallet = await connectSepoliaWallet();
@@ -53,13 +53,13 @@ export default function SettlementPage() {
       const receipt = await approveSettlement(item.trade.onChainPurchaseId);
       return api.post(`/settlement/${item.id}/complete`, { settlementTxHash: receipt.hash });
     },
-    onSuccess: async () => { setNotice({ tone: 'ok', text: 'Settlement confirmed on Sepolia: CAP was released to the seller and ERC-1155 units transferred to the buyer.' }); await refresh(); },
+    onSuccess: async () => { setNotice({ tone: 'ok', text: `Settlement confirmed on ${network.chainName}: CAP was released to the seller and ERC-1155 units transferred to the buyer.` }); await refresh(); },
     onError: (error) => setNotice({ tone: 'danger', text: errorMessage(error) }),
     onSettled: () => setSettlingId(undefined),
   });
 
   return <div className="mx-auto max-w-6xl space-y-6">
-    <PageHeader eyebrow="Settlement" title="Trade settlement" description="The buyer has already escrowed CAP. Only the listing wallet can approve the atomic Sepolia release of CAP and ERC-1155 units." />
+    <PageHeader eyebrow="Settlement" title="Trade settlement" description={`The buyer has already escrowed CAP. Only the listing wallet can approve the atomic ${network.chainName} release of CAP and ERC-1155 units.`} />
     {!wallet ? <p className="rounded-xl border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--muted)]">Connect the listing MetaMask wallet from the top-right menu to create or approve settlement.</p> : null}
     {notice ? <div role="status" className={notice.tone === 'ok' ? 'rounded-2xl border border-[var(--ok)]/25 bg-[var(--ok-soft)] px-4 py-3 text-sm text-[var(--ok)]' : 'rounded-2xl border border-[var(--danger)]/25 bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger)]'}>{notice.text}</div> : null}
     <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
@@ -79,8 +79,8 @@ export default function SettlementPage() {
           const seller = sameAddress(item.trade?.listing?.listerWalletAddress, wallet);
           const buyer = sameAddress(item.trade?.buyerWalletAddress, wallet);
           const completed = item.status === 'COMPLETED';
-          return <Card key={item.id} className="p-6"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-display text-lg font-semibold tracking-[-0.02em]">{item.asset?.name ?? item.tradeId}</h2><p className="mt-1 text-sm text-[var(--muted)]">{item.trade?.tokenUnits?.toLocaleString() ?? 0} ERC-1155 units · {item.trade ? money(item.trade.notional, item.trade.currency) : item.method} CAP</p><p className="mt-1 text-xs text-[var(--muted)]">Trade {item.tradeId}{item.trade?.onChainPurchaseId ? ` · Sepolia purchase #${item.trade.onChainPurchaseId}` : ''}</p>{item.trade?.listing?.listerWalletAddress ? <p className="mt-1 font-mono text-xs text-[var(--muted)]">Listing wallet: {item.trade.listing.listerWalletAddress}</p> : null}</div><Badge>{item.status}</Badge></div>
-            {completed ? <p className="mt-4 text-sm text-[var(--ok)]">Completed on Sepolia. CAP has been paid to the seller and asset units transferred to the buyer.</p> : seller ? <div className="mt-4"><p className="text-sm text-[var(--muted)]">Approve from this listing wallet to atomically release escrowed CAP and ERC-1155 units for this trade only.</p><Button className="mt-3" onClick={() => { setNotice(undefined); setSettlingId(item.id); settle.mutate(item); }} disabled={settle.isPending}>{settlingId === item.id ? 'Confirming selected trade…' : 'Approve & settle on Sepolia'}</Button></div> : buyer ? <p className="mt-4 text-sm text-[var(--muted)]">Your CAP and the seller’s units are held in escrow. Waiting for the seller’s on-chain approval.</p> : <p className="mt-4 text-sm text-[var(--muted)]">Connect the listing wallet to approve this settlement, or the buyer wallet to view its escrow status.</p>}
+          return <Card key={item.id} className="p-6"><div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-display text-lg font-semibold tracking-[-0.02em]">{item.asset?.name ?? item.tradeId}</h2><p className="mt-1 text-sm text-[var(--muted)]">{item.trade?.tokenUnits?.toLocaleString() ?? 0} ERC-1155 units · {item.trade ? money(item.trade.notional, item.trade.currency) : item.method} CAP</p><p className="mt-1 text-xs text-[var(--muted)]">Trade {item.tradeId}{item.trade?.onChainPurchaseId ? ` · ${network.chainName} purchase #${item.trade.onChainPurchaseId}` : ''}</p>{item.trade?.listing?.listerWalletAddress ? <p className="mt-1 font-mono text-xs text-[var(--muted)]">Listing wallet: {item.trade.listing.listerWalletAddress}</p> : null}</div><Badge>{item.status}</Badge></div>
+            {completed ? <p className="mt-4 text-sm text-[var(--ok)]">Completed on {network.chainName}. CAP has been paid to the seller and asset units transferred to the buyer.</p> : seller ? <div className="mt-4"><p className="text-sm text-[var(--muted)]">Approve from this listing wallet to atomically release escrowed CAP and ERC-1155 units for this trade only.</p><Button className="mt-3" onClick={() => { setNotice(undefined); setSettlingId(item.id); settle.mutate(item); }} disabled={settle.isPending}>{settlingId === item.id ? 'Confirming selected trade…' : `Approve & settle on ${network.chainName}`}</Button></div> : buyer ? <p className="mt-4 text-sm text-[var(--muted)]">Your CAP and the seller’s units are held in escrow. Waiting for the seller’s on-chain approval.</p> : <p className="mt-4 text-sm text-[var(--muted)]">Connect the listing wallet to approve this settlement, or the buyer wallet to view its escrow status.</p>}
           </Card>;
         })}
       </div>
