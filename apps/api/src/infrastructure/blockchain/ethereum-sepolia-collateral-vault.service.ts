@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Contract, JsonRpcProvider, getAddress, id as ethId, isAddress, zeroPadValue, toBeHex } from 'ethers';
+import { Contract, HDNodeWallet, JsonRpcProvider, Wallet, getAddress, id as ethId, isAddress, zeroPadValue, toBeHex } from 'ethers';
 import {
   DEFAULT_ETHEREUM_SEPOLIA_RPC,
   ETHEREUM_SEPOLIA_CHAIN_ID,
@@ -7,6 +7,10 @@ import {
 import { BlockchainNetworkService } from './blockchain-network.service';
 
 const VAULT_ABI = [
+  'function loanActivators(address) view returns(bool)',
+  'function releaseExecutors(address) view returns(bool)',
+  'function setLoanActivator(address account,bool allowed)',
+  'function setReleaseExecutor(address account,bool allowed)',
   'event CollateralLocked(uint256 indexed collateralId,address indexed borrower,address indexed assetToken,uint256 tokenId,uint256 units)',
   'event LoanActivated(uint256 indexed collateralId,address indexed lender,bytes32 indexed loanReference)',
   'event CollateralReleased(uint256 indexed collateralId,address indexed borrower)',
@@ -22,6 +26,45 @@ export class EthereumSepoliaCollateralVaultService {
   }
 
   isConfigured() { return Boolean(this.address()); }
+
+  /**
+   * A BANKER has application-level authority to operate facilities, while the
+   * vault independently requires that wallet to be whitelisted. The configured
+   * vault-owner signer performs that one-time on-chain authorization so the
+   * banker can subsequently sign activation/release transactions themselves.
+   */
+  async authorizeBankExecutor(walletAddress: string) {
+    const address = this.address();
+    if (!address) throw new Error('The active network collateral vault is not configured.');
+    if (!isAddress(walletAddress)) throw new Error('A valid MetaMask wallet address is required.');
+    const network = this.networks.selected();
+    if (!network.privateKey && !network.mnemonic) {
+      throw new Error(`The ${network.chainName} vault-owner signer is not configured.`);
+    }
+    const provider = new JsonRpcProvider(network.rpcUrl, network.chainId);
+    const signer = network.privateKey
+      ? new Wallet(network.privateKey, provider)
+      : HDNodeWallet.fromPhrase(network.mnemonic!).connect(provider);
+    const vault = new Contract(address, VAULT_ABI, signer);
+    const executor = getAddress(walletAddress);
+    const overrides = network.zeroGas ? { gasPrice: 0n } : {};
+    const transactions: string[] = [];
+    const isLoanActivator = vault.getFunction('loanActivators');
+    const setLoanActivator = vault.getFunction('setLoanActivator');
+    const isReleaseExecutor = vault.getFunction('releaseExecutors');
+    const setReleaseExecutor = vault.getFunction('setReleaseExecutor');
+    if (!await isLoanActivator(executor)) {
+      const tx = await setLoanActivator(executor, true, overrides);
+      await tx.wait();
+      transactions.push(tx.hash);
+    }
+    if (!await isReleaseExecutor(executor)) {
+      const tx = await setReleaseExecutor(executor, true, overrides);
+      await tx.wait();
+      transactions.push(tx.hash);
+    }
+    return { walletAddress: executor, transactions };
+  }
 
   async verifyLock(input: {
     txHash: string; collateralId: string; borrower: string; assetToken: string;

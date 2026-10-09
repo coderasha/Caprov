@@ -55,6 +55,7 @@ class CreateLoanDto {
 class OfferLoanDto { @IsNumber() @Min(1) principal!: number; @IsInt() @Min(0) @Max(5000) haircutBps!: number; @IsInt() @Min(1) @Max(5000) interestRateBps!: number; @IsInt() @Min(1) @Max(3650) termDays!: number; }
 class DisburseLoanDto { @IsOptional() @IsString() vaultTxHash?: string; }
 class ReleaseCollateralDto { @IsString() vaultTxHash!: string; }
+class AuthorizeBankExecutorDto { @IsString() walletAddress!: string; }
 
 @Controller('lending')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -70,6 +71,25 @@ export class LendingController {
     return this.db.snapshot.loans
       .filter((item) => item.organizationId === user.organizationId || user.roles.includes('BANKER'))
       .map((item) => this.hydrate(item));
+  }
+
+  @Post('vault/authorize-executor')
+  @Roles('BANKER', 'PLATFORM_ADMIN')
+  async authorizeVaultExecutor(@CurrentUser() user: AuthUser, @Body() dto: AuthorizeBankExecutorDto) {
+    try {
+      const authorization = await this.vault.authorizeBankExecutor(dto.walletAddress);
+      this.audit.log({
+        organizationId: user.organizationId,
+        actorUserId: user.id,
+        action: 'lending.vault_executor_authorized',
+        entityType: 'Wallet',
+        entityId: authorization.walletAddress,
+        metadata: { network: 'selected', transactions: authorization.transactions },
+      });
+      return authorization;
+    } catch (error) {
+      throw new BadRequestException(error instanceof Error ? error.message : 'Could not authorize the bank wallet for vault execution.');
+    }
   }
 
   @Post()

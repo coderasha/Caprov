@@ -71,7 +71,7 @@ function exactMoney(amount: number, currency: string) {
 
 export default function LendingPage() {
   const queryClient = useQueryClient();
-  const { network } = useWallet();
+  const { address: wallet, network } = useWallet();
   const roles = useAuthStore((state) => state.roles);
   const [collateralId, setCollateralId] = useState('');
   const [principal, setPrincipal] = useState('10000000');
@@ -128,7 +128,9 @@ export default function LendingPage() {
     mutationFn: async (loan: LoanRow) => {
       const collateralId = loan.collateral?.vaultCollateralId;
       if (!collateralId) throw new Error(`This loan does not have a live ${network.chainName} vault collateral record.`);
+      if (!wallet) throw new Error('Connect the banker MetaMask wallet before activating the vault.');
       try {
+        await api.post('/lending/vault/authorize-executor', { walletAddress: wallet });
         const activation = await activateCollateralLoanOnSepolia({ collateralId, loanId: loan.id });
         return api.post(`/lending/${loan.id}/disburse`, { vaultTxHash: activation.txHash });
       } catch (error) {
@@ -141,10 +143,12 @@ export default function LendingPage() {
       }
     },
     onSuccess: async () => {
+      setActionError(null);
       await queryClient.invalidateQueries({ queryKey: ['lending'] });
       await queryClient.invalidateQueries({ queryKey: ['collateral'] });
       await queryClient.invalidateQueries({ queryKey: ['organization'] });
     },
+    onError: (error) => setActionError(errorMessage(error)),
   });
   const offer = useMutation({ mutationFn: async (id: string) => api.post(`/lending/${id}/offer`, { principal: Number(principal), haircutBps: Number(haircutBps), interestRateBps: 650, termDays: 365 }), onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['lending'] }); } });
   const offerFromCollateral = useMutation({
@@ -334,7 +338,7 @@ export default function LendingPage() {
                   </Button>
                 ) : null}
                 {loan.status === 'OFFERED' && canRequestDisbursal ? <Button onClick={() => accept.mutate(loan.id)} disabled={accept.isPending}>Accept bank offer</Button> : null}
-                {loan.status === 'ACCEPTED' && canApproveDisbursal ? <Button onClick={() => disburse.mutate(loan)} disabled={disburse.isPending}>Activate vault & disburse USD</Button> : null}
+                {loan.status === 'ACCEPTED' && canApproveDisbursal ? <Button onClick={() => { setActionError(null); disburse.mutate(loan); }} disabled={disburse.isPending}>{disburse.isPending ? `Authorizing ${network.chainName} vault…` : 'Activate vault & disburse USD'}</Button> : null}
                 {loan.status === 'ACTIVE' && !isBanker ? (
                   <Button onClick={() => repay.mutate(loan.id)}>Repay</Button>
                 ) : null}
