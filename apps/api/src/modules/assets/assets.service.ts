@@ -46,6 +46,21 @@ export class AssetsService {
       .map((asset) => this.hydrate(asset.id));
   }
 
+  /** A lender's inventory is only the assets actively presented for credit review. */
+  listForUser(user: AuthUser) {
+    if (user.roles.includes('BANKER') && !user.roles.some((role) => ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN'].includes(role))) {
+      const collateralAssetIds = new Set(
+        this.db.snapshot.collateralPositions
+          .filter((position) => ['PENDING_APPROVAL', 'ACTIVE'].includes(position.status))
+          .map((position) => position.assetId),
+      );
+      return this.db.snapshot.assets
+        .filter((asset) => collateralAssetIds.has(asset.id))
+        .map((asset) => this.hydrate(asset.id));
+    }
+    return this.list(user.organizationId);
+  }
+
   get(organizationId: string, assetId: string) {
     const asset = this.hydrate(assetId);
     if (!asset || asset.organizationId !== organizationId) {

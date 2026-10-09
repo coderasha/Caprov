@@ -121,7 +121,7 @@ export class AssetsController {
 
   @Get()
   list(@CurrentUser() user: AuthUser) {
-    return this.assets.list(user.organizationId);
+    return this.assets.listForUser(user);
   }
 
   @Get(':id')

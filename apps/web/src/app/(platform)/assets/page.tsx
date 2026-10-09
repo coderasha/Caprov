@@ -15,6 +15,7 @@ import { useMemo, useState } from 'react';
 
 export default function AssetsPage() {
   const roles = useAuthStore((state) => state.roles);
+  const bankerOnly = roles.includes('BANKER') && !roles.some((role) => ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN', 'BUYER'].includes(role));
   const canCreateAssets = roles.includes('ORG_ADMIN') || roles.includes('PLATFORM_ADMIN');
   const [query, setQuery] = useState('');
   const assetsQuery = useQuery({
@@ -42,8 +43,8 @@ export default function AssetsPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       <PageHeader
         eyebrow="Assets"
-        title="Assets"
-        description="Create and review the assets your team manages. Each asset becomes the home for documents, Asset DNA, collateral, and lending."
+        title={bankerOnly ? 'Collateral-backed assets' : 'Assets'}
+        description={bankerOnly ? 'Review only the asset records submitted as live collateral. Asset creation, documents, and intelligence management remain with the lister.' : 'Create and review the assets your team manages. Each asset becomes the home for documents, Asset DNA, collateral, and lending.'}
         actions={
           <>
             {canCreateAssets ? (
@@ -51,9 +52,7 @@ export default function AssetsPage() {
                 <Button>New asset</Button>
               </Link>
             ) : null}
-            <Link href="/documents">
-              <Button variant="secondary">Add documents</Button>
-            </Link>
+            {!bankerOnly ? <Link href="/documents"><Button variant="secondary">Add documents</Button></Link> : null}
           </>
         }
       />
@@ -82,10 +81,12 @@ export default function AssetsPage() {
       {allAssets.length === 0 ? (
         <Card className="p-8">
           <h2 className="font-display text-xl font-semibold tracking-[-0.03em] text-[var(--ink)]">
-            {canCreateAssets ? 'Start with the first asset record' : 'No assets are available yet'}
+            {bankerOnly ? 'No collateral-backed assets are available' : canCreateAssets ? 'Start with the first asset record' : 'No assets are available yet'}
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--muted)]">
-            {canCreateAssets
+            {bankerOnly
+              ? 'Assets appear here once a lister submits a live collateral position for bank review.'
+              : canCreateAssets
               ? 'Assets are the anchor for the rest of the platform. Once you create one, your team can add documents, review Asset DNA, and move into portfolio, tokenization, collateral, and lending workflows.'
               : 'Assets created by your workspace will appear here. You can review them and ask AI for analysis.'}
           </p>
@@ -95,9 +96,7 @@ export default function AssetsPage() {
                 <Button>Create asset</Button>
               </Link>
             ) : null}
-            <Link href="/documents">
-              <Button variant="secondary">See document workflow</Button>
-            </Link>
+            {!bankerOnly ? <Link href="/documents"><Button variant="secondary">See document workflow</Button></Link> : <Link href="/collateral"><Button variant="secondary">Open collateral review</Button></Link>}
           </div>
         </Card>
       ) : (

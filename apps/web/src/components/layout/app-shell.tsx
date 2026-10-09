@@ -74,8 +74,30 @@ const buyerNavSections = [
   },
 ] as const;
 
+const bankerNavSections = [
+  {
+    title: 'Credit desk',
+    items: [
+      { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
+      { href: '/collateral', label: 'Collateral review', icon: HandCoins },
+      { href: '/lending', label: 'Loans', icon: Landmark },
+      { href: '/settlement', label: 'Settlement', icon: Scale },
+    ],
+  },
+  {
+    title: 'Oversight',
+    items: [
+      { href: '/audit', label: 'Audit', icon: Activity },
+    ],
+  },
+] as const;
+
 function isBuyerOnly(roles: string[]) {
   return roles.includes('BUYER') && !roles.some((role) => ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN', 'BANKER'].includes(role));
+}
+
+function isBankerOnly(roles: string[]) {
+  return roles.includes('BANKER') && !roles.some((role) => ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN', 'BUYER'].includes(role));
 }
 
 function isActivePath(pathname: string, href: string) {
@@ -106,9 +128,13 @@ function SidebarContent({
   const logout = useAuthStore((state) => state.logout);
 
   const buyerOnly = isBuyerOnly(roles);
+  const bankerOnly = isBankerOnly(roles);
   const sections = useMemo(() => {
     if (buyerOnly) {
       return buyerNavSections;
+    }
+    if (bankerOnly) {
+      return bankerNavSections;
     }
     if (!roles.includes('PLATFORM_ADMIN')) {
       return navSections;
@@ -120,7 +146,7 @@ function SidebarContent({
       },
       ...navSections,
     ];
-  }, [buyerOnly, roles]);
+  }, [bankerOnly, buyerOnly, roles]);
 
   return (
     <div className="flex h-full min-h-0 flex-col px-4 py-5 sm:px-5 sm:py-7">
@@ -131,7 +157,7 @@ function SidebarContent({
             markClassName="text-[var(--gold)]"
           />
           <p className="mt-2 text-[12px] leading-5 text-white/45">
-            {buyerOnly ? 'Buyer desk' : 'Private-asset intelligence'}
+            {buyerOnly ? 'Buyer desk' : bankerOnly ? 'Credit desk' : 'Private-asset intelligence'}
           </p>
         </Link>
         {showClose ? (
@@ -208,6 +234,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const user = useAuthStore((state) => state.user);
   const roles = useAuthStore((state) => state.roles);
   const buyerOnly = isBuyerOnly(roles);
+  const bankerOnly = isBankerOnly(roles);
   const hasHydrated = useAuthStore((state) => state.hasHydrated);
   const [navOpen, setNavOpen] = useState(false);
 
@@ -300,16 +327,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             </button>
             <div className="min-w-0">
               <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--muted)]">
-                {buyerOnly ? 'Buyer desk' : 'Operator console'}
+                {buyerOnly ? 'Buyer desk' : bankerOnly ? 'Credit desk' : 'Operator console'}
               </p>
               <p className="mt-0.5 truncate text-sm font-medium text-[var(--ink)] sm:mt-1">
-                {user?.title ?? (buyerOnly ? 'Buyer' : 'Operator workspace')}
+                {user?.title ?? (buyerOnly ? 'Buyer' : bankerOnly ? 'Banker workspace' : 'Operator workspace')}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="hidden rounded-xl border border-[var(--line)] bg-[var(--card)]/90 px-3.5 py-2 text-[11px] uppercase tracking-[0.16em] text-[var(--muted)] md:block">
-              {buyerOnly ? 'Review → Buy → Settle' : 'Collect → Review → Act'}
+              {buyerOnly ? 'Review → Buy → Settle' : bankerOnly ? 'Review → Underwrite → Disburse' : 'Collect → Review → Act'}
             </div>
             <WalletStatus />
           </div>

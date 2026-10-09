@@ -103,6 +103,8 @@ export default function AssetDetailPage() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
+  const roles = useAuthStore((state) => state.roles);
+  const bankerOnly = roles.includes('BANKER') && !roles.some((role) => ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN', 'BUYER'].includes(role));
   const requestedTab = searchParams.get('tab')?.toLowerCase();
   const initialTab = requestedTab === 'documents' ? 'Documents' : 'Overview';
   const [tab, setTab] = useState<(typeof tabs)[number]>(initialTab);
@@ -421,9 +423,9 @@ export default function AssetDetailPage() {
           <Badge tone={riskTone(asset.latestRisk?.payload.rating)}>
             {asset.latestRisk?.payload.rating ?? 'No risk snapshot'}
           </Badge>
-          <Button onClick={() => runPipeline.mutate()} disabled={runPipeline.isPending}>
+          {!bankerOnly ? <Button onClick={() => runPipeline.mutate()} disabled={runPipeline.isPending}>
             {runPipeline.isPending ? 'Running pipeline…' : 'Run Asset DNA'}
-          </Button>
+          </Button> : <Link href="/lending"><Button>Open loan desk</Button></Link>}
         </div>
       </div>
 
@@ -445,7 +447,7 @@ export default function AssetDetailPage() {
       </section>
 
       <div className="flex flex-wrap gap-2">
-        {tabs.map((item) => (
+        {tabs.filter((item) => !bankerOnly || item !== 'Ownership').map((item) => (
           <button
             key={item}
             type="button"
@@ -459,7 +461,7 @@ export default function AssetDetailPage() {
 
       {tab === 'Overview' ? (
         <div className="grid gap-6 lg:grid-cols-2">
-          <Card className="p-6">
+          {!bankerOnly ? <Card className="p-6">
             <h2 className="text-lg font-semibold">Master record</h2>
             <dl className="mt-4 grid gap-3 text-sm">
               <Row label="Location" value={asset.location} />
@@ -467,7 +469,7 @@ export default function AssetDetailPage() {
               <Row label="Created" value={formatDate(asset.creationDate)} />
               <Row label="Currency" value={asset.currency} />
             </dl>
-          </Card>
+          </Card> : <Card className="p-6"><h2 className="text-lg font-semibold">Source documents</h2><p className="mt-2 text-sm text-[var(--muted)]">Document evidence is read-only for the credit desk. Listers manage uploads and provenance records.</p></Card>}
           <Card className="p-6">
             <h2 className="text-lg font-semibold">Intelligence summary</h2>
             <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
@@ -585,7 +587,7 @@ export default function AssetDetailPage() {
               ) : null}
             </div>
           </Card>
-          <Card className="p-6">
+          {!bankerOnly ? <Card className="p-6">
             <h2 className="text-lg font-semibold">Upload and anchor</h2>
             <form
               className="mt-4 grid gap-3"
@@ -652,11 +654,11 @@ export default function AssetDetailPage() {
                 admins can sign a real {network?.chainName ?? selectedBlockchainNetwork().chainName} anchor transaction only when live document anchoring is configured.
               </p>
             </form>
-          </Card>
+          </Card> : <Card className="p-6"><h2 className="text-lg font-semibold">Credit-desk access</h2><p className="mt-2 text-sm text-[var(--muted)]">Document evidence is read-only for the credit desk. Listers manage uploads and provenance records.</p></Card>}
         </div>
       ) : null}
 
-      {tab === 'Ownership' ? (
+      {tab === 'Ownership' && !bankerOnly ? (
         <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
           <Card className="p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
