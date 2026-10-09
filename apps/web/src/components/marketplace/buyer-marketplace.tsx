@@ -199,7 +199,6 @@ export function BuyerMarketplace() {
     queryFn: async () => (await api.get<{ listings: Listing[] }>('/marketplace')).data.listings,
   });
 
-  const [category, setCategory] = useState<CategoryId>('ALL');
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortId>('newest');
   const [view, setView] = useState<ViewMode>('grid');
@@ -269,8 +268,6 @@ export function BuyerMarketplace() {
   const visible = useMemo(() => {
     const term = query.trim().toLowerCase();
     let rows = browseable.filter((listing) => {
-      if (category !== 'ALL' && categoryOf(listing) !== category) return false;
-
       if (assetClassFilters.size > 0) {
         const listingCategory = categoryOf(listing);
         if (!assetClassFilters.has(listingCategory)) return false;
@@ -346,7 +343,6 @@ export function BuyerMarketplace() {
   }, [
     assetClassFilters,
     browseable,
-    category,
     city,
     country,
     query,
@@ -377,7 +373,6 @@ export function BuyerMarketplace() {
     setCountry('');
     setCity('');
     setRangeMax(500);
-    setCategory('ALL');
     setQuery('');
   }
 
@@ -422,30 +417,6 @@ export function BuyerMarketplace() {
             <p>Real assets. Real opportunities.</p>
           </div>
         </div>
-      </section>
-
-      <section className="buyer-mkt__categories" aria-label="Asset categories">
-        {CATEGORIES.map((item) => {
-          const Icon = item.icon;
-          const active = category === item.id;
-          const count = categoryCounts[item.id];
-          return (
-            <button
-              key={item.id}
-              type="button"
-              className={cn('buyer-mkt__category', active && 'is-active')}
-              onClick={() => setCategory(item.id)}
-            >
-              <span className="buyer-mkt__category-icon" aria-hidden="true">
-                <Icon size={18} strokeWidth={1.75} />
-              </span>
-              <span className="buyer-mkt__category-copy">
-                <strong>{item.label}</strong>
-                <span>{count} listings</span>
-              </span>
-            </button>
-          );
-        })}
       </section>
 
       <div className="buyer-mkt__layout">
