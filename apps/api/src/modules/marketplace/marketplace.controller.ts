@@ -462,6 +462,10 @@ export class MarketplaceController {
           imageUrls: rawAsset.imageUrls?.slice(0, 1),
         }
       : null;
+    const organization =
+      this.db.snapshot.organizations.find(
+        (item) => item.id === listing.organizationId,
+      ) ?? null;
     const valuation =
       this.db.snapshot.valuations
         .filter((item) => item.assetId === listing.assetId)
@@ -482,6 +486,16 @@ export class MarketplaceController {
       persistImageUrl(listing.imageUrl) ??
       asset?.primaryImageUrl ??
       asset?.imageUrls?.[0];
-    return { ...listing, imageUrl, asset, valuation, risk, token };
+    return {
+      ...listing,
+      imageUrl,
+      asset,
+      organization: organization
+        ? { id: organization.id, name: organization.name }
+        : null,
+      valuation,
+      risk,
+      token,
+    };
   }
 }

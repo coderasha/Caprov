@@ -14,6 +14,7 @@ import {
   ChevronRight,
   FileStack,
   FolderKanban,
+  Globe2,
   HandCoins,
   Landmark,
   LayoutDashboard,
@@ -49,6 +50,7 @@ const navSections = [
     items: [
       { href: '/portfolios', label: 'Portfolios', icon: Wallet },
       { href: '/marketplace', label: 'Listings', icon: Store },
+      { href: '/asset-marketplace', label: 'Marketplace', icon: Globe2 },
       { href: '/trading', label: 'Orders', icon: ArrowLeftRight },
       { href: '/settlement', label: 'Settlement', icon: Scale },
       { href: '/tokenization', label: 'Tokens', icon: Shield },
