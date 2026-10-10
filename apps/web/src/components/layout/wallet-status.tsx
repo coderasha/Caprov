@@ -12,7 +12,7 @@ function shortAddress(address: string) {
 export function WalletStatus() {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  const { address, accounts, busy, message, networkId, selectNetwork, connect, chooseAccount, selectAccount } = useWallet();
+  const { address, accounts, busy, message, networkId, selectNetwork, syncNetwork, connect, chooseAccount, selectAccount } = useWallet();
   const network = blockchainNetworks().find((item) => item.id === networkId)!;
 
   useEffect(() => {
@@ -75,7 +75,23 @@ export function WalletStatus() {
               {address ?? 'No MetaMask account connected'}
             </p>
           </div>
-          <label className="mt-3 block text-xs font-medium text-[var(--muted)]">Blockchain network
+          <div className="mt-3">
+            <p className="text-xs font-medium text-[var(--muted)]">Blockchain network</p>
+            <div className="mt-1.5 grid grid-cols-2 gap-2">
+              {blockchainNetworks().map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void selectNetwork(item.id)}
+                  className={`min-h-10 rounded-xl border px-2 text-xs font-medium transition disabled:cursor-wait disabled:opacity-60 ${networkId === item.id ? 'border-[var(--teal)] bg-[var(--teal-soft)] text-[var(--teal)]' : 'border-[var(--line)] bg-[var(--card)] text-[var(--ink)] hover:border-[var(--ink)]/25'}`}
+                >
+                  {item.id === 'sepolia' ? 'Ethereum Sepolia' : 'CAPROV Besu'}
+                </button>
+              ))}
+            </div>
+          </div>
+          <label className="mt-3 block text-xs font-medium text-[var(--muted)]">Network selector
             <select value={networkId} onChange={(event) => void selectNetwork(event.target.value as typeof networkId)} className="mt-1.5 min-h-10 w-full rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 text-xs text-[var(--ink)] outline-none focus:border-[var(--teal)]">
               {blockchainNetworks().map((item) => <option key={item.id} value={item.id}>{item.chainName}{item.zeroGas ? ' (zero-fee)' : ''}</option>)}
             </select>
@@ -94,16 +110,23 @@ export function WalletStatus() {
             </label>
           ) : null}
 
-          {address ? (
-            <button
-              type="button"
-              onClick={() => void chooseAccount()}
-              disabled={busy}
-              className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--card)] px-4 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--ink)]/25 disabled:cursor-wait disabled:opacity-60"
-            >
-              {busy ? 'Confirm in MetaMask…' : 'Choose MetaMask account'}
-            </button>
-          ) : null}
+          <button
+            type="button"
+            onClick={() => void chooseAccount()}
+            disabled={busy}
+            className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--card)] px-4 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--ink)]/25 disabled:cursor-wait disabled:opacity-60"
+          >
+            {busy ? 'Confirm in MetaMask…' : address ? 'Choose another MetaMask account' : 'Choose MetaMask account'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => void syncNetwork()}
+            disabled={busy}
+            className="mt-2 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--card)] px-4 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--ink)]/25 disabled:cursor-wait disabled:opacity-60"
+          >
+            {busy ? 'Checking MetaMask…' : 'Check MetaMask network'}
+          </button>
 
           {message ? <p className="mt-3 text-xs leading-5 text-[var(--muted)]">{message}</p> : null}
           <button
@@ -112,7 +135,7 @@ export function WalletStatus() {
             disabled={busy}
             className="mt-4 inline-flex min-h-10 w-full items-center justify-center rounded-xl bg-[var(--ink)] px-4 text-sm font-medium text-white transition hover:bg-[#152033] disabled:cursor-wait disabled:opacity-60"
           >
-            {busy ? 'Confirm in MetaMask…' : address ? 'Reconnect MetaMask' : 'Connect MetaMask'}
+            {busy ? 'Confirm in MetaMask…' : address ? 'Reconnect MetaMask' : 'Connect current MetaMask account'}
           </button>
         </div>
       ) : null}

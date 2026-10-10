@@ -8,6 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  IsArray,
   IsEnum,
   IsNumber,
   IsOptional,
@@ -38,6 +39,11 @@ class CreatePortfolioDto {
   @IsOptional()
   @IsEnum(['USD', 'EUR', 'GBP', 'INR', 'SGD'])
   baseCurrency?: CurrencyCode;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  focusAssetClasses?: string[];
 }
 
 class AddHoldingDto {
@@ -97,7 +103,8 @@ export class PortfoliosController {
       ownerUserId: user.id,
       name: dto.name,
       description: dto.description,
-      baseCurrency: 'USD' as CurrencyCode,
+      baseCurrency: (dto.baseCurrency ?? 'USD') as CurrencyCode,
+      focusAssetClasses: dto.focusAssetClasses ?? [],
       createdAt: now,
       updatedAt: now,
     };

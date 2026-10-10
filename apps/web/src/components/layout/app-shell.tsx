@@ -82,17 +82,11 @@ const bankerNavSections = [
   {
     title: 'Credit desk',
     items: [
-      { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
-      { href: '/collateral', label: 'Collateral review', icon: HandCoins },
+      { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/collateral', label: 'Collateral Review', icon: HandCoins },
       { href: '/intelligence/copilot', label: 'Ask AI', icon: MessageSquareText },
       { href: '/lending', label: 'Loans', icon: Landmark },
       { href: '/settlement', label: 'Settlement', icon: Scale },
-    ],
-  },
-  {
-    title: 'Oversight',
-    items: [
-      { href: '/audit', label: 'Audit', icon: Activity },
     ],
   },
 ] as const;
@@ -179,7 +173,7 @@ function SidebarContent({
               Private Asset Intelligence
             </p>
           ) : bankerOnly ? (
-            <p className="mt-2 text-[12px] leading-5 text-white/45">Credit desk</p>
+            <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-white/40">Credit desk</p>
           ) : null}
         </Link>
         {showClose ? (
@@ -212,7 +206,7 @@ function SidebarContent({
                       className={cn(
                         'platform-nav-link flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] text-white/55 transition hover:bg-white/[0.06] hover:text-white',
                         active && 'bg-white/[0.08] font-medium text-white',
-                        buyerOnly &&
+                        (buyerOnly || bankerOnly) &&
                           active &&
                           'border border-[var(--gold)]/55 bg-white/[0.06] shadow-[inset_0_0_0_1px_rgba(157,107,36,0.12)]',
                       )}
@@ -223,7 +217,7 @@ function SidebarContent({
                         className={active ? 'text-[var(--gold)]' : undefined}
                       />
                       <span className="flex-1">{item.label}</span>
-                      {active && !buyerOnly ? (
+                      {active && !buyerOnly && !bankerOnly ? (
                         <ChevronRight size={14} className="text-[var(--gold)]" />
                       ) : null}
                     </Link>
@@ -251,7 +245,22 @@ function SidebarContent({
               <ChevronRight size={14} className="shrink-0 text-white/35" />
             </div>
           </div>
-        ) : !bankerOnly ? (
+        ) : bankerOnly ? (
+          <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3">
+            <div className="flex items-center gap-2.5">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[var(--gold)]/18 text-[var(--gold)]">
+                <Landmark size={15} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-medium text-white/90">
+                  {organization?.name ?? 'Demo Bank'}
+                </p>
+                <p className="mt-0.5 text-[11px] text-white/40">Credit institution</p>
+              </div>
+              <ChevronRight size={14} className="shrink-0 text-white/35" />
+            </div>
+          </div>
+        ) : (
           <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3">
             <div className="flex items-start gap-2.5">
               <span className="mt-0.5 grid h-8 w-8 place-items-center rounded-lg bg-[var(--gold)]/15 text-[var(--gold)]">
@@ -265,8 +274,6 @@ function SidebarContent({
               </div>
             </div>
           </div>
-        ) : (
-          <p className="truncate px-2 text-[13px] font-medium text-white/90">{organization?.name}</p>
         )}
         <button
           type="button"
@@ -276,7 +283,13 @@ function SidebarContent({
           }}
           className="inline-flex items-center gap-2 rounded-xl px-2 py-2 text-[12px] text-white/45 transition hover:bg-white/[0.06] hover:text-white"
         >
-          <LogOut size={14} />
+          {bankerOnly ? (
+            <span className="grid h-6 w-6 place-items-center rounded-full bg-white/10 text-[10px] font-semibold text-white/80">
+              {initials(user?.fullName)}
+            </span>
+          ) : (
+            <LogOut size={14} />
+          )}
           Sign out
         </button>
       </div>
@@ -345,7 +358,9 @@ function OperatorHeader({
             placeholder={
               buyerOnly
                 ? 'Search assets, locations, asset class, or keywords...'
-                : 'Search assets, documents, users, transactions…'
+                : bankerOnly
+                  ? 'Search assets, borrowers, deals, documents...'
+                  : 'Search assets, documents, users, transactions…'
             }
             className="h-11 w-full rounded-full border border-[var(--line)] bg-white/80 pl-10 pr-14 text-sm text-[var(--ink)] outline-none transition placeholder:text-[var(--muted)]/80 focus:border-[var(--ink)]/25 focus:bg-white"
           />

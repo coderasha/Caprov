@@ -2,17 +2,19 @@
 
 import {
   alignMetaMaskToSelectedNetwork,
+  activeMetaMaskProvider,
   chooseMetaMaskAccount,
+  clearMetaMaskConnection,
   connectMetaMaskWallet,
   selectMetaMaskAccount,
 } from '@/lib/sepolia-marketplace';
-import { selectedBlockchainNetwork, setSelectedBlockchainNetwork, type BlockchainNetworkId, type BrowserNetwork } from '@/lib/blockchain-network';
+import { blockchainNetworkForChainId, selectedBlockchainNetwork, setSelectedBlockchainNetwork, type BlockchainNetworkId, type BrowserNetwork } from '@/lib/blockchain-network';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 type InjectedProvider = {
   request: (input: { method: string }) => Promise<unknown>;
-  on?: (event: string, listener: (value: string[]) => void) => void;
-  removeListener?: (event: string, listener: (value: string[]) => void) => void;
+  on?: (event: string, listener: (value: string | string[]) => void) => void;
+  removeListener?: (event: string, listener: (value: string | string[]) => void) => void;
 };
 
 type WalletContextValue = {
@@ -23,6 +25,7 @@ type WalletContextValue = {
   networkId: BlockchainNetworkId;
   network: BrowserNetwork;
   selectNetwork: (networkId: BlockchainNetworkId) => Promise<void>;
+  syncNetwork: () => Promise<void>;
   connect: () => Promise<string | undefined>;
   chooseAccount: () => Promise<string | undefined>;
   selectAccount: (address: string) => Promise<void>;
@@ -47,15 +50,15 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     // while it resolves the page origin ("Cannot read properties of undefined
     // (reading 'origin')").
     if (address) {
-      setMessage(`Switching MetaMask to ${network.chainName}…`);
+      setMessage(`Checking MetaMask is on ${network.chainName}…`);
       try {
         await alignMetaMaskToSelectedNetwork();
         setMessage(`MetaMask is on ${network.chainName} (chain ID ${network.chainId}).`);
       } catch (error) {
         setMessage(
           error instanceof Error
-            ? `Selected ${network.chainName}, but MetaMask did not switch: ${error.message}`
-            : `Selected ${network.chainName}. Open MetaMask and switch network manually, then reconnect.`,
+            ? error.message
+            : `Selected ${network.chainName}. Open MetaMask and switch to that network, then try again.`,
         );
       } finally {
         setBusy(false);
@@ -66,6 +69,27 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setMessage(`Selected ${network.chainName}. Connect MetaMask when you are ready to sign.`);
     setBusy(false);
   }, [address]);
+
+  const syncNetwork = useCallback(async () => {
+    setBusy(true);
+    try {
+      const provider = await activeMetaMaskProvider();
+      const value = await provider.request({ method: 'eth_chainId' });
+      const chainId = typeof value === 'string' ? Number.parseInt(value, 16) : Number.NaN;
+      const network = Number.isSafeInteger(chainId) ? blockchainNetworkForChainId(chainId) : undefined;
+      if (!network) {
+        setMessage('MetaMask is on an unsupported network. Select Ethereum Sepolia or CAPROV Besu in MetaMask, then check again.');
+        return;
+      }
+      setSelectedBlockchainNetwork(network.id);
+      setNetworkId(network.id);
+      setMessage(`Verified: MetaMask is on ${network.chainName} (chain ID ${network.chainId}).`);
+    } catch (error) {
+      setMessage(error instanceof Error ? `Could not read MetaMask’s active network: ${error.message}` : 'Could not read MetaMask’s active network. Unlock MetaMask and try again.');
+    } finally {
+      setBusy(false);
+    }
+  }, []);
 
   const connect = useCallback(async () => {
     setBusy(true);
@@ -91,7 +115,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const connection = await chooseMetaMaskAccount();
       setAddress(connection.address);
       setAccounts(connection.accounts);
-      setMessage(`Active wallet changed to ${connection.address.slice(0, 6)}…${connection.address.slice(-4)}.`);
+      try {
+        await alignMetaMaskToSelectedNetwork();
+        setMessage(`Active wallet changed to ${connection.address.slice(0, 6)}…${connection.address.slice(-4)} on ${selectedBlockchainNetwork().chainName}.`);
+      } catch (error) {
+        setMessage(
+          `${connection.address.slice(0, 6)}…${connection.address.slice(-4)} selected. ${error instanceof Error ? error.message : 'Select the CAPROV network in MetaMask before signing.'}`,
+        );
+      }
       return connection.address;
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'MetaMask account selection could not be completed.');
@@ -108,9 +139,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const ethereum = (window as Window & { ethereum?: InjectedProvider }).ethereum;
-    if (!ethereum) return;
-    const updateAccounts = (next: string[]) => {
+    let provider: InjectedProvider | undefined;
+    let disposed = false;
+    const updateAccounts = (value: string | string[]) => {
+      const next = Array.isArray(value) ? value : [];
       setAccounts(next);
       setAddress((current) => next.find((item) => item.toLowerCase() === current?.toLowerCase()) ?? next[0]);
     };
@@ -118,16 +150,48 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     // extensions reject even `eth_accounts` until explicitly selected by the
     // user, and an extension-level rejection can otherwise trigger Next's
     // development error overlay. Account access begins from the Connect button.
-    ethereum.on?.('accountsChanged', updateAccounts);
-    ethereum.on?.('chainChanged', () => setMessage(`Wallet network changed. Use ${selectedBlockchainNetwork().chainName} for CAPROV transactions.`));
-    return () => {
-      ethereum.removeListener?.('accountsChanged', updateAccounts);
-      ethereum.removeListener?.('chainChanged', () => undefined);
+    const updateChain = (value: string | string[]) => {
+      const chainId = typeof value === 'string' ? value : '';
+      const parsedChainId = Number.parseInt(chainId, 16);
+      const network = Number.isSafeInteger(parsedChainId) ? blockchainNetworkForChainId(parsedChainId) : undefined;
+      if (network) {
+        setSelectedBlockchainNetwork(network.id);
+        setNetworkId(network.id);
+        setMessage(`MetaMask switched to ${network.chainName} (chain ID ${network.chainId}).`);
+        return;
+      }
+      setMessage('MetaMask switched to an unsupported network. Select CAPROV Besu or Ethereum Sepolia to continue.');
     };
-  }, []);
+    const handleDisconnect = () => {
+      clearMetaMaskConnection();
+      setAccounts([]);
+      setAddress(undefined);
+      setMessage('MetaMask disconnected or restarted. Unlock MetaMask, then reconnect it to CAPROV.');
+    };
+    // Subscribe to the exact EIP-6963 MetaMask provider selected by CAPROV,
+    // rather than whichever wallet extension last assigned window.ethereum.
+    // This matters when MetaMask and another injected wallet are installed.
+    void activeMetaMaskProvider()
+      .then((selected) => {
+        if (disposed) return;
+        provider = selected as unknown as InjectedProvider;
+        provider.on?.('accountsChanged', updateAccounts);
+        provider.on?.('chainChanged', updateChain);
+        provider.on?.('disconnect', handleDisconnect);
+      })
+      .catch(() => {
+        // No provider is available until MetaMask is installed/unlocked.
+      });
+    return () => {
+      disposed = true;
+      provider?.removeListener?.('accountsChanged', updateAccounts);
+      provider?.removeListener?.('chainChanged', updateChain);
+      provider?.removeListener?.('disconnect', handleDisconnect);
+    };
+  }, [address]);
 
   const network = selectedBlockchainNetwork();
-  const value = useMemo(() => ({ address, accounts, busy, message, networkId, network, selectNetwork, connect, chooseAccount, selectAccount }), [address, accounts, busy, message, networkId, network, selectNetwork, connect, chooseAccount, selectAccount]);
+  const value = useMemo(() => ({ address, accounts, busy, message, networkId, network, selectNetwork, syncNetwork, connect, chooseAccount, selectAccount }), [address, accounts, busy, message, networkId, network, selectNetwork, syncNetwork, connect, chooseAccount, selectAccount]);
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
 }
 

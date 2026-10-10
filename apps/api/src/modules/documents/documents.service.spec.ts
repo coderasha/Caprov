@@ -26,6 +26,16 @@ describe('DocumentsService', () => {
     roles: ['ORG_ADMIN'],
   };
 
+  it('returns the stored original file for a document the user can read', () => {
+    const service = createService({ store: buildStore() });
+
+    const file = service.readOriginalFile(user, 'doc_test');
+
+    expect(file.filename).toBe('LMN_Asset_KYC_Ownership.docx');
+    expect(file.mimeType).toContain('wordprocessingml');
+    expect(file.buffer.toString('utf8')).toBe('test document content');
+  });
+
   it('keeps simulated anchors out of the blockchain-anchored state', async () => {
     const store = buildStore();
     const document = store.documents[0]!;

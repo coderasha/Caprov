@@ -1,5 +1,5 @@
-import { BrowserProvider, Contract, Interface, id as ethId, type Eip1193Provider, formatUnits, parseUnits } from 'ethers';
-import { selectedBlockchainNetwork } from './blockchain-network';
+import { BrowserProvider, Contract, FeeData, Interface, id as ethId, type Eip1193Provider, formatUnits, parseUnits } from 'ethers';
+import { selectedBlockchainNetwork, type BrowserNetwork } from './blockchain-network';
 
 const assetAbi = [
   'function mintAsset(address to, uint256 id, uint256 amount, string assetReference)',
@@ -53,6 +53,12 @@ type Eip6963Detail = {
 
 let activeWallet: { id: string; provider: WalletProvider } | undefined;
 let activeAccount: string | undefined;
+
+/** Drops a provider that MetaMask has disconnected or restarted in the background. */
+export function clearMetaMaskConnection() {
+  activeWallet = undefined;
+  activeAccount = undefined;
+}
 
 async function metaMaskWallet() {
   const wallets = await availableSepoliaWallets();
@@ -113,7 +119,7 @@ export async function connectMetaMaskWallet() {
   // selected. In particular, choosing Ethereum Sepolia must move MetaMask to
   // chain 11155111 before the signer is resolved.
   await switchWalletToSelectedNetwork();
-  const provider = new BrowserProvider(metaMask.provider);
+  const provider = walletBrowserProvider(metaMask.provider);
   const network = await provider.getNetwork();
   const selected = selectedBlockchainNetwork();
   if (network.chainId !== BigInt(selected.chainId)) {
@@ -211,57 +217,39 @@ async function selectedProvider(walletId?: string) {
  */
 export async function switchWalletToSelectedNetwork() {
   const provider = await selectedProvider();
-  const network = selectedBlockchainNetwork();
-  const chainId = `0x${network.chainId.toString(16)}`;
+  await ensureProviderChain(provider, selectedBlockchainNetwork());
+}
 
-  // Sepolia is usually already present in MetaMask. Prefer a silent no-op when
-  // the wallet is already on the selected chain — re-prompting switch/add can
-  // crash some MetaMask builds while they resolve the page origin.
+/**
+ * Confirms MetaMask is on `network` without opening its programmatic switch
+ * popup. Recent MetaMask builds crash that popup with "reading 'origin'" for
+ * both custom networks and Sepolia. A dapp cannot repair an extension popup;
+ * using MetaMask's own network selector is reliable and emits `chainChanged`,
+ * which keeps CAPROV in sync.
+ */
+export async function ensureProviderChain(
+  provider: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> },
+  network: BrowserNetwork,
+) {
+  let current: unknown;
   try {
-    const current = await provider.request({ method: 'eth_chainId' });
-    if (typeof current === 'string' && current.toLowerCase() === chainId.toLowerCase()) {
-      return;
-    }
+    current = await provider.request({ method: 'eth_chainId' });
   } catch {
-    // Fall through to an explicit switch if the chain-id probe fails.
+    current = undefined;
   }
+  if (sameChainId(current, network.chainId)) return;
 
-  try {
-    await provider.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId }],
-    });
-  } catch (error) {
-    const code = typeof error === 'object' && error !== null && 'code' in error
-      ? (error as { code?: number }).code
-      : undefined;
-    if (code !== 4902) throw error;
-    // MetaMask does not need an explorer to add a chain. In particular, avoid
-    // passing a loopback Blockscout URL: some extension builds fail while
-    // resolving its origin before the RPC request is made.
-    if (!network.rpcUrl || !/^https?:\/\//i.test(network.rpcUrl) || isLoopbackUrl(network.rpcUrl)) {
-      throw new Error(
-        `${network.chainName} RPC URL is invalid for MetaMask. Set a public HTTPS RPC in NEXT_PUBLIC_ETHEREUM_SEPOLIA_RPC_URL (or Besu equivalent).`,
-      );
-    }
-    const blockExplorerUrls = network.blockExplorerUrl && !isLoopbackUrl(network.blockExplorerUrl)
-      ? { blockExplorerUrls: [network.blockExplorerUrl] }
-      : {};
-    await provider.request({
-      method: 'wallet_addEthereumChain',
-      params: [{
-        chainId,
-        chainName: network.chainName,
-        rpcUrls: [network.rpcUrl],
-        nativeCurrency: {
-          name: network.id === 'besu' ? network.chainName : 'Sepolia Ether',
-          symbol: network.id === 'besu' ? 'BESU' : 'ETH',
-          decimals: 18,
-        },
-        ...blockExplorerUrls,
-      }],
-    });
+  throw new Error(networkSelectionMessage(network));
+}
+
+/** Legacy fees for zero-base-fee Besu. EIP-1559 fee data of 0 crashes MetaMask's confirmation. */
+export function walletBrowserProvider(provider: Eip1193Provider, chainId?: number) {
+  const selected = selectedBlockchainNetwork();
+  const browserProvider = new BrowserProvider(provider, chainId ?? selected.chainId);
+  if (selected.zeroGas) {
+    browserProvider.getFeeData = async () => new FeeData(1n, null, null);
   }
+  return browserProvider;
 }
 
 /** Switch MetaMask to the CAPROV-selected chain without reopening the connect prompt. */
@@ -270,13 +258,27 @@ export async function alignMetaMaskToSelectedNetwork() {
   await switchWalletToSelectedNetwork();
 }
 
-function isLoopbackUrl(value: string) {
-  try {
-    const hostname = new URL(value).hostname;
-    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
-  } catch {
-    return false;
+function sameChainId(current: unknown, chainId: number) {
+  return typeof current === 'string' && Number.parseInt(current, 16) === chainId;
+}
+
+function metamaskRpcUrl(rpcUrl: string) {
+  const url = new URL(rpcUrl);
+  // MetaMask's built-in local network is http://localhost:8545. Sending
+  // 127.0.0.1 creates a second endpoint whose origin the confirmation cannot read.
+  if (url.hostname === '127.0.0.1') url.hostname = 'localhost';
+  return url.toString().replace(/\/$/, '');
+}
+
+function networkSelectionMessage(network: BrowserNetwork) {
+  if (network.id === 'sepolia') {
+    return 'Select Ethereum Sepolia directly from MetaMask’s network menu, then retry. If it is hidden, enable “Show test networks” in MetaMask settings. CAPROV will detect the change automatically.';
   }
+  const rpcUrl = metamaskRpcUrl(network.rpcUrl);
+  return [
+    `Select ${network.chainName} directly from MetaMask’s network menu, then retry. CAPROV will detect the change automatically.`,
+    `If it is not listed, add it once in MetaMask Settings → Networks: name ${network.chainName}; RPC URL ${rpcUrl}; chain ID ${network.chainId}; currency symbol ETH; leave block explorer blank.`,
+  ].join(' ');
 }
 
 /** The exact MetaMask provider selected by CAPROV's global wallet menu. */
@@ -295,8 +297,13 @@ export async function activeMetaMaskConnection() {
 }
 
 async function signer(walletId?: string) {
-  const provider = new BrowserProvider(await selectedProvider(walletId));
-  const requestedAccounts = await provider.send('eth_requestAccounts', []) as string[];
+  const rawProvider = await selectedProvider(walletId);
+  await ensureProviderChain(rawProvider, selectedBlockchainNetwork());
+  const existingAccounts = await rawProvider.request({ method: 'eth_accounts' }) as string[];
+  const requestedAccounts = existingAccounts.length
+    ? existingAccounts
+    : await rawProvider.request({ method: 'eth_requestAccounts' }) as string[];
+  const provider = walletBrowserProvider(rawProvider);
   const network = await provider.getNetwork();
   const selected = selectedBlockchainNetwork();
   if (network.chainId !== BigInt(selected.chainId)) {

@@ -6,10 +6,12 @@ import {
   Param,
   Post,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
@@ -92,6 +94,25 @@ export class DocumentsController {
   @Get(':id')
   get(@CurrentUser() user: AuthUser, @Param('id') id: string) {
     return this.documents.getForUser(user, id);
+  }
+
+  @Get(':id/file')
+  file(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Res() res: Response,
+  ) {
+    const file = this.documents.readOriginalFile(user, id);
+    const filename = file.filename.replace(/[\r\n"]/g, '');
+    res.setHeader('Content-Type', file.mimeType);
+    res.setHeader('Content-Length', String(file.buffer.length));
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(file.filename)}`,
+    );
+    res.send(file.buffer);
   }
 
   @Get(':id/history')

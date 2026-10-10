@@ -8,7 +8,7 @@ import { DnaDecisionTable } from '@/components/intelligence/dna-decision-table';
 import { FactSummaryTable } from '@/components/intelligence/fact-summary-table';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
-import { activeMetaMaskConnection } from '@/lib/sepolia-marketplace';
+import { activeMetaMaskConnection, ensureProviderChain, walletBrowserProvider } from '@/lib/sepolia-marketplace';
 import {
   selectedBlockchainNetwork,
   type BlockchainNetworkId,
@@ -27,7 +27,7 @@ import type { AssetDocumentsTree, AuditRow, DocumentRow, HydratedAsset } from '@
 import { useAuthStore } from '@/stores/auth-store';
 import type { DocumentType, OwnershipType } from '@caprov/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BrowserProvider, Contract } from 'ethers';
+import { BrowserProvider, Contract, solidityPackedKeccak256 } from 'ethers';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
@@ -95,6 +95,8 @@ interface WalletSession {
 
 const DOCUMENT_REGISTRY_ABI = [
   'function anchorDocumentVersion(string assetId, string documentId, string documentType, string documentName, uint256 version, bytes32 documentHash, bytes32 previousVersionHash, string offChainUri)',
+  'function latestVersionByLineage(bytes32 lineageKey) view returns (uint256)',
+  'function getDocumentVersion(bytes32 lineageKey, uint256 version) view returns (string assetId, string documentId, string documentType, string documentName, uint256 storedVersion, bytes32 documentHash, uint256 anchoredAt, bytes32 previousVersionHash, string offChainUri, bool exists)',
 ] as const;
 
 
@@ -332,13 +334,34 @@ export default function AssetDetailPage() {
 
     assertSelectedNetwork(targetNetwork);
     await ensureDocumentNetwork(session.provider, targetNetwork);
-    const currentBrowserProvider = new BrowserProvider(
+    const currentBrowserProvider = walletBrowserProvider(
       session.provider,
       targetNetwork.chainId,
     );
     const signer = await currentBrowserProvider.getSigner(session.account);
     const signerAddress = await signer.getAddress();
     const contract = new Contract(targetNetwork.contractAddress, DOCUMENT_REGISTRY_ABI, signer);
+    const requestedVersion = BigInt(document.version ?? 1);
+    const lineageKey = solidityPackedKeccak256(
+      ['string', 'string', 'string', 'string', 'string'],
+      [document.assetId, '|', document.type, '|', document.name],
+    );
+    const latestVersion = BigInt(await contract.getFunction('latestVersionByLineage')(lineageKey));
+    if (requestedVersion !== latestVersion + 1n) {
+      let detail = `Besu expects version ${latestVersion + 1n}, but this document is version ${requestedVersion}.`;
+      if (requestedVersion <= latestVersion) {
+        const existing = await contract.getFunction('getDocumentVersion')(lineageKey, requestedVersion);
+        const existingDocumentId = existing[1] as string;
+        const existingHash = existing[5] as string;
+        if (
+          existingDocumentId === document.id &&
+          existingHash.toLowerCase() === normalizeHash(document.documentHash).toLowerCase()
+        ) {
+          detail = 'This exact document version is already anchored on Besu. Refresh the page; do not submit it again.';
+        }
+      }
+      throw new Error(`${detail} Create the next document version before anchoring, or use a fresh Besu document-registry deployment for a clean test network.`);
+    }
     const anchorFn = contract.getFunction('anchorDocumentVersion');
     setWalletMessage('Awaiting MetaMask signature…');
     const tx = await anchorFn(
@@ -346,7 +369,7 @@ export default function AssetDetailPage() {
       document.id,
       document.type,
       document.name,
-      BigInt(document.version ?? 1),
+      requestedVersion,
       normalizeHash(document.documentHash),
       normalizeHash(document.previousVersionHash),
       document.offChainUri,
@@ -384,10 +407,13 @@ export default function AssetDetailPage() {
           await api.get<DocumentNetworkStatus>('/documents/network-status')
         ).data;
         assertSelectedNetwork(currentNetwork);
-        if (currentNetwork.liveReady && currentNetwork.contractAddress) {
-          const session = walletSession ?? (await connectWallet(currentNetwork));
-          await anchorDocumentWithWallet(created, session, currentNetwork);
+        if (!currentNetwork.liveReady || !currentNetwork.contractAddress) {
+          throw new Error(
+            `${currentNetwork.chainName} anchoring is not ready: ${currentNetwork.message || 'the document-registry contract is not configured.'}`,
+          );
         }
+        const session = walletSession ?? (await connectWallet(currentNetwork));
+        await anchorDocumentWithWallet(created, session, currentNetwork);
       }
 
       setDoc({ name: '', type: 'OTHER', extractedText: '' });
@@ -399,6 +425,27 @@ export default function AssetDetailPage() {
       if (created) {
         await refreshAssetDocuments();
       }
+    }
+  }
+
+  async function anchorExistingDocument(document: DocumentRow) {
+    setAnchorError(null);
+    setWalletMessage('Checking the selected network before requesting a signature…');
+    try {
+      const currentNetwork = (
+        await api.get<DocumentNetworkStatus>('/documents/network-status')
+      ).data;
+      assertSelectedNetwork(currentNetwork);
+      if (!currentNetwork.liveReady || !currentNetwork.contractAddress) {
+        throw new Error(
+          `${currentNetwork.chainName} anchoring is not ready: ${currentNetwork.message || 'the document-registry contract is not configured.'}`,
+        );
+      }
+      const session = walletSession ?? (await connectWallet(currentNetwork));
+      await anchorDocumentWithWallet(document, session, currentNetwork);
+      await refreshAssetDocuments();
+    } catch (error) {
+      setAnchorError(readErrorMessage(error));
     }
   }
 
@@ -574,6 +621,21 @@ export default function AssetDetailPage() {
                               </Link>
                             ))}
                           </div>
+                          {canWalletAnchor && entry.anchorStatus !== 'BLOCKCHAIN_ANCHORED' ? (
+                            <Button
+                              className="mt-3"
+                              variant="secondary"
+                              disabled={walletBusy || recordAnchor.isPending}
+                              onClick={() => {
+                                const current = entry.versions.find((version) => version.isCurrent) ?? entry.versions[0];
+                                if (current) void anchorExistingDocument(current);
+                              }}
+                            >
+                              {walletBusy || recordAnchor.isPending
+                                ? 'Preparing MetaMask…'
+                                : `Anchor v${entry.currentVersion} on ${network?.chainName ?? selectedBlockchainNetwork().chainName}`}
+                            </Button>
+                          ) : null}
                         </div>
                       ))}
                     </div>
@@ -653,6 +715,8 @@ export default function AssetDetailPage() {
                 its category, matching filenames create a new version instead of replacing older ones, and org
                 admins can sign a real {network?.chainName ?? selectedBlockchainNetwork().chainName} anchor transaction only when live document anchoring is configured.
               </p>
+              {walletMessage ? <p className="text-xs text-[var(--muted)]">{walletMessage}</p> : null}
+              {anchorError ? <p role="alert" className="text-xs text-[var(--danger)]">{anchorError}</p> : null}
             </form>
           </Card> : <Card className="p-6"><h2 className="text-lg font-semibold">Credit-desk access</h2><p className="mt-2 text-sm text-[var(--muted)]">Document evidence is read-only for the credit desk. Listers manage uploads and provenance records.</p></Card>}
         </div>
@@ -879,7 +943,7 @@ async function connectMetaMask(network?: DocumentNetworkStatus): Promise<WalletS
   assertSelectedNetwork(network);
   await ensureDocumentNetwork(provider, network);
   const selected = selectedBlockchainNetwork();
-  const browserProvider = new BrowserProvider(provider, network?.chainId ?? selected.chainId);
+  const browserProvider = walletBrowserProvider(provider, network?.chainId ?? selected.chainId);
   if (!account) throw new Error('MetaMask did not expose an account to CAPROV.');
   const chain = await browserProvider.getNetwork();
   return {
@@ -909,44 +973,13 @@ async function ensureDocumentNetwork(
 ) {
   const selected = selectedBlockchainNetwork();
   const chainId = network?.chainId ?? selected.chainId;
-  const targetHex = `0x${chainId.toString(16)}`;
-  try {
-    await provider.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: targetHex }],
-    });
-  } catch (error) {
-    const code =
-      typeof error === 'object' &&
-      error !== null &&
-      'code' in error &&
-      typeof error.code === 'number'
-        ? error.code
-        : undefined;
-    if (code !== 4902) {
-      throw error;
-    }
-    const explorerUrl = network?.explorerBase ?? selected.blockExplorerUrl;
-    const blockExplorerUrls = explorerUrl && !isLoopbackUrl(explorerUrl)
-      ? { blockExplorerUrls: [explorerUrl] }
-      : {};
-    await provider.request({
-      method: 'wallet_addEthereumChain',
-      params: [
-        {
-          chainId: targetHex,
-          chainName: network?.chainName ?? selected.chainName,
-          rpcUrls: [network?.rpcUrl ?? selected.rpcUrl],
-          nativeCurrency: {
-            name: selected.chainName,
-            symbol: selected.id === 'besu' ? 'BESU' : 'SEP',
-            decimals: 18,
-          },
-          ...blockExplorerUrls,
-        },
-      ],
-    });
-  }
+  await ensureProviderChain(provider, {
+    ...selected,
+    chainId,
+    chainName: network?.chainName ?? selected.chainName,
+    rpcUrl: network?.rpcUrl || selected.rpcUrl,
+    blockExplorerUrl: undefined,
+  });
 
   const activeChain = await provider.request({ method: 'eth_chainId' });
   const activeChainId =
@@ -955,15 +988,6 @@ async function ensureDocumentNetwork(
     throw new Error(
       `Wallet remains on chain ID ${activeChainId}. ${network?.chainName ?? selected.chainName} (chain ID ${chainId}) is required before an anchor can be submitted.`,
     );
-  }
-}
-
-function isLoopbackUrl(value: string) {
-  try {
-    const hostname = new URL(value).hostname;
-    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
-  } catch {
-    return false;
   }
 }
 

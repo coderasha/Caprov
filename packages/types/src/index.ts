@@ -331,6 +331,7 @@ export type TokenizationStatus = 'PENDING' | 'SUBMITTED' | 'CONFIRMED' | 'SIMULA
 export type CollateralStatus =
   | 'PENDING_APPROVAL'
   | 'ACTIVE'
+  | 'REJECTED'
   | 'RELEASED'
   | 'LIQUIDATED';
 

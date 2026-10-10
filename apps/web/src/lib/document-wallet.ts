@@ -1,9 +1,9 @@
-import { BrowserProvider } from 'ethers';
+import { BrowserProvider, Contract, solidityPackedKeccak256 } from 'ethers';
 import {
   selectedBlockchainNetwork,
   type BlockchainNetworkId,
 } from '@/lib/blockchain-network';
-import { activeMetaMaskConnection } from '@/lib/sepolia-marketplace';
+import { activeMetaMaskConnection, ensureProviderChain, walletBrowserProvider } from '@/lib/sepolia-marketplace';
 
 export type WalletProviderLike = {
   request: (args: {
@@ -39,6 +39,8 @@ export interface DocumentNetworkStatus {
 
 export const DOCUMENT_REGISTRY_ABI = [
   'function anchorDocumentVersion(string assetId, string documentId, string documentType, string documentName, uint256 version, bytes32 documentHash, bytes32 previousVersionHash, string offChainUri)',
+  'function latestVersionByLineage(bytes32 lineageKey) view returns (uint256)',
+  'function getDocumentVersion(bytes32 lineageKey, uint256 version) view returns (string assetId, string documentId, string documentType, string documentName, uint256 storedVersion, bytes32 documentHash, uint256 anchoredAt, bytes32 previousVersionHash, string offChainUri, bool exists)',
 ] as const;
 
 export function shortAddress(address: string) {
@@ -50,6 +52,32 @@ export function normalizeHash(value?: string) {
     return `0x${'0'.repeat(64)}`;
   }
   return value.startsWith('0x') ? value : `0x${value}`;
+}
+
+/** Prevents an avoidable MetaMask RPC error when this chain already has a different document lineage. */
+export async function assertNextDocumentAnchorVersion(
+  contract: Contract,
+  document: { assetId: string; id: string; type: string; name: string; version?: number; documentHash: string },
+) {
+  const requestedVersion = BigInt(document.version ?? 1);
+  const lineageKey = solidityPackedKeccak256(
+    ['string', 'string', 'string', 'string', 'string'],
+    [document.assetId, '|', document.type, '|', document.name],
+  );
+  const latestVersion = BigInt(await contract.getFunction('latestVersionByLineage')(lineageKey));
+  if (requestedVersion === latestVersion + 1n) return requestedVersion;
+
+  let detail = `This network expects version ${latestVersion + 1n}, but this document is version ${requestedVersion}.`;
+  if (requestedVersion <= latestVersion) {
+    const existing = await contract.getFunction('getDocumentVersion')(lineageKey, requestedVersion);
+    if (
+      (existing[1] as string) === document.id &&
+      (existing[5] as string).toLowerCase() === normalizeHash(document.documentHash).toLowerCase()
+    ) {
+      detail = 'This exact document version is already anchored on this network. Refresh the page; do not submit it again.';
+    }
+  }
+  throw new Error(`${detail} Create the next document version before anchoring, or use a fresh document-registry deployment for a clean test network.`);
 }
 
 export function readErrorMessage(error: unknown) {
@@ -103,43 +131,14 @@ export async function ensureDocumentNetwork(
 ) {
   const selected = selectedBlockchainNetwork();
   const chainId = network?.chainId ?? selected.chainId;
-  const targetHex = `0x${chainId.toString(16)}`;
-  try {
-    await provider.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: targetHex }],
-    });
-  } catch (error) {
-    const code =
-      typeof error === 'object' &&
-      error !== null &&
-      'code' in error &&
-      typeof error.code === 'number'
-        ? error.code
-        : undefined;
-    if (code !== 4902) {
-      throw error;
-    }
-    const explorerUrl = network?.explorerBase ?? selected.blockExplorerUrl;
-    const blockExplorerUrls =
-      explorerUrl && !isLoopbackUrl(explorerUrl) ? { blockExplorerUrls: [explorerUrl] } : {};
-    await provider.request({
-      method: 'wallet_addEthereumChain',
-      params: [
-        {
-          chainId: targetHex,
-          chainName: network?.chainName ?? selected.chainName,
-          rpcUrls: [network?.rpcUrl ?? selected.rpcUrl],
-          nativeCurrency: {
-            name: selected.chainName,
-            symbol: selected.id === 'besu' ? 'BESU' : 'SEP',
-            decimals: 18,
-          },
-          ...blockExplorerUrls,
-        },
-      ],
-    });
-  }
+  await ensureProviderChain(provider, {
+    ...selected,
+    chainId,
+    chainName: network?.chainName ?? selected.chainName,
+    rpcUrl: network?.rpcUrl || selected.rpcUrl,
+    // Never forward a loopback explorer. MetaMask crashes while resolving its origin.
+    blockExplorerUrl: publicHttpsExplorer(network?.explorerBase) ?? publicHttpsExplorer(selected.blockExplorerUrl),
+  });
 
   const activeChain = await provider.request({ method: 'eth_chainId' });
   const activeChainId =
@@ -159,7 +158,7 @@ export async function connectMetaMask(
   assertSelectedNetwork(network);
   await ensureDocumentNetwork(provider, network);
   const selected = selectedBlockchainNetwork();
-  const browserProvider = new BrowserProvider(provider, network?.chainId ?? selected.chainId);
+  const browserProvider = walletBrowserProvider(provider, network?.chainId ?? selected.chainId);
   const chain = await browserProvider.getNetwork();
   return {
     account,
@@ -169,11 +168,13 @@ export async function connectMetaMask(
   };
 }
 
-function isLoopbackUrl(value: string) {
+function publicHttpsExplorer(value?: string) {
+  if (!value) return undefined;
   try {
-    const hostname = new URL(value).hostname;
-    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+    const url = new URL(value);
+    const loopback = url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '[::1]';
+    return url.protocol === 'https:' && !loopback ? value : undefined;
   } catch {
-    return false;
+    return undefined;
   }
 }

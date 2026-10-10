@@ -31,3 +31,8 @@ export function setSelectedBlockchainNetwork(id: BlockchainNetworkId) {
   window.dispatchEvent(new Event('caprov-network-changed'));
 }
 export function blockchainNetworks() { return [networks.sepolia, networks.besu]; }
+
+/** Returns the CAPROV network represented by an EIP-1193 chain id. */
+export function blockchainNetworkForChainId(chainId: number) {
+  return blockchainNetworks().find((network) => network.chainId === chainId);
+}

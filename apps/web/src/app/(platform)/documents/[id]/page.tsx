@@ -1,5 +1,6 @@
 'use client';
 
+import { OpenDocumentButton } from '@/components/documents/open-document';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { api } from '@/lib/api';
@@ -152,7 +153,13 @@ export default function DocumentDetailPage() {
     <div className="mx-auto max-w-4xl space-y-6">
       <div>
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--muted)]">Document</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">{document.name}</h1>
+        <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+          <h1 className="text-3xl font-semibold tracking-tight">{document.name}</h1>
+          <OpenDocumentButton
+            documentId={document.id}
+            filename={document.originalFilename || document.name}
+          />
+        </div>
         <div className="mt-3 flex flex-wrap gap-2">
           <Badge>{documentTypeLabel[document.type]}</Badge>
           <Badge tone={document.status === 'READY' ? 'ok' : 'warn'}>{document.status}</Badge>

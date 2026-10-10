@@ -103,12 +103,14 @@ export class CollateralController {
         if (item.organizationId === user.organizationId || isPlatformAdmin) {
           return true;
         }
-        // Bankers receive a review inbox of live borrower collateral only.
-        // Released and historical positions remain visible only to the owner
-        // organization or a platform administrator.
+        // Bankers receive a review inbox of borrower collateral (pending,
+        // approved, and rejected). Released/liquidated history stays with the
+        // owner organization or a platform administrator.
         return (
           isBanker &&
-          (item.status === 'PENDING_APPROVAL' || item.status === 'ACTIVE')
+          (item.status === 'PENDING_APPROVAL' ||
+            item.status === 'ACTIVE' ||
+            item.status === 'REJECTED')
         );
       })
       .map((item) => this.hydrate(item));
@@ -143,9 +145,20 @@ export class CollateralController {
 
   @Get(':id')
   get(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    const position = this.db.snapshot.collateralPositions.find(
-      (item) => item.id === id && item.organizationId === user.organizationId,
-    );
+    const isBanker = user.roles.includes('BANKER');
+    const isPlatformAdmin = user.roles.includes('PLATFORM_ADMIN');
+    const position = this.db.snapshot.collateralPositions.find((item) => {
+      if (item.id !== id) return false;
+      if (item.organizationId === user.organizationId || isPlatformAdmin) {
+        return true;
+      }
+      return (
+        isBanker &&
+        (item.status === 'PENDING_APPROVAL' ||
+          item.status === 'ACTIVE' ||
+          item.status === 'REJECTED')
+      );
+    });
     if (!position) throw new NotFoundException('Collateral not found');
     return this.hydrate(position);
   }
@@ -245,11 +258,9 @@ export class CollateralController {
   }
 
   @Post(':id/approve')
-  @Roles('COMPLIANCE', 'ORG_ADMIN', 'PLATFORM_ADMIN')
+  @Roles('BANKER', 'COMPLIANCE', 'ORG_ADMIN', 'PLATFORM_ADMIN')
   approve(@CurrentUser() user: AuthUser, @Param('id') id: string) {
-    const position = this.db.snapshot.collateralPositions.find(
-      (item) => item.id === id && item.organizationId === user.organizationId,
-    );
+    const position = this.findReviewablePosition(user, id);
     if (!position) throw new NotFoundException('Collateral not found');
     if (position.status !== 'PENDING_APPROVAL') {
       throw new BadRequestException('Collateral is not pending approval');
@@ -264,9 +275,36 @@ export class CollateralController {
       target.updatedAt = now;
     });
     this.audit.log({
-      organizationId: user.organizationId,
+      organizationId: position.organizationId,
       actorUserId: user.id,
       action: 'collateral.approved',
+      entityType: 'Collateral',
+      entityId: id,
+    });
+    return this.hydrate(
+      this.db.snapshot.collateralPositions.find((item) => item.id === id)!,
+    );
+  }
+
+  @Post(':id/reject')
+  @Roles('BANKER', 'COMPLIANCE', 'ORG_ADMIN', 'PLATFORM_ADMIN')
+  reject(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    const position = this.findReviewablePosition(user, id);
+    if (!position) throw new NotFoundException('Collateral not found');
+    if (position.status !== 'PENDING_APPROVAL') {
+      throw new BadRequestException('Collateral is not pending approval');
+    }
+
+    const now = new Date().toISOString();
+    this.db.mutate((draft) => {
+      const target = draft.collateralPositions.find((item) => item.id === id)!;
+      target.status = 'REJECTED';
+      target.updatedAt = now;
+    });
+    this.audit.log({
+      organizationId: position.organizationId,
+      actorUserId: user.id,
+      action: 'collateral.rejected',
       entityType: 'Collateral',
       entityId: id,
     });
@@ -343,6 +381,18 @@ export class CollateralController {
     );
   }
 
+  private findReviewablePosition(user: AuthUser, id: string) {
+    const isBanker = user.roles.includes('BANKER');
+    const isPlatformAdmin = user.roles.includes('PLATFORM_ADMIN');
+    return this.db.snapshot.collateralPositions.find((item) => {
+      if (item.id !== id) return false;
+      if (item.organizationId === user.organizationId || isPlatformAdmin) {
+        return true;
+      }
+      return isBanker;
+    });
+  }
+
   private hydrate(position: CollateralPosition) {
     const loans = this.activeLoans(position.id);
     const utilizedAmount = loans.reduce(
@@ -352,6 +402,13 @@ export class CollateralController {
     const availableAmount = Number(
       Math.max(0, position.advanceableValue - utilizedAmount).toFixed(2),
     );
+    const organization =
+      this.db.snapshot.organizations.find(
+        (item) => item.id === position.organizationId,
+      ) ?? null;
+    const asset =
+      this.db.snapshot.assets.find((item) => item.id === position.assetId) ??
+      null;
     return {
       ...position,
       utilizedAmount,
@@ -362,9 +419,10 @@ export class CollateralController {
       canRelease: false,
       activeLoanCount: loans.length,
       loans,
-      asset:
-        this.db.snapshot.assets.find((item) => item.id === position.assetId) ??
-        null,
+      organization: organization
+        ? { id: organization.id, name: organization.name }
+        : null,
+      asset,
       token: position.tokenId
         ? (this.db.snapshot.tokens.find(
             (item) => item.id === position.tokenId,

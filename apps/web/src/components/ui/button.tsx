@@ -1,15 +1,15 @@
 import { cn } from '@/lib/utils';
-import type { ButtonHTMLAttributes } from 'react';
+import { forwardRef, type ButtonHTMLAttributes } from 'react';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'ink';
 
-export function Button({
-  className,
-  variant = 'primary',
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
+export const Button = forwardRef<
+  HTMLButtonElement,
+  ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }
+>(function Button({ className, variant = 'primary', ...props }, ref) {
   return (
     <button
+      ref={ref}
       className={cn(
         'inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium tracking-[-0.01em] transition disabled:cursor-not-allowed disabled:opacity-50',
         variant === 'primary' &&
@@ -24,4 +24,4 @@ export function Button({
       {...props}
     />
   );
-}
+});

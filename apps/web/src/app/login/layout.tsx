@@ -1,13 +1,7 @@
-import { Playfair_Display } from 'next/font/google';
-import type { ReactNode } from 'react';
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  variable: '--font-auth-serif',
-  display: 'swap',
-});
+import type { CSSProperties, ReactNode } from 'react';
 
 export default function LoginLayout({ children }: { children: ReactNode }) {
-  return <div className={playfair.variable}>{children}</div>;
+  // Keep authentication pages deployable in isolated/private environments;
+  // next/font/google otherwise makes the production build depend on Google.
+  return <div style={{ '--font-auth-serif': 'Georgia, "Times New Roman", serif' } as CSSProperties}>{children}</div>;
 }

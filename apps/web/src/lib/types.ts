@@ -119,12 +119,13 @@ export interface PortfolioRow {
   name: string;
   description?: string;
   baseCurrency: CurrencyCode;
+  focusAssetClasses?: string[];
   holdingCount: number;
   holdings: Array<{
     id: string;
     assetId: string;
     weight?: number;
-    asset: (Pick<HydratedAsset, 'id' | 'name' | 'assetClass' | 'currency' | 'location' | 'jurisdiction' | 'description' | 'ownerships' | 'documentCount' | 'primaryImageUrl'>) | null;
+    asset: (Pick<HydratedAsset, 'id' | 'name' | 'assetClass' | 'currency' | 'location' | 'jurisdiction' | 'description' | 'ownerships' | 'documentCount' | 'primaryImageUrl' | 'imageUrls'>) | null;
     valuation: { payload: ValuationSummary } | null;
     risk: { payload: RiskSummary } | null;
   }>;

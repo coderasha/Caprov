@@ -4,6 +4,7 @@ import { useWallet } from '@/components/wallet/wallet-provider';
 import { api } from '@/lib/api';
 import {
   assertSelectedNetwork,
+  assertNextDocumentAnchorVersion,
   connectMetaMask,
   DOCUMENT_REGISTRY_ABI,
   ensureDocumentNetwork,
@@ -21,10 +22,11 @@ import {
 import type { DocumentRow, HydratedAsset } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { selectedBlockchainNetwork, type BlockchainNetworkId } from '@/lib/blockchain-network';
+import { walletBrowserProvider } from '@/lib/sepolia-marketplace';
 import { useAuthStore } from '@/stores/auth-store';
 import type { DocumentType } from '@caprov/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BrowserProvider, Contract } from 'ethers';
+import { Contract } from 'ethers';
 import {
   CheckCircle2,
   ChevronLeft,
@@ -351,10 +353,18 @@ export default function DocumentsPage() {
 
     assertSelectedNetwork(targetNetwork);
     await ensureDocumentNetwork(session.provider, targetNetwork);
-    const currentBrowserProvider = new BrowserProvider(session.provider, targetNetwork.chainId);
+    const currentBrowserProvider = walletBrowserProvider(session.provider, targetNetwork.chainId);
     const signer = await currentBrowserProvider.getSigner(session.account);
     const signerAddress = await signer.getAddress();
     const contract = new Contract(targetNetwork.contractAddress, DOCUMENT_REGISTRY_ABI, signer);
+    const requestedVersion = await assertNextDocumentAnchorVersion(contract, {
+      assetId: document.assetId,
+      id: document.id,
+      type: document.type,
+      name: document.name,
+      version: document.version,
+      documentHash: document.documentHash,
+    });
     const anchorFn = contract.getFunction('anchorDocumentVersion');
     setWalletMessage('Awaiting MetaMask signature…');
     const tx = await anchorFn(
@@ -362,7 +372,7 @@ export default function DocumentsPage() {
       document.id,
       document.type,
       document.name,
-      BigInt(document.version ?? 1),
+      requestedVersion,
       normalizeHash(document.documentHash),
       normalizeHash(document.previousVersionHash),
       document.offChainUri,
@@ -404,10 +414,13 @@ export default function DocumentsPage() {
           await api.get<DocumentNetworkStatus>('/documents/network-status')
         ).data;
         assertSelectedNetwork(currentNetwork);
-        if (currentNetwork.liveReady && currentNetwork.contractAddress) {
-          const session = walletSession ?? (await connectWallet(currentNetwork));
-          await anchorDocumentWithWallet(created, session, currentNetwork);
+        if (!currentNetwork.liveReady || !currentNetwork.contractAddress) {
+          throw new Error(
+            `${currentNetwork.chainName} anchoring is not ready: ${currentNetwork.message || 'the document-registry contract is not configured.'}`,
+          );
         }
+        const session = walletSession ?? (await connectWallet(currentNetwork));
+        await anchorDocumentWithWallet(created, session, currentNetwork);
       }
       setForm((current) => ({ ...current, name: '', type: 'OTHER', notes: '' }));
       setFile(null);

@@ -170,6 +170,24 @@ export class DocumentsService {
     return this.get(this.organizationForDocumentRead(user, documentId), documentId);
   }
 
+  readOriginalFile(user: AuthUser, documentId: string) {
+    const document = this.requireDocument(
+      this.organizationForDocumentRead(user, documentId),
+      documentId,
+    );
+    const buffer = this.storage.readBuffer(document.storageKey);
+    if (!buffer) {
+      throw new NotFoundException(
+        'The original file for this document is not available.',
+      );
+    }
+    return {
+      buffer,
+      mimeType: document.mimeType || 'application/octet-stream',
+      filename: document.originalFilename || document.name,
+    };
+  }
+
   history(organizationId: string, documentId: string) {
     const document = this.requireDocument(organizationId, documentId);
     return this.db.snapshot.documents
