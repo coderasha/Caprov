@@ -112,18 +112,21 @@ export async function connectMetaMaskWallet() {
   // `wallet_requestPermissions` immediately before `eth_requestAccounts`
   // creates a duplicate MetaMask approval flow and can make the extension's
   // connection window fail before it receives the page origin.
-  const accounts = await metaMask.provider.request({ method: 'eth_requestAccounts' }) as string[];
+  const accounts = (await metaMask.provider.request({
+    method: 'eth_requestAccounts',
+  })) as string[];
   if (!accounts[0]) throw new Error('MetaMask did not expose an account to CAPROV.');
   activeAccount = accounts[0];
-  // A connection is only useful when the signer is on the network CAPROV has
-  // selected. In particular, choosing Ethereum Sepolia must move MetaMask to
-  // chain 11155111 before the signer is resolved.
+  // Move MetaMask onto the CAPROV-selected chain (Sepolia or Besu) before any
+  // signer work. Missing custom chains are added automatically.
   await switchWalletToSelectedNetwork();
   const provider = walletBrowserProvider(metaMask.provider);
   const network = await provider.getNetwork();
   const selected = selectedBlockchainNetwork();
   if (network.chainId !== BigInt(selected.chainId)) {
-    throw new Error(`MetaMask did not switch to ${selected.chainName} (chain ID ${selected.chainId}).`);
+    throw new Error(
+      `MetaMask did not switch to ${selected.chainName} (chain ID ${selected.chainId}).`,
+    );
   }
   const address = await (await provider.getSigner(activeAccount)).getAddress();
   return { address, accounts };
@@ -221,25 +224,80 @@ export async function switchWalletToSelectedNetwork() {
 }
 
 /**
- * Confirms MetaMask is on `network` without opening its programmatic switch
- * popup. Recent MetaMask builds crash that popup with "reading 'origin'" for
- * both custom networks and Sepolia. A dapp cannot repair an extension popup;
- * using MetaMask's own network selector is reliable and emits `chainChanged`,
- * which keeps CAPROV in sync.
+ * Aligns MetaMask to `network` for both Ethereum Sepolia and CAPROV Besu.
+ * Tries `wallet_switchEthereumChain` first; when the chain is missing (common
+ * for Besu), adds it with `wallet_addEthereumChain`, then verifies.
  */
 export async function ensureProviderChain(
   provider: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> },
   network: BrowserNetwork,
 ) {
-  let current: unknown;
-  try {
-    current = await provider.request({ method: 'eth_chainId' });
-  } catch {
-    current = undefined;
-  }
+  let current = await readChainId(provider);
   if (sameChainId(current, network.chainId)) return;
 
-  throw new Error(networkSelectionMessage(network));
+  const chainIdHex = toChainIdHex(network.chainId);
+  try {
+    await provider.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: chainIdHex }],
+    });
+  } catch (error) {
+    const code = providerErrorCode(error);
+    if (code === 4001) {
+      throw new Error(`Switch to ${network.chainName} was cancelled in MetaMask.`);
+    }
+    if (code === -32002) {
+      throw new Error(
+        'A MetaMask request is already open. Finish or close that prompt, then try again.',
+      );
+    }
+    if (code === 4902 || code === -32603 || isUnrecognizedChainError(error) || network.id === 'besu') {
+      try {
+        await provider.request({
+          method: 'wallet_addEthereumChain',
+          params: [addEthereumChainParams(network)],
+        });
+      } catch (addError) {
+        const addCode = providerErrorCode(addError);
+        if (addCode === 4001) {
+          throw new Error(`Adding ${network.chainName} in MetaMask was cancelled.`);
+        }
+        if (addCode === -32002) {
+          throw new Error(
+            'A MetaMask request is already open. Finish or close that prompt, then try again.',
+          );
+        }
+        // Chain may already exist under another name; retry the switch once.
+        try {
+          await provider.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: chainIdHex }],
+          });
+        } catch {
+          throw new Error(networkSelectionMessage(network));
+        }
+      }
+    } else {
+      throw new Error(networkSelectionMessage(network));
+    }
+  }
+
+  current = await readChainId(provider);
+  if (!sameChainId(current, network.chainId)) {
+    // Some MetaMask builds approve add without completing the switch.
+    try {
+      await provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: chainIdHex }],
+      });
+    } catch {
+      /* verified below */
+    }
+    current = await readChainId(provider);
+  }
+  if (!sameChainId(current, network.chainId)) {
+    throw new Error(networkSelectionMessage(network));
+  }
 }
 
 /** Legacy fees for zero-base-fee Besu. EIP-1559 fee data of 0 crashes MetaMask's confirmation. */
@@ -259,7 +317,42 @@ export async function alignMetaMaskToSelectedNetwork() {
 }
 
 function sameChainId(current: unknown, chainId: number) {
-  return typeof current === 'string' && Number.parseInt(current, 16) === chainId;
+  if (typeof current === 'string') {
+    return Number.parseInt(current, 16) === chainId;
+  }
+  if (typeof current === 'number') return current === chainId;
+  return false;
+}
+
+function toChainIdHex(chainId: number) {
+  return `0x${chainId.toString(16)}`;
+}
+
+async function readChainId(
+  provider: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> },
+) {
+  try {
+    return await provider.request({ method: 'eth_chainId' });
+  } catch {
+    return undefined;
+  }
+}
+
+function providerErrorCode(error: unknown) {
+  if (typeof error === 'object' && error !== null && 'code' in error) {
+    return (error as { code?: number | string }).code;
+  }
+  return undefined;
+}
+
+function isUnrecognizedChainError(error: unknown) {
+  const message =
+    error instanceof Error
+      ? error.message
+      : typeof error === 'object' && error !== null && 'message' in error
+        ? String((error as { message?: unknown }).message ?? '')
+        : String(error ?? '');
+  return /unrecognized chain|unknown chain|chain.*not.*added|does not exist/i.test(message);
 }
 
 function metamaskRpcUrl(rpcUrl: string) {
@@ -270,14 +363,35 @@ function metamaskRpcUrl(rpcUrl: string) {
   return url.toString().replace(/\/$/, '');
 }
 
+function addEthereumChainParams(network: BrowserNetwork) {
+  const rpcUrl = metamaskRpcUrl(network.rpcUrl);
+  const params: {
+    chainId: string;
+    chainName: string;
+    nativeCurrency: { name: string; symbol: string; decimals: number };
+    rpcUrls: string[];
+    blockExplorerUrls?: string[];
+  } = {
+    chainId: toChainIdHex(network.chainId),
+    chainName: network.chainName,
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: [rpcUrl],
+  };
+  if (network.blockExplorerUrl) {
+    params.blockExplorerUrls = [network.blockExplorerUrl];
+  }
+  return params;
+}
+
 function networkSelectionMessage(network: BrowserNetwork) {
   if (network.id === 'sepolia') {
-    return 'Select Ethereum Sepolia directly from MetaMask’s network menu, then retry. If it is hidden, enable “Show test networks” in MetaMask settings. CAPROV will detect the change automatically.';
+    return 'Could not switch MetaMask to Ethereum Sepolia. Open MetaMask, enable “Show test networks”, select Ethereum Sepolia, then retry. CAPROV will detect the change automatically.';
   }
   const rpcUrl = metamaskRpcUrl(network.rpcUrl);
   return [
-    `Select ${network.chainName} directly from MetaMask’s network menu, then retry. CAPROV will detect the change automatically.`,
-    `If it is not listed, add it once in MetaMask Settings → Networks: name ${network.chainName}; RPC URL ${rpcUrl}; chain ID ${network.chainId}; currency symbol ETH; leave block explorer blank.`,
+    `Could not switch MetaMask to ${network.chainName}.`,
+    `If it is missing, add it once in MetaMask Settings → Networks: name ${network.chainName}; RPC URL ${rpcUrl}; chain ID ${network.chainId}; currency symbol ETH.`,
+    'Then select that network and retry — CAPROV will detect the change automatically.',
   ].join(' ');
 }
 

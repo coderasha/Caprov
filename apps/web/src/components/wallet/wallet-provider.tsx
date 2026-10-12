@@ -39,21 +39,50 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string>();
   const [networkId, setNetworkId] = useState<BlockchainNetworkId>('sepolia');
-  useEffect(() => { setNetworkId(selectedBlockchainNetwork().id); }, []);
+  useEffect(() => {
+    setNetworkId(selectedBlockchainNetwork().id);
+  }, []);
+
+  // Quietly restore an already-authorized MetaMask session (no popup).
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const provider = await activeMetaMaskProvider();
+        const accounts = (await provider.request({ method: 'eth_accounts' })) as string[];
+        if (cancelled || !accounts[0]) return;
+        setAccounts(accounts);
+        setAddress(accounts[0]);
+        const value = await provider.request({ method: 'eth_chainId' });
+        const chainId = typeof value === 'string' ? Number.parseInt(value, 16) : Number.NaN;
+        const network = Number.isSafeInteger(chainId)
+          ? blockchainNetworkForChainId(chainId)
+          : undefined;
+        if (network) {
+          setSelectedBlockchainNetwork(network.id);
+          setNetworkId(network.id);
+        }
+      } catch {
+        // Leave disconnected until the user clicks Connect.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const selectNetwork = useCallback(async (next: BlockchainNetworkId) => {
     setSelectedBlockchainNetwork(next);
     setNetworkId(next);
     const network = selectedBlockchainNetwork();
     setBusy(true);
-    // If MetaMask is already connected, only align the chain. Forcing a full
-    // eth_requestAccounts on every network change can crash MetaMask's popup
-    // while it resolves the page origin ("Cannot read properties of undefined
-    // (reading 'origin')").
+    // Prefer a chain switch only — avoid eth_requestAccounts on every toggle so
+    // MetaMask does not open a second connect popup while switching networks.
     if (address) {
-      setMessage(`Checking MetaMask is on ${network.chainName}…`);
+      setMessage(`Switching MetaMask to ${network.chainName}…`);
       try {
         await alignMetaMaskToSelectedNetwork();
-        setMessage(`MetaMask is on ${network.chainName} (chain ID ${network.chainId}).`);
+        setMessage(`Connected on ${network.chainName} (chain ID ${network.chainId}).`);
       } catch (error) {
         setMessage(
           error instanceof Error
@@ -66,7 +95,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    setMessage(`Selected ${network.chainName}. Connect MetaMask when you are ready to sign.`);
+    setMessage(`Selected ${network.chainName}. Connect MetaMask to use this network.`);
     setBusy(false);
   }, [address]);
 
@@ -78,14 +107,20 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const chainId = typeof value === 'string' ? Number.parseInt(value, 16) : Number.NaN;
       const network = Number.isSafeInteger(chainId) ? blockchainNetworkForChainId(chainId) : undefined;
       if (!network) {
-        setMessage('MetaMask is on an unsupported network. Select Ethereum Sepolia or CAPROV Besu in MetaMask, then check again.');
+        setMessage(
+          'MetaMask is on an unsupported network. Choose Ethereum Sepolia or CAPROV Besu Local in CAPROV (or MetaMask), then try again.',
+        );
         return;
       }
       setSelectedBlockchainNetwork(network.id);
       setNetworkId(network.id);
       setMessage(`Verified: MetaMask is on ${network.chainName} (chain ID ${network.chainId}).`);
     } catch (error) {
-      setMessage(error instanceof Error ? `Could not read MetaMask’s active network: ${error.message}` : 'Could not read MetaMask’s active network. Unlock MetaMask and try again.');
+      setMessage(
+        error instanceof Error
+          ? `Could not read MetaMask’s active network: ${error.message}`
+          : 'Could not read MetaMask’s active network. Unlock MetaMask and try again.',
+      );
     } finally {
       setBusy(false);
     }
@@ -93,12 +128,16 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const connect = useCallback(async () => {
     setBusy(true);
-    setMessage('Confirm the connection in MetaMask.');
+    const selected = selectedBlockchainNetwork();
+    setMessage(`Connecting MetaMask on ${selected.chainName}…`);
     try {
       const connection = await connectMetaMaskWallet();
       setAddress(connection.address);
       setAccounts(connection.accounts);
-      setMessage(`Wallet connected for ${selectedBlockchainNetwork().chainName}.`);
+      setNetworkId(selectedBlockchainNetwork().id);
+      setMessage(
+        `Wallet connected on ${selectedBlockchainNetwork().chainName} (${connection.address.slice(0, 6)}…${connection.address.slice(-4)}).`,
+      );
       return connection.address;
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'MetaMask connection could not be completed.');
