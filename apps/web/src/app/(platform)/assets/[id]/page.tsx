@@ -28,9 +28,10 @@ import { useAuthStore } from '@/stores/auth-store';
 import type { DocumentType, OwnershipType } from '@caprov/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BrowserProvider, Contract, solidityPackedKeccak256 } from 'ethers';
+import { ArrowLeft, ArrowUpRight, Building2, CalendarDays, CheckCircle2, Download, FileText, Landmark, MapPin, ScanSearch, Share2, Sparkles, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 
 const tabs = ['Overview', 'DNA', 'Documents', 'Ownership', 'Valuation & risk', 'Audit'] as const;
 
@@ -412,8 +413,12 @@ export default function AssetDetailPage() {
             `${currentNetwork.chainName} anchoring is not ready: ${currentNetwork.message || 'the document-registry contract is not configured.'}`,
           );
         }
-        const session = walletSession ?? (await connectWallet(currentNetwork));
-        await anchorDocumentWithWallet(created, session, currentNetwork);
+        const tree = (await api.get<AssetDocumentsTree>(`/documents/assets/${params.id}/folders`)).data;
+        const lineage = tree.folders
+          .flatMap((folder) => folder.entries)
+          .find((entry) => entry.versions.some((version) => version.id === created!.id));
+        if (!lineage) throw new Error('The uploaded document lineage could not be loaded for anchoring.');
+        await anchorDocumentVersionsSequentially(lineage.versions);
       }
 
       setDoc({ name: '', type: 'OTHER', extractedText: '' });
@@ -449,57 +454,89 @@ export default function AssetDetailPage() {
     }
   }
 
+  /** Process a lineage oldest-to-newest; the registry accepts only its next version. */
+  async function anchorDocumentVersionsSequentially(documents: DocumentRow[]) {
+    setAnchorError(null);
+    const pending = [...documents]
+      .filter((document) => document.anchorStatus !== 'BLOCKCHAIN_ANCHORED')
+      .sort((left, right) => Number(left.version ?? 1) - Number(right.version ?? 1));
+    if (!pending.length) {
+      setWalletMessage('All document versions in this lineage are already anchored.');
+      return;
+    }
+    try {
+      const currentNetwork = (await api.get<DocumentNetworkStatus>('/documents/network-status')).data;
+      assertSelectedNetwork(currentNetwork);
+      if (!currentNetwork.liveReady || !currentNetwork.contractAddress) {
+        throw new Error(`${currentNetwork.chainName} anchoring is not ready: ${currentNetwork.message || 'the document-registry contract is not configured.'}`);
+      }
+      const session = walletSession ?? (await connectWallet(currentNetwork));
+      for (let index = 0; index < pending.length; index += 1) {
+        const document = pending[index]!;
+        setWalletMessage(`Anchoring version ${document.version} (${index + 1} of ${pending.length}). Confirm the MetaMask transaction…`);
+        await anchorDocumentWithWallet(document, session, currentNetwork);
+      }
+      await refreshAssetDocuments();
+      setWalletMessage(`Anchored ${pending.length} document version${pending.length === 1 ? '' : 's'} on ${currentNetwork.chainName}.`);
+    } catch (error) {
+      await refreshAssetDocuments();
+      setAnchorError(readErrorMessage(error));
+    }
+  }
+
   if (assetQuery.isLoading || !asset) {
     return <p className="text-sm text-[var(--muted)]">Loading asset…</p>;
   }
 
   const dna = asset.latestDna?.envelope;
+  const valuation = asset.latestValuation?.payload;
+  const keyFacts = (dna?.facts ?? []).slice(0, 8);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--muted)]">
-            {assetClassLabel[asset.assetClass]}
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">{asset.name}</h1>
-          <p className="mt-2 max-w-2xl text-[var(--muted)]">{asset.description}</p>
-        </div>
+    <div className="mx-auto max-w-[1440px] space-y-5 pb-8">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link href="/assets" className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ink)] transition hover:text-[var(--gold)]"><ArrowLeft size={16} />Back to assets</Link>
         <div className="flex flex-wrap gap-2">
-          <Badge tone={asset.status === 'ACTIVE' ? 'ok' : 'warn'}>{assetStatusLabel[asset.status]}</Badge>
-          <Badge tone={riskTone(asset.latestRisk?.payload.rating)}>
-            {asset.latestRisk?.payload.rating ?? 'No risk snapshot'}
-          </Badge>
-          {!bankerOnly ? <Button onClick={() => runPipeline.mutate()} disabled={runPipeline.isPending}>
-            {runPipeline.isPending ? 'Running pipeline…' : 'Run Asset DNA'}
-          </Button> : <Link href="/lending"><Button>Open loan desk</Button></Link>}
+          <Button variant="secondary" className="gap-2"><Share2 size={16} />Share</Button>
+          <Button variant="secondary" className="gap-2"><Download size={16} />Download report</Button>
+          {!bankerOnly ? <Button onClick={() => setTab('Documents')} className="gap-2"><Upload size={16} />Upload documents</Button> : null}
         </div>
       </div>
 
-      <section className="grid gap-4 md:grid-cols-3">
-        <Card className="p-5">
-          <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Marked value</p>
-          <p className="mt-3 text-2xl font-semibold">
-            {money(asset.latestValuation?.payload.amount, asset.latestValuation?.payload.currency ?? asset.currency)}
-          </p>
-        </Card>
-        <Card className="p-5">
-          <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">DNA version</p>
-          <p className="mt-3 text-2xl font-semibold">{asset.latestDna ? `v${asset.latestDna.version}` : '—'}</p>
-        </Card>
-        <Card className="p-5">
-          <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Documents</p>
-          <p className="mt-3 text-2xl font-semibold">{asset.documentCount}</p>
-        </Card>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="flex flex-wrap items-center gap-3"><h1 className="text-3xl font-semibold tracking-tight text-[var(--ink)]">{asset.name}</h1><Badge tone={asset.status === 'ACTIVE' ? 'ok' : 'warn'}>{assetStatusLabel[asset.status]}</Badge></div>
+          <p className="mt-1.5 max-w-3xl text-sm text-[var(--muted)]">{asset.description || 'A complete asset profile with verified documents, valuation intelligence, and provenance.'}</p>
+        </div>
+        {!bankerOnly ? <Button variant="secondary" onClick={() => runPipeline.mutate()} disabled={runPipeline.isPending} className="gap-2"><Sparkles size={16} />{runPipeline.isPending ? 'Running Asset DNA…' : 'Refresh Asset DNA'}</Button> : null}
+      </header>
+
+      <section className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--card)] shadow-sm">
+        <div className="grid gap-0 lg:grid-cols-[12rem_minmax(0,1fr)]">
+          <div className="min-h-44 bg-[var(--paper)]">
+            {asset.primaryImageUrl ? <img src={asset.primaryImageUrl} alt={asset.name} className="h-full min-h-44 w-full object-cover" /> : <div className="grid h-full min-h-44 place-items-center text-[var(--gold)]"><Building2 size={42} /></div>}
+          </div>
+          <div className="p-5">
+            <div className="flex flex-wrap items-center gap-3"><h2 className="text-lg font-semibold">{asset.name}</h2><span className="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">{assetClassLabel[asset.assetClass]}</span></div>
+            <p className="mt-2 flex items-center gap-2 text-sm text-[var(--muted)]"><MapPin size={16} className="text-[var(--gold)]" />{asset.location || asset.jurisdiction || 'Location pending verification'}</p>
+            <div className="mt-5 grid divide-y divide-[var(--line)] border-t border-[var(--line)] sm:grid-cols-2 sm:divide-x sm:divide-y-0 xl:grid-cols-5">
+              <ProfileMetric label="Asset type" value={assetClassLabel[asset.assetClass]} />
+              <ProfileMetric label="Current valuation" value={money(valuation?.amount, valuation?.currency ?? asset.currency)} />
+              <ProfileMetric label="Valuation date" value={formatDate(valuation?.asOf)} />
+              <ProfileMetric label="DNA version" value={asset.latestDna ? `v${asset.latestDna.version}` : 'Not generated'} />
+              <ProfileMetric label="Supporting documents" value={`${asset.documentCount} records`} />
+            </div>
+          </div>
+        </div>
       </section>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1 rounded-xl border border-[var(--line)] bg-white/70 p-1.5">
         {tabs.filter((item) => !bankerOnly || item !== 'Ownership').map((item) => (
           <button
             key={item}
             type="button"
             onClick={() => setTab(item)}
-            className={`rounded-full px-4 py-2 text-sm ${tab === item ? 'bg-[var(--ink)] text-white' : 'bg-white text-[var(--muted)]'}`}
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition ${tab === item ? 'bg-[var(--ink)] text-white shadow-sm' : 'text-[var(--muted)] hover:bg-[var(--paper)] hover:text-[var(--ink)]'}`}
           >
             {item}
           </button>
@@ -507,24 +544,26 @@ export default function AssetDetailPage() {
       </div>
 
       {tab === 'Overview' ? (
-        <div className="grid gap-6 lg:grid-cols-2">
-          {!bankerOnly ? <Card className="p-6">
-            <h2 className="text-lg font-semibold">Master record</h2>
-            <dl className="mt-4 grid gap-3 text-sm">
-              <Row label="Location" value={asset.location} />
-              <Row label="Jurisdiction" value={asset.jurisdiction} />
-              <Row label="Created" value={formatDate(asset.creationDate)} />
-              <Row label="Currency" value={asset.currency} />
+        <div className="grid gap-4 xl:grid-cols-[1.05fr_.95fr]">
+          <Card className="overflow-hidden p-0"><PanelHeading icon={<ScanSearch size={20} />} title="Extracted information" subtitle="Key details automatically derived from verified document evidence." tag={dna ? 'AI extracted' : undefined} />
+            <dl className="px-5 pb-3 text-sm">
+              {(keyFacts.length ? keyFacts : [{ id: 'location', label: 'Location', value: asset.location || 'Pending verification' }, { id: 'jurisdiction', label: 'Jurisdiction', value: asset.jurisdiction || '—' }, { id: 'created', label: 'Creation date', value: formatDate(asset.creationDate) }]).map((fact) => <Row key={fact.id} label={fact.label} value={fact.value} />)}
             </dl>
-          </Card> : <Card className="p-6"><h2 className="text-lg font-semibold">Source documents</h2><p className="mt-2 text-sm text-[var(--muted)]">Document evidence is read-only for the credit desk. Listers manage uploads and provenance records.</p></Card>}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold">Intelligence summary</h2>
-            <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
-              {dna?.summary ?? 'No Asset DNA snapshot yet. Ingest documents and run the pipeline.'}
-            </p>
-            <Link href={`/intelligence/dna/${asset.id}`} className="mt-4 inline-block text-sm underline">
-              Open DNA explorer
-            </Link>
+          </Card>
+          <div className="space-y-4">
+            <Card className="overflow-hidden p-0"><PanelHeading icon={<Landmark size={20} />} title="Valuation details" subtitle="Latest mark extracted from valuation evidence." />
+              <div className="grid gap-px border-y border-[var(--line)] bg-[var(--line)] sm:grid-cols-3"><div className="bg-[#fff1d9] p-4 sm:col-span-1"><p className="text-xs text-[#8a5a12]">Current estimated value</p><p className="mt-1 text-xl font-semibold">{money(valuation?.amount, valuation?.currency ?? asset.currency)}</p></div><ProfileMetric label="Valuation date" value={formatDate(valuation?.asOf)} /><ProfileMetric label="Method" value={valuation?.method || 'Pending'} /></div>
+              <dl className="px-5 py-2 text-sm"><Row label="Valuation source" value={valuation?.notes?.[0] || 'No supporting valuation report'} /><Row label="Risk assessment" value={asset.latestRisk?.payload.rating || 'Not assessed'} /></dl>
+            </Card>
+            <Card className="overflow-hidden p-0"><PanelHeading icon={<CheckCircle2 size={20} />} title="Key extracted facts" subtitle="Important information summarized from uploaded documents." />
+              <div className="px-5 pb-3">{keyFacts.length ? keyFacts.slice(0, 5).map((fact) => <div key={fact.id} className="flex gap-3 border-t border-[var(--line)] py-2 text-sm"><CheckCircle2 size={15} className="mt-0.5 shrink-0 text-[var(--gold)]" /><span className="min-w-0 text-[var(--muted)]">{fact.label}:</span><span className="min-w-0 font-medium">{fact.value}</span></div>) : <p className="py-5 text-sm text-[var(--muted)]">Run Asset DNA after uploading source documents to populate verified facts.</p>}</div>
+            </Card>
+          </div>
+          <Card className="overflow-hidden p-0"><PanelHeading icon={<MapPin size={20} />} title="Location" subtitle="Asset location from the master record and verified documents." />
+            <div className="mx-5 mb-5 grid min-h-52 place-items-center rounded-xl border border-[#ddd6c8] bg-[linear-gradient(135deg,#e8eee5,#f5f0e7)] p-5 text-center"><div><MapPin className="mx-auto text-[var(--gold)]" size={30} /><p className="mt-3 font-semibold">{asset.location || 'Location pending'}</p><p className="mt-1 text-sm text-[var(--muted)]">{asset.jurisdiction || 'Add jurisdiction to complete the location record.'}</p><button type="button" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--ink)] underline underline-offset-4">View on map <ArrowUpRight size={14} /></button></div></div>
+          </Card>
+          <Card className="overflow-hidden p-0"><PanelHeading icon={<FileText size={20} />} title="Supporting documents" subtitle="Documents used for intelligence and valuation." action={<button type="button" onClick={() => setTab('Documents')} className="text-sm font-medium text-[var(--ink)] underline underline-offset-4">View all ({asset.documentCount})</button>} />
+            <div className="grid grid-cols-2 gap-3 px-5 pb-5 sm:grid-cols-3">{documents.slice(0, 6).map((document) => <Link href={`/documents/${document.id}`} key={document.id} className="rounded-xl border border-[var(--line)] bg-[var(--paper)]/50 p-3 transition hover:border-[var(--gold)]"><FileText size={20} className="text-red-500" /><p className="mt-5 truncate text-sm font-medium">{document.name}</p><p className="mt-1 text-xs text-[var(--muted)]">v{document.version ?? 1} · {documentTypeLabel[document.type]}</p></Link>)}{!documents.length ? <p className="col-span-full py-6 text-sm text-[var(--muted)]">No source documents yet.</p> : null}</div>
           </Card>
         </div>
       ) : null}
@@ -626,14 +665,13 @@ export default function AssetDetailPage() {
                               className="mt-3"
                               variant="secondary"
                               disabled={walletBusy || recordAnchor.isPending}
-                              onClick={() => {
-                                const current = entry.versions.find((version) => version.isCurrent) ?? entry.versions[0];
-                                if (current) void anchorExistingDocument(current);
-                              }}
+                              onClick={() => void anchorDocumentVersionsSequentially(entry.versions)}
                             >
                               {walletBusy || recordAnchor.isPending
                                 ? 'Preparing MetaMask…'
-                                : `Anchor v${entry.currentVersion} on ${network?.chainName ?? selectedBlockchainNetwork().chainName}`}
+                                : entry.versionCount > 1
+                                  ? `Anchor pending versions through v${entry.currentVersion}`
+                                  : `Anchor v${entry.currentVersion} on ${network?.chainName ?? selectedBlockchainNetwork().chainName}`}
                             </Button>
                           ) : null}
                         </div>
@@ -881,6 +919,14 @@ function Row({ label, value }: { label: string; value?: string | null }) {
       <dd>{value || '—'}</dd>
     </div>
   );
+}
+
+function ProfileMetric({ label, value }: { label: string; value?: string | null }) {
+  return <div className="min-w-0 bg-[var(--card)] px-4 py-3.5"><p className="text-[11px] font-medium text-[var(--muted)]">{label}</p><p className="mt-1 truncate text-sm font-semibold text-[var(--ink)]" title={value ?? undefined}>{value || '—'}</p></div>;
+}
+
+function PanelHeading({ icon, title, subtitle, tag, action }: { icon: ReactNode; title: string; subtitle: string; tag?: string; action?: ReactNode }) {
+  return <div className="flex items-start justify-between gap-3 border-b border-[var(--line)] px-5 py-4"><div className="flex gap-3"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#fff1d9] text-[var(--gold)]">{icon}</span><div><h2 className="font-semibold text-[var(--ink)]">{title}</h2><p className="mt-0.5 text-xs text-[var(--muted)]">{subtitle}</p></div></div>{tag ? <span className="rounded-md bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-700">{tag}</span> : action}</div>;
 }
 
 function anchorTone(status?: string) {

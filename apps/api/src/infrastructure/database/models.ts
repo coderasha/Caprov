@@ -58,6 +58,27 @@ export interface MembershipRecord {
   createdAt: string;
 }
 
+/** A wallet proven by a signed challenge; never contains a private key. */
+export interface WalletLinkRecord {
+  id: string;
+  userId: string;
+  organizationId: string;
+  address: string;
+  chainId: number;
+  verifiedAt: string;
+  lastUsedAt?: string;
+}
+
+export interface WalletChallengeRecord {
+  id: string;
+  userId: string;
+  organizationId: string;
+  address: string;
+  chainId: number;
+  nonce: string;
+  expiresAt: string;
+}
+
 export interface OrganizationAccessRequestRecord {
   id: string;
   organizationName: string;
@@ -261,6 +282,8 @@ export interface CaprovData {
   organizations: OrganizationRecord[];
   users: UserRecord[];
   memberships: MembershipRecord[];
+  walletLinks: WalletLinkRecord[];
+  walletChallenges: WalletChallengeRecord[];
   organizationAccessRequests: OrganizationAccessRequestRecord[];
   assets: AssetRecord[];
   ownerships: AssetOwnershipRecord[];
@@ -293,6 +316,8 @@ export function emptyStore(): CaprovData {
     organizations: [],
     users: [],
     memberships: [],
+    walletLinks: [],
+    walletChallenges: [],
     organizationAccessRequests: [],
     assets: [],
     ownerships: [],

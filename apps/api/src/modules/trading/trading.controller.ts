@@ -29,6 +29,7 @@ import { createId } from '../../infrastructure/database/ids';
 import { AuditService } from '../audit/audit.service';
 import { EthereumSepoliaMarketplaceService } from '../../infrastructure/blockchain/ethereum-sepolia-marketplace.service';
 import { isAddress, getAddress, formatUnits } from 'ethers';
+import { WalletLinkService } from '../auth/wallet-link.service';
 
 class RegisterOnChainTradeDto {
   @IsString() listingId!: string;
@@ -68,11 +69,13 @@ export class TradingController {
     private readonly db: DatabaseService,
     private readonly audit: AuditService,
     private readonly marketplace: EthereumSepoliaMarketplaceService,
+    private readonly wallets?: WalletLinkService,
   ) {}
 
   @Post('on-chain-trades/quote')
   @Roles('ORG_ADMIN', 'ANALYST', 'BUYER', 'PLATFORM_ADMIN')
   quoteOnChainTrade(@CurrentUser() user: AuthUser, @Body() dto: OnChainTradeQuoteDto) {
+    this.wallets?.assertLinked(user, dto.buyerWalletAddress);
     const listing = this.db.snapshot.listings.find((item) => item.id === dto.listingId && item.onChainListingId && item.pricePerTokenWei);
     if (!listing || !isAddress(dto.buyerWalletAddress)) throw new NotFoundException('Open tokenized listing not found.');
     if (listing.listerWalletAddress && getAddress(listing.listerWalletAddress) === getAddress(dto.buyerWalletAddress)) throw new BadRequestException('The listing wallet cannot buy its own asset.');
@@ -83,6 +86,7 @@ export class TradingController {
   @Post('on-chain-trades')
   @Roles('ORG_ADMIN', 'ANALYST', 'BUYER', 'PLATFORM_ADMIN')
   async registerOnChainTrade(@CurrentUser() user: AuthUser, @Body() dto: RegisterOnChainTradeDto) {
+    this.wallets?.assertLinked(user, dto.buyerWalletAddress);
     if (!isAddress(dto.buyerWalletAddress) || !/^\d+$/.test(dto.purchaseId) || !/^\d+$/.test(dto.paymentCapWei)) throw new BadRequestException('Invalid purchase reference.');
     const listing = this.db.snapshot.listings.find((item) => item.id === dto.listingId && item.onChainListingId && item.pricePerTokenWei);
     if (!listing) throw new BadRequestException('This tokenized listing is not available to this buyer.');

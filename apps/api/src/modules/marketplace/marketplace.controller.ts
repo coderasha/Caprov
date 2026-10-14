@@ -36,6 +36,7 @@ import { DatabaseService } from '../../infrastructure/database/database.service'
 import { createId } from '../../infrastructure/database/ids';
 import { persistImageUrl } from '../../infrastructure/media/media-urls';
 import { AuditService } from '../audit/audit.service';
+import { WalletLinkService } from '../auth/wallet-link.service';
 
 class CreateListingDto {
   @IsString()
@@ -130,6 +131,7 @@ export class MarketplaceController {
     private readonly audit: AuditService,
     private readonly sepolia: EthereumSepoliaTokenService,
     private readonly marketplace: EthereumSepoliaMarketplaceService,
+    private readonly wallets?: WalletLinkService,
   ) {}
 
   @Get()
@@ -175,6 +177,7 @@ export class MarketplaceController {
     }
     const asset = this.db.snapshot.assets.find((item) => item.id === dto.assetId && item.organizationId === user.organizationId);
     const network = this.sepolia.getNetworkStatus();
+    this.wallets?.assertLinked(user, dto.listerWalletAddress, network.chainId);
     const token = this.db.snapshot.tokens.find((item) =>
       item.id === dto.tokenPositionId &&
       item.assetId === dto.assetId &&

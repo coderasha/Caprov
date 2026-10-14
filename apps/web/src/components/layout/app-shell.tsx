@@ -451,7 +451,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <WalletProvider>
-      <div className="min-h-screen xl:grid xl:grid-cols-[272px_minmax(0,1fr)]">
+      <div className="min-h-screen xl:grid xl:h-svh xl:grid-cols-[272px_minmax(0,1fr)] xl:overflow-hidden">
         <aside className="platform-sidebar hidden text-white xl:sticky xl:top-0 xl:flex xl:h-screen xl:w-[272px] xl:flex-col">
           <SidebarContent pathname={pathname} />
         </aside>

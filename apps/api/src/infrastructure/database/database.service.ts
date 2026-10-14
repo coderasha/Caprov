@@ -108,6 +108,8 @@ export class DatabaseService implements OnModuleInit {
       }
     }
     const arrays: Array<keyof CaprovData> = [
+      'walletLinks',
+      'walletChallenges',
       'organizationAccessRequests',
       'projections',
       'provenanceAnchors',

@@ -1,5 +1,6 @@
 import { BrowserProvider, Contract, FeeData, Interface, id as ethId, type Eip1193Provider, formatUnits, parseUnits } from 'ethers';
-import { selectedBlockchainNetwork, type BrowserNetwork } from './blockchain-network';
+import type { MetamaskConnectEVM } from '@metamask/connect-evm';
+import { blockchainNetworks, selectedBlockchainNetwork, type BrowserNetwork } from './blockchain-network';
 
 const assetAbi = [
   'function mintAsset(address to, uint256 id, uint256 amount, string assetReference)',
@@ -53,11 +54,57 @@ type Eip6963Detail = {
 
 let activeWallet: { id: string; provider: WalletProvider } | undefined;
 let activeAccount: string | undefined;
+let metaMaskConnectClient: Promise<MetamaskConnectEVM> | undefined;
+// MetaMask permits only one account-connection prompt for an origin at a time.
+// Keep the promise at module scope because the global wallet menu, a page action,
+// and a stale component can otherwise all issue the same request in one render.
+let accountConnectionRequest: Promise<string[]> | undefined;
 
 /** Drops a provider that MetaMask has disconnected or restarted in the background. */
 export function clearMetaMaskConnection() {
   activeWallet = undefined;
   activeAccount = undefined;
+}
+
+/** Records the account MetaMask has made active through its own account menu. */
+export function syncActiveMetaMaskAccount(accounts: string[]) {
+  activeAccount = accounts[0];
+}
+
+function walletErrorCode(error: unknown) {
+  if (typeof error === 'object' && error !== null && 'code' in error) {
+    return (error as { code?: number | string }).code;
+  }
+  return undefined;
+}
+
+function accountConnectionError(error: unknown) {
+  if (walletErrorCode(error) === -32002) {
+    return new Error(
+      'MetaMask already has a connection request open for CAPROV. Open the MetaMask extension, complete or reject that request, then return here and press Select account. Do not open another connection prompt.',
+    );
+  }
+  return error;
+}
+
+/**
+ * Opens at most one MetaMask account permission request for this page origin.
+ * It is used only for the initial connection. Account switching is handled
+ * by CAPROV's picker from accounts MetaMask has already authorized.
+ */
+async function requestMetaMaskAccounts(provider: WalletProvider) {
+  if (!accountConnectionRequest) {
+    accountConnectionRequest = provider
+      .request({ method: 'eth_requestAccounts' })
+      .then((value) => (Array.isArray(value) ? value as string[] : []))
+      .catch((error: unknown) => {
+        throw accountConnectionError(error);
+      })
+      .finally(() => {
+        accountConnectionRequest = undefined;
+      });
+  }
+  return accountConnectionRequest;
 }
 
 async function metaMaskWallet() {
@@ -106,19 +153,24 @@ export async function availableSepoliaWallets(): Promise<Array<WalletOption & { 
 
 /** Resolves MetaMask specifically; marketplace transactions never fall back to another extension. */
 export async function connectMetaMaskWallet() {
-  const metaMask = await metaMaskWallet();
-  activeWallet = { id: metaMask.id, provider: metaMask.provider };
-  // Use the standard EIP-1102 connection request. Calling
-  // `wallet_requestPermissions` immediately before `eth_requestAccounts`
-  // creates a duplicate MetaMask approval flow and can make the extension's
-  // connection window fail before it receives the page origin.
-  const accounts = (await metaMask.provider.request({
-    method: 'eth_requestAccounts',
-  })) as string[];
+  // When account selection was just completed through MetaMask Connect, retain
+  // that provider for verification. Falling back to the injected provider here
+  // creates a second permissions request while the first is still settling.
+  const metaMask = activeWallet ?? await metaMaskWallet();
+  activeWallet = metaMask;
+  // Never reopen the permission dialog for an origin that MetaMask has already
+  // authorized. MetaMask implements `eth_requestAccounts` as a permissions
+  // request, so calling it again is what produced the pending-permissions
+  // error reported from inpage.js.
+  const exposedAccounts = (await metaMask.provider.request({ method: 'eth_accounts' })) as string[];
+  const accounts = exposedAccounts.length
+    ? exposedAccounts
+    : await requestMetaMaskAccounts(metaMask.provider);
   if (!accounts[0]) throw new Error('MetaMask did not expose an account to CAPROV.');
-  activeAccount = accounts[0];
-  // Move MetaMask onto the CAPROV-selected chain (Sepolia or Besu) before any
-  // signer work. Missing custom chains are added automatically.
+  activeAccount = activeAccount && accounts.some((account) => account.toLowerCase() === activeAccount?.toLowerCase())
+    ? activeAccount
+    : accounts[0];
+  // Move MetaMask onto the CAPROV-selected chain before signer work.
   await switchWalletToSelectedNetwork();
   const provider = walletBrowserProvider(metaMask.provider);
   const network = await provider.getNetwork();
@@ -132,12 +184,23 @@ export async function connectMetaMaskWallet() {
   return { address, accounts };
 }
 
-/**
- * Opens MetaMask's account-permission chooser again. This is deliberately
- * separate from the initial connect flow: a user can change the signing
- * account at any time without silently falling back to another exposed one.
- */
+/** Returns accounts that MetaMask has already authorized for CAPROV. */
 export async function chooseMetaMaskAccount() {
+  const provider = await selectedProvider();
+  const accounts = await provider.request({ method: 'eth_accounts' }) as string[];
+  if (!accounts[0]) throw new Error('MetaMask did not expose an account to CAPROV.');
+  activeAccount = activeAccount && accounts.some((account) => account.toLowerCase() === activeAccount?.toLowerCase())
+    ? activeAccount
+    : accounts[0];
+  return { address: activeAccount, accounts };
+}
+
+/**
+ * Reopens MetaMask's account-permission flow so a user can add or remove the
+ * accounts this origin may see. MetaMask owns the dialog; CAPROV only requests
+ * it and then reads the accounts the user approved.
+ */
+export async function requestMetaMaskAccountSelection() {
   const provider = await selectedProvider();
   try {
     await provider.request({
@@ -145,17 +208,51 @@ export async function chooseMetaMaskAccount() {
       params: [{ eth_accounts: {} }],
     });
   } catch (error) {
-    const code = typeof error === 'object' && error !== null && 'code' in error
-      ? (error as { code?: number }).code
-      : undefined;
-    // Some injected wallets do not implement the MetaMask permission method.
-    // They can still expose their account chooser through the standard request.
-    if (code !== -32601 && code !== 4200) throw error;
+    throw accountConnectionError(error);
   }
-  const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
-  if (!accounts[0]) throw new Error('MetaMask did not expose an account to CAPROV.');
+  const accounts = (await provider.request({ method: 'eth_accounts' })) as string[];
+  if (!accounts[0]) throw new Error('No MetaMask account was approved for CAPROV.');
   activeAccount = accounts[0];
-  return { address: activeAccount, accounts };
+  return { address: accounts[0], accounts };
+}
+
+/**
+ * Opens MetaMask Connect's supported account selector for an existing session.
+ * Unlike calling wallet_requestPermissions directly on the injected provider,
+ * forceRequest is handled by MetaMask Connect and consistently presents the
+ * account chooser rather than leaving the extension in a pending state.
+ */
+export async function promptMetaMaskAccountSelection() {
+  if (typeof window === 'undefined') throw new Error('MetaMask account selection is available only in a browser.');
+  if (!metaMaskConnectClient) {
+    const supportedNetworks = Object.fromEntries(
+      blockchainNetworks().map((network) => [`0x${network.chainId.toString(16)}`, network.rpcUrl]),
+    ) as Record<`0x${string}`, string>;
+    metaMaskConnectClient = import('@metamask/connect-evm')
+      .then(({ createEVMClient }) => createEVMClient({
+        dapp: { name: 'CAPROV', url: window.location.origin },
+        api: { supportedNetworks },
+        ui: { preferExtension: true, showInstallModal: false },
+        // CAPROV already performs EIP-6963 discovery for its transaction provider.
+        // Do not announce a second provider when this helper is used only as a picker.
+        skipAutoAnnounce: true,
+      }))
+      .catch((error) => {
+        metaMaskConnectClient = undefined;
+        throw error;
+      });
+  }
+  const client = await metaMaskConnectClient;
+  const selected = selectedBlockchainNetwork();
+  const result = await client.connect({
+    chainIds: [`0x${selected.chainId.toString(16)}`],
+    forceRequest: true,
+  });
+  const accounts = [...result.accounts];
+  if (!accounts[0]) throw new Error('No MetaMask account was selected for CAPROV.');
+  activeWallet = { id: 'metamask-connect', provider: client.getProvider() as unknown as WalletProvider };
+  activeAccount = accounts[0];
+  return { address: accounts[0], accounts };
 }
 
 /** Selects a MetaMask account that the extension has explicitly exposed to this site. */
@@ -251,7 +348,22 @@ export async function ensureProviderChain(
         'A MetaMask request is already open. Finish or close that prompt, then try again.',
       );
     }
-    if (code === 4902 || code === -32603 || isUnrecognizedChainError(error) || network.id === 'besu') {
+    // Ethereum Sepolia is a built-in MetaMask test network. Trying to add it
+    // again after an internal switch failure can make some MetaMask builds
+    // throw "Cannot read properties of undefined (reading 'origin')" from
+    // the extension UI. It must be enabled in MetaMask instead of added by
+    // the dapp, so return a useful recovery instruction without a second RPC.
+    if (network.id === 'sepolia') {
+      throw new Error(networkSelectionMessage(network));
+    }
+    // MetaMask's current extension can crash in its own add-network dialog for
+    // loopback custom RPCs ("reading 'origin'"). Do not invoke that unstable
+    // dialog for the local Besu network. Once the user has added it once in
+    // MetaMask, wallet_switchEthereumChain remains the normal, safe path.
+    if (network.id === 'besu') {
+      throw new Error(besuNetworkSetupMessage(network));
+    }
+    if (code === 4902 || code === -32603 || isUnrecognizedChainError(error)) {
       try {
         await provider.request({
           method: 'wallet_addEthereumChain',
@@ -312,8 +424,13 @@ export function walletBrowserProvider(provider: Eip1193Provider, chainId?: numbe
 
 /** Switch MetaMask to the CAPROV-selected chain without reopening the connect prompt. */
 export async function alignMetaMaskToSelectedNetwork() {
-  await selectedProvider();
-  await switchWalletToSelectedNetwork();
+  await alignMetaMaskToNetwork(selectedBlockchainNetwork());
+}
+
+/** Switch to an explicit target without changing CAPROV's selected-network state first. */
+export async function alignMetaMaskToNetwork(network: BrowserNetwork) {
+  const provider = await selectedProvider();
+  await ensureProviderChain(provider, network);
 }
 
 function sameChainId(current: unknown, chainId: number) {
@@ -377,21 +494,41 @@ function addEthereumChainParams(network: BrowserNetwork) {
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
     rpcUrls: [rpcUrl],
   };
-  if (network.blockExplorerUrl) {
-    params.blockExplorerUrls = [network.blockExplorerUrl];
+  // MetaMask can use an HTTP loopback RPC endpoint, but recent extension
+  // builds can crash internally while resolving an HTTP/loopback explorer's
+  // origin during wallet_addEthereumChain. A local explorer is not required
+  // for signing, so omit it; retain only public HTTPS explorers.
+  const explorerUrl = metaMaskExplorerUrl(network.blockExplorerUrl);
+  if (explorerUrl) {
+    params.blockExplorerUrls = [explorerUrl];
   }
   return params;
+}
+
+function metaMaskExplorerUrl(value?: string) {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value);
+    const isLoopback = url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '[::1]';
+    return url.protocol === 'https:' && !isLoopback ? value : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function networkSelectionMessage(network: BrowserNetwork) {
   if (network.id === 'sepolia') {
     return 'Could not switch MetaMask to Ethereum Sepolia. Open MetaMask, enable “Show test networks”, select Ethereum Sepolia, then retry. CAPROV will detect the change automatically.';
   }
+  return besuNetworkSetupMessage(network);
+}
+
+function besuNetworkSetupMessage(network: BrowserNetwork) {
   const rpcUrl = metamaskRpcUrl(network.rpcUrl);
   return [
-    `Could not switch MetaMask to ${network.chainName}.`,
-    `If it is missing, add it once in MetaMask Settings → Networks: name ${network.chainName}; RPC URL ${rpcUrl}; chain ID ${network.chainId}; currency symbol ETH.`,
-    'Then select that network and retry — CAPROV will detect the change automatically.',
+    `CAPROV Besu Local must be added once in MetaMask before it can be selected.`,
+    `In MetaMask: Settings → Networks → Add network manually. Name: ${network.chainName}; RPC URL: ${rpcUrl}; Chain ID: ${network.chainId}; currency symbol: ETH.`,
+    'Save it, select it in MetaMask, then return to CAPROV and choose CAPROV Besu Local again.',
   ].join(' ');
 }
 
@@ -416,7 +553,7 @@ async function signer(walletId?: string) {
   const existingAccounts = await rawProvider.request({ method: 'eth_accounts' }) as string[];
   const requestedAccounts = existingAccounts.length
     ? existingAccounts
-    : await rawProvider.request({ method: 'eth_requestAccounts' }) as string[];
+    : await requestMetaMaskAccounts(rawProvider);
   const provider = walletBrowserProvider(rawProvider);
   const network = await provider.getNetwork();
   const selected = selectedBlockchainNetwork();

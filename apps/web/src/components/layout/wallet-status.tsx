@@ -18,15 +18,13 @@ export function WalletStatus() {
   const panelRef = useRef<HTMLDivElement>(null);
   const {
     address,
-    accounts,
+    selectedAccount,
     busy,
     message,
     networkId,
     selectNetwork,
-    syncNetwork,
     connect,
-    chooseAccount,
-    selectAccount,
+    switchAccount,
   } = useWallet();
   const network = blockchainNetworks().find((item) => item.id === networkId)!;
 
@@ -49,14 +47,6 @@ export function WalletStatus() {
       document.removeEventListener('keydown', closeOnEscape);
     };
   }, [open]);
-
-  async function changeAccount(nextAddress: string) {
-    try {
-      await selectAccount(nextAddress);
-    } catch {
-      /* Connection errors surface in this panel via message. */
-    }
-  }
 
   return (
     <div ref={panelRef} className="relative">
@@ -127,47 +117,17 @@ export function WalletStatus() {
               ))}
             </div>
             <p className="mt-1.5 text-[11px] leading-4 text-[var(--muted)]">
-              Selecting a network asks MetaMask to switch (and adds Besu once if needed).
+              Selecting a network asks MetaMask to switch. Add CAPROV Besu Local in MetaMask once before using it.
             </p>
           </div>
 
-          {address ? (
-            <label className="mt-3 block text-xs font-medium text-[var(--muted)]">
-              Active MetaMask account
-              <select
-                value={address ?? ''}
-                onChange={(event) => void changeAccount(event.target.value)}
-                className="mt-1.5 min-h-10 w-full rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 font-mono text-xs text-[var(--ink)] outline-none focus:border-[var(--teal)]"
-              >
-                {accounts.map((account) => (
-                  <option key={account} value={account}>
-                    {account}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : null}
-
           <button
             type="button"
-            onClick={() => void chooseAccount()}
+            onClick={() => void switchAccount()}
             disabled={busy}
             className="mt-3 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--card)] px-4 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--ink)]/25 disabled:cursor-wait disabled:opacity-60"
           >
-            {busy
-              ? 'Confirm in MetaMask…'
-              : address
-                ? 'Choose another MetaMask account'
-                : 'Choose MetaMask account'}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => void syncNetwork()}
-            disabled={busy}
-            className="mt-2 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--card)] px-4 text-sm font-medium text-[var(--ink)] transition hover:border-[var(--ink)]/25 disabled:cursor-wait disabled:opacity-60"
-          >
-            {busy ? 'Checking MetaMask…' : 'Sync from MetaMask network'}
+            {busy ? 'Opening MetaMask…' : 'Switch accounts'}
           </button>
 
           {message ? (
@@ -184,7 +144,9 @@ export function WalletStatus() {
               ? 'Confirm in MetaMask…'
               : address
                 ? 'Reconnect MetaMask'
-                : `Connect on ${networkLabel(networkId)}`}
+                : selectedAccount
+                  ? 'Verify selected account'
+                  : `Connect on ${networkLabel(networkId)}`}
           </button>
         </div>
       ) : null}

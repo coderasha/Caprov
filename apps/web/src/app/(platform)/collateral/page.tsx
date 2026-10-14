@@ -17,6 +17,7 @@ import axios from 'axios';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
+import { ArrowRight, Building2, ChevronDown, CircleAlert, Landmark, LockKeyhole, Search, ShieldCheck, WalletCards } from 'lucide-react';
 
 interface LoanSummary {
   id: string;
@@ -128,6 +129,8 @@ function CollateralOperatorPage() {
   const [collateralBps, setCollateralBps] = useState('1000');
   const [formError, setFormError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [assetSearch, setAssetSearch] = useState('');
+  const [assetFilter, setAssetFilter] = useState<'ALL' | 'AVAILABLE' | 'PLEDGED'>('ALL');
 
   const collateral = useQuery({
     queryKey: ['collateral'],
@@ -223,6 +226,14 @@ function CollateralOperatorPage() {
   const selectedAssetHasPledgedToken = selectedAssetTokens.some((token) =>
     pledgedTokenIds.has(token.id),
   );
+  const assetRows = useMemo(() => (assets.data ?? [])
+    .map((asset) => ({ asset, token: (tokens.data ?? []).find((token) => token.assetId === asset.id && token.status === 'CONFIRMED'), collateral: (collateral.data ?? []).find((item) => item.assetId === asset.id) }))
+    .filter(({ asset, token, collateral: item }) => {
+      const query = assetSearch.trim().toLowerCase();
+      const matchesSearch = !query || asset.name.toLowerCase().includes(query) || asset.assetClass.toLowerCase().includes(query);
+      const matchesFilter = assetFilter === 'ALL' || (assetFilter === 'PLEDGED' ? Boolean(item) : Boolean(token) && !item);
+      return matchesSearch && matchesFilter;
+    }), [assets.data, tokens.data, collateral.data, assetSearch, assetFilter]);
 
   const refresh = async () => {
     await queryClient.invalidateQueries({ queryKey: ['collateral'] });
@@ -300,212 +311,31 @@ function CollateralOperatorPage() {
     onError: (error) => setFormError(errorMessage(error)),
   });
 
-  return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <PageHeader
-        eyebrow="Collateral"
-        title="Pledge DNA-backed assets"
-        description="Submit assets or tokenized positions for bank review. Approvers can inspect valuation details before activating collateral for lending."
-      />
-      <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-        <Card className="p-6">
-          <h2 className="font-display text-lg font-semibold tracking-[-0.02em]">Submit collateral</h2>
-          <form
-            className="mt-4 grid gap-3"
-            onSubmit={(event) => {
-              event.preventDefault();
-              setFormError(null);
-              create.mutate();
-            }}
-          >
-            <Field label="Asset">
-              <Select
-                value={assetId}
-                onChange={(e) => {
-                  setAssetId(e.target.value);
-                  setTokenId('');
-                }}
-                required
-              >
-                <option value="">Select asset</option>
-                {pledgeableAssets.map((asset) => (
-                  <option key={asset.id} value={asset.id}>
-                    {asset.name}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            {!pledgeableAssets.length ? (
-              <p className="text-sm text-[var(--muted)]">
-                All tokenized assets already have an active or pending pledge. Release one
-                to pledge again.
-              </p>
-            ) : null}
-            <Field label="Token position">
-              <Select value={tokenId} onChange={(e) => setTokenId(e.target.value)} required>
-                <option value="">Select confirmed token position</option>
-                {availableTokens.map((token) => (
-                  <option key={token.id} value={token.id}>
-                    {token.asset?.name ?? token.id}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            {assetId && !availableTokens.length ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-3 text-sm text-amber-950">
-                <p className="font-medium">
-                  {selectedAssetHasPledgedToken
-                    ? 'This asset’s token position is already pledged.'
-                    : 'No confirmed token position is registered for this asset.'}
-                </p>
-                <p className="mt-1 text-amber-900/80">
-                  {selectedAssetHasPledgedToken
-                    ? 'Release the existing collateral position before submitting it again.'
-                    : 'Owner-held ERC-1155 units must be linked to this asset in CAPROV before they can be selected as collateral.'}
-                </p>
-                {!selectedAssetHasPledgedToken ? (
-                  <Link
-                    className="mt-2 inline-flex font-medium text-[var(--ink)] underline underline-offset-4"
-                    href="/marketplace"
-                  >
-                    Register or verify token position →
-                  </Link>
-                ) : null}
-              </div>
-            ) : null}
-            <Field label="Collateral percentage (bps)">
-              <Input
-                type="number"
-                min={1}
-                max={10000}
-                value={collateralBps}
-                onChange={(e) => setCollateralBps(e.target.value)}
-                placeholder="1000 = 10%"
-                required
-              />
-            </Field>
-            {marketValuation.isLoading ? (
-              <p className="text-sm text-[var(--muted)]">
-                Loading tokenized collateral reference…
-              </p>
-            ) : null}
-            {marketValuation.data && previewPledged > 0 ? (
-              <p className="text-sm text-[var(--muted)]">
-                {(Number(collateralBps) / 100).toFixed(2)}% equals {money(previewPledged, 'USD')} at{' '}
-                {money(marketValuation.data.pricePerTokenUsd, 'USD')} per ERC-1155 unit ({marketValuation.data.sourceLabel}).{' '}
-                {previewUnits.toLocaleString()} ERC-1155 units will be locked in the {network.chainName} vault. The banker applies the haircut and loan limit during underwriting.
-              </p>
-            ) : null}
-            {activeOnChainListing ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-3 text-sm text-amber-950">
-                <p>The active {network.chainName} listing holds this token position in marketplace escrow. Close it to return the unsold units to your wallet before pledging collateral.</p>
-                <Button type="button" className="mt-3" variant="secondary" disabled={closeOnChain.isPending || !wallet} onClick={() => { setFormError(null); closeOnChain.mutate(); }}>
-                  {closeOnChain.isPending ? `Closing listing on ${network.chainName}…` : 'Close listing and recover units'}
-                </Button>
-              </div>
-            ) : null}
-            {assetId && tokenId && marketValuation.isError ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-3 text-sm text-amber-950">
-                <p>This token position has no collateral reference yet. Publish an on-chain CAP listing to establish its initial USD price, or settle a CAP trade.</p>
-                {existingListing ? <Button type="button" className="mt-3" variant="secondary" disabled={publishOnChain.isPending || !wallet} onClick={() => { setFormError(null); publishOnChain.mutate(); }}>
-                  {publishOnChain.isPending ? `Publishing on ${network.chainName}…` : `Publish ${existingListing.title} on ${network.chainName}`}
-                </Button> : <p className="mt-2 text-xs text-amber-900/80">Create an open listing for this token position in Marketplace first.</p>}
-                {existingListing && !wallet ? <p className="mt-2 text-xs text-amber-900/80">Connect the token-holder wallet from the top-right menu to publish.</p> : null}
-              </div>
-            ) : null}
-            {formError ? <p className="text-sm text-red-700">{formError}</p> : null}
-            <Button type="submit" disabled={!assetId || !tokenId || !marketValuation.data || Boolean(activeOnChainListing) || create.isPending || !canManageCollateral}>
-              {create.isPending ? `Waiting for ${network.chainName} confirmation…` : `Lock collateral on ${network.chainName}`}
-            </Button>
-          </form>
-        </Card>
+  return <div className="collateral-page mx-auto w-full max-w-[1480px]">
+    <section className="collateral-hero"><div><p className="collateral-eyebrow">Collateral</p><h1>Pledge DNA-backed assets</h1><p>Submit assets or tokenized positions for bank review. Approvers can inspect valuation details before activating collateral for lending.</p></div><aside>Unlock liquidity<br />with trusted<br />asset collateral.<i /></aside></section>
+    <div className="collateral-layout">
+      <section className="collateral-submit" aria-labelledby="submit-collateral-heading"><div className="collateral-submit__heading"><span><ShieldCheck size={27} /></span><div><h2 id="submit-collateral-heading">Submit collateral</h2><p>Lock your assets or tokenized positions as collateral on<br className="hidden xl:block" /> {network.chainName} for lending.</p></div></div>
+        <form onSubmit={(event) => { event.preventDefault(); setFormError(null); create.mutate(); }}>
+          <label htmlFor="collateral-asset">Asset <b>*</b></label><div className="collateral-field"><Landmark size={20} /><Select id="collateral-asset" value={assetId} onChange={(event) => { setAssetId(event.target.value); setTokenId(''); }} required><option value="">Select asset</option>{pledgeableAssets.map((asset) => <option key={asset.id} value={asset.id}>{asset.name}</option>)}</Select></div>
+          <label htmlFor="collateral-token">Token position <b>*</b></label><div className="collateral-field"><WalletCards size={20} /><Select id="collateral-token" value={tokenId} onChange={(event) => setTokenId(event.target.value)} required><option value="">Select confirmed token position</option>{availableTokens.map((token) => <option key={token.id} value={token.id}>{token.asset?.name ?? token.id}</option>)}</Select></div>
+          <label htmlFor="collateral-bps">Collateral percentage (bps) <b>*</b></label><div className="collateral-field"><span className="collateral-percent">%</span><Input id="collateral-bps" type="number" min={1} max={10000} value={collateralBps} onChange={(event) => setCollateralBps(event.target.value)} placeholder="1000 = 10%" required /></div><small>Collateral percentage in basis points (BPS). 10000 BPS = 100%.</small>
+          {marketValuation.data && previewPledged > 0 ? <p className="collateral-value-note">{(Number(collateralBps) / 100).toFixed(2)}% equals {money(previewPledged, 'USD')} at {money(marketValuation.data.pricePerTokenUsd, 'USD')} per ERC-1155 unit. {previewUnits.toLocaleString()} units will be locked.</p> : null}
+          {assetId && !availableTokens.length ? <div className="collateral-warning"><CircleAlert size={19} /><div><strong>{selectedAssetHasPledgedToken ? 'This asset’s token position is already pledged.' : 'No confirmed token position is registered for this asset.'}</strong>{!selectedAssetHasPledgedToken ? <Link href="/marketplace">Register or verify token position <ArrowRight size={14} /></Link> : null}</div></div> : null}
+          {activeOnChainListing ? <div className="collateral-warning"><CircleAlert size={19} /><div><strong>Token units are held in marketplace escrow.</strong><Button type="button" variant="secondary" disabled={closeOnChain.isPending || !wallet} onClick={() => { setFormError(null); closeOnChain.mutate(); }}>{closeOnChain.isPending ? 'Closing listing…' : 'Close listing and recover units'}</Button></div></div> : null}
+          {assetId && tokenId && marketValuation.isError ? <div className="collateral-warning"><CircleAlert size={19} /><div><strong>This token position needs a collateral market reference.</strong>{existingListing ? <Button type="button" variant="secondary" disabled={publishOnChain.isPending || !wallet} onClick={() => { setFormError(null); publishOnChain.mutate(); }}>{publishOnChain.isPending ? 'Publishing…' : `Publish ${existingListing.title}`}</Button> : <span>Create an open listing in Marketplace first.</span>}</div></div> : null}
+          {formError ? <p className="collateral-error">{formError}</p> : null}
+          <Button type="submit" className="collateral-submit-button" disabled={!assetId || !tokenId || !marketValuation.data || Boolean(activeOnChainListing) || create.isPending || !canManageCollateral}><LockKeyhole size={18} />{create.isPending ? `Waiting for ${network.chainName}…` : `Lock collateral on ${network.chainName}`}</Button>
+          <p className="collateral-tip"><CircleAlert size={20} />Only confirmed token positions can be used as collateral. The selected asset will be locked on {network.chainName}.</p>
+        </form>
+      </section>
+      <section className="collateral-assets" aria-labelledby="your-assets-heading"><header><div><h2 id="your-assets-heading">Your assets</h2><p>Select an asset to pledge as collateral. Only released assets can be used.</p></div><div className="collateral-tools"><label><Search size={17} /><input value={assetSearch} onChange={(event) => setAssetSearch(event.target.value)} placeholder="Search assets…" /></label><select value={assetFilter} onChange={(event) => setAssetFilter(event.target.value as typeof assetFilter)}><option value="ALL">All assets</option><option value="AVAILABLE">Available</option><option value="PLEDGED">Pledged</option></select><ChevronDown size={15} /></div></header>
+        <div className="collateral-assets__list">{assets.isLoading ? <p className="collateral-empty">Loading your assets…</p> : null}{!assets.isLoading && !assetRows.length ? <p className="collateral-empty">No assets match this filter.</p> : null}{assetRows.map(({ asset, token, collateral: item }) => <AssetRow key={asset.id} asset={asset} token={token} collateral={item} selected={assetId === asset.id} onSelect={() => { setAssetId(asset.id); setTokenId(token?.id ?? ''); document.getElementById('collateral-token')?.focus(); }} />)}</div>
+      </section>
+    </div>{actionError ? <p className="collateral-error">{actionError}</p> : null}
+  </div>;
+}
 
-        <div className="grid gap-4">
-          {actionError ? (
-            <Card className="border-red-200 bg-red-50/70 p-4 text-sm text-red-800">{actionError}</Card>
-          ) : null}
-          {collateral.isLoading ? (
-            <Card className="p-6 text-sm text-[var(--muted)]">Loading collateral…</Card>
-          ) : null}
-          {collateral.isError ? (
-            <Card className="p-6 text-sm text-red-700">{errorMessage(collateral.error)}</Card>
-          ) : null}
-          {!collateral.isLoading && !(collateral.data ?? []).length ? (
-            <Card className="p-6 text-sm text-[var(--muted)]">No collateral positions yet.</Card>
-          ) : null}
-          {visibleCollateral.map((item) => (
-            <Card key={item.id} className="p-6">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h2 className="font-display text-lg font-semibold tracking-[-0.02em]">
-                    {item.asset?.name ?? item.id}
-                  </h2>
-                  <p className="mt-1 text-sm text-[var(--muted)]">
-                    pledged {money(item.pledgedValue, item.currency)} · collateral{' '}
-                    {item.collateralBps != null ? `${(item.collateralBps / 100).toFixed(2)}%` : 'legacy position'}
-                    {item.lockedTokenUnits != null ? ` · ${item.lockedTokenUnits.toLocaleString()} ERC-1155 units` : ''}
-                  </p>
-                  <p className="mt-1 text-sm text-[var(--muted)]">
-                    utilized {money(item.utilizedAmount ?? 0, item.currency)} · available{' '}
-                    {money(item.availableAmount ?? item.advanceableValue, item.currency)}
-                    {item.token ? ` · token ${item.token.mode}` : ''}
-                  </p>
-                  {item.marketValuation ? (
-                    <div className="mt-3 rounded-xl border border-[var(--line)] bg-[var(--paper)]/60 px-3 py-3 text-sm text-[var(--muted)]">
-                      <p className="font-medium text-[var(--ink)]">
-                        Tokenized collateral reference {money(item.marketValuation.assetValueUsd, 'USD')}
-                      </p>
-                      <p className="mt-1">
-                        {money(item.marketValuation.pricePerTokenUsd, 'USD')} per ERC-1155 unit · {item.marketValuation.sourceLabel}
-                      </p>
-                      <p className="mt-1">
-                        Observed {item.marketValuation.observedAt.slice(0, 10)} · {item.marketValuation.settledTradeCount} settled CAP trade{item.marketValuation.settledTradeCount === 1 ? '' : 's'}
-                      </p>
-                    </div>
-                  ) : null}
-                </div>
-                <Badge>{item.status}</Badge>
-              </div>
-
-              {item.status === 'PENDING_APPROVAL' ? (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <p className="text-sm text-[var(--muted)]">Locked on {network.chainName} and awaiting a bank loan offer.</p>
-                </div>
-              ) : null}
-
-              {(item.loans?.length ?? 0) > 0 ? (
-                <div className="mt-3 rounded-xl border border-[var(--line)] bg-[var(--paper)]/60 px-3 py-2 text-sm">
-                  <p className="font-medium">
-                    {item.activeLoanCount} active loan{item.activeLoanCount === 1 ? '' : 's'}
-                  </p>
-                  <ul className="mt-1 space-y-1 text-[var(--muted)]">
-                    {item.loans?.map((loan) => (
-                      <li key={loan.id}>
-                        {loan.id} · outstanding {money(loan.outstanding, loan.currency)}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/lending" className="mt-2 inline-block text-[var(--ink)] underline">
-                    Manage on Lending
-                  </Link>
-                </div>
-              ) : null}
-
-              {item.status === 'ACTIVE' ? (
-                <p className="mt-2 text-xs text-[var(--muted)]">
-                  Collateral remains locked until the facility is repaid and the bank confirms the on-chain ERC-1155 release from Lending.
-                </p>
-              ) : null}
-              {item.status === 'ACTIVE' && item.approvedAt ? (
-                <p className="mt-2 text-xs text-[var(--muted)]">
-                  Approved on {item.approvedAt.slice(0, 10)} for lending use.
-                </p>
-              ) : null}
-
-            </Card>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+function AssetRow({ asset, token, collateral, selected, onSelect }: { asset: HydratedAsset; token?: TokenOption; collateral?: CollateralRow; selected: boolean; onSelect: () => void }) {
+  const released = !collateral; const supply = token?.supply ?? 0; const available = collateral?.lockedTokenUnits != null ? Math.max(0, supply - collateral.lockedTokenUnits) : supply; const value = collateral?.marketValuation?.assetValueUsd ?? asset.latestValuation?.payload.amount ?? 0;
+  return <article className={selected ? 'collateral-asset-row is-selected' : 'collateral-asset-row'}><div className="collateral-asset-image" role={asset.primaryImageUrl ? 'img' : undefined} aria-label={asset.primaryImageUrl ? `${asset.name} preview` : undefined} style={asset.primaryImageUrl ? { backgroundImage: `url(${asset.primaryImageUrl})` } : undefined}>{!asset.primaryImageUrl ? <Building2 size={26} /> : null}</div><div className="collateral-asset-main"><div><h3>{asset.name}</h3><span>{asset.assetClass.replaceAll('_', ' ')}</span><em className={released ? 'is-released' : ''}>{released ? 'Released' : collateral?.status.replaceAll('_', ' ')}</em></div><p>pledged {money(collateral?.pledgedValue ?? 0, collateral?.currency ?? 'USD')} · collateral {collateral?.collateralBps != null ? `${(collateral.collateralBps / 100).toFixed(2)}%` : '10.00%'} · {supply.toLocaleString()} ERC-1155 units</p><p>utilized {money(collateral?.utilizedAmount ?? 0, collateral?.currency ?? 'USD')} · available {money(collateral?.availableAmount ?? collateral?.advanceableValue ?? 0, collateral?.currency ?? 'USD')} · token {token?.status === 'CONFIRMED' ? 'LIVE' : 'PENDING'}</p><div className="collateral-valuation"><strong>Tokenized collateral reference {value ? money(value, 'USD') : 'Pending'}</strong><span>{collateral?.marketValuation ? `${money(collateral.marketValuation.pricePerTokenUsd, 'USD')} per ERC-1155 unit · ${collateral.marketValuation.sourceLabel}` : 'Select this asset to confirm its tokenized collateral reference.'}</span></div></div><div className="collateral-asset-stats"><div><small>Total Supply</small><strong>{supply.toLocaleString()}</strong></div><div><small>Unit Price</small><strong>{collateral?.marketValuation ? money(collateral.marketValuation.pricePerTokenUsd, 'USD') : '—'}</strong></div><div><small>Available Units</small><strong>{available.toLocaleString()}</strong></div><button type="button" onClick={onSelect}>{selected ? 'Selected' : 'View details'} <ArrowRight size={15} /></button></div></article>;
 }

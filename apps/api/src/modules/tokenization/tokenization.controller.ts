@@ -21,6 +21,7 @@ import { transactionExplorerUrl } from '../../infrastructure/blockchain/explorer
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import { createId } from '../../infrastructure/database/ids';
 import { AuditService } from '../audit/audit.service';
+import { WalletLinkService } from '../auth/wallet-link.service';
 
 class TokenizeDto {
   @IsString()
@@ -61,6 +62,7 @@ export class TokenizationController {
     private readonly audit: AuditService,
     private readonly sepolia: EthereumSepoliaTokenService,
     private readonly marketplace: EthereumSepoliaMarketplaceService,
+    private readonly wallets?: WalletLinkService,
   ) {}
 
   @Get()
@@ -96,6 +98,7 @@ export class TokenizationController {
     );
     if (!asset) throw new NotFoundException('Asset not found');
     const network = this.sepolia.getNetworkStatus();
+    if (dto.recipientAddress) this.wallets?.assertLinked(user, dto.recipientAddress, network.chainId);
     // Tokens minted on a retired contract cannot be escrowed by the active
     // marketplace. They are retained as history but do not block a one-time
     // mint on the currently configured ERC-1155 contract.
@@ -198,6 +201,7 @@ export class TokenizationController {
     if (dto.supply > 1_000_000_000) throw new BadRequestException('Supply too large');
 
     const network = this.sepolia.getNetworkStatus();
+    this.wallets?.assertLinked(user, dto.recipientAddress, network.chainId);
     if (!network.contractAddress) {
       throw new BadRequestException('ETHEREUM_TOKEN_CONTRACT must be configured to register a wallet-signed mint.');
     }

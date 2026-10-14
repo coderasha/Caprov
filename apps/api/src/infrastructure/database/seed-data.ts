@@ -1060,6 +1060,8 @@ export function buildSeedData(): CaprovData {
       },
       { id: bankerId, email: 'banker@caprov.demo', passwordHash, fullName: 'Jordan Lee', title: 'Banker', createdAt: now, updatedAt: now },
     ],
+    walletLinks: [],
+    walletChallenges: [],
     memberships: [
       {
         id: 'mem_elena',
