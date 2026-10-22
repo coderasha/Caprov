@@ -24,7 +24,7 @@ export default function TokenizationPage() {
   const [assetId, setAssetId] = useState('');
   const [supply, setSupply] = useState('1000000');
   const [copyMessage, setCopyMessage] = useState('');
-  const query = useQuery({ queryKey: ['tokenization'], queryFn: async () => (await api.get<{ network: NetworkStatus; tokens: TokenRow[] }>('/tokenization')).data });
+  const query = useQuery({ queryKey: ['tokenization', 'overview'], queryFn: async () => (await api.get<{ network: NetworkStatus; tokens: TokenRow[] }>('/tokenization')).data });
   const network = useQuery({ queryKey: ['tokenization-network'], queryFn: async () => (await api.get<NetworkStatus>('/tokenization/network')).data });
   const assets = useQuery({ queryKey: ['assets'], queryFn: async () => (await api.get<HydratedAsset[]>('/assets')).data });
   const status = network.data ?? query.data?.network;

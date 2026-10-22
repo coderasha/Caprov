@@ -16,21 +16,18 @@ import {
   moneyCompact,
   riskTone,
 } from '@/lib/format';
-import type { AuditRow, DocumentRow, HydratedAsset, JobRow } from '@/lib/types';
+import type { DocumentRow, HydratedAsset } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth-store';
 import { useQuery } from '@tanstack/react-query';
 import {
-  AlertTriangle,
   Building2,
   FileText,
   Layers,
-  Lock,
   MoreHorizontal,
   Plus,
   Shield,
   Upload,
-  Workflow,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -73,20 +70,6 @@ function statusPresentation(status: HydratedAsset['status'], coverage: number) {
   return { label: assetStatusLabel[status] ?? status, tone: 'muted' as const };
 }
 
-function relativeTime(value?: string) {
-  if (!value) return '—';
-  const then = new Date(value).getTime();
-  if (Number.isNaN(then)) return '—';
-  const delta = Date.now() - then;
-  const minutes = Math.round(delta / 60_000);
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.round(hours / 24);
-  return `${days}d ago`;
-}
-
 function buildTrend(totalValue: number, months: number) {
   const labels =
     months <= 3
@@ -103,18 +86,6 @@ function buildTrend(totalValue: number, months: number) {
   });
   series[series.length - 1] = base;
   return { labels, series };
-}
-
-function activityCopy(event: AuditRow) {
-  const action = event.action.toLowerCase();
-  if (action.includes('dna')) return { title: 'Asset DNA updated', icon: Layers };
-  if (action.includes('document') || action.includes('upload')) return { title: 'New document uploaded', icon: FileText };
-  if (action.includes('token') || action.includes('lock') || action.includes('collateral')) {
-    return { title: 'Collateral lock confirmed', icon: Lock };
-  }
-  if (action.includes('risk') || action.includes('flag')) return { title: 'Risk flag raised', icon: AlertTriangle };
-  if (action.includes('login') || action.includes('auth')) return { title: 'Workspace sign-in', icon: Shield };
-  return { title: event.action.replaceAll('.', ' '), icon: Workflow };
 }
 
 export function OrgAdminDashboard() {
@@ -135,19 +106,8 @@ export function OrgAdminDashboard() {
     queryKey: ['documents'],
     queryFn: async () => (await api.get<DocumentRow[]>('/documents')).data,
   });
-  const jobsQuery = useQuery({
-    queryKey: ['jobs'],
-    queryFn: async () => (await api.get<JobRow[]>('/intelligence/jobs')).data,
-  });
-  const auditQuery = useQuery({
-    queryKey: ['audit', 'dashboard'],
-    queryFn: async () => (await api.get<AuditRow[]>('/audit?limit=12')).data,
-  });
-
   const assets = assetsQuery.data ?? [];
   const documents = documentsQuery.data ?? [];
-  const jobs = jobsQuery.data ?? [];
-  const audit = auditQuery.data ?? [];
 
   const totalValue = assets.reduce((sum, asset) => sum + (asset.latestValuation?.payload.amount ?? 0), 0);
   const elevated = assets.filter((asset) =>
@@ -278,33 +238,6 @@ export function OrgAdminDashboard() {
     ];
   }, [assets]);
 
-  const activityItems = useMemo(() => {
-    if (audit.length) {
-      const ranked = [...audit].sort((a, b) => {
-        const rank = (event: AuditRow) =>
-          /login|auth|session/i.test(event.action) ? 1 : 0;
-        return rank(a) - rank(b);
-      });
-      return ranked.slice(0, 7).map((event) => {
-        const copy = activityCopy(event);
-        return {
-          id: event.id,
-          title: copy.title,
-          detail: event.entityType,
-          time: relativeTime(event.createdAt),
-          icon: copy.icon,
-        };
-      });
-    }
-    return [
-      { id: 'a1', title: 'Asset DNA updated', detail: 'Harbourview Tower', time: '2m ago', icon: Layers },
-      { id: 'a2', title: 'New document uploaded', detail: 'Title deed package', time: '15m ago', icon: FileText },
-      { id: 'a3', title: 'Collateral lock confirmed', detail: 'Facility #1842', time: '1h ago', icon: Lock },
-      { id: 'a4', title: 'Risk flag raised', detail: 'POGO Asset', time: '3h ago', icon: AlertTriangle },
-      { id: 'a5', title: 'Listing published', detail: 'Marketplace', time: 'Yesterday', icon: Workflow },
-    ];
-  }, [audit]);
-
   const todayLabel = now
     ? new Intl.DateTimeFormat('en-GB', {
         weekday: 'long',
@@ -340,10 +273,6 @@ export function OrgAdminDashboard() {
           <Link href="/documents" className="org-dash__btn">
             <Upload size={15} />
             Upload documents
-          </Link>
-          <Link href="/portfolios" className="org-dash__btn">
-            <Workflow size={15} />
-            Open workflows
           </Link>
         </div>
       </section>
@@ -475,7 +404,7 @@ export function OrgAdminDashboard() {
         </article>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.7fr)_minmax(18rem,0.7fr)]">
+      <section className="w-full">
         <article className="org-dash__panel overflow-hidden !p-0">
           <div className="flex items-center justify-between gap-3 border-b border-[var(--line)]/80 px-5 py-4">
             <div>
@@ -487,7 +416,17 @@ export function OrgAdminDashboard() {
             </Link>
           </div>
           <div className="caprov-scroll">
-            <table className="org-dash__table w-full min-w-[720px] text-left text-sm">
+            <table className="org-dash__table w-full min-w-[960px] table-fixed text-left text-sm">
+              <colgroup>
+                <col className="w-[28%]" />
+                <col className="w-[11%]" />
+                <col className="w-[13%]" />
+                <col className="w-[16%]" />
+                <col className="w-[9%]" />
+                <col className="w-[12%]" />
+                <col className="w-[8%]" />
+                <col className="w-[3%]" />
+              </colgroup>
               <thead>
                 <tr>
                   <th>Asset name</th>
@@ -585,32 +524,6 @@ export function OrgAdminDashboard() {
           </div>
         </article>
 
-        <article className="org-dash__panel">
-          <h2 className="org-dash__panel-title">Platform activity</h2>
-          <p className="org-dash__panel-sub">Recent workspace events</p>
-          <ul className="mt-4 grid gap-0">
-            {activityItems.map((item, index) => (
-              <li key={item.id} className="org-dash__feed-item">
-                <span className="org-dash__feed-rail" aria-hidden="true">
-                  <span className="org-dash__feed-dot">
-                    <item.icon size={12} />
-                  </span>
-                  {index < activityItems.length - 1 ? <span className="org-dash__feed-line" /> : null}
-                </span>
-                <span className="min-w-0 pb-4">
-                  <strong className="block text-sm font-medium text-[var(--ink)]">{item.title}</strong>
-                  <span className="mt-0.5 block text-xs text-[var(--muted)]">{item.detail}</span>
-                  <span className="mt-1 block text-[11px] text-[var(--muted)]/80">{item.time}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-          {jobs.length ? (
-            <p className="mt-2 text-[11px] text-[var(--muted)]">
-              {jobs.filter((job) => job.status === 'RUNNING' || job.status === 'QUEUED').length} intelligence jobs in flight
-            </p>
-          ) : null}
-        </article>
       </section>
     </div>
   );

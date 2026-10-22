@@ -11,6 +11,7 @@ import type {
 
 const CLASS_BASE_GROWTH: Record<AssetClass, number> = {
   REAL_ESTATE: 0.025,
+  PLANT_AND_MACHINERY: 0.02,
   INFRASTRUCTURE: 0.03,
   PRIVATE_CREDIT: 0.04,
   PRIVATE_EQUITY: 0.05,

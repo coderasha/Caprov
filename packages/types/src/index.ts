@@ -8,6 +8,7 @@ export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'INR' | 'SGD';
 
 export type AssetClass =
   | 'REAL_ESTATE'
+  | 'PLANT_AND_MACHINERY'
   | 'PRIVATE_CREDIT'
   | 'PRIVATE_EQUITY'
   | 'INFRASTRUCTURE'
@@ -17,7 +18,58 @@ export type AssetClass =
   | 'FUND'
   | 'OTHER';
 
+export const assetSubcategories = {
+  REAL_ESTATE: [
+    'Land & Development',
+    'Residential Real Estate',
+    'Commercial Real Estate',
+    'Industrial & Logistics Real Estate',
+    'Hospitality & Leisure Real Estate',
+    'Under-Construction & Development Properties',
+    'Agricultural & Rural Real Estate',
+    'Institutional & Special-Purpose Real Estate',
+    'Other Real Estate',
+  ],
+  PLANT_AND_MACHINERY: [
+    'Manufacturing & Production Machinery',
+    'Material Handling & Lifting Equipment',
+    'Construction & Earthmoving Equipment',
+    'Power Generation & Electrical Equipment',
+    'Agricultural Machinery & Equipment',
+    'Mining & Mineral Processing Equipment',
+    'Food Processing & Packaging Machinery',
+    'Others',
+  ],
+  PRIVATE_EQUITY: ['Direct Company Equity'],
+  PRIVATE_CREDIT: [],
+  INFRASTRUCTURE: [],
+  AVIATION: [],
+  ART: [],
+  AGRICULTURE: [],
+  FUND: [],
+  OTHER: [],
+} as const satisfies Record<AssetClass, readonly string[]>;
+
 export type AssetStatus = 'DRAFT' | 'ACTIVE' | 'UNDER_REVIEW' | 'ARCHIVED';
+
+export interface AssetAddress {
+  countryCode: string;
+  countryName: string;
+  stateCode?: string;
+  stateName?: string;
+  districtCode?: string;
+  districtName?: string;
+  subDistrictCode?: string;
+  subDistrictName?: string;
+  subDistrictLabel?: string;
+  settlementName?: string;
+  locality?: string;
+  propertyAddress?: string;
+  pinCode?: string;
+  postOffice?: string;
+  source?: 'LGD' | 'INDIA_POST' | 'MANUAL';
+  sourceVersion?: string;
+}
 
 export type DocumentType =
   | 'TITLE_DEED'

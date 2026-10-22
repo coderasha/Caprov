@@ -93,8 +93,8 @@ export function AreaTrendChart({
             <stop offset="100%" stopColor="#c9a46a" stopOpacity="0.02" />
           </linearGradient>
         </defs>
-        {yTicks.map((tick) => (
-          <g key={tick.label}>
+        {yTicks.map((tick, index) => (
+          <g key={`y-tick-${index}`}>
             <line x1={padX} x2={width - padX} y1={tick.y} y2={tick.y} stroke="rgba(10,15,26,0.06)" />
             <text x={width - 4} y={tick.y - 4} textAnchor="end" fontSize="10" fill="#8a8378">
               {tick.label}
@@ -110,8 +110,8 @@ export function AreaTrendChart({
         )}
       </svg>
       <div className="mt-1 flex justify-between px-1 text-[11px] text-[var(--muted)]">
-        {labels.map((label) => (
-          <span key={label}>{label}</span>
+        {labels.map((label, index) => (
+          <span key={`x-label-${index}`}>{label}</span>
         ))}
       </div>
     </div>

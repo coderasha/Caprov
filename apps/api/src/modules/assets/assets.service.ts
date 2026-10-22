@@ -1,10 +1,12 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type {
   AssetClass,
+  AssetAddress,
   AssetStatus,
   CurrencyCode,
   OwnershipType,
 } from '@caprov/types';
+import { assetSubcategories } from '@caprov/types';
 import type { AuthUser } from '../../common/types/auth-user';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import type {
@@ -23,6 +25,8 @@ import {
 export interface CreateAssetInput {
   name: string;
   assetClass: AssetClass;
+  assetSubcategory?: string;
+  address?: AssetAddress;
   status?: AssetStatus;
   currency?: CurrencyCode;
   jurisdiction?: string;
@@ -109,6 +113,7 @@ export class AssetsService {
   }
 
   create(user: AuthUser, input: CreateAssetInput) {
+    this.assertValidSubcategory(input.assetClass, input.assetSubcategory);
     const now = new Date().toISOString();
     const imageUrls = persistImageUrls(
       normalizeImageUrls(input.imageUrls, input.primaryImageUrl),
@@ -121,6 +126,8 @@ export class AssetsService {
       organizationId: user.organizationId,
       name: input.name,
       assetClass: input.assetClass,
+      assetSubcategory: input.assetSubcategory,
+      address: input.address,
       status: input.status ?? 'DRAFT',
       currency: 'USD' as CurrencyCode,
       jurisdiction: input.jurisdiction,
@@ -147,6 +154,15 @@ export class AssetsService {
 
   update(user: AuthUser, assetId: string, input: Partial<CreateAssetInput>) {
     this.get(user.organizationId, assetId);
+    const existing = this.db.snapshot.assets.find((item) => item.id === assetId);
+    const nextAssetClass = input.assetClass ?? existing?.assetClass ?? 'OTHER';
+    const nextAssetSubcategory = input.assetSubcategory ?? (
+      input.assetClass ? undefined : existing?.assetSubcategory
+    );
+    this.assertValidSubcategory(
+      nextAssetClass,
+      nextAssetSubcategory,
+    );
     if (input.primaryImageUrl != null || input.imageUrls != null) {
       assertImageBudget(input.primaryImageUrl, input.imageUrls);
     }
@@ -170,6 +186,7 @@ export class AssetsService {
           : asset.primaryImageUrl;
       Object.assign(asset, {
         ...input,
+        assetSubcategory: nextAssetSubcategory,
         status: input.status ?? asset.status,
         currency: 'USD',
         primaryImageUrl: nextPrimary,
@@ -228,6 +245,13 @@ export class AssetsService {
     });
     await this.intelligence.runPipeline(user, assetId);
     return this.hydrate(assetId);
+  }
+
+  private assertValidSubcategory(assetClass: AssetClass, assetSubcategory?: string) {
+    if (!assetSubcategory) return;
+    if (!(assetSubcategories[assetClass] as readonly string[]).includes(assetSubcategory)) {
+      throw new BadRequestException('Asset subcategory does not belong to the selected asset class.');
+    }
   }
 
   hydrate(assetId: string) {

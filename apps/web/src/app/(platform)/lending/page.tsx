@@ -18,6 +18,7 @@ import { ArrowRight, Building2, ChevronDown, CircleAlert, Landmark, Search, Wall
 interface CollateralRow {
   id: string;
   status: string;
+  pledgedValue: number;
   advanceableValue: number;
   availableAmount?: number;
   currency: string;
@@ -70,12 +71,18 @@ function exactMoney(amount: number, currency: string) {
   }).format(amount);
 }
 
+function collateralOfferMaximum(collateral: CollateralRow, haircut: number) {
+  return Number((collateral.pledgedValue * (1 - haircut / 10_000)).toFixed(2));
+}
+
 export default function LendingPage() {
   const queryClient = useQueryClient();
   const { address: wallet, network } = useWallet();
   const roles = useAuthStore((state) => state.roles);
   const [collateralId, setCollateralId] = useState('');
-  const [principal, setPrincipal] = useState('10000000');
+  // A lender must set a deliberate offer amount.  We populate this from the
+  // selected collateral instead of carrying an arbitrary portfolio-wide value.
+  const [principal, setPrincipal] = useState('');
   const [haircutBps, setHaircutBps] = useState('1500');
   const [formError, setFormError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -112,6 +119,9 @@ export default function LendingPage() {
     loan.collateral?.status === 'ACTIVE' &&
     Boolean(loan.collateral.vaultCollateralId);
   const selected = requestableCollateral.find((item) => item.id === collateralId);
+  const selectedOfferMaximum = selected
+    ? collateralOfferMaximum(selected, Number(haircutBps || 0))
+    : 0;
   const visibleLoans = useMemo(() => (loans.data ?? []).filter((loan) => {
     const matchesSearch = !loanSearch.trim() || (loan.asset?.name ?? loan.id).toLowerCase().includes(loanSearch.trim().toLowerCase());
     const matchesFilter = loanFilter === 'ALL' || (loanFilter === 'PENDING' ? ['PENDING_APPROVAL', 'OFFERED', 'ACCEPTED'].includes(loan.status) : loan.status === loanFilter);
@@ -158,7 +168,11 @@ export default function LendingPage() {
     },
     onError: (error) => setActionError(errorMessage(error)),
   });
-  const offer = useMutation({ mutationFn: async (id: string) => api.post(`/lending/${id}/offer`, { principal: Number(principal), haircutBps: Number(haircutBps), interestRateBps: 650, termDays: 365 }), onSuccess: async () => { await queryClient.invalidateQueries({ queryKey: ['lending'] }); } });
+  const offer = useMutation({
+    mutationFn: async (id: string) => api.post(`/lending/${id}/offer`, { principal: Number(principal), haircutBps: Number(haircutBps), interestRateBps: 650, termDays: 365 }),
+    onSuccess: async () => { setActionError(null); await queryClient.invalidateQueries({ queryKey: ['lending'] }); },
+    onError: (error) => setActionError(errorMessage(error)),
+  });
   const offerFromCollateral = useMutation({
     mutationFn: async () =>
       api.post(`/lending/collateral/${collateralId}/offer`, {
@@ -204,7 +218,7 @@ export default function LendingPage() {
   return <div className="lending-page mx-auto w-full max-w-[1480px]">
     <section className="lending-hero"><div><p className="lending-eyebrow">Lending</p><h1>Collateralized facilities</h1><p>Request fund disbursal against approved collateral. Bank approval activates the facility and credits the asset-owner wallet.</p></div><aside>Unlock liquidity<br />with your tokenized<br />real-world assets.<i /></aside></section>
     <div className="lending-layout"><div className="lending-left"><section className="lending-wallet"><span><Landmark size={28} /></span><div><h2>{canApproveDisbursal ? 'Bank simulated USD treasury' : 'Asset-owner simulated USD wallet'}</h2><div className="lending-wallet__balance"><small>{walletBalance?.currency ?? 'USD'}</small><strong>{walletBalance ? (canApproveDisbursal ? exactMoney(walletBalance.balance, walletBalance.currency) : money(walletBalance.balance, walletBalance.currency)) : '$0'}</strong></div></div></section>
-      <section className="lending-request"><div className="lending-request__heading"><span><Landmark size={26} /></span><div><h2>{isBanker ? 'Underwrite collateral' : 'Request disbursal'}</h2><p>{isBanker ? `Set a bank haircut and proposed USD principal against ${network.chainName}-locked collateral.` : 'Submit a loan request against your approved collateral.'}</p></div></div><form onSubmit={(event) => { event.preventDefault(); setFormError(null); isBanker ? offerFromCollateral.mutate() : create.mutate(); }}><label htmlFor="loan-collateral">{isBanker ? 'Locked borrower collateral' : 'Collateral'} <b>*</b></label><div className="lending-field"><WalletCards size={20} /><Select id="loan-collateral" value={collateralId} onChange={(event) => setCollateralId(event.target.value)} required><option value="">Select collateral</option>{requestableCollateral.filter((item) => !isBanker || item.status === 'PENDING_APPROVAL').map((item) => <option key={item.id} value={item.id}>{item.asset?.name ?? item.id} · available {money(item.availableAmount ?? item.advanceableValue, item.currency)}</option>)}</Select></div><small>{isBanker ? 'Choose collateral awaiting bank review.' : 'Choose the collateralized asset to request a loan against.'}</small><label htmlFor="loan-principal">{isBanker ? 'Proposed principal (USD)' : 'Principal (USD)'} <b>*</b></label><div className="lending-field"><span className="lending-dollar">$</span><Input id="loan-principal" inputMode="numeric" value={principal} onChange={(event) => setPrincipal(event.target.value.replace(/[^0-9]/g, ''))} required /></div><small>Enter the loan amount in USD.</small>{isBanker ? <><label htmlFor="loan-haircut">Bank haircut (basis points) <b>*</b></label><div className="lending-field"><span className="lending-dollar">%</span><Input id="loan-haircut" inputMode="numeric" value={haircutBps} onChange={(event) => setHaircutBps(event.target.value.replace(/[^0-9]/g, ''))} required /></div></> : null}{selected ? <p className="lending-capacity">Available capacity {money(selected.availableAmount ?? selected.advanceableValue, selected.currency)}{isBanker ? ` · maximum offer ${money(selected.advanceableValue * (1 - Number(haircutBps || 0) / 10_000), selected.currency)}` : ''}</p> : null}{formError ? <p className="lending-error">{formError}</p> : null}<Button type="submit" variant="ink" className="lending-submit" disabled={!collateralId || (isBanker ? offerFromCollateral.isPending : create.isPending) || (!isBanker && !canRequestDisbursal)}><Landmark size={19} />{isBanker ? (offerFromCollateral.isPending ? 'Issuing offer…' : 'Issue loan offer') : (create.isPending ? 'Submitting…' : 'Submit for bank approval')}<ArrowRight size={19} /></Button></form></section></div>
+      <section className="lending-request"><div className="lending-request__heading"><span><Landmark size={26} /></span><div><h2>{isBanker ? 'Underwrite collateral' : 'Request disbursal'}</h2><p>{isBanker ? `Set a bank haircut and proposed USD principal against ${network.chainName}-locked collateral.` : 'Submit a loan request against your approved collateral.'}</p></div></div><form onSubmit={(event) => { event.preventDefault(); setFormError(null); isBanker ? offerFromCollateral.mutate() : create.mutate(); }}><label htmlFor="loan-collateral">{isBanker ? 'Locked borrower collateral' : 'Collateral'} <b>*</b></label><div className="lending-field"><WalletCards size={20} /><Select id="loan-collateral" value={collateralId} onChange={(event) => { const nextId = event.target.value; setCollateralId(nextId); setFormError(null); if (isBanker) { const next = requestableCollateral.find((item) => item.id === nextId); if (next) setPrincipal(String(collateralOfferMaximum(next, Number(haircutBps || 0)))); } }} required><option value="">Select collateral</option>{requestableCollateral.filter((item) => !isBanker || item.status === 'PENDING_APPROVAL').map((item) => <option key={item.id} value={item.id}>{item.asset?.name ?? item.id} · available {money(item.availableAmount ?? item.advanceableValue, item.currency)}</option>)}</Select></div><small>{isBanker ? 'Choose collateral awaiting bank review. The proposed principal is prefilled to the maximum and remains editable.' : 'Choose the collateralized asset to request a loan against.'}</small><label htmlFor="loan-principal">{isBanker ? 'Proposed principal (USD)' : 'Principal (USD)'} <b>*</b></label><div className="lending-field"><span className="lending-dollar">$</span><Input id="loan-principal" inputMode="numeric" value={principal} max={isBanker && selectedOfferMaximum ? selectedOfferMaximum : undefined} onChange={(event) => { setPrincipal(event.target.value.replace(/[^0-9]/g, '')); setFormError(null); setActionError(null); }} required /></div><small>{isBanker && selected ? `Maximum offer at the selected haircut: ${money(selectedOfferMaximum, selected.currency)}. You can propose any lower amount.` : 'Enter the loan amount in USD.'}</small>{isBanker ? <><label htmlFor="loan-haircut">Bank haircut (basis points) <b>*</b></label><div className="lending-field"><span className="lending-dollar">%</span><Input id="loan-haircut" inputMode="numeric" value={haircutBps} onChange={(event) => { setHaircutBps(event.target.value.replace(/[^0-9]/g, '')); setFormError(null); setActionError(null); }} required /></div></> : null}{selected ? <p className="lending-capacity">Available capacity {money(selected.availableAmount ?? selected.advanceableValue, selected.currency)}{isBanker ? ` · maximum offer ${money(selectedOfferMaximum, selected.currency)}` : ''}</p> : null}{formError ? <p className="lending-error">{formError}</p> : null}<Button type="submit" variant="ink" className="lending-submit" disabled={!collateralId || (isBanker ? offerFromCollateral.isPending : create.isPending) || (!isBanker && !canRequestDisbursal)}><Landmark size={19} />{isBanker ? (offerFromCollateral.isPending ? 'Issuing offer…' : 'Issue loan offer') : (create.isPending ? 'Submitting…' : 'Submit for bank approval')}<ArrowRight size={19} /></Button></form></section></div>
       <section className="lending-assets"><header><div><h2>Collateralized assets</h2><p>View the status of your loan requests and repayment details.</p></div><div className="lending-tools"><label><Search size={17} /><input value={loanSearch} onChange={(event) => setLoanSearch(event.target.value)} placeholder="Search assets…" /></label><select value={loanFilter} onChange={(event) => setLoanFilter(event.target.value as typeof loanFilter)}><option value="ALL">All assets</option><option value="ACTIVE">Active</option><option value="REPAID">Repaid</option><option value="PENDING">Pending</option></select><ChevronDown size={15} /></div></header><div className="lending-list">{loans.isLoading ? <p className="lending-empty">Loading facilities…</p> : null}{!loans.isLoading && !visibleLoans.length ? <p className="lending-empty">No facilities match this filter.</p> : null}{visibleLoans.map((loan) => <LoanCard key={loan.id} loan={loan} isBanker={isBanker} canRequest={canRequestDisbursal} canApprove={canApproveDisbursal} canRelease={canReleaseCollateral(loan)} networkName={network.chainName} onOffer={() => offer.mutate(loan.id)} onAccept={() => accept.mutate(loan.id)} onDisburse={() => { setActionError(null); disburse.mutate(loan); }} onRepay={() => repay.mutate(loan.id)} onRelease={() => { setActionError(null); releaseCollateral.mutate(loan); }} busy={{ offer: offer.isPending, accept: accept.isPending, disburse: disburse.isPending, release: releaseCollateral.isPending }} />)}</div></section>
     </div>{actionError ? <p className="lending-error">{actionError}</p> : null}
   </div>;

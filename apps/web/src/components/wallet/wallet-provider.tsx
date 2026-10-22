@@ -25,6 +25,7 @@ type WalletContextValue = {
   address?: string;
   accounts: string[];
   selectedAccount?: string;
+  selectedAccountNetworkId?: BlockchainNetworkId;
   busy: boolean;
   message?: string;
   networkId: BlockchainNetworkId;
@@ -32,6 +33,7 @@ type WalletContextValue = {
   selectNetwork: (networkId: BlockchainNetworkId) => Promise<void>;
   syncNetwork: () => Promise<void>;
   connect: () => Promise<string | undefined>;
+  disconnect: () => void;
   switchAccount: () => Promise<string | undefined>;
   selectAccount: (address: string) => Promise<void>;
 };
@@ -42,6 +44,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [address, setAddress] = useState<string>();
   const [accounts, setAccounts] = useState<string[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<string>();
+  const [selectedAccountNetworkId, setSelectedAccountNetworkId] = useState<BlockchainNetworkId>();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string>();
   const [networkId, setNetworkId] = useState<BlockchainNetworkId>('sepolia');
@@ -141,7 +144,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setAddress(connection.address);
       setAccounts(connection.accounts);
       setSelectedAccount(connection.address);
-      setNetworkId(selectedBlockchainNetwork().id);
+      const connectedNetworkId = selectedBlockchainNetwork().id;
+      setSelectedAccountNetworkId(connectedNetworkId);
+      setNetworkId(connectedNetworkId);
       setMessage(
         `Wallet verified for this CAPROV account on ${selectedBlockchainNetwork().chainName} (${connection.address.slice(0, 6)}…${connection.address.slice(-4)}).`,
       );
@@ -152,6 +157,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     } finally {
       setBusy(false);
     }
+  }, []);
+
+  const disconnect = useCallback(() => {
+    // This ends CAPROV's in-app session only. The user remains in control of
+    // MetaMask's site permissions and can revoke them from MetaMask if wanted.
+    clearMetaMaskConnection();
+    setAccounts([]);
+    setSelectedAccount(undefined);
+    setSelectedAccountNetworkId(undefined);
+    setAddress(undefined);
+    setMessage('MetaMask disconnected from this CAPROV session.');
   }, []);
 
   const switchAccount = useCallback(async () => {
@@ -165,6 +181,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const selection = await promptMetaMaskAccountSelection();
       setAccounts(selection.accounts);
       setSelectedAccount(selection.address);
+      setSelectedAccountNetworkId(selectedBlockchainNetwork().id);
       // Selection is intentionally not treated as a CAPROV wallet connection.
       // The selected address must complete the signed verification step first.
       setAddress(undefined);
@@ -186,6 +203,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       // it. Keep the former verified address disconnected until the selected
       // account completes CAPROV's signature challenge.
       setSelectedAccount(selected);
+      setSelectedAccountNetworkId(selectedBlockchainNetwork().id);
       setAddress(undefined);
       setMessage(`Selected ${selected.slice(0, 6)}…${selected.slice(-4)}. Verify the selected account to use it with CAPROV.`);
     } catch (error) {
@@ -205,6 +223,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       syncActiveMetaMaskAccount(next);
       setAccounts(next);
       setSelectedAccount(next[0]);
+      setSelectedAccountNetworkId(next.length ? selectedBlockchainNetwork().id : undefined);
       setAddress((current) => {
         // MetaMask puts its newly active account first. Treat a change in that
         // account as disconnected until the user explicitly re-verifies it.
@@ -237,6 +256,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       clearMetaMaskConnection();
       setAccounts([]);
       setSelectedAccount(undefined);
+      setSelectedAccountNetworkId(undefined);
       setAddress(undefined);
       setMessage('MetaMask disconnected or restarted. Unlock MetaMask, then reconnect it to CAPROV.');
     };
@@ -263,7 +283,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, [address]);
 
   const network = selectedBlockchainNetwork();
-  const value = useMemo(() => ({ address, accounts, selectedAccount, busy, message, networkId, network, selectNetwork, syncNetwork, connect, switchAccount, selectAccount }), [address, accounts, selectedAccount, busy, message, networkId, network, selectNetwork, syncNetwork, connect, switchAccount, selectAccount]);
+  const value = useMemo(() => ({ address, accounts, selectedAccount, selectedAccountNetworkId, busy, message, networkId, network, selectNetwork, syncNetwork, connect, disconnect, switchAccount, selectAccount }), [address, accounts, selectedAccount, selectedAccountNetworkId, busy, message, networkId, network, selectNetwork, syncNetwork, connect, disconnect, switchAccount, selectAccount]);
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
 }
 

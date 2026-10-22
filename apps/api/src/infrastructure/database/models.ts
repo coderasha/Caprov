@@ -1,5 +1,6 @@
 import type {
   AssetClass,
+  AssetAddress,
   AssetDnaEnvelope,
   AssetStatus,
   CollateralPosition,
@@ -99,6 +100,8 @@ export interface AssetRecord {
   organizationId: string;
   name: string;
   assetClass: AssetClass;
+  assetSubcategory?: string;
+  address?: AssetAddress;
   status: AssetStatus;
   currency: CurrencyCode;
   jurisdiction?: string;

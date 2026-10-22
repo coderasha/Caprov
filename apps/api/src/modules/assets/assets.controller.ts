@@ -22,6 +22,7 @@ import {
 import { Type } from 'class-transformer';
 import type {
   AssetClass,
+  AssetAddress,
   AssetStatus,
   CurrencyCode,
   OwnershipType,
@@ -33,6 +34,25 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import type { AuthUser } from '../../common/types/auth-user';
 import { AssetsService } from './assets.service';
 
+class AssetAddressDto implements AssetAddress {
+  @IsString() countryCode!: string;
+  @IsString() countryName!: string;
+  @IsOptional() @IsString() stateCode?: string;
+  @IsOptional() @IsString() stateName?: string;
+  @IsOptional() @IsString() districtCode?: string;
+  @IsOptional() @IsString() districtName?: string;
+  @IsOptional() @IsString() subDistrictCode?: string;
+  @IsOptional() @IsString() subDistrictName?: string;
+  @IsOptional() @IsString() subDistrictLabel?: string;
+  @IsOptional() @IsString() settlementName?: string;
+  @IsOptional() @IsString() locality?: string;
+  @IsOptional() @IsString() propertyAddress?: string;
+  @IsOptional() @IsString() pinCode?: string;
+  @IsOptional() @IsString() postOffice?: string;
+  @IsOptional() @IsEnum(['LGD', 'INDIA_POST', 'MANUAL']) source?: 'LGD' | 'INDIA_POST' | 'MANUAL';
+  @IsOptional() @IsString() sourceVersion?: string;
+}
+
 class CreateAssetDto {
   @IsString()
   @MinLength(2)
@@ -40,6 +60,7 @@ class CreateAssetDto {
 
   @IsEnum([
     'REAL_ESTATE',
+    'PLANT_AND_MACHINERY',
     'PRIVATE_CREDIT',
     'PRIVATE_EQUITY',
     'INFRASTRUCTURE',
@@ -50,6 +71,15 @@ class CreateAssetDto {
     'OTHER',
   ])
   assetClass!: AssetClass;
+
+  @IsOptional()
+  @IsString()
+  assetSubcategory?: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AssetAddressDto)
+  address?: AssetAddressDto;
 
   @IsOptional()
   @IsEnum(['DRAFT', 'ACTIVE', 'UNDER_REVIEW', 'ARCHIVED'])

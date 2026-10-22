@@ -14,6 +14,7 @@ import {
   Info,
   List,
   Search,
+  ShieldCheck,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -38,6 +39,18 @@ type ListingRow = {
   } | null;
 };
 
+type BuyerTrade = {
+  id: string;
+  assetId: string;
+  status: string;
+  notional: number;
+  currency: string;
+  tokenUnits?: number;
+  participantRole?: 'BUYER' | 'SELLER';
+  asset?: { id: string; name: string; assetClass?: string; primaryImageUrl?: string } | null;
+  listing?: { totalTokenSupply?: number; valuation?: { payload?: { amount?: number; currency?: string } } | null } | null;
+};
+
 function formatMarketValue(amount: number) {
   if (amount <= 0) return '$0';
   if (amount >= 1_000_000_000) {
@@ -54,8 +67,38 @@ export function BuyerDashboard() {
     queryKey: ['marketplace', 'buyer-dashboard'],
     queryFn: async () => (await api.get<ListingRow[]>('/marketplace/listings')).data,
   });
+  const tradesQuery = useQuery({
+    queryKey: ['trading', 'buyer-dashboard'],
+    queryFn: async () => (await api.get<{ trades: BuyerTrade[] }>('/trading')).data,
+  });
 
   const listings = listingsQuery.data ?? [];
+  const listingsByAssetId = useMemo(
+    () => new Map(listings.filter((listing) => listing.asset?.id).map((listing) => [listing.asset!.id, listing])),
+    [listings],
+  );
+  const investments = useMemo(() => {
+    const positions = new Map<string, BuyerTrade & { units: number; invested: number; pending: boolean }>();
+    for (const trade of tradesQuery.data?.trades ?? []) {
+      if (trade.participantRole && trade.participantRole !== 'BUYER') continue;
+      if (!['SETTLED', 'PENDING_SETTLEMENT', 'SETTLING'].includes(trade.status)) continue;
+      const existing = positions.get(trade.assetId);
+      const units = trade.tokenUnits ?? 0;
+      if (existing) {
+        existing.units += units;
+        existing.invested += trade.notional;
+        existing.pending ||= trade.status !== 'SETTLED';
+      } else {
+        positions.set(trade.assetId, {
+          ...trade,
+          units,
+          invested: trade.notional,
+          pending: trade.status !== 'SETTLED',
+        });
+      }
+    }
+    return [...positions.values()];
+  }, [tradesQuery.data]);
   const openListings = useMemo(
     () => listings.filter((item) => ['OPEN', 'PARTIALLY_FILLED'].includes(item.status)),
     [listings],
@@ -212,6 +255,35 @@ export function BuyerDashboard() {
             </article>
           );
         })}
+      </section>
+
+      <section className="buyer-dash__investments" aria-labelledby="buyer-investments-heading">
+        <div className="buyer-dash__investments-head">
+          <div>
+            <p className="buyer-dash__eyebrow">Portfolio</p>
+            <h2 id="buyer-investments-heading">Your investments</h2>
+            <p>Properties and private assets purchased through CAPROV.</p>
+          </div>
+          <Link href="/trading" className="buyer-dash__investments-link">View trading activity <ArrowRight size={15} /></Link>
+        </div>
+        {tradesQuery.isLoading ? <p className="buyer-dash__investments-empty">Loading your investment positions…</p> : null}
+        {!tradesQuery.isLoading && !investments.length ? <div className="buyer-dash__investments-empty"><Building2 size={20} /><span><strong>No investments yet</strong>Explore the marketplace to acquire an interest in a verified asset.</span><Link href="/marketplace">Browse marketplace <ArrowRight size={14} /></Link></div> : null}
+        {investments.length ? <div className="buyer-dash__investment-grid">{investments.map((investment) => {
+          // Marketplace data is a resilient fallback while an older API
+          // process is still returning a lean trade record without `asset`.
+          const marketplaceListing = listingsByAssetId.get(investment.assetId);
+          const asset = investment.asset ?? marketplaceListing?.asset;
+          const valuation = investment.listing?.valuation?.payload?.amount ?? marketplaceListing?.valuation?.payload?.amount;
+          const supply = investment.listing?.totalTokenSupply;
+          const ownership = supply && investment.units ? (investment.units / supply) * 100 : undefined;
+          const name = asset?.name ?? 'Tokenized asset';
+          return <Link key={investment.assetId} href={`/assets/${investment.assetId}`} className="buyer-dash__investment-card">
+            <div className="buyer-dash__investment-icon"><Building2 size={20} /></div>
+            <div className="buyer-dash__investment-top"><div><p className="buyer-dash__investment-class">{asset?.assetClass ? assetClassLabel[asset.assetClass as keyof typeof assetClassLabel] : 'Private asset'}</p><h3>{name}</h3></div><span className={investment.pending ? 'buyer-dash__investment-status is-pending' : 'buyer-dash__investment-status'}>{investment.pending ? 'Settling' : 'Held'}</span></div>
+            <div className="buyer-dash__investment-metrics"><span><small>Units held</small><strong>{investment.units.toLocaleString()}</strong></span><span><small>Invested</small><strong>{moneyCompact(investment.invested, investment.currency)}</strong></span><span><small>{valuation ? 'Asset valuation' : 'Ownership'}</small><strong>{valuation ? moneyCompact(valuation, investment.listing?.valuation?.payload?.currency) : ownership != null ? `${ownership.toFixed(2)}%` : '—'}</strong></span></div>
+            <p className="buyer-dash__investment-foot"><ShieldCheck size={14} />{investment.pending ? 'Purchase is awaiting settlement' : 'Settlement completed'}<ChevronRight size={16} /></p>
+          </Link>;
+        })}</div> : null}
       </section>
 
       <section className="buyer-dash__actions">

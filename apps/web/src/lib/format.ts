@@ -84,6 +84,7 @@ export function confidenceLabel(value?: number) {
 
 export const assetClassLabel: Record<AssetClass, string> = {
   REAL_ESTATE: 'Real estate',
+  PLANT_AND_MACHINERY: 'Plant & machinery',
   PRIVATE_CREDIT: 'Private credit',
   PRIVATE_EQUITY: 'Private equity',
   INFRASTRUCTURE: 'Infrastructure',

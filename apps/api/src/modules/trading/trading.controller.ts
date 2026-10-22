@@ -127,11 +127,17 @@ export class TradingController {
             listing.organizationId === user.organizationId,
         );
       })
-      .map((trade) => ({
-        ...trade,
-        listing:
-          this.db.snapshot.listings.find((item) => item.id === trade.listingId) ?? null,
-      }));
+      .map((trade) => {
+        const listing = this.db.snapshot.listings.find((item) => item.id === trade.listingId) ?? null;
+        return {
+          ...trade,
+          // The dashboard must distinguish a buyer's acquired position from
+          // a seller's own listing activity when an organization has both.
+          participantRole: trade.organizationId === user.organizationId ? 'BUYER' : 'SELLER',
+          listing,
+          asset: this.db.snapshot.assets.find((item) => item.id === trade.assetId) ?? null,
+        };
+      });
   }
 
   @Post('orders')

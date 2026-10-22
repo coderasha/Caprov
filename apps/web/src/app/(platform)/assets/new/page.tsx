@@ -4,18 +4,27 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Field, Input, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
+import { distinctOptions, indiaAddressDirectory, indiaStates } from '@/lib/india-address-directory';
 import { readFileAsDataUrl, readFilesAsDataUrls } from '@/lib/files';
-import { assetClassLabel } from '@/lib/format';
 import type { HydratedAsset } from '@/lib/types';
-import type { AssetClass, AssetStatus, CurrencyCode } from '@caprov/types';
+import type { AssetAddress } from '@caprov/types';
+import { assetSubcategories, type AssetClass, type AssetStatus, type CurrencyCode } from '@caprov/types';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 
-const classes = (Object.keys(assetClassLabel) as AssetClass[]).filter(
-  (assetClass) => assetClass !== 'PRIVATE_CREDIT' && assetClass !== 'FUND',
-);
+const classes = [
+  { value: 'REAL_ESTATE', label: 'Real Estate' },
+  { value: 'PLANT_AND_MACHINERY', label: 'Plant & Machinery' },
+  { value: 'PRIVATE_EQUITY', label: 'Private Equity' },
+] as const satisfies ReadonlyArray<{ value: AssetClass; label: string }>;
+
+const initialAddress: AssetAddress = {
+  countryCode: 'IN',
+  countryName: 'India',
+  source: 'MANUAL',
+};
 
 export default function NewAssetPage() {
   const router = useRouter();
@@ -25,10 +34,10 @@ export default function NewAssetPage() {
   const [form, setForm] = useState({
     name: '',
     assetClass: 'REAL_ESTATE' as AssetClass,
+    assetSubcategory: '',
+    address: initialAddress,
     status: 'DRAFT' as AssetStatus,
     currency: 'USD' as CurrencyCode,
-    jurisdiction: '',
-    location: '',
     description: '',
     creationDate: '',
     primaryImageUrl: '',
@@ -65,10 +74,10 @@ export default function NewAssetPage() {
       const response = await api.post<HydratedAsset>('/assets', {
         name: form.name,
         assetClass: form.assetClass,
+        assetSubcategory: form.assetSubcategory,
         status: form.status,
         currency: form.currency,
-        jurisdiction: form.jurisdiction || undefined,
-        location: form.location || undefined,
+        address: form.address,
         description: form.description || undefined,
         creationDate: form.creationDate || undefined,
         primaryImageUrl: form.primaryImageUrl || undefined,
@@ -82,6 +91,19 @@ export default function NewAssetPage() {
     }
   }
 
+  const addressMatches = useMemo(
+    () => indiaAddressDirectory.filter((item) =>
+      (!form.address.stateCode || item.stateCode === form.address.stateCode) &&
+      (!form.address.districtName || item.districtName === form.address.districtName) &&
+      (!form.address.subDistrictName || item.subDistrictName === form.address.subDistrictName) &&
+      (!form.address.settlementName || item.settlementName === form.address.settlementName),
+    ),
+    [form.address],
+  );
+  const setAddress = (patch: Partial<typeof form.address>) =>
+    setForm({ ...form, address: { ...form.address, source: 'MANUAL', ...patch } });
+  const subDistrictLabel = addressMatches[0]?.subDistrictLabel ?? 'Sub-district';
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
@@ -94,15 +116,33 @@ export default function NewAssetPage() {
             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Class">
+            <Field label="Asset class">
               <Select
                 value={form.assetClass}
-                onChange={(e) => setForm({ ...form, assetClass: e.target.value as AssetClass })}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    assetClass: e.target.value as AssetClass,
+                    assetSubcategory: '',
+                  })
+                }
               >
-                {classes.map((value) => (
+                {classes.map(({ value, label }) => (
                   <option key={value} value={value}>
-                    {assetClassLabel[value]}
+                    {label}
                   </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Subcategory">
+              <Select
+                value={form.assetSubcategory}
+                onChange={(e) => setForm({ ...form, assetSubcategory: e.target.value })}
+                required
+              >
+                <option value="" disabled>Select a subcategory</option>
+                {assetSubcategories[form.assetClass].map((subcategory) => (
+                  <option key={subcategory} value={subcategory}>{subcategory}</option>
                 ))}
               </Select>
             </Field>
@@ -134,13 +174,66 @@ export default function NewAssetPage() {
                 onChange={(e) => setForm({ ...form, creationDate: e.target.value })}
               />
             </Field>
-            <Field label="Jurisdiction">
-              <Input value={form.jurisdiction} onChange={(e) => setForm({ ...form, jurisdiction: e.target.value })} />
-            </Field>
-            <Field label="Location">
-              <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
-            </Field>
           </div>
+          <section className="rounded-2xl border border-[var(--line)] bg-[var(--paper)]/40 p-4 sm:p-5">
+            <div className="mb-4">
+              <h2 className="text-sm font-semibold text-[var(--ink)]">Asset address</h2>
+              <p className="mt-1 text-xs leading-5 text-[var(--muted)]">PIN lookup narrows the address when a matching postal record is available. Every field remains editable.</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Country">
+                <Select value={form.address.countryCode} onChange={(e) => setAddress({ countryCode: e.target.value, countryName: e.target.value === 'IN' ? 'India' : e.target.value })}>
+                  <option value="IN">India</option>
+                </Select>
+              </Field>
+              <Field label="PIN Code">
+                <Input
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="6-digit PIN"
+                  value={form.address.pinCode ?? ''}
+                  onChange={(e) => {
+                    const pinCode = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    const matched = pinCode.length === 6 ? indiaAddressDirectory.find((item) => item.pinCode === pinCode) : undefined;
+                    setAddress(matched ? { ...matched, pinCode, source: 'INDIA_POST' } : { pinCode });
+                  }}
+                />
+              </Field>
+              <Field label="State / Union Territory">
+                <Select value={form.address.stateCode ?? ''} onChange={(e) => {
+                  const [stateCode, stateName] = indiaStates.find(([code]) => code === e.target.value) ?? ['', ''];
+                  setAddress({ stateCode, stateName, districtCode: '', districtName: '', subDistrictCode: '', subDistrictName: '', settlementName: '', locality: '' });
+                }}>
+                  <option value="">Select state / union territory</option>
+                  {indiaStates.map(([code, name]) => <option key={code} value={code}>{name}</option>)}
+                </Select>
+              </Field>
+              <Field label="District">
+                <Input list="asset-districts" value={form.address.districtName ?? ''} placeholder="Select or enter district" onChange={(e) => setAddress({ districtName: e.target.value, subDistrictCode: '', subDistrictName: '', settlementName: '', locality: '' })} />
+                <datalist id="asset-districts">{distinctOptions(addressMatches, 'districtName').map((value) => <option key={value} value={value} />)}</datalist>
+              </Field>
+              <Field label={subDistrictLabel}>
+                <Input list="asset-subdistricts" value={form.address.subDistrictName ?? ''} placeholder={`Select or enter ${subDistrictLabel.toLowerCase()}`} onChange={(e) => setAddress({ subDistrictName: e.target.value, settlementName: '', locality: '' })} />
+                <datalist id="asset-subdistricts">{distinctOptions(addressMatches, 'subDistrictName').map((value) => <option key={value} value={value} />)}</datalist>
+              </Field>
+              <Field label="Village / Town / City">
+                <Input list="asset-settlements" value={form.address.settlementName ?? ''} placeholder="Select or enter settlement" onChange={(e) => setAddress({ settlementName: e.target.value, locality: '' })} />
+                <datalist id="asset-settlements">{distinctOptions(addressMatches, 'settlementName').map((value) => <option key={value} value={value} />)}</datalist>
+              </Field>
+              <Field label="Locality / Area / Ward">
+                <Input list="asset-localities" value={form.address.locality ?? ''} placeholder="Select or enter locality" onChange={(e) => setAddress({ locality: e.target.value })} />
+                <datalist id="asset-localities">{distinctOptions(addressMatches, 'locality').map((value) => <option key={value} value={value} />)}</datalist>
+              </Field>
+              <Field label="Post office">
+                <Input value={form.address.postOffice ?? ''} onChange={(e) => setAddress({ postOffice: e.target.value })} />
+              </Field>
+            </div>
+            <div className="mt-4">
+              <Field label="Property / Site Address">
+                <Textarea rows={3} value={form.address.propertyAddress ?? ''} placeholder="Building, plot, street, road, landmark" onChange={(e) => setAddress({ propertyAddress: e.target.value })} />
+              </Field>
+            </div>
+          </section>
           <Field label="Description">
             <Textarea
               rows={4}

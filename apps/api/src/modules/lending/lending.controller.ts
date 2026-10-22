@@ -103,6 +103,16 @@ export class LendingController {
     if (!collateral || !['PENDING_APPROVAL', 'ACTIVE'].includes(collateral.status)) {
       throw new NotFoundException('A pending or active collateral position is required');
     }
+    const existingLoan = this.db.snapshot.loans.find(
+      (item) =>
+        item.collateralId === collateral.id &&
+        ['PENDING_APPROVAL', 'OFFERED', 'ACCEPTED', 'ACTIVE'].includes(item.status),
+    );
+    if (existingLoan) {
+      throw new BadRequestException(
+        'This collateral position already has an open loan workflow.',
+      );
+    }
     const utilized = this.utilizedAmount(collateral.id);
     // Before underwriting, the owner can only request against the pledged
     // mark. The banker later applies the authoritative haircut in the offer.
@@ -355,6 +365,17 @@ export class LendingController {
     if (!loan || loan.status !== 'PENDING_APPROVAL') throw new NotFoundException('Pending loan application not found');
     const collateral = this.db.snapshot.collateralPositions.find((item) => item.id === loan.collateralId);
     if (!collateral) throw new NotFoundException('Collateral not found');
+    const conflictingLoan = this.db.snapshot.loans.find(
+      (item) =>
+        item.id !== loan.id &&
+        item.collateralId === collateral.id &&
+        ['OFFERED', 'ACCEPTED', 'ACTIVE'].includes(item.status),
+    );
+    if (conflictingLoan) {
+      throw new BadRequestException(
+        'This collateral position already has an open loan workflow.',
+      );
+    }
     const maxLoan = Number((collateral.pledgedValue * (1 - dto.haircutBps / 10_000)).toFixed(2));
     if (dto.principal > maxLoan) throw new BadRequestException(`Offer exceeds haircut-adjusted limit of ${maxLoan} ${collateral.currency}`);
     const now = new Date().toISOString();

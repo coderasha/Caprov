@@ -57,6 +57,17 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Desktop platform pages have one scroll owner: the AppShell main pane.
+   Without this, the document can also become scrollable alongside that pane
+   when a long marketplace listing is rendered. */
+@media (min-width: 1280px) {
+  html:has(.platform-canvas),
+  body:has(.platform-canvas) {
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
 ::selection {
   background: var(--gold-soft);
 }
@@ -5569,6 +5580,33 @@ canvas {
   color: var(--muted);
 }
 
+.buyer-dash__investments { border: 1px solid color-mix(in srgb, var(--line) 85%, white); border-radius: 1rem; background: color-mix(in srgb, var(--card) 96%, white); padding: 1.25rem; box-shadow: 0 10px 28px rgba(10, 15, 26, .04); }
+.buyer-dash__investments-head { display: flex; align-items: end; justify-content: space-between; gap: 1rem; }
+.buyer-dash__investments-head h2 { margin-top: .25rem; font-family: var(--font-display), ui-sans-serif, sans-serif; font-size: 1.35rem; font-weight: 650; letter-spacing: -.03em; color: var(--ink); }
+.buyer-dash__investments-head p:last-child { margin-top: .25rem; font-size: .84rem; color: var(--muted); }
+.buyer-dash__investments-link { display: inline-flex; align-items: center; gap: .35rem; color: var(--gold); font-size: .8rem; font-weight: 650; text-decoration: none; white-space: nowrap; }
+.buyer-dash__investment-grid { display: grid; gap: .8rem; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 1rem; }
+.buyer-dash__investment-card { position: relative; display: grid; gap: .9rem; min-width: 0; border: 1px solid color-mix(in srgb, var(--line) 88%, white); border-radius: .85rem; background: linear-gradient(135deg, rgba(255,255,255,.88), rgba(250,248,243,.82)); padding: 1rem; color: inherit; text-decoration: none; transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease; }
+.buyer-dash__investment-card:hover { border-color: color-mix(in srgb, var(--gold) 40%, var(--line)); transform: translateY(-1px); box-shadow: 0 10px 24px rgba(10,15,26,.06); }
+.buyer-dash__investment-icon { display: grid; width: 2.35rem; height: 2.35rem; place-items: center; border-radius: .7rem; background: var(--gold-soft); color: var(--gold); }
+.buyer-dash__investment-top { display: flex; justify-content: space-between; gap: .75rem; }
+.buyer-dash__investment-class { font-size: .68rem; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.buyer-dash__investment-top h3 { margin-top: .25rem; overflow: hidden; font-family: var(--font-display), ui-sans-serif, sans-serif; font-size: 1rem; font-weight: 650; letter-spacing: -.02em; color: var(--ink); text-overflow: ellipsis; white-space: nowrap; }
+.buyer-dash__investment-status { flex: 0 0 auto; height: fit-content; border-radius: 999px; background: var(--ok-soft); padding: .25rem .5rem; color: var(--ok); font-size: .68rem; font-weight: 700; }
+.buyer-dash__investment-status.is-pending { background: var(--gold-soft); color: #91601c; }
+.buyer-dash__investment-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid color-mix(in srgb, var(--line) 80%, white); padding-top: .8rem; }
+.buyer-dash__investment-metrics span { min-width: 0; padding: 0 .65rem; border-left: 1px solid color-mix(in srgb, var(--line) 75%, white); }
+.buyer-dash__investment-metrics span:first-child { padding-left: 0; border-left: 0; }
+.buyer-dash__investment-metrics small, .buyer-dash__investment-metrics strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.buyer-dash__investment-metrics small { font-size: .67rem; color: var(--muted); }
+.buyer-dash__investment-metrics strong { margin-top: .2rem; font-size: .78rem; color: var(--ink); }
+.buyer-dash__investment-foot { display: flex; align-items: center; gap: .35rem; color: var(--muted); font-size: .73rem; }
+.buyer-dash__investment-foot svg:last-child { margin-left: auto; color: var(--gold); }
+.buyer-dash__investments-empty { display: flex; align-items: center; gap: .7rem; margin-top: 1rem; border: 1px dashed color-mix(in srgb, var(--line) 95%, white); border-radius: .8rem; padding: 1rem; color: var(--muted); font-size: .82rem; }
+.buyer-dash__investments-empty span { display: grid; gap: .15rem; }
+.buyer-dash__investments-empty strong { color: var(--ink); }
+.buyer-dash__investments-empty a { display: inline-flex; align-items: center; gap: .3rem; margin-left: auto; color: var(--gold); font-weight: 650; text-decoration: none; white-space: nowrap; }
+
 .buyer-dash__actions {
   display: grid;
   gap: 0.95rem;
@@ -5668,6 +5706,7 @@ canvas {
   .buyer-dash__action-grid {
     grid-template-columns: 1fr;
   }
+  .buyer-dash__investment-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
@@ -5682,6 +5721,12 @@ canvas {
   .buyer-dash__hero-content {
     align-items: stretch;
   }
+
+  .buyer-dash__investments-head { align-items: start; flex-direction: column; }
+  .buyer-dash__investment-metrics { grid-template-columns: 1fr; gap: .55rem; }
+  .buyer-dash__investment-metrics span { padding: 0; border-left: 0; }
+  .buyer-dash__investments-empty { align-items: start; flex-wrap: wrap; }
+  .buyer-dash__investments-empty a { margin-left: 1.7rem; }
 
   .buyer-dash__title {
     max-width: none;

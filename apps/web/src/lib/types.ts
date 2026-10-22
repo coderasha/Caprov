@@ -1,5 +1,6 @@
 import type {
   AssetClass,
+  AssetAddress,
   AssetDnaEnvelope,
   AssetStatus,
   CurrencyCode,
@@ -19,6 +20,8 @@ export interface HydratedAsset {
   organizationId: string;
   name: string;
   assetClass: AssetClass;
+  assetSubcategory?: string;
+  address?: AssetAddress;
   status: AssetStatus;
   currency: CurrencyCode;
   jurisdiction?: string;

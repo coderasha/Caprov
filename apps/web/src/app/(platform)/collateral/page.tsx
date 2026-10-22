@@ -141,7 +141,9 @@ function CollateralOperatorPage() {
     queryFn: async () => (await api.get<HydratedAsset[]>('/assets')).data,
   });
   const tokens = useQuery({
-    queryKey: ['tokenization'],
+    // Do not share this cache entry with the Tokenization overview, whose
+    // response is an object containing both network and token data.
+    queryKey: ['tokenization', 'collateral-tokens'],
     queryFn: async () =>
       (await api.get<{ tokens: TokenOption[] }>('/tokenization')).data.tokens,
   });
