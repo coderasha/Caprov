@@ -64,8 +64,8 @@ export class DatabaseService implements OnModuleInit {
     if (!this.data.memberships.some((membership) => membership.id === 'mem_bank_demo')) {
       this.data.memberships.push({ id: 'mem_bank_demo', organizationId: bankOrgId, userId: bankerId, role: 'BANKER', createdAt: new Date().toISOString() }); changed = true;
     }
-    if (!this.data.wallets.some((wallet) => wallet.organizationId === bankOrgId && wallet.currency === 'USD')) {
-      this.data.wallets.push({ organizationId: bankOrgId, currency: 'USD', balance: 100_000_000, updatedAt: new Date().toISOString() }); changed = true;
+    if (!this.data.wallets.some((wallet) => wallet.organizationId === bankOrgId && wallet.currency === 'INR')) {
+      this.data.wallets.push({ organizationId: bankOrgId, currency: 'INR', balance: 100_000_000, updatedAt: new Date().toISOString() }); changed = true;
     }
     if (!this.data.organizations.some((org) => org.id === buyerOrgId)) {
       this.data.organizations.push({ id: buyerOrgId, name: 'Mehta Family Office', slug: 'mehta-family-office', status: 'ACTIVE', llmModelId: preferredDefaultModelId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); changed = true;
@@ -129,8 +129,8 @@ export class DatabaseService implements OnModuleInit {
         changed = true;
       }
     }
-    if (!this.data.wallets.some((wallet) => wallet.organizationId === buyerOrgId && wallet.currency === 'USD')) {
-      this.data.wallets.push({ organizationId: buyerOrgId, currency: 'USD', balance: 0, updatedAt: new Date().toISOString() });
+    if (!this.data.wallets.some((wallet) => wallet.organizationId === buyerOrgId && wallet.currency === 'INR')) {
+      this.data.wallets.push({ organizationId: buyerOrgId, currency: 'INR', balance: 0, updatedAt: new Date().toISOString() });
       changed = true;
     }
     for (const snapshot of this.data.dnaSnapshots) {
@@ -201,7 +201,7 @@ export class DatabaseService implements OnModuleInit {
       });
     }
     for (const asset of this.data.assets) {
-      if (asset.currency !== 'USD') { asset.currency = 'USD'; changed = true; }
+      if (asset.currency !== 'INR') { asset.currency = 'INR'; changed = true; }
       const legacy = asset as typeof asset & { acquisitionDate?: string };
       if (legacy.acquisitionDate && !legacy.creationDate) {
         legacy.creationDate = legacy.acquisitionDate;
@@ -230,35 +230,35 @@ export class DatabaseService implements OnModuleInit {
         changed = true;
       }
     }
-    // CAPROV's operational ledger is USD-only. Historical source documents
+    // CAPROV's operational ledger is INR-only. Historical source documents
     // retain their original currencies as evidence, but all platform marks,
-    // positions, facilities, and wallet entries are denominated in USD.
+    // positions, facilities, and wallet entries are denominated in INR.
     for (const valuation of this.data.valuations) {
-      if (valuation.payload.currency !== 'USD') { valuation.payload.currency = 'USD'; changed = true; }
+      if (valuation.payload.currency !== 'INR') { valuation.payload.currency = 'INR'; changed = true; }
     }
     for (const listing of this.data.listings) {
-      if (listing.currency !== 'USD') { listing.currency = 'USD'; changed = true; }
+      if (listing.currency !== 'INR') { listing.currency = 'INR'; changed = true; }
     }
     for (const order of this.data.orders) {
-      if (order.currency !== 'USD') { order.currency = 'USD'; changed = true; }
+      if (order.currency !== 'INR') { order.currency = 'INR'; changed = true; }
     }
     for (const trade of this.data.trades) {
-      if (trade.currency !== 'USD') { trade.currency = 'USD'; changed = true; }
+      if (trade.currency !== 'INR') { trade.currency = 'INR'; changed = true; }
     }
     for (const position of this.data.collateralPositions) {
-      if (position.currency !== 'USD') { position.currency = 'USD'; changed = true; }
+      if (position.currency !== 'INR') { position.currency = 'INR'; changed = true; }
     }
     for (const loan of this.data.loans) {
-      if (loan.currency !== 'USD') { loan.currency = 'USD'; changed = true; }
+      if (loan.currency !== 'INR') { loan.currency = 'INR'; changed = true; }
     }
     for (const wallet of this.data.wallets) {
-      if (wallet.currency !== 'USD') { wallet.currency = 'USD'; changed = true; }
+      if (wallet.currency !== 'INR') { wallet.currency = 'INR'; changed = true; }
     }
     for (const transaction of this.data.walletTransactions) {
-      if (transaction.currency !== 'USD') { transaction.currency = 'USD'; changed = true; }
+      if (transaction.currency !== 'INR') { transaction.currency = 'INR'; changed = true; }
     }
     for (const portfolio of this.data.portfolios) {
-      if (portfolio.baseCurrency !== 'USD') { portfolio.baseCurrency = 'USD'; changed = true; }
+      if (portfolio.baseCurrency !== 'INR') { portfolio.baseCurrency = 'INR'; changed = true; }
     }
     for (const listing of this.data.listings) {
       if (!listing.offeringType) {

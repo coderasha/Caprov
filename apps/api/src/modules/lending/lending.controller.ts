@@ -136,7 +136,7 @@ export class LendingController {
       status: 'PENDING_APPROVAL',
       requestedByUserId: user.id,
       principal: dto.principal,
-      currency: 'USD',
+      currency: 'INR',
       interestRateBps: dto.interestRateBps ?? 650,
       termDays: dto.termDays ?? 365,
       outstanding: 0,
@@ -166,7 +166,7 @@ export class LendingController {
    * Lets a banker underwrite a live, Sepolia-verified collateral position
    * directly.  This is the normal lender-led workflow: the asset owner locks
    * collateral, the bank offers terms, the owner accepts, then the bank
-   * activates the on-chain vault position and disburses USD.
+   * activates the on-chain vault position and disburses INR.
    */
   @Post('collateral/:collateralId/offer')
   @Roles('BANKER', 'PLATFORM_ADMIN')
@@ -220,7 +220,7 @@ export class LendingController {
       requestedByUserId: collateral.requestedByUserId,
       approvedByUserId: user.id,
       principal: dto.principal,
-      currency: 'USD',
+      currency: 'INR',
       interestRateBps: dto.interestRateBps,
       termDays: dto.termDays,
       outstanding: 0,
@@ -306,9 +306,9 @@ export class LendingController {
       target.updatedAt = now;
 
       const bankWallet = draft.wallets.find((item) => item.organizationId === user.organizationId && item.currency === target.currency);
-      if (!bankWallet || bankWallet.balance < target.principal) throw new BadRequestException('Bank simulated USD treasury has insufficient funds.');
+      if (!bankWallet || bankWallet.balance < target.principal) throw new BadRequestException('Bank simulated INR treasury has insufficient funds.');
       bankWallet.balance = Number((bankWallet.balance - target.principal).toFixed(2)); bankWallet.updatedAt = now;
-      draft.walletTransactions.unshift({ id: createId('wtx'), organizationId: user.organizationId, direction: 'DEBIT', type: 'LOAN_DISBURSAL', amount: target.principal, currency: target.currency, description: `Simulated USD disbursal for loan ${target.id}`, referenceType: 'Loan', referenceId: target.id, createdAt: now, createdByUserId: user.id });
+      draft.walletTransactions.unshift({ id: createId('wtx'), organizationId: user.organizationId, direction: 'DEBIT', type: 'LOAN_DISBURSAL', amount: target.principal, currency: target.currency, description: `Simulated INR disbursal for loan ${target.id}`, referenceType: 'Loan', referenceId: target.id, createdAt: now, createdByUserId: user.id });
       const wallet =
         draft.wallets.find(
           (item) =>
@@ -419,15 +419,15 @@ export class LendingController {
     this.db.mutate((draft) => {
       const target = draft.loans.find((item) => item.id === id)!;
       const borrowerWallet = draft.wallets.find((item) => item.organizationId === target.organizationId && item.currency === target.currency);
-      if (!borrowerWallet || borrowerWallet.balance < target.outstanding) throw new BadRequestException('Lister simulated USD wallet has insufficient funds for repayment.');
+      if (!borrowerWallet || borrowerWallet.balance < target.outstanding) throw new BadRequestException('Lister simulated INR wallet has insufficient funds for repayment.');
       const bankerMembership = draft.memberships.find((item) => item.userId === target.approvedByUserId && item.role === 'BANKER');
       const bankWallet = bankerMembership && draft.wallets.find((item) => item.organizationId === bankerMembership.organizationId && item.currency === target.currency);
       if (!bankWallet) throw new BadRequestException('Bank treasury wallet is unavailable.');
       const repayment = target.outstanding;
       borrowerWallet.balance = Number((borrowerWallet.balance - repayment).toFixed(2)); borrowerWallet.updatedAt = now;
       bankWallet.balance = Number((bankWallet.balance + repayment).toFixed(2)); bankWallet.updatedAt = now;
-      draft.walletTransactions.unshift({ id: createId('wtx'), organizationId: target.organizationId, direction: 'DEBIT', type: 'LOAN_REPAYMENT', amount: repayment, currency: target.currency, description: `Simulated USD repayment for loan ${target.id}`, referenceType: 'Loan', referenceId: target.id, createdAt: now, createdByUserId: user.id });
-      draft.walletTransactions.unshift({ id: createId('wtx'), organizationId: bankerMembership.organizationId, direction: 'CREDIT', type: 'LOAN_REPAYMENT', amount: repayment, currency: target.currency, description: `Simulated USD repayment received for loan ${target.id}`, referenceType: 'Loan', referenceId: target.id, createdAt: now, createdByUserId: user.id });
+      draft.walletTransactions.unshift({ id: createId('wtx'), organizationId: target.organizationId, direction: 'DEBIT', type: 'LOAN_REPAYMENT', amount: repayment, currency: target.currency, description: `Simulated INR repayment for loan ${target.id}`, referenceType: 'Loan', referenceId: target.id, createdAt: now, createdByUserId: user.id });
+      draft.walletTransactions.unshift({ id: createId('wtx'), organizationId: bankerMembership.organizationId, direction: 'CREDIT', type: 'LOAN_REPAYMENT', amount: repayment, currency: target.currency, description: `Simulated INR repayment received for loan ${target.id}`, referenceType: 'Loan', referenceId: target.id, createdAt: now, createdByUserId: user.id });
       target.status = 'REPAID';
       target.outstanding = 0;
       target.repaidAt = now;
@@ -444,7 +444,7 @@ export class LendingController {
   }
 
   /**
-   * The lender releases ERC-1155 collateral only after the USD repayment has
+   * The lender releases ERC-1155 collateral only after the INR repayment has
    * posted to both ledgers.  The API records the release only after verifying
    * the matching real Sepolia event.
    */

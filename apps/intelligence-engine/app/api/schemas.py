@@ -21,7 +21,7 @@ class PipelineAsset(BaseModel):
     id: str
     name: str
     assetClass: str = "OTHER"
-    currency: str = "USD"
+    currency: str = "INR"
     location: str | None = None
     jurisdiction: str | None = None
 

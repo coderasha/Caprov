@@ -1,305 +1,65 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Field, Input, Select, Textarea } from '@/components/ui/input';
+import { Input, Select, Textarea } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { distinctOptions, indiaAddressDirectory, indiaStates } from '@/lib/india-address-directory';
 import { readFileAsDataUrl, readFilesAsDataUrls } from '@/lib/files';
 import type { HydratedAsset } from '@/lib/types';
+import { useAuthStore } from '@/stores/auth-store';
 import type { AssetAddress } from '@caprov/types';
 import { assetSubcategories, type AssetClass, type AssetStatus, type CurrencyCode } from '@caprov/types';
+import { ArrowLeft, ArrowRight, Building2, CalendarDays, Check, CircleHelp, FileImage, Landmark, MapPin, Plus, Search, ShieldCheck, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
-import { useAuthStore } from '@/stores/auth-store';
+import { useMemo, useRef, useState } from 'react';
 
-const classes = [
-  { value: 'REAL_ESTATE', label: 'Real Estate' },
-  { value: 'PLANT_AND_MACHINERY', label: 'Plant & Machinery' },
-  { value: 'PRIVATE_EQUITY', label: 'Private Equity' },
-] as const satisfies ReadonlyArray<{ value: AssetClass; label: string }>;
+const classes = [{ value: 'REAL_ESTATE', label: 'Real Estate' }, { value: 'PLANT_AND_MACHINERY', label: 'Plant & Machinery' }, { value: 'PRIVATE_EQUITY', label: 'Private Equity' }] as const satisfies ReadonlyArray<{ value: AssetClass; label: string }>;
+const initialAddress: AssetAddress = { countryCode: 'IN', countryName: 'India', source: 'MANUAL' };
+type District = { code: string; name: string };
+type SubDistrict = { code: string; name: string };
 
-const initialAddress: AssetAddress = {
-  countryCode: 'IN',
-  countryName: 'India',
-  source: 'MANUAL',
-};
+function Label({ children, required }: { children: React.ReactNode; required?: boolean }) { return <label className="asset-create__label">{children}{required && <b>*</b>}</label>; }
+function Title({ number, title, text }: { number: number; title: string; text: string }) { return <div className="asset-create__title"><span>{number}</span><div><h2>{title}</h2><p>{text}</p></div></div>; }
 
 export default function NewAssetPage() {
-  const router = useRouter();
-  const roles = useAuthStore((state) => state.roles);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [form, setForm] = useState({
-    name: '',
-    assetClass: 'REAL_ESTATE' as AssetClass,
-    assetSubcategory: '',
-    address: initialAddress,
-    status: 'DRAFT' as AssetStatus,
-    currency: 'USD' as CurrencyCode,
-    description: '',
-    creationDate: '',
-    primaryImageUrl: '',
-    imageUrls: [] as string[],
-    primaryImageName: '',
-    galleryImageNames: [] as string[],
-  });
-
-  const canCreateAssets = roles.includes('ORG_ADMIN') || roles.includes('PLATFORM_ADMIN');
-
-  if (!canCreateAssets) {
-    return (
-      <div className="mx-auto max-w-2xl space-y-6">
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--muted)]">Assets</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">Asset creation is restricted</h1>
-        </div>
-        <Card className="p-6">
-          <p className="text-sm leading-6 text-[var(--muted)]">
-            Only organization administrators can create assets. Buyers review listings and place buy interest instead.
-          </p>
-          <Button className="mt-5" onClick={() => router.push('/assets')}>View assets</Button>
-        </Card>
-      </div>
-    );
-  }
-
-  async function onSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    setLoading(true);
-    setError('');
-    try {
-      const imageUrls = Array.from(new Set([form.primaryImageUrl, ...form.imageUrls].filter(Boolean)));
-      const response = await api.post<HydratedAsset>('/assets', {
-        name: form.name,
-        assetClass: form.assetClass,
-        assetSubcategory: form.assetSubcategory,
-        status: form.status,
-        currency: form.currency,
-        address: form.address,
-        description: form.description || undefined,
-        creationDate: form.creationDate || undefined,
-        primaryImageUrl: form.primaryImageUrl || undefined,
-        imageUrls,
-      });
-      router.push(`/assets/${response.data.id}`);
-    } catch {
-      setError('Could not create the asset. Check the fields and try again.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const addressMatches = useMemo(
-    () => indiaAddressDirectory.filter((item) =>
-      (!form.address.stateCode || item.stateCode === form.address.stateCode) &&
-      (!form.address.districtName || item.districtName === form.address.districtName) &&
-      (!form.address.subDistrictName || item.subDistrictName === form.address.subDistrictName) &&
-      (!form.address.settlementName || item.settlementName === form.address.settlementName),
-    ),
-    [form.address],
-  );
-  const setAddress = (patch: Partial<typeof form.address>) =>
-    setForm({ ...form, address: { ...form.address, source: 'MANUAL', ...patch } });
-  const subDistrictLabel = addressMatches[0]?.subDistrictLabel ?? 'Sub-district';
-
-  return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--muted)]">Assets</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">New asset</h1>
-      </div>
-      <Card className="p-6">
-        <form className="grid gap-4" onSubmit={onSubmit}>
-          <Field label="Name">
-            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-          </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Asset class">
-              <Select
-                value={form.assetClass}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    assetClass: e.target.value as AssetClass,
-                    assetSubcategory: '',
-                  })
-                }
-              >
-                {classes.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </Select>
-            </Field>
-            <Field label="Subcategory">
-              <Select
-                value={form.assetSubcategory}
-                onChange={(e) => setForm({ ...form, assetSubcategory: e.target.value })}
-                required
-              >
-                <option value="" disabled>Select a subcategory</option>
-                {assetSubcategories[form.assetClass].map((subcategory) => (
-                  <option key={subcategory} value={subcategory}>{subcategory}</option>
-                ))}
-              </Select>
-            </Field>
-            <Field label="Status">
-              <Select
-                value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value as AssetStatus })}
-              >
-                <option value="DRAFT">Draft</option>
-                <option value="ACTIVE">Active</option>
-                <option value="UNDER_REVIEW">Under review</option>
-                <option value="ARCHIVED">Archived</option>
-              </Select>
-            </Field>
-            <Field label="Currency">
-              <Select
-                value={form.currency}
-                onChange={(e) => setForm({ ...form, currency: e.target.value as CurrencyCode })}
-              >
-                {['USD', 'EUR', 'GBP', 'SGD', 'INR'].map((value) => (
-                  <option key={value}>{value}</option>
-                ))}
-              </Select>
-            </Field>
-            <Field label="Creation date">
-              <Input
-                type="date"
-                value={form.creationDate}
-                onChange={(e) => setForm({ ...form, creationDate: e.target.value })}
-              />
-            </Field>
-          </div>
-          <section className="rounded-2xl border border-[var(--line)] bg-[var(--paper)]/40 p-4 sm:p-5">
-            <div className="mb-4">
-              <h2 className="text-sm font-semibold text-[var(--ink)]">Asset address</h2>
-              <p className="mt-1 text-xs leading-5 text-[var(--muted)]">PIN lookup narrows the address when a matching postal record is available. Every field remains editable.</p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Country">
-                <Select value={form.address.countryCode} onChange={(e) => setAddress({ countryCode: e.target.value, countryName: e.target.value === 'IN' ? 'India' : e.target.value })}>
-                  <option value="IN">India</option>
-                </Select>
-              </Field>
-              <Field label="PIN Code">
-                <Input
-                  inputMode="numeric"
-                  maxLength={6}
-                  placeholder="6-digit PIN"
-                  value={form.address.pinCode ?? ''}
-                  onChange={(e) => {
-                    const pinCode = e.target.value.replace(/\D/g, '').slice(0, 6);
-                    const matched = pinCode.length === 6 ? indiaAddressDirectory.find((item) => item.pinCode === pinCode) : undefined;
-                    setAddress(matched ? { ...matched, pinCode, source: 'INDIA_POST' } : { pinCode });
-                  }}
-                />
-              </Field>
-              <Field label="State / Union Territory">
-                <Select value={form.address.stateCode ?? ''} onChange={(e) => {
-                  const [stateCode, stateName] = indiaStates.find(([code]) => code === e.target.value) ?? ['', ''];
-                  setAddress({ stateCode, stateName, districtCode: '', districtName: '', subDistrictCode: '', subDistrictName: '', settlementName: '', locality: '' });
-                }}>
-                  <option value="">Select state / union territory</option>
-                  {indiaStates.map(([code, name]) => <option key={code} value={code}>{name}</option>)}
-                </Select>
-              </Field>
-              <Field label="District">
-                <Input list="asset-districts" value={form.address.districtName ?? ''} placeholder="Select or enter district" onChange={(e) => setAddress({ districtName: e.target.value, subDistrictCode: '', subDistrictName: '', settlementName: '', locality: '' })} />
-                <datalist id="asset-districts">{distinctOptions(addressMatches, 'districtName').map((value) => <option key={value} value={value} />)}</datalist>
-              </Field>
-              <Field label={subDistrictLabel}>
-                <Input list="asset-subdistricts" value={form.address.subDistrictName ?? ''} placeholder={`Select or enter ${subDistrictLabel.toLowerCase()}`} onChange={(e) => setAddress({ subDistrictName: e.target.value, settlementName: '', locality: '' })} />
-                <datalist id="asset-subdistricts">{distinctOptions(addressMatches, 'subDistrictName').map((value) => <option key={value} value={value} />)}</datalist>
-              </Field>
-              <Field label="Village / Town / City">
-                <Input list="asset-settlements" value={form.address.settlementName ?? ''} placeholder="Select or enter settlement" onChange={(e) => setAddress({ settlementName: e.target.value, locality: '' })} />
-                <datalist id="asset-settlements">{distinctOptions(addressMatches, 'settlementName').map((value) => <option key={value} value={value} />)}</datalist>
-              </Field>
-              <Field label="Locality / Area / Ward">
-                <Input list="asset-localities" value={form.address.locality ?? ''} placeholder="Select or enter locality" onChange={(e) => setAddress({ locality: e.target.value })} />
-                <datalist id="asset-localities">{distinctOptions(addressMatches, 'locality').map((value) => <option key={value} value={value} />)}</datalist>
-              </Field>
-              <Field label="Post office">
-                <Input value={form.address.postOffice ?? ''} onChange={(e) => setAddress({ postOffice: e.target.value })} />
-              </Field>
-            </div>
-            <div className="mt-4">
-              <Field label="Property / Site Address">
-                <Textarea rows={3} value={form.address.propertyAddress ?? ''} placeholder="Building, plot, street, road, landmark" onChange={(e) => setAddress({ propertyAddress: e.target.value })} />
-              </Field>
-            </div>
-          </section>
-          <Field label="Description">
-            <Textarea
-              rows={4}
-              value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
-            />
-          </Field>
-          <Field label="Primary image">
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) {
-                  setForm({ ...form, primaryImageUrl: '', primaryImageName: '' });
-                  return;
-                }
-                const primaryImageUrl = await readFileAsDataUrl(file);
-                setForm({ ...form, primaryImageUrl, primaryImageName: file.name });
-              }}
-            />
-            {form.primaryImageName ? (
-              <p className="mt-2 text-xs text-[var(--muted)]">Selected: {form.primaryImageName}</p>
-            ) : null}
-            {form.primaryImageUrl ? (
-              <Image
-                src={form.primaryImageUrl}
-                alt="Primary asset preview"
-                width={640}
-                height={288}
-                className="mt-3 h-36 w-full rounded-2xl object-cover"
-                unoptimized
-              />
-            ) : null}
-          </Field>
-          <Field label="Gallery images">
-            <Input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={async (e) => {
-                const files = e.target.files;
-                if (!files?.length) {
-                  setForm({ ...form, imageUrls: [], galleryImageNames: [] });
-                  return;
-                }
-                const imageUrls = await readFilesAsDataUrls(files);
-                setForm({
-                  ...form,
-                  imageUrls,
-                  galleryImageNames: Array.from(files).map((file) => file.name),
-                });
-              }}
-            />
-            {form.galleryImageNames.length > 0 ? (
-              <p className="mt-2 text-xs text-[var(--muted)]">
-                Selected: {form.galleryImageNames.join(', ')}
-              </p>
-            ) : null}
-          </Field>
-          {error ? <p className="text-sm text-[var(--danger)]">{error}</p> : null}
-          <Button type="submit" disabled={loading}>
-            {loading ? 'Creating…' : 'Create asset'}
-          </Button>
-        </form>
-      </Card>
-    </div>
-  );
+  const router = useRouter(); const roles = useAuthStore((s) => s.roles); const primaryInput = useRef<HTMLInputElement>(null); const galleryInput = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(false); const [error, setError] = useState(''); const [districts, setDistricts] = useState<District[]>([]); const [districtsLoading, setDistrictsLoading] = useState(false); const [subDistricts, setSubDistricts] = useState<SubDistrict[]>([]); const [mapMode, setMapMode] = useState(false); const [mapSelected, setMapSelected] = useState(false);
+  const [form, setForm] = useState({ name: '', assetClass: 'REAL_ESTATE' as AssetClass, assetSubcategory: '', status: 'DRAFT' as AssetStatus, currency: 'INR' as CurrencyCode, creationDate: '', description: '', address: initialAddress, primaryImageUrl: '', imageUrls: [] as string[] });
+  const matches = useMemo(() => indiaAddressDirectory.filter((item) => (!form.address.stateCode || item.stateCode === form.address.stateCode) && (!form.address.districtName || item.districtName === form.address.districtName)), [form.address]);
+  const address = (patch: Partial<AssetAddress>) => setForm((current) => ({ ...current, address: { ...current.address, source: 'MANUAL', ...patch } }));
+  if (!roles.includes('ORG_ADMIN') && !roles.includes('PLATFORM_ADMIN')) return <div className="asset-create__restricted"><ShieldCheck size={30} /><h1>Asset creation is restricted</h1><p>Only organization administrators can create assets.</p><Button onClick={() => router.push('/assets')}>View assets</Button></div>;
+  async function submit(event: React.FormEvent) { event.preventDefault(); setLoading(true); setError(''); try { const imageUrls = Array.from(new Set([form.primaryImageUrl, ...form.imageUrls].filter(Boolean))); const response = await api.post<HydratedAsset>('/assets', { ...form, description: form.description || undefined, creationDate: form.creationDate || undefined, primaryImageUrl: form.primaryImageUrl || undefined, imageUrls }); router.push(`/assets/${response.data.id}`); } catch { setError('Could not create the asset. Check the required fields and try again.'); } finally { setLoading(false); } }
+  async function pinLookup(value: string) { const pinCode = value.replace(/\D/g, '').slice(0, 6); address({ pinCode }); if (pinCode.length !== 6) return; const item = indiaAddressDirectory.find((entry) => entry.pinCode === pinCode); if (item) address({ ...item, pinCode, source: 'INDIA_POST' }); }
+  async function changeState(code: string) { const [, name] = indiaStates.find(([key]) => key === code) ?? ['', '']; address({ stateCode: code, stateName: name, districtCode: '', districtName: '', subDistrictCode: '', subDistrictName: '' }); setDistricts([]); setSubDistricts([]); if (!name) return; const fallback = [...new Map(indiaAddressDirectory.filter((item) => item.stateCode === code).map((item) => [item.districtCode, { code: item.districtCode, name: item.districtName }])).values()]; setDistrictsLoading(true); try { const result = (await api.get<District[]>(`/assets/address-directory/districts?state=${encodeURIComponent(name)}`)).data; setDistricts(result.length ? result : fallback); } catch { setDistricts(fallback); } finally { setDistrictsLoading(false); } }
+  function changeDistrict(code: string) { const item = districts.find((entry) => entry.code === code); address({ districtCode: item?.code, districtName: item?.name, subDistrictCode: '', subDistrictName: '' }); setSubDistricts([]); if (!item) return; const fallback = indiaAddressDirectory.filter((entry) => entry.districtCode === item.code).map((entry) => ({ code: entry.subDistrictCode, name: entry.subDistrictName })); void api.get<SubDistrict[]>(`/assets/address-directory/subdistricts?district=${encodeURIComponent(item.code)}`).then((result) => setSubDistricts(result.data.length ? result.data : fallback)).catch(() => setSubDistricts(fallback)); }
+  return <div className="asset-create">
+    <header className="asset-create__header"><button type="button" onClick={() => router.push('/assets')}><ArrowLeft size={14} /> Assets</button><span>›</span><span>New asset</span><h1>Create New Asset</h1><p>Register a new asset with detailed information for valuation, due diligence and portfolio management.</p></header>
+    <nav className="asset-create__steps">{[['Basic Information', 'Asset type and basic details'], ['Location', 'Geographic details'], ['Supporting Documents', 'Upload relevant documents'], ['Review & Create', 'Verify and create asset']].map(([title, text], index) => <div className={index === 0 ? 'is-active' : ''} key={title}><i>{index + 1}</i><p><b>{title}</b><small>{text}</small></p></div>)}</nav>
+    <form onSubmit={submit} className="asset-create__layout"><main>
+      <section className="asset-create__panel"><div className="asset-create__panel-head"><Title number={1} title="Asset Type & Basic Information" text="Select the asset classification and provide basic details." /><span>* Required fields</span></div><div className="asset-create__grid asset-create__basic">
+        <div className="wide"><Label required>Asset Name</Label><Input placeholder="Enter a descriptive name for the asset" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></div>
+        <div><Label required>Asset Category</Label><Select value={form.assetClass} onChange={(e) => setForm({ ...form, assetClass: e.target.value as AssetClass, assetSubcategory: '' })}>{classes.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</Select></div>
+        <div><Label required>Subcategory</Label><Select value={form.assetSubcategory} onChange={(e) => setForm({ ...form, assetSubcategory: e.target.value })} required><option value="">Select subcategory</option>{assetSubcategories[form.assetClass].map((item) => <option key={item}>{item}</option>)}</Select></div>
+        <div><Label required>Asset Type</Label><Select defaultValue="DIRECT"><option value="DIRECT">Direct ownership</option><option value="FRACTIONAL">Fractional ownership</option><option value="LEASE">Lease interest</option></Select></div>
+        <div><Label required>Status</Label><Select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as AssetStatus })}><option value="DRAFT">Draft</option><option value="ACTIVE">Active</option><option value="UNDER_REVIEW">Under review</option></Select></div>
+        <div><Label required>Currency</Label><Select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value as CurrencyCode })}><option value="INR">🇮🇳 INR - Indian Rupee</option><option value="USD">USD</option><option value="EUR">EUR</option></Select></div>
+        <div><Label>Creation Date</Label><span className="asset-create__icon-input"><CalendarDays size={16} /><Input type="date" value={form.creationDate} onChange={(e) => setForm({ ...form, creationDate: e.target.value })} /></span></div>
+      </div></section>
+      <section className="asset-create__panel"><div className="asset-create__panel-head"><Title number={2} title="Location Details" text="Provide the complete location information for this asset." /><button type="button" className={`asset-create__toggle ${mapMode ? 'is-on' : ''}`} onClick={() => setMapMode((value) => !value)} aria-pressed={mapMode}><i />Use map to select location</button></div>{mapMode ? <button type="button" className="asset-create__map-picker" onClick={() => { setMapSelected(true); address({ locality: form.address.locality || 'Map-selected location' }); }}><MapPin size={22} /><span>{mapSelected ? 'Location selected — click to update' : 'Click to select the asset location'}</span></button> : null}<div className="asset-create__grid">
+        <div><Label required>Country</Label><Select value="IN"><option>🇮🇳 India</option></Select></div><div><Label required>State / Union Territory</Label><Select value={form.address.stateCode ?? ''} onChange={(e) => void changeState(e.target.value)}><option value="">Select state / union territory</option>{indiaStates.map(([code, name]) => <option key={code} value={code}>{name}</option>)}</Select></div>
+        <div><Label required>District</Label><Select value={form.address.districtCode ?? ''} disabled={!form.address.stateCode || districtsLoading} onChange={(e) => changeDistrict(e.target.value)}><option value="">{!form.address.stateCode ? 'Select a state first' : districtsLoading ? 'Loading districts…' : 'Select district'}</option>{districts.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}</Select></div>
+        <div><Label>Subdistrict / Taluk / Tehsil</Label><Select value={form.address.subDistrictCode ?? ''} disabled={!subDistricts.length} onChange={(e) => { const item = subDistricts.find((entry) => entry.code === e.target.value); address({ subDistrictCode: item?.code, subDistrictName: item?.name }); }}><option value="">Select subdistrict</option>{subDistricts.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}</Select></div>
+        <div><Label required>Village / Town / City</Label><Input list="settlements" placeholder="Select village / town / city" value={form.address.settlementName ?? ''} onChange={(e) => address({ settlementName: e.target.value })} /><datalist id="settlements">{distinctOptions(matches, 'settlementName').map((value) => <option key={value} value={value} />)}</datalist></div>
+        <div><Label>Local Body (Municipality / Panchayat)</Label><Input placeholder="Select local body" value={form.address.postOffice ?? ''} onChange={(e) => address({ postOffice: e.target.value })} /></div>
+        <div><Label>Locality / Area / Ward</Label><span className="asset-create__icon-input"><Search size={16} /><Input placeholder="Enter locality or select" value={form.address.locality ?? ''} onChange={(e) => address({ locality: e.target.value })} /></span></div><div><Label>PIN Code</Label><Input inputMode="numeric" maxLength={6} placeholder="Enter 6-digit PIN code" value={form.address.pinCode ?? ''} onChange={(e) => void pinLookup(e.target.value)} /></div>
+        <div><Label>Property / Site Address</Label><Textarea rows={2} placeholder="Building, plot, street, road, landmark" value={form.address.propertyAddress ?? ''} onChange={(e) => address({ propertyAddress: e.target.value })} /></div>
+      </div></section>
+      <section className="asset-create__panel asset-create__description"><Title number={3} title="Description" text="Provide a brief description of this asset." /><Textarea rows={4} maxLength={1000} placeholder="Enter key details, purpose, and any other relevant information…" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /><small>{form.description.length}/1000</small></section>{error && <p className="asset-create__error">{error}</p>}
+    </main><aside>
+      <section className="asset-create__side"><h2>Asset Preview</h2><div className="asset-create__preview">{form.primaryImageUrl ? <Image src={form.primaryImageUrl} alt="Asset preview" fill className="object-cover" unoptimized /> : <><FileImage size={40} /><b>No image uploaded</b><span>Upload a cover image for this asset</span><button type="button" onClick={() => primaryInput.current?.click()}><Upload size={15} />Upload Image</button></>}<input className="sr-only" ref={primaryInput} type="file" accept="image/*" onChange={async (e) => { const file = e.target.files?.[0]; if (file) setForm({ ...form, primaryImageUrl: await readFileAsDataUrl(file) }); }} /></div><h3>Additional Images</h3><div className="asset-create__gallery">{[0,1,2,3].map((n) => <button key={n} type="button" onClick={() => galleryInput.current?.click()}>{form.imageUrls[n] ? <Image src={form.imageUrls[n]} alt="Asset image" fill className="object-cover" unoptimized /> : <Plus size={19} />}</button>)}</div><input className="sr-only" ref={galleryInput} type="file" multiple accept="image/*" onChange={async (e) => { if (e.target.files?.length) setForm({ ...form, imageUrls: await readFilesAsDataUrls(e.target.files) }); }} /><p>Supported formats: JPG, PNG, WebP (Max 10MB each)</p></section>
+      <section className="asset-create__side asset-create__map"><div><h2>Location on Map</h2><button type="button">View on map <ArrowRight size={13} /></button></div><div className="asset-create__map-art"><MapPin size={30} /><b>India</b></div><p><CircleHelp size={15} />Select location details to see the asset on map</p></section>
+      <section className="asset-create__side asset-create__tips"><h2>💡 Quick Tips</h2>{['Use a clear and descriptive asset name','Select the correct category and subcategory','Provide accurate location details','Upload relevant documents for better valuation','You can always edit this information later'].map((tip) => <p key={tip}><Check size={14} />{tip}</p>)}</section>
+      <div className="asset-create__actions"><Button type="button" variant="secondary" onClick={() => router.push('/assets')}>Cancel</Button><Button type="submit" variant="ink" disabled={loading}>{loading ? 'Creating…' : 'Create Asset'} <ArrowRight size={16} /></Button></div>
+    </aside></form></div>;
 }

@@ -269,7 +269,7 @@ export function BankerDashboard() {
       icon: Building2,
     },
     {
-      label: 'Total Exposure (USD)',
+      label: 'Total Exposure (INR)',
       value: moneyCompact(totalExposure || exposureTotal),
       delta: '↑ 25% vs last month',
       hint: `Across ${activeLoans.length || 1} active facilit${activeLoans.length === 1 || !activeLoans.length ? 'y' : 'ies'}`,

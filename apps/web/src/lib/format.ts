@@ -8,7 +8,7 @@ const currencySymbols: Record<string, string> = {
   INR: '₹',
 };
 
-export function money(amount?: number | null, currency = 'USD') {
+export function money(amount?: number | null, currency = 'INR') {
   if (amount == null || Number.isNaN(amount)) {
     return '—';
   }
@@ -23,7 +23,7 @@ export function money(amount?: number | null, currency = 'USD') {
 }
 
 /** Compact money labels for dashboards ($4.40B, $92.80M). */
-export function moneyCompact(amount?: number | null, currency = 'USD') {
+export function moneyCompact(amount?: number | null, currency = 'INR') {
   if (amount == null || Number.isNaN(amount)) {
     return '—';
   }
@@ -40,7 +40,7 @@ export function moneyCompact(amount?: number | null, currency = 'USD') {
   if (amount >= 1_000) {
     return `${symbol}${(amount / 1_000).toFixed(1)}K`;
   }
-  return `${symbol}${amount.toLocaleString('en-US')}`;
+  return `${symbol}${amount.toLocaleString('en-IN')}`;
 }
 
 export function formatDate(value?: string | null) {

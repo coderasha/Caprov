@@ -151,7 +151,7 @@ export function OrgPortfolios() {
   const [form, setForm] = useState({
     name: '',
     description: '',
-    baseCurrency: 'USD' as CurrencyCode,
+    baseCurrency: 'INR' as CurrencyCode,
     focusAssetClasses: [] as string[],
   });
   const [formError, setFormError] = useState<string | null>(null);
@@ -249,7 +249,7 @@ export function OrgPortfolios() {
         focusAssetClasses: form.focusAssetClasses,
       }),
     onSuccess: async () => {
-      setForm({ name: '', description: '', baseCurrency: 'USD', focusAssetClasses: [] });
+      setForm({ name: '', description: '', baseCurrency: 'INR', focusAssetClasses: [] });
       setFormError(null);
       await queryClient.invalidateQueries({ queryKey: ['portfolios'] });
     },
@@ -628,7 +628,7 @@ export function OrgPortfolios() {
                   setForm({ ...form, baseCurrency: event.target.value as CurrencyCode })
                 }
               >
-                {['USD', 'EUR', 'GBP', 'SGD', 'INR'].map((currency) => (
+                {['INR', 'USD', 'EUR', 'GBP', 'SGD'].map((currency) => (
                   <option key={currency} value={currency}>
                     {currency}
                   </option>

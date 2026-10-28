@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Query,
   Patch,
   Post,
   Put,
@@ -33,6 +34,8 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import type { AuthUser } from '../../common/types/auth-user';
 import { AssetsService } from './assets.service';
+import { IndiaPostDirectoryService } from './india-post-directory.service';
+import { LgdDirectoryService } from './lgd-directory.service';
 
 class AssetAddressDto implements AssetAddress {
   @IsString() countryCode!: string;
@@ -147,7 +150,26 @@ class OwnershipRegisterDto {
 @Controller('assets')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AssetsController {
-  constructor(private readonly assets: AssetsService) {}
+  constructor(
+    private readonly assets: AssetsService,
+    private readonly indiaPostDirectory: IndiaPostDirectoryService,
+    private readonly lgdDirectory: LgdDirectoryService,
+  ) {}
+
+  @Get('address-directory/pin/:pinCode')
+  lookupPin(@Param('pinCode') pinCode: string) {
+    return this.indiaPostDirectory.lookup(pinCode.replace(/\D/g, '').slice(0, 6));
+  }
+
+  @Get('address-directory/districts')
+  districts(@Query('state') stateName = '') {
+    return this.lgdDirectory.districtsForState(stateName);
+  }
+
+  @Get('address-directory/subdistricts')
+  subDistricts(@Query('district') districtCode = '') {
+    return this.lgdDirectory.subDistrictsForDistrict(districtCode);
+  }
 
   @Get()
   list(@CurrentUser() user: AuthUser) {

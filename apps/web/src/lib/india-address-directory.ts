@@ -22,6 +22,7 @@ export const indiaAddressDirectory: DirectoryAddress[] = [
   { stateCode: 'TS', stateName: 'Telangana', districtCode: 'TS-HYD', districtName: 'Hyderabad', subDistrictCode: 'TS-HYD-SHA', subDistrictName: 'Shaikpet', subDistrictLabel: 'Mandal', settlementName: 'Hyderabad', locality: 'Banjara Hills', pinCode: '500034', postOffice: 'Banjara Hills' },
   { stateCode: 'TN', stateName: 'Tamil Nadu', districtCode: 'TN-CHE', districtName: 'Chennai', subDistrictCode: 'TN-CHE-MAM', subDistrictName: 'Mambalam', subDistrictLabel: 'Taluk', settlementName: 'Chennai', locality: 'T. Nagar', pinCode: '600017', postOffice: 'Thyagaraya Nagar' },
   { stateCode: 'DL', stateName: 'Delhi', districtCode: 'DL-ND', districtName: 'New Delhi', subDistrictCode: 'DL-ND-ND', subDistrictName: 'New Delhi', subDistrictLabel: 'Sub-district', settlementName: 'New Delhi', locality: 'Connaught Place', pinCode: '110001', postOffice: 'New Delhi GPO' },
+  { stateCode: 'OD', stateName: 'Odisha', districtCode: 'OD-BLS', districtName: 'Balasore', subDistrictCode: 'OD-BLS-BSD', subDistrictName: 'Baleshwar Sadar', subDistrictLabel: 'Tehsil', settlementName: 'Balasore', locality: 'Aradbazar', pinCode: '756001', postOffice: 'Balasore H.O.' },
 ];
 
 export function distinctOptions(items: DirectoryAddress[], key: keyof DirectoryAddress) {

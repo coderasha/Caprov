@@ -103,7 +103,7 @@ export class PortfoliosController {
       ownerUserId: user.id,
       name: dto.name,
       description: dto.description,
-      baseCurrency: (dto.baseCurrency ?? 'USD') as CurrencyCode,
+      baseCurrency: (dto.baseCurrency ?? 'INR') as CurrencyCode,
       focusAssetClasses: dto.focusAssetClasses ?? [],
       createdAt: now,
       updatedAt: now,

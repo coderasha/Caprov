@@ -227,7 +227,7 @@ export class CollateralController {
       status: 'PENDING_APPROVAL',
       requestedByUserId: user.id,
       pledgedValue,
-      currency: 'USD',
+      currency: 'INR',
       // Banker underwriting applies the haircut later. The lister only states
       // the portion of the asset offered as collateral.
       haircutBps: 0,
@@ -450,7 +450,7 @@ export class CollateralController {
         !trade.tokenUnits ||
         trade.tokenUnits < 1 ||
         trade.notional <= 0 ||
-        trade.currency !== 'USD'
+        trade.currency !== 'INR'
       ) {
         return false;
       }

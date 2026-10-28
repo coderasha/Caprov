@@ -119,13 +119,13 @@ function formatUnitPrice(value: number) {
   if (value <= 0) return '—';
   if (value >= 100_000) return moneyCompact(value);
   if (value >= 1) {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       maximumFractionDigits: value >= 10 ? 0 : 2,
     }).format(value);
   }
-  return `$${value.toFixed(2)}`;
+  return `₹${value.toFixed(2)}`;
 }
 
 function normalizeLocationToken(value: string) {

@@ -168,7 +168,7 @@ def _parse_amount(raw: str) -> tuple[float, str] | None:
     elif currency_match and currency_match.group(4):
         currency = "EUR"
     else:
-        currency = "USD"
+        currency = "INR"
     return amount, currency
 
 
@@ -507,7 +507,7 @@ def _fallback_value(asset_class: str | None) -> float:
 def _estimate_valuation(asset: dict[str, Any], facts: list[dict[str, Any]], documents: list[dict[str, Any]]) -> dict[str, Any]:
     value_fact = _pick_value_fact(facts)
     amount = float(value_fact["numericValue"]) if value_fact else _fallback_value(asset.get("assetClass"))
-    currency = (value_fact or {}).get("currency") or asset.get("currency") or "USD"
+    currency = (value_fact or {}).get("currency") or asset.get("currency") or "INR"
     as_of = _resolve_valuation_as_of(facts, documents)
     method = {
         "market_value": "Independent valuation memo / appraisal extract",
@@ -698,7 +698,7 @@ def answer_copilot(question: str, envelope: dict[str, Any] | None) -> dict[str, 
             )
         return {
             "answer": (
-                f"{_format_money(float(valuation.get('amount') or 0), str(valuation.get('currency') or 'USD'))} "
+                f"{_format_money(float(valuation.get('amount') or 0), str(valuation.get('currency') or 'INR'))} "
                 f"as of {str(valuation.get('asOf', ''))[:10]}, using {str(valuation.get('method', '')).lower()}. "
                 f"Confidence {round((valuation.get('confidence') or 0) * 100)}%.{extra}"
             ),

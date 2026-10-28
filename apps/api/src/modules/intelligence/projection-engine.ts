@@ -189,7 +189,7 @@ export function attachProjection(
   const projection = projectValuation({
     assetId: envelope.assetId,
     assetClass,
-    currency: envelope.valuation?.currency ?? 'USD',
+    currency: envelope.valuation?.currency ?? 'INR',
     valuation: envelope.valuation,
     risk: envelope.risk,
     facts: envelope.facts,

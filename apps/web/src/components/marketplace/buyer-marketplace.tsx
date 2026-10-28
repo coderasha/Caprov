@@ -557,7 +557,7 @@ export function BuyerMarketplace() {
           </div>
 
           <div className="buyer-mkt__filter-block">
-            <h3>Investment Range (USD)</h3>
+            <h3>Investment Range (INR)</h3>
             <div className="buyer-mkt__range">
               <input
                 type="range"

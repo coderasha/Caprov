@@ -219,7 +219,7 @@ export class MarketplaceController {
           asset.primaryImageUrl ||
           asset.imageUrls?.[0],
       ),
-      askPrice: dto.askPrice, currency: 'USD', quantityBps: 0, remainingBps: 0,
+      askPrice: dto.askPrice, currency: 'INR', quantityBps: 0, remainingBps: 0,
       tokenPositionId: token.id, tokenizationMode: token.mode, assetTokenId: token.tokenId,
       totalTokenSupply: token.supply, availableTokenUnits: dto.availableTokenUnits,
       pricePerTokenWei: dto.pricePerTokenWei,
@@ -380,7 +380,7 @@ export class MarketplaceController {
         dto.imageUrl?.trim() || asset.primaryImageUrl || asset.imageUrls?.[0],
       ),
       askPrice,
-      currency: 'USD',
+      currency: 'INR',
       leaseRate:
         offeringType === 'LEASE' ? (dto.leaseRate ?? dto.askPrice) : undefined,
       leaseTermMonths:

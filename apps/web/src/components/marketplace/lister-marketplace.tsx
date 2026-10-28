@@ -488,7 +488,7 @@ export function ListerMarketplace() {
                   </div>
                   <label className="lister-mkt__field">
                     <span>
-                      Indicative asking price (USD) <i>*</i>
+                      Indicative asking price (INR) <i>*</i>
                     </span>
                     <div className="lister-mkt__control">
                       <Tag size={16} strokeWidth={1.7} aria-hidden="true" />
