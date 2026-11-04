@@ -1940,6 +1940,12 @@ export function buildSeedData(): CaprovData {
     ],
     wallets: [
       {
+        organizationId: bankOrgId,
+        currency: 'INR',
+        balance: 1_000_000_000,
+        updatedAt: now,
+      },
+      {
         organizationId: orgId,
         currency: 'SGD',
         balance: 25_000_000,

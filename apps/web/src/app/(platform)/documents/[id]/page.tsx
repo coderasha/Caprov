@@ -2,14 +2,17 @@
 
 import { OpenDocumentButton } from '@/components/documents/open-document';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { api } from '@/lib/api';
 import { documentTypeLabel, formatDate, formatDateTime } from '@/lib/format';
 import { transactionExplorerUrl } from '@/lib/explorer';
+import { useAuthStore } from '@/stores/auth-store';
 import type { DocumentType } from '@caprov/types';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useState } from 'react';
 
 interface DocumentDetail {
   id: string;
@@ -90,6 +93,9 @@ interface DocumentVerifyResult {
 
 export default function DocumentDetailPage() {
   const params = useParams<{ id: string }>();
+  const roles = useAuthStore((state) => state.roles);
+  const [rawDataOpen, setRawDataOpen] = useState(false);
+  const [rawDataCopied, setRawDataCopied] = useState(false);
   const query = useQuery({
     queryKey: ['document', params.id],
     queryFn: async () => (await api.get<DocumentDetail>(`/documents/${params.id}`)).data,
@@ -148,6 +154,14 @@ export default function DocumentDetailPage() {
           ? 'Partial match'
           : 'Mismatch'
     : 'Checking';
+  const canViewRawExtraction = roles.includes('ORG_ADMIN') || roles.includes('PLATFORM_ADMIN');
+  const rawExtractedText = document.extractedText?.trim();
+
+  async function copyRawExtraction() {
+    if (!rawExtractedText) return;
+    await navigator.clipboard.writeText(rawExtractedText);
+    setRawDataCopied(true);
+  }
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -155,10 +169,13 @@ export default function DocumentDetailPage() {
         <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-[var(--muted)]">Document</p>
         <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
           <h1 className="text-3xl font-semibold tracking-tight">{document.name}</h1>
-          <OpenDocumentButton
-            documentId={document.id}
-            filename={document.originalFilename || document.name}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            {canViewRawExtraction ? <Button variant="secondary" onClick={() => { setRawDataOpen((open) => !open); setRawDataCopied(false); }} aria-expanded={rawDataOpen} aria-controls="raw-extracted-data">{rawDataOpen ? 'Hide Raw Extracted Data' : 'Raw Extracted Data'}</Button> : null}
+            <OpenDocumentButton
+              documentId={document.id}
+              filename={document.originalFilename || document.name}
+            />
+          </div>
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
           <Badge>{documentTypeLabel[document.type]}</Badge>
@@ -188,6 +205,18 @@ export default function DocumentDetailPage() {
           ) : null}
         </div>
       </div>
+      {canViewRawExtraction && rawDataOpen ? (
+        <Card id="raw-extracted-data" className="overflow-hidden p-0">
+          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--line)] px-5 py-4 sm:px-6">
+            <div>
+              <h2 className="text-lg font-semibold">Raw Extracted Data</h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">Verbatim extraction retained from this document version. It is unreviewed and may include OCR artifacts.</p>
+            </div>
+            <Button variant="secondary" onClick={() => void copyRawExtraction()} disabled={!rawExtractedText}>{rawDataCopied ? 'Copied' : 'Copy text'}</Button>
+          </div>
+          {rawExtractedText ? <pre className="max-h-[32rem] overflow-auto whitespace-pre-wrap break-words bg-[var(--paper)]/45 px-5 py-4 font-mono text-xs leading-6 text-[var(--ink)] sm:px-6">{rawExtractedText}</pre> : <p className="px-5 py-8 text-sm text-[var(--muted)] sm:px-6">No raw extracted text is available for this document.</p>}
+        </Card>
+      ) : null}
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="p-5">
           <p className="text-xs uppercase tracking-[0.16em] text-[var(--muted)]">Version</p>

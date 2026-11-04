@@ -64,8 +64,31 @@ export class DatabaseService implements OnModuleInit {
     if (!this.data.memberships.some((membership) => membership.id === 'mem_bank_demo')) {
       this.data.memberships.push({ id: 'mem_bank_demo', organizationId: bankOrgId, userId: bankerId, role: 'BANKER', createdAt: new Date().toISOString() }); changed = true;
     }
-    if (!this.data.wallets.some((wallet) => wallet.organizationId === bankOrgId && wallet.currency === 'INR')) {
-      this.data.wallets.push({ organizationId: bankOrgId, currency: 'INR', balance: 100_000_000, updatedAt: new Date().toISOString() }); changed = true;
+    const bankTreasuries = this.data.wallets.filter(
+      (wallet) => wallet.organizationId === bankOrgId && wallet.currency === 'INR',
+    );
+    if (!bankTreasuries.length) {
+      this.data.wallets.push({ organizationId: bankOrgId, currency: 'INR', balance: 1_000_000_000, updatedAt: new Date().toISOString() }); changed = true;
+    } else {
+      const bankTreasury = bankTreasuries.reduce((highest, wallet) =>
+        wallet.balance > highest.balance ? wallet : highest,
+      );
+      if (bankTreasuries.length > 1) {
+        this.data.wallets = this.data.wallets.filter(
+          (wallet) =>
+            wallet.organizationId !== bankOrgId ||
+            wallet.currency !== 'INR' ||
+            wallet === bankTreasury,
+        );
+        changed = true;
+      }
+      if (bankTreasury.balance === 100_000_000) {
+        // Upgrade the former demo default without overwriting a treasury that has
+        // already been changed through lending activity.
+        bankTreasury.balance = 1_000_000_000;
+        bankTreasury.updatedAt = new Date().toISOString();
+        changed = true;
+      }
     }
     if (!this.data.organizations.some((org) => org.id === buyerOrgId)) {
       this.data.organizations.push({ id: buyerOrgId, name: 'Mehta Family Office', slug: 'mehta-family-office', status: 'ACTIVE', llmModelId: preferredDefaultModelId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); changed = true;

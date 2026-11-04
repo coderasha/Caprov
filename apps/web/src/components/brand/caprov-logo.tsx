@@ -19,6 +19,34 @@ const ASSETS = {
   },
 } as const;
 
+const PRIVATEASSETZ_LOGO = {
+  src: '/brand/privateassetz-logo.png',
+  width: 2172,
+  height: 724,
+} as const;
+
+/** The PrivateAssetz marketing lockup. Kept separate while the application UI
+ * continues to use the established compact Caprov mark in constrained slots. */
+export function PrivateAssetzWordmark({
+  className,
+  priority = false,
+}: {
+  className?: string;
+  priority?: boolean;
+}) {
+  return (
+    <Image
+      src={PRIVATEASSETZ_LOGO.src}
+      alt="PrivateAssetz"
+      width={PRIVATEASSETZ_LOGO.width}
+      height={PRIVATEASSETZ_LOGO.height}
+      priority={priority}
+      sizes="(max-width: 640px) 104px, 132px"
+      className={cn('block h-auto w-auto object-contain object-left', className)}
+    />
+  );
+}
+
 /** Caprov brand image. Prefer `compact` in nav bars; `full` for login/footer. */
 export function CaprovLogo({
   tone = 'light',

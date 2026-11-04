@@ -1,4 +1,4 @@
-import { CaprovWordmark } from '@/components/brand/caprov-logo';
+import { PrivateAssetzWordmark } from '@/components/brand/caprov-logo';
 import { LandingAssetCarousel } from '@/components/landing/landing-asset-carousel';
 import { LandingHeader } from '@/components/landing/landing-header';
 import { LandingReveal } from '@/components/landing/landing-reveal';
@@ -120,7 +120,7 @@ export default function Home() {
                   Intelligence for <span className="landing-hero-title__gold">private assets.</span> Built to execute.
                 </h1>
                 <p className="landing-lead landing-read mt-5">
-                  CAPROV turns complex private-asset documents into verified digital records—then carries that evidence
+                  PrivateAssetz turns complex private-asset documents into verified digital records—then carries that evidence
                   into controlled tokenization, marketplace trading, and collateralized lending.
                 </p>
                 <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
@@ -202,7 +202,7 @@ export default function Home() {
                   <LandingSectionHeader
                     kicker="Platform"
                     title="One operating record from document to market and credit"
-                    description="CAPROV gives asset owners, investors, banks, and control teams a shared place to establish evidence, review intelligence, tokenize fractional interests, and act with appropriate controls."
+                    description="PrivateAssetz gives asset owners, investors, banks, and control teams a shared place to establish evidence, review intelligence, tokenize fractional interests, and act with appropriate controls."
                   />
                 </div>
                 <div className="landing-platform-pillars relative z-10 mt-10 grid gap-4 md:grid-cols-3 lg:absolute lg:inset-x-8 lg:bottom-8 lg:mt-0">
@@ -343,11 +343,7 @@ export default function Home() {
         <div className="landing-shell landing-footer__inner">
           <div className="landing-footer__top">
             <div className="landing-footer__brand">
-              <CaprovWordmark
-                tone="dark"
-                variant="full"
-                className="landing-footer__logo"
-              />
+              <PrivateAssetzWordmark className="landing-footer__logo" />
               <p className="landing-footer__tagline">
                 Evidence, markets, and credit on one private-asset record.
               </p>
@@ -371,7 +367,7 @@ export default function Home() {
             </nav>
           </div>
           <div className="landing-footer__bottom">
-            <p>© {new Date().getFullYear()} CAPROV</p>
+            <p>© {new Date().getFullYear()} PrivateAssetz</p>
             <p className="landing-footer__bottom-note">Evidence-led private asset operations</p>
           </div>
         </div>

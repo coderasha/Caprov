@@ -3,7 +3,7 @@ import { Providers } from '@/components/providers';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'CAPROV — Evidence-led private asset operations',
+  title: 'PrivateAssetz — Evidence-led private asset operations',
   description:
     'The operating system for evidence-led private asset decisions: Asset DNA, provenance, controls, and execution workflows.',
 };

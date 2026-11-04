@@ -1,6 +1,6 @@
 'use client';
 
-import { CaprovWordmark } from '@/components/brand/caprov-logo';
+import { PrivateAssetzWordmark } from '@/components/brand/caprov-logo';
 import { cn } from '@/lib/utils';
 import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
@@ -40,9 +40,7 @@ export function LandingHeader() {
         <div className="landing-header-bar">
           <div className="landing-header__inner">
             <Link href="/" className="landing-header__brand group min-w-0">
-              <CaprovWordmark
-                tone="light"
-                variant="compact"
+              <PrivateAssetzWordmark
                 priority
                 className="landing-header__logo transition group-hover:opacity-90"
               />
@@ -88,7 +86,7 @@ export function LandingHeader() {
         <button type="button" className="landing-mobile-menu__backdrop" aria-label="Close menu" onClick={closeMenu} />
         <div className="landing-mobile-menu__panel">
           <div className="flex items-center justify-between border-b border-[var(--line)] px-5 py-4">
-            <CaprovWordmark tone="light" variant="compact" className="landing-header__logo" />
+            <PrivateAssetzWordmark className="landing-header__logo" />
             <button type="button" className="landing-icon-btn" aria-label="Close menu" onClick={closeMenu}>
               <X className="h-4 w-4" />
             </button>

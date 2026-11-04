@@ -28,7 +28,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import type { DocumentType, OwnershipType } from '@caprov/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BrowserProvider, Contract, solidityPackedKeccak256 } from 'ethers';
-import { ArrowLeft, ArrowUpRight, Building2, CalendarDays, CheckCircle2, Download, FileText, Landmark, MapPin, ScanSearch, Share2, Sparkles, Upload } from 'lucide-react';
+import { ArrowLeft, Building2, CalendarDays, CheckCircle2, Download, FileText, Landmark, MapPin, ScanSearch, Share2, Sparkles, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
@@ -555,16 +555,10 @@ export default function AssetDetailPage() {
               <div className="grid gap-px border-y border-[var(--line)] bg-[var(--line)] sm:grid-cols-3"><div className="bg-[#fff1d9] p-4 sm:col-span-1"><p className="text-xs text-[#8a5a12]">Current estimated value</p><p className="mt-1 text-xl font-semibold">{money(valuation?.amount, valuation?.currency ?? asset.currency)}</p></div><ProfileMetric label="Valuation date" value={formatDate(valuation?.asOf)} /><ProfileMetric label="Method" value={valuation?.method || 'Pending'} /></div>
               <dl className="px-5 py-2 text-sm"><Row label="Valuation source" value={valuation?.notes?.[0] || 'No supporting valuation report'} /><Row label="Risk assessment" value={asset.latestRisk?.payload.rating || 'Not assessed'} /></dl>
             </Card>
-            <Card className="overflow-hidden p-0"><PanelHeading icon={<CheckCircle2 size={20} />} title="Key extracted facts" subtitle="Important information summarized from uploaded documents." />
-              <div className="px-5 pb-3">{keyFacts.length ? keyFacts.slice(0, 5).map((fact) => <div key={fact.id} className="flex gap-3 border-t border-[var(--line)] py-2 text-sm"><CheckCircle2 size={15} className="mt-0.5 shrink-0 text-[var(--gold)]" /><span className="min-w-0 text-[var(--muted)]">{fact.label}:</span><span className="min-w-0 font-medium">{fact.value}</span></div>) : <p className="py-5 text-sm text-[var(--muted)]">Run Asset DNA after uploading source documents to populate verified facts.</p>}</div>
+            <Card className="overflow-hidden p-0"><PanelHeading icon={<FileText size={20} />} title="Supporting documents" subtitle="Documents used for intelligence and valuation." action={<button type="button" onClick={() => setTab('Documents')} className="text-sm font-medium text-[var(--ink)] underline underline-offset-4">View all ({asset.documentCount})</button>} />
+              <div className="grid grid-cols-2 gap-3 px-5 pb-5 sm:grid-cols-3">{documents.slice(0, 6).map((document) => <Link href={`/documents/${document.id}`} key={document.id} className="rounded-xl border border-[var(--line)] bg-[var(--paper)]/50 p-3 transition hover:border-[var(--gold)]"><FileText size={20} className="text-red-500" /><p className="mt-5 truncate text-sm font-medium">{document.name}</p><p className="mt-1 text-xs text-[var(--muted)]">v{document.version ?? 1} · {documentTypeLabel[document.type]}</p></Link>)}{!documents.length ? <p className="col-span-full py-6 text-sm text-[var(--muted)]">No source documents yet.</p> : null}</div>
             </Card>
           </div>
-          <Card className="overflow-hidden p-0"><PanelHeading icon={<MapPin size={20} />} title="Location" subtitle="Asset location from the master record and verified documents." />
-            <div className="mx-5 mb-5 grid min-h-52 place-items-center rounded-xl border border-[#ddd6c8] bg-[linear-gradient(135deg,#e8eee5,#f5f0e7)] p-5 text-center"><div><MapPin className="mx-auto text-[var(--gold)]" size={30} /><p className="mt-3 font-semibold">{asset.location || 'Location pending'}</p><p className="mt-1 text-sm text-[var(--muted)]">{asset.jurisdiction || 'Add jurisdiction to complete the location record.'}</p><button type="button" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--ink)] underline underline-offset-4">View on map <ArrowUpRight size={14} /></button></div></div>
-          </Card>
-          <Card className="overflow-hidden p-0"><PanelHeading icon={<FileText size={20} />} title="Supporting documents" subtitle="Documents used for intelligence and valuation." action={<button type="button" onClick={() => setTab('Documents')} className="text-sm font-medium text-[var(--ink)] underline underline-offset-4">View all ({asset.documentCount})</button>} />
-            <div className="grid grid-cols-2 gap-3 px-5 pb-5 sm:grid-cols-3">{documents.slice(0, 6).map((document) => <Link href={`/documents/${document.id}`} key={document.id} className="rounded-xl border border-[var(--line)] bg-[var(--paper)]/50 p-3 transition hover:border-[var(--gold)]"><FileText size={20} className="text-red-500" /><p className="mt-5 truncate text-sm font-medium">{document.name}</p><p className="mt-1 text-xs text-[var(--muted)]">v{document.version ?? 1} · {documentTypeLabel[document.type]}</p></Link>)}{!documents.length ? <p className="col-span-full py-6 text-sm text-[var(--muted)]">No source documents yet.</p> : null}</div>
-          </Card>
         </div>
       ) : null}
 

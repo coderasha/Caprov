@@ -109,14 +109,6 @@ const isTokenized = (listing: Listing) =>
 const shortTokenId = (tokenId: string) =>
   tokenId.length > 14 ? `${tokenId.slice(0, 6)}…${tokenId.slice(-4)}` : tokenId;
 
-function formatCapAmount(value: number) {
-  if (!Number.isFinite(value) || value <= 0) return '—';
-  if (value >= 1) {
-    return `${value.toLocaleString('en-US', { maximumFractionDigits: 6 })} CAP`;
-  }
-  return `${value.toFixed(6).replace(/\.?0+$/, '')} CAP`;
-}
-
 export function ListerMarketplace() {
   const client = useQueryClient();
   const roles = useAuthStore((state) => state.roles);
@@ -207,7 +199,7 @@ export function ListerMarketplace() {
       const listingTitle = form.title.trim();
       const totalAskPrice = Number(form.price);
       if (!Number.isFinite(totalAskPrice) || totalAskPrice < 0.01) {
-        throw new Error('Enter a valid total asking price of at least 0.01 USD.');
+        throw new Error('Enter a valid total asking price of at least ₹0.01.');
       }
       if (listingTitle && listingTitle.length < 2) {
         throw new Error('Listing title must contain at least 2 characters.');
@@ -459,7 +451,7 @@ export function ListerMarketplace() {
 
                     <label className="lister-mkt__field">
                       <span>
-                        Total asking price (USD / CAP) <i>*</i>
+                        Total asking price (INR) <i>*</i>
                       </span>
                       <div className="lister-mkt__control">
                         <Tag size={16} strokeWidth={1.7} aria-hidden="true" />
@@ -475,8 +467,8 @@ export function ListerMarketplace() {
                         />
                       </div>
                       <small>
-                        This is the total for all token units. The {selectedNetwork.chainName}{' '}
-                        contract derives the per-unit CAP price; 1 CAP = 1 USD.
+                        This is the total INR ask for all token units. The {selectedNetwork.chainName}{' '}
+                        contract derives the per-unit settlement amount from this total.
                       </small>
                     </label>
                   </div>
@@ -676,16 +668,12 @@ export function ListerMarketplace() {
                 <div>
                   <dt>Total Price</dt>
                   <dd>
-                    {form.tokenizeBeforeListing
-                      ? formatCapAmount(priceNum)
-                      : Number.isFinite(priceNum)
-                        ? money(priceNum, 'USD')
-                        : '—'}
+                    {Number.isFinite(priceNum) ? money(priceNum, 'INR') : '—'}
                   </dd>
                 </div>
                 <div>
                   <dt>Price per Unit</dt>
-                  <dd>{form.tokenizeBeforeListing ? formatCapAmount(pricePerUnit) : '—'}</dd>
+                  <dd>{form.tokenizeBeforeListing && pricePerUnit > 0 ? money(pricePerUnit, 'INR') : '—'}</dd>
                 </div>
               </dl>
 

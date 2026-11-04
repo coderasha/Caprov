@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Download,
   ExternalLink,
   FileText,
   Filter,
@@ -902,11 +901,11 @@ export function BankerCollateralReview({
                 Ask AI
               </Link>
               <Link
-                href={`/assets/${selected.assetId}?tab=documents`}
+                href={`/assets/${selected.assetId}`}
                 className="banker-col__secondary-btn"
               >
-                <Download size={14} />
-                Download Report
+                <Building2 size={14} />
+                View Asset
               </Link>
             </div>
 

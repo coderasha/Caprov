@@ -1581,10 +1581,12 @@ canvas {
 }
 
 .landing-header__logo {
-  height: 1.85rem !important;
-  max-height: 1.85rem !important;
+  display: block;
+  height: 1.9rem !important;
+  max-height: 1.9rem !important;
   width: auto !important;
-  max-width: 9.25rem !important;
+  max-width: 8.75rem !important;
+  object-position: left center;
 }
 
 @media (min-width: 640px) {
@@ -1593,17 +1595,21 @@ canvas {
   }
 
   .landing-header__logo {
-    height: 2rem !important;
-    max-height: 2rem !important;
-    max-width: 10rem !important;
+    height: 2.1rem !important;
+    max-height: 2.1rem !important;
+    max-width: 9.75rem !important;
   }
 }
 
 .landing-footer__logo {
-  height: 2.35rem !important;
-  max-height: 2.35rem !important;
+  height: 2.45rem !important;
+  max-height: 2.45rem !important;
   width: auto !important;
   max-width: 11.5rem !important;
+  border-radius: 0.3rem;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 0.3rem 0.45rem;
+  box-sizing: content-box;
 }
 
 .landing-header--scrolled {
