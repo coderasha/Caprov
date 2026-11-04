@@ -18,7 +18,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import type { OrderSide, TradeRecord, TradingOrder } from '@caprov/types';
+import type { OrderSide, TradeRecord, TradingOrder } from '@privateassetz/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';

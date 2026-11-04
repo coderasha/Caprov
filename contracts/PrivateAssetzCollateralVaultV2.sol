@@ -6,7 +6,7 @@ interface IERC1155CollateralV2 {
 }
 
 /// @notice ERC-1155 collateral vault with owner-managed bank execution delegates.
-contract CaprovCollateralVaultV2 {
+contract PrivateAssetzCollateralVaultV2 {
     enum Status { LOCKED, ACTIVE, RELEASED, CLAIMED }
     struct Collateral {
         address borrower;

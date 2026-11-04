@@ -16,7 +16,7 @@ const networks: Record<BlockchainNetworkId, BrowserNetwork> = {
   besu: {
     id: 'besu',
     chainId: Number(process.env.NEXT_PUBLIC_BESU_CHAIN_ID || 1337),
-    chainName: process.env.NEXT_PUBLIC_BESU_CHAIN_NAME || 'CAPROV Besu Local',
+    chainName: process.env.NEXT_PUBLIC_BESU_CHAIN_NAME || 'PRIVATEASSETZ Besu Local',
     rpcUrl: process.env.NEXT_PUBLIC_BESU_RPC_URL || 'http://127.0.0.1:8545',
     blockExplorerUrl: process.env.NEXT_PUBLIC_BESU_EXPLORER_URL,
     zeroGas: process.env.NEXT_PUBLIC_BESU_ZERO_GAS !== 'false',
@@ -27,18 +27,18 @@ const networks: Record<BlockchainNetworkId, BrowserNetwork> = {
     documentRegistry: process.env.NEXT_PUBLIC_BESU_DOCUMENT_REGISTRY_CONTRACT,
   },
 };
-const storageKey = 'caprov-blockchain-network';
+const storageKey = 'privateassetz-blockchain-network';
 export function selectedBlockchainNetwork(): BrowserNetwork {
   if (typeof window === 'undefined') return networks.sepolia;
   return networks[window.localStorage.getItem(storageKey) === 'besu' ? 'besu' : 'sepolia'];
 }
 export function setSelectedBlockchainNetwork(id: BlockchainNetworkId) {
   window.localStorage.setItem(storageKey, id);
-  window.dispatchEvent(new Event('caprov-network-changed'));
+  window.dispatchEvent(new Event('privateassetz-network-changed'));
 }
 export function blockchainNetworks() { return [networks.sepolia, networks.besu]; }
 
-/** Returns the CAPROV network represented by an EIP-1193 chain id. */
+/** Returns the PRIVATEASSETZ network represented by an EIP-1193 chain id. */
 export function blockchainNetworkForChainId(chainId: number) {
   return blockchainNetworks().find((network) => network.chainId === chainId);
 }

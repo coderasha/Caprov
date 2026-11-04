@@ -5,7 +5,7 @@ import { api } from '@/lib/api';
 import { assetClassLabel, moneyCompact } from '@/lib/format';
 import type { PortfolioRow } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import type { AssetClass, CurrencyCode } from '@caprov/types';
+import type { AssetClass, CurrencyCode } from '@privateassetz/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   BarChart3,

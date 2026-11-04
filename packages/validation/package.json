@@ -1,5 +1,5 @@
 {
-  "name": "@caprov/validation",
+  "name": "@privateassetz/validation",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "build": "tsc -p tsconfig.json",
     "lint": "tsc -p tsconfig.json --noEmit",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "echo \"No tests for @caprov/validation\""
+    "test": "echo \"No tests for @privateassetz/validation\""
   },
   "dependencies": {
     "zod": "^4.4.3"

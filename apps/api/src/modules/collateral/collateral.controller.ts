@@ -24,7 +24,7 @@ import type {
   CurrencyCode,
   LoanFacility,
   TokenPosition,
-} from '@caprov/types';
+} from '@privateassetz/types';
 import { formatUnits } from 'ethers';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';

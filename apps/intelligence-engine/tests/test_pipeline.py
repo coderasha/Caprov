@@ -3,7 +3,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from caprov_intelligence.pipeline import run_asset_dna
+from privateassetz_intelligence.pipeline import run_asset_dna
 
 
 def test_asset_dna_extracts_purchase_price() -> None:

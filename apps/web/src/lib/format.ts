@@ -1,4 +1,4 @@
-import type { AssetClass, AssetStatus, DocumentType, MembershipRole } from '@caprov/types';
+import type { AssetClass, AssetStatus, DocumentType, MembershipRole } from '@privateassetz/types';
 
 const currencySymbols: Record<string, string> = {
   USD: '$',

@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import type { HealthStatus } from '@caprov/types';
+import type { HealthStatus } from '@privateassetz/types';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 
 @Controller('health')
@@ -9,7 +9,7 @@ export class HealthController {
   @Get()
   getHealth(): HealthStatus & { assets: number; documents: number } {
     return {
-      service: 'caprov-api',
+      service: 'privateassetz-api',
       status: 'ok',
       timestamp: new Date().toISOString(),
       assets: this.db.snapshot.assets.length,

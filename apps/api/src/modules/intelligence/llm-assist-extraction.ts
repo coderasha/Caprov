@@ -1,4 +1,4 @@
-import type { DnaFact, LlmModelOption } from '@caprov/types';
+import type { DnaFact, LlmModelOption } from '@privateassetz/types';
 import { createId } from '../../infrastructure/database/ids';
 import { isLlmModelLive } from './llm-catalog';
 import {
@@ -33,7 +33,7 @@ export async function assistExtractionGaps(options: {
   const { model, documents, facts } = options;
   if (
     !isLlmModelLive(model) ||
-    model.provider === 'caprov' ||
+    model.provider === 'privateassetz' ||
     model.alwaysAvailable
   ) {
     return { facts, filled: [] };

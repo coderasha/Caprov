@@ -1,4 +1,4 @@
-import type { MembershipRole } from '@caprov/types';
+import type { MembershipRole } from '@privateassetz/types';
 
 export const AUTH_SCOPES = {
   platformAdmin: 'platform:admin',

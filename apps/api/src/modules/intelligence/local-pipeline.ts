@@ -9,7 +9,7 @@ import type {
   DocumentType,
   RiskSummary,
   ValuationSummary,
-} from '@caprov/types';
+} from '@privateassetz/types';
 import { createId } from '../../infrastructure/database/ids';
 import {
   AS_OF_RE,
@@ -540,7 +540,7 @@ export function answerCopilot(
         });
       }
       title = 'Forward valuation';
-      headline = `${y3.years}-year base mark from the CAPROV forward model.`;
+      headline = `${y3.years}-year base mark from the PRIVATEASSETZ forward model.`;
       metric = formatMoney(y3.base, envelope.projection.currency);
       metricLabel = `${y3.years}y base mark`;
       confidence = y3.confidence;

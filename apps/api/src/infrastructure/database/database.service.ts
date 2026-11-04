@@ -2,8 +2,9 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { emptyStore, type CaprovData } from './models';
-import { buildSeedData } from './seed-data';
+import { compareSync } from 'bcryptjs';
+import { emptyStore, type PrivateAssetzData } from './models';
+import { buildSeedData, DEMO_PASSWORD } from './seed-data';
 import {
   DEFAULT_LLM_MODEL_ID,
   getPreferredDefaultLlmModelId,
@@ -15,7 +16,7 @@ import {
 
 @Injectable()
 export class DatabaseService implements OnModuleInit {
-  private data: CaprovData = emptyStore();
+  private data: PrivateAssetzData = emptyStore();
   private readonly filePath = resolveDataFilePath();
   private writeChain: Promise<void> = Promise.resolve();
   
@@ -30,7 +31,7 @@ export class DatabaseService implements OnModuleInit {
       return;
     }
     try {
-      this.data = JSON.parse(readFileSync(this.filePath, 'utf8')) as CaprovData;
+      this.data = JSON.parse(readFileSync(this.filePath, 'utf8')) as PrivateAssetzData;
       this.normalizeStore();
     } catch {
       this.data = buildSeedData();
@@ -43,23 +44,46 @@ export class DatabaseService implements OnModuleInit {
     let changed = false;
     // Lazily build seed data — buildSeedData() runs bcrypt and is expensive.
     // Skip it on the common path when demo users/orgs are already present.
-    let seeded: CaprovData | undefined;
+    let seeded: PrivateAssetzData | undefined;
     const ensureSeeded = () => {
       seeded ??= buildSeedData();
       return seeded;
     };
+    // The rebrand changed the published demo credential. Existing local stores
+    // retain password hashes, so update only the fixed demo identities when
+    // they do not accept the current documented password. This leaves all
+    // customer-created accounts and the rest of the workspace untouched.
+    const demoEmails = new Set([
+      'banker@privateassetz.demo',
+      'priya@privateassetz.io',
+      'elena@meridian.privateassetz',
+      'arjun@meridian.privateassetz',
+      'sofia@meridian.privateassetz',
+    ]);
+    for (const user of this.data.users) {
+      if (!demoEmails.has(user.email.toLowerCase()) || compareSync(DEMO_PASSWORD, user.passwordHash)) {
+        continue;
+      }
+      const seededUser = ensureSeeded().users.find(
+        (candidate) => candidate.email.toLowerCase() === user.email.toLowerCase(),
+      );
+      if (seededUser) {
+        user.passwordHash = seededUser.passwordHash;
+        changed = true;
+      }
+    }
     const preferredDefaultModelId = getPreferredDefaultLlmModelId();
     const arjun = this.data.users.find(
-      (user) => user.email === 'arjun@meridian.caprov',
+      (user) => user.email === 'arjun@meridian.privateassetz',
     );
-    const bankOrgId = 'org_caprov_demo_bank';
+    const bankOrgId = 'org_privateassetz_demo_bank';
     const bankerId = 'usr_bank_demo';
     const buyerOrgId = 'org_mehta';
     if (!this.data.organizations.some((org) => org.id === bankOrgId)) {
-      this.data.organizations.push({ id: bankOrgId, name: 'CAPROV Demo Bank', slug: 'caprov-demo-bank', status: 'ACTIVE', llmModelId: preferredDefaultModelId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); changed = true;
+      this.data.organizations.push({ id: bankOrgId, name: 'PRIVATEASSETZ Demo Bank', slug: 'privateassetz-demo-bank', status: 'ACTIVE', llmModelId: preferredDefaultModelId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); changed = true;
     }
     if (!this.data.users.some((user) => user.id === bankerId)) {
-      this.data.users.push({ id: bankerId, email: 'banker@caprov.demo', passwordHash: ensureSeeded().users.find((user) => user.id === bankerId)!.passwordHash, fullName: 'Jordan Lee', title: 'Banker', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); changed = true;
+      this.data.users.push({ id: bankerId, email: 'banker@privateassetz.demo', passwordHash: ensureSeeded().users.find((user) => user.id === bankerId)!.passwordHash, fullName: 'Jordan Lee', title: 'Banker', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); changed = true;
     }
     if (!this.data.memberships.some((membership) => membership.id === 'mem_bank_demo')) {
       this.data.memberships.push({ id: 'mem_bank_demo', organizationId: bankOrgId, userId: bankerId, role: 'BANKER', createdAt: new Date().toISOString() }); changed = true;
@@ -130,7 +154,7 @@ export class DatabaseService implements OnModuleInit {
         changed = true;
       }
     }
-    const arrays: Array<keyof CaprovData> = [
+    const arrays: Array<keyof PrivateAssetzData> = [
       'walletLinks',
       'walletChallenges',
       'organizationAccessRequests',
@@ -178,7 +202,7 @@ export class DatabaseService implements OnModuleInit {
         changed = true;
       }
       if (!document.offChainUri) {
-        document.offChainUri = `caprov://storage/${document.storageKey}`;
+        document.offChainUri = `privateassetz://storage/${document.storageKey}`;
         changed = true;
       }
       if (!document.anchorStatus) {
@@ -253,7 +277,7 @@ export class DatabaseService implements OnModuleInit {
         changed = true;
       }
     }
-    // CAPROV's operational ledger is INR-only. Historical source documents
+    // PRIVATEASSETZ's operational ledger is INR-only. Historical source documents
     // retain their original currencies as evidence, but all platform marks,
     // positions, facilities, and wallet entries are denominated in INR.
     for (const valuation of this.data.valuations) {
@@ -330,21 +354,21 @@ export class DatabaseService implements OnModuleInit {
       }
     }
     const needsPlatformBackfill =
-      !this.data.organizations.some((item) => item.id === 'org_caprov') ||
-      !this.data.users.some((item) => item.id === 'usr_caprov_admin') ||
+      !this.data.organizations.some((item) => item.id === 'org_privateassetz') ||
+      !this.data.users.some((item) => item.id === 'usr_privateassetz_admin') ||
       !this.data.memberships.some(
         (item) =>
-          item.userId === 'usr_caprov_admin' &&
-          item.organizationId === 'org_caprov' &&
+          item.userId === 'usr_privateassetz_admin' &&
+          item.organizationId === 'org_privateassetz' &&
           item.role === 'PLATFORM_ADMIN',
       ) ||
       this.data.users.some(
-        (item) => item.email.toLowerCase() === 'admin@caprov.io',
+        (item) => item.email.toLowerCase() === 'admin@privateassetz.io',
       );
     if (needsPlatformBackfill) {
       const seed = ensureSeeded();
       const seededPlatformOrg = seed.organizations.find(
-        (item) => item.id === 'org_caprov',
+        (item) => item.id === 'org_privateassetz',
       );
       if (seededPlatformOrg) {
         const existingPlatformOrg = this.data.organizations.find(
@@ -373,11 +397,11 @@ export class DatabaseService implements OnModuleInit {
         }
       }
       const seededPlatformAdmin = seed.users.find(
-        (item) => item.id === 'usr_caprov_admin',
+        (item) => item.id === 'usr_privateassetz_admin',
       );
       if (seededPlatformAdmin) {
         const legacyPlatformAdmin = this.data.users.find(
-          (item) => item.email.toLowerCase() === 'admin@caprov.io',
+          (item) => item.email.toLowerCase() === 'admin@privateassetz.io',
         );
         const existingPlatformAdmin =
           this.data.users.find((item) => item.id === seededPlatformAdmin.id) ??
@@ -412,7 +436,7 @@ export class DatabaseService implements OnModuleInit {
         }
       }
       const seededPlatformMembership = seed.memberships.find(
-        (item) => item.id === 'mem_caprov_admin',
+        (item) => item.id === 'mem_privateassetz_admin',
       );
       if (seededPlatformMembership) {
         const hasPlatformMembership = this.data.memberships.some(
@@ -432,11 +456,11 @@ export class DatabaseService implements OnModuleInit {
     }
   }
 
-  get snapshot(): CaprovData {
+  get snapshot(): PrivateAssetzData {
     return this.data;
   }
 
-  mutate<T>(fn: (draft: CaprovData) => T): T {
+  mutate<T>(fn: (draft: PrivateAssetzData) => T): T {
     const result = fn(this.data);
     void this.persist();
     return result;
@@ -452,7 +476,7 @@ export class DatabaseService implements OnModuleInit {
    */
   async mutateWithDocumentLock<T>(
     documentId: string,
-    fn: (draft: CaprovData) => T,
+    fn: (draft: PrivateAssetzData) => T,
   ): Promise<T> {
     // Get existing lock or create new one
     const existingLock = this.documentLocks.get(documentId) ?? Promise.resolve();

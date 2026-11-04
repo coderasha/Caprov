@@ -12,7 +12,7 @@ const asset = process.env.ETHEREUM_TOKEN_CONTRACT;
 const payment = process.env.ETHEREUM_PAYMENT_TOKEN_CONTRACT;
 const marketplace = process.env.ETHEREUM_MARKETPLACE_CONTRACT;
 if (!asset || !payment || !marketplace) throw new Error('Set all three deployed contract addresses.');
-const files = ['CaprovAssetToken.sol', 'CaprovPaymentToken.sol', 'CaprovMarketplace.sol'];
+const files = ['PrivateAssetzAssetToken.sol', 'PrivateAssetzPaymentToken.sol', 'PrivateAssetzMarketplace.sol'];
 const input = {
   language: 'Solidity',
   sources: Object.fromEntries(files.map((file) => [file, { content: readFileSync(resolve(process.cwd(), 'contracts', file), 'utf8') }])),
@@ -21,14 +21,14 @@ const input = {
 const compilerVersion = `v${solc.version().split('.Emscripten')[0]}`;
 const coder = AbiCoder.defaultAbiCoder();
 const constructorArguments = {
-  CaprovAssetToken: coder.encode(['string'], [process.env.CAPROV_TOKEN_URI || 'https://caprov.local/token/{id}.json']).slice(2),
-  CaprovPaymentToken: '',
-  CaprovMarketplace: coder.encode(['address', 'address'], [asset, payment]).slice(2),
+  PrivateAssetzAssetToken: coder.encode(['string'], [process.env.PRIVATEASSETZ_TOKEN_URI || 'https://privateassetz.local/token/{id}.json']).slice(2),
+  PrivateAssetzPaymentToken: '',
+  PrivateAssetzMarketplace: coder.encode(['address', 'address'], [asset, payment]).slice(2),
 };
 const contracts = [
-  ['CaprovAssetToken', asset],
-  ['CaprovPaymentToken', payment],
-  ['CaprovMarketplace', marketplace],
+  ['PrivateAssetzAssetToken', asset],
+  ['PrivateAssetzPaymentToken', payment],
+  ['PrivateAssetzMarketplace', marketplace],
 ];
 for (const [name, address] of contracts) {
   const body = new URLSearchParams({

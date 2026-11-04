@@ -1,4 +1,4 @@
-# CAPROV
+# PRIVATEASSETZ
 
 AI-first **private-asset intelligence** platform built around **Asset DNA**, with capital-markets workflows on top of DNA-backed marks.
 
@@ -8,7 +8,7 @@ AI-first **private-asset intelligence** platform built around **Asset DNA**, wit
 | `apps/api` | Authoritative business platform (NestJS) — auth, assets, DNA orchestration, capital markets |
 | `apps/intelligence-engine` | Deterministic AI runtime (FastAPI) — extraction, DNA, valuation, risk, copilot |
 | `packages/types` | Shared TypeScript domain types |
-| `contracts/CaprovAssetToken.sol` | Ethereum Sepolia ERC-1155-style asset token |
+| `contracts/PrivateAssetzAssetToken.sol` | Ethereum Sepolia ERC-1155-style asset token |
 
 ## What works today
 
@@ -46,10 +46,10 @@ See [docs/README.md](docs/README.md) for the full documentation index.
 
 | User | Email | Password | Role |
 | --- | --- | --- | --- |
-| Priya Nair | `priya@caprov.io` | `CaprovDemo!23` | Platform admin |
-| Elena Voss | `elena@meridian.caprov` | `CaprovDemo!23` | Org admin |
-| Arjun Mehta | `arjun@meridian.caprov` | `CaprovDemo!23` | Buyer |
-| Sofia Laurent | `sofia@meridian.caprov` | `CaprovDemo!23` | Compliance |
+| Priya Nair | `priya@privateassetz.io` | `PrivateAssetzDemo!23` | Platform admin |
+| Elena Voss | `elena@meridian.privateassetz` | `PrivateAssetzDemo!23` | Org admin |
+| Arjun Mehta | `arjun@meridian.privateassetz` | `PrivateAssetzDemo!23` | Buyer |
+| Sofia Laurent | `sofia@meridian.privateassetz` | `PrivateAssetzDemo!23` | Compliance |
 
 ## Run locally
 
@@ -57,7 +57,7 @@ See [docs/README.md](docs/README.md) for the full documentation index.
 pnpm install
 
 # Shared types
-pnpm --filter @caprov/types build
+pnpm --filter @privateassetz/types build
 
 # API — http://localhost:3001/api  (Swagger at /api/docs)
 pnpm --filter api build
@@ -105,22 +105,22 @@ Pick a preferred model under **Organization**, **Intelligence**, or **Copilot**.
 Defaults to **simulated** Sepolia mints (chain id `11155111`). For live testnet mints:
 
 1. Fund a Sepolia wallet
-2. Deploy `contracts/CaprovAssetToken.sol` (`ETHEREUM_SEPOLIA_PRIVATE_KEY=… node scripts/deploy-caprov-token.mjs` after installing `solc`)
+2. Deploy `contracts/PrivateAssetzAssetToken.sol` (`ETHEREUM_SEPOLIA_PRIVATE_KEY=… node scripts/deploy-privateassetz-token.mjs` after installing `solc`)
 3. Set `ETHEREUM_SEPOLIA_PRIVATE_KEY` and `ETHEREUM_TOKEN_CONTRACT` in `apps/api/.env`
 
 See [docs/capital-markets.md](docs/capital-markets.md).
 
 ### Atomic asset-token marketplace (Sepolia)
 
-`contracts/CaprovAssetToken.sol` now assigns one immutable ERC-1155 token type and supply to each asset. `contracts/CaprovPaymentToken.sol` is the CAPROV ERC-20 test payment token, and `contracts/CaprovMarketplace.sol` escrows listed asset units and atomically swaps them for CAPROV.
+`contracts/PrivateAssetzAssetToken.sol` now assigns one immutable ERC-1155 token type and supply to each asset. `contracts/PrivateAssetzPaymentToken.sol` is the PRIVATEASSETZ ERC-20 test payment token, and `contracts/PrivateAssetzMarketplace.sol` escrows listed asset units and atomically swaps them for PRIVATEASSETZ.
 
 Deploy the three contracts from a funded Sepolia owner wallet:
 
 ```bash
-node scripts/deploy-caprov-marketplace.mjs
+node scripts/deploy-privateassetz-marketplace.mjs
 ```
 
-Set the three addresses printed by the script in `apps/api/.env`. Sellers must approve the marketplace to transfer their ERC-1155 units before listing; buyers must approve it to spend CAPROV before calling `buy(listingId, units)` from their own wallet. The server must never hold a buyer's private key.
+Set the three addresses printed by the script in `apps/api/.env`. Sellers must approve the marketplace to transfer their ERC-1155 units before listing; buyers must approve it to spend PRIVATEASSETZ before calling `buy(listingId, units)` from their own wallet. The server must never hold a buyer's private key.
 
 ### Trusted intelligence and provenance
 

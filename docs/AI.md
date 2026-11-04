@@ -1,6 +1,6 @@
-# CAPROV AI Intelligence Engine
+# PRIVATEASSETZ AI Intelligence Engine
 
-This document describes the features of the CAPROV intelligence layer: what it does, how it fits into the platform, how pipelines run, and what each capability produces.
+This document describes the features of the PRIVATEASSETZ intelligence layer: what it does, how it fits into the platform, how pipelines run, and what each capability produces.
 
 ## Role in the platform
 
@@ -118,13 +118,13 @@ Organizations pick a preferred LLM from the platform catalog. UI pickers live on
 | Asset DNA extraction, valuation marks, risk | Organization-selected DNA model when live; deterministic core if the model is unavailable or produces no source-validated facts |
 | Copilot Q&A synthesis | Selected org model when its API key is live; otherwise deterministic retrieval over the DNA envelope |
 
-The Copilot preference is stored as `llmModelId`; the separate primary DNA preference is stored as `dnaLlmModelId` and defaults to `caprov-deterministic`. DNA selections are limited to models with the `asset_dna` capability and are audited as `intelligence.dna_llm_model_selected`. A live selected DNA model extracts the full supported fact set; only values and provenance fragments found in the uploaded documents are accepted. When no facts survive that validation or the model is unavailable, CAPROV falls back to the deterministic extractor.
+The Copilot preference is stored as `llmModelId`; the separate primary DNA preference is stored as `dnaLlmModelId` and defaults to `privateassetz-deterministic`. DNA selections are limited to models with the `asset_dna` capability and are audited as `intelligence.dna_llm_model_selected`. A live selected DNA model extracts the full supported fact set; only values and provenance fragments found in the uploaded documents are accepted. When no facts survive that validation or the model is unavailable, PRIVATEASSETZ falls back to the deterministic extractor.
 
 #### Catalog
 
 | Model id | Provider | Label | API key env | Always available |
 | --- | --- | --- | --- | --- |
-| `caprov-deterministic` | caprov | CAPROV Deterministic Extractor | — | Yes |
+| `privateassetz-deterministic` | privateassetz | PRIVATEASSETZ Deterministic Extractor | — | Yes |
 | `openai-gpt-5.6-terra` | openai | OpenAI GPT-5.6 Terra | `OPENAI_API_KEY` | No |
 | `openai-gpt-4.1` | openai | OpenAI GPT-4.1 | `OPENAI_API_KEY` | No |
 | `openai-gpt-4o` | openai | OpenAI GPT-4o | `OPENAI_API_KEY` | No |
@@ -148,11 +148,11 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "selectedModelId": "caprov-deterministic",
-  "selected": { "id": "caprov-deterministic", "label": "CAPROV Deterministic Extractor", "...": "..." },
+  "selectedModelId": "privateassetz-deterministic",
+  "selected": { "id": "privateassetz-deterministic", "label": "PRIVATEASSETZ Deterministic Extractor", "...": "..." },
   "models": [ "...catalog..." ],
   "availability": {
-    "caprov-deterministic": { "available": true, "reason": "Built-in CAPROV extractor — always ready." },
+    "privateassetz-deterministic": { "available": true, "reason": "Built-in PRIVATEASSETZ extractor — always ready." },
     "openai-gpt-4o": { "available": false, "reason": "Set OPENAI_API_KEY to enable live inference. ..." }
   }
 }
@@ -282,7 +282,7 @@ Builds chronological events from document dates (`As of`, `Date`, or embedded ca
 - `valuation`, `risk`
 - `confidence` — `{ overall, coverage, provenance }`
 - `sourceDocumentIds`
-- `engine` — `caprov-intelligence-engine` when produced by the Python service
+- `engine` — `privateassetz-intelligence-engine` when produced by the Python service
 - `version` / `generatedAt` (versioning also applied by the API on persist)
 
 ### 7. Valuation intelligence
@@ -321,7 +321,7 @@ Produces:
 
 ### 9. Forward valuation (predictive analysis)
 
-After a current DNA mark exists, CAPROV builds a **deterministic forward valuation** (`caprov-forward-mark-v1`):
+After a current DNA mark exists, PRIVATEASSETZ builds a **deterministic forward valuation** (`privateassetz-forward-mark-v1`):
 
 | Horizon | Output |
 | --- | --- |
@@ -379,12 +379,12 @@ Asset DNA extraction is **not** a general open-domain LLM. Free-form legalese ou
 apps/intelligence-engine/
   app/api/                 FastAPI routes & schemas
   app/core/                Settings
-  caprov_intelligence/
+  privateassetz_intelligence/
     pipeline.py            End-to-end deterministic pipeline (authoritative implementation)
   tests/                   Health + accuracy golden tests
 ```
 
-Package subfolders under `caprov_intelligence/` (document_intelligence, extraction, …) may exist as layout placeholders; runtime logic lives in `pipeline.py`, mirrored by Nest `extraction-accuracy.ts` / `local-pipeline.ts`.
+Package subfolders under `privateassetz_intelligence/` (document_intelligence, extraction, …) may exist as layout placeholders; runtime logic lives in `pipeline.py`, mirrored by Nest `extraction-accuracy.ts` / `local-pipeline.ts`.
 
 ## Running locally
 
@@ -394,7 +394,7 @@ Package subfolders under `caprov_intelligence/` (document_intelligence, extracti
 # → http://localhost:8000/api/health
 
 # API (orchestrates engine)
-pnpm --filter @caprov/types build
+pnpm --filter @privateassetz/types build
 pnpm --filter api build
 PORT=3001 INTELLIGENCE_ENGINE_URL=http://127.0.0.1:8000 node apps/api/dist/main.js
 ```
@@ -413,7 +413,7 @@ Environment (`apps/api/.env` / `.env.example`):
 | `OPENAI_COMPAT_BASE_URL` | Groq OpenAI URL | Gateway base for Meta/Llama |
 | `OPENAI_COMPAT_MODEL` | `meta-llama/llama-4-maverick` | Gateway model name override |
 | `ETHEREUM_SEPOLIA_PRIVATE_KEY` | — | Live Sepolia mint signer (optional) |
-| `ETHEREUM_TOKEN_CONTRACT` | — | Deployed CaprovAssetToken address (optional) |
+| `ETHEREUM_TOKEN_CONTRACT` | — | Deployed PrivateAssetzAssetToken address (optional) |
 
 ## Related docs
 

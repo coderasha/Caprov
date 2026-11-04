@@ -77,7 +77,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new IdempotencyInterceptor(idempotencyService));
 
   const swagger = new DocumentBuilder()
-    .setTitle('CAPROV API')
+    .setTitle('PRIVATEASSETZ API')
     .setDescription(
       'Private-asset intelligence platform — Asset DNA, documents, portfolios and audit.',
     )

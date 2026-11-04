@@ -1,6 +1,6 @@
-# CAPROV Setup Guide
+# PRIVATEASSETZ Setup Guide
 
-This guide gives step-by-step commands to set up the CAPROV project locally, with clear separation between frontend, backend, AI engine, and blockchain tasks.
+This guide gives step-by-step commands to set up the PRIVATEASSETZ project locally, with clear separation between frontend, backend, AI engine, and blockchain tasks.
 
 The current local demo runs on a file-backed store. PostgreSQL and Redis are optional boundaries for later phases and are not required to boot the updated platform.
 
@@ -21,15 +21,15 @@ Optional for live blockchain deployment:
 ## 2. Clone and Install Workspace Dependencies
 
 ```bash
-git clone <your-repo-url> Caprov
-cd Caprov
+git clone <your-repo-url> PrivateAssetz
+cd PrivateAssetz
 pnpm install
 ```
 
 Build shared types before running the apps:
 
 ```bash
-pnpm --filter @caprov/types build
+pnpm --filter @privateassetz/types build
 ```
 
 ## 3. Backend Setup
@@ -80,8 +80,8 @@ The frontend expects the backend to be available at `http://localhost:3001`.
 
 - Visit `http://localhost:3000/register` to submit a new organization access request.
 - Sign in as the platform admin to approve or reject requests:
-  - Email: `priya@caprov.io`
-  - Password: `CaprovDemo!23`
+  - Email: `priya@privateassetz.io`
+  - Password: `PrivateAssetzDemo!23`
 - After approval, the requester can sign in as the new org admin.
 
 ## 5. AI Engine Setup
@@ -150,7 +150,7 @@ export ETHEREUM_SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
 Deploy the contract:
 
 ```bash
-node scripts/deploy-caprov-token.mjs
+node scripts/deploy-privateassetz-token.mjs
 ```
 
 After deployment, copy the printed contract address into `apps/api/.env`:
@@ -181,7 +181,7 @@ ETHEREUM_SEPOLIA_PRIVATE_KEY=0xYOUR_PRIVATE_KEY
 ETHEREUM_DOCUMENT_REGISTRY_CONTRACT=0xDEPLOYED_DOCUMENT_REGISTRY_ADDRESS
 ```
 
-Without `ETHEREUM_DOCUMENT_REGISTRY_CONTRACT`, CAPROV will store the document but will not offer a genuine Sepolia document anchor transaction.
+Without `ETHEREUM_DOCUMENT_REGISTRY_CONTRACT`, PRIVATEASSETZ will store the document but will not offer a genuine Sepolia document anchor transaction.
 
 ## 7. Full Local Startup Order
 
@@ -216,13 +216,13 @@ http://localhost:3000
 
 Demo user:
 
-- Email: `elena@meridian.caprov`
-- Password: `CaprovDemo!23`
+- Email: `elena@meridian.privateassetz`
+- Password: `PrivateAssetzDemo!23`
 
 Platform admin:
 
-- Email: `priya@caprov.io`
-- Password: `CaprovDemo!23`
+- Email: `priya@privateassetz.io`
+- Password: `PrivateAssetzDemo!23`
 
 Useful test asset document:
 

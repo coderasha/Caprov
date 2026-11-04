@@ -70,7 +70,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (address) {
       setMessage(`Switching MetaMask to ${targetNetwork.chainName}…`);
       try {
-        // Keep CAPROV on its current network until MetaMask confirms the
+        // Keep PRIVATEASSETZ on its current network until MetaMask confirms the
         // explicit target. This avoids issuing a second/stale switch while
         // MetaMask is emitting its intermediate chainChanged event.
         requestedNetworkRef.current = next;
@@ -108,7 +108,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const network = Number.isSafeInteger(chainId) ? blockchainNetworkForChainId(chainId) : undefined;
       if (!network) {
         setMessage(
-          'MetaMask is on an unsupported network. Choose Ethereum Sepolia or CAPROV Besu Local in CAPROV (or MetaMask), then try again.',
+          'MetaMask is on an unsupported network. Choose Ethereum Sepolia or PRIVATEASSETZ Besu Local in PRIVATEASSETZ (or MetaMask), then try again.',
         );
         return;
       }
@@ -133,7 +133,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     try {
       const connection = await connectMetaMaskWallet();
       const chainId = selectedBlockchainNetwork().chainId;
-      setMessage('Confirm the signature to verify this wallet for your CAPROV account…');
+      setMessage('Confirm the signature to verify this wallet for your PRIVATEASSETZ account…');
       const challenge = (await api.post<{ challengeId: string; message: string }>('/auth/wallets/challenge', {
         address: connection.address,
         chainId,
@@ -148,7 +148,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setSelectedAccountNetworkId(connectedNetworkId);
       setNetworkId(connectedNetworkId);
       setMessage(
-        `Wallet verified for this CAPROV account on ${selectedBlockchainNetwork().chainName} (${connection.address.slice(0, 6)}…${connection.address.slice(-4)}).`,
+        `Wallet verified for this PRIVATEASSETZ account on ${selectedBlockchainNetwork().chainName} (${connection.address.slice(0, 6)}…${connection.address.slice(-4)}).`,
       );
       return connection.address;
     } catch (error) {
@@ -160,14 +160,14 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const disconnect = useCallback(() => {
-    // This ends CAPROV's in-app session only. The user remains in control of
+    // This ends PRIVATEASSETZ's in-app session only. The user remains in control of
     // MetaMask's site permissions and can revoke them from MetaMask if wanted.
     clearMetaMaskConnection();
     setAccounts([]);
     setSelectedAccount(undefined);
     setSelectedAccountNetworkId(undefined);
     setAddress(undefined);
-    setMessage('MetaMask disconnected from this CAPROV session.');
+    setMessage('MetaMask disconnected from this PRIVATEASSETZ session.');
   }, []);
 
   const switchAccount = useCallback(async () => {
@@ -182,10 +182,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setAccounts(selection.accounts);
       setSelectedAccount(selection.address);
       setSelectedAccountNetworkId(selectedBlockchainNetwork().id);
-      // Selection is intentionally not treated as a CAPROV wallet connection.
+      // Selection is intentionally not treated as a PRIVATEASSETZ wallet connection.
       // The selected address must complete the signed verification step first.
       setAddress(undefined);
-      setMessage('Account selected. Verify it to use it with CAPROV.');
+      setMessage('Account selected. Verify it to use it with PRIVATEASSETZ.');
       return selection.address;
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'MetaMask account selection could not be completed.');
@@ -199,13 +199,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setBusy(true);
     try {
       const selected = await selectMetaMaskAccount(nextAddress);
-      // Choosing an exposed account is not proof that this CAPROV user controls
+      // Choosing an exposed account is not proof that this PRIVATEASSETZ user controls
       // it. Keep the former verified address disconnected until the selected
-      // account completes CAPROV's signature challenge.
+      // account completes PRIVATEASSETZ's signature challenge.
       setSelectedAccount(selected);
       setSelectedAccountNetworkId(selectedBlockchainNetwork().id);
       setAddress(undefined);
-      setMessage(`Selected ${selected.slice(0, 6)}…${selected.slice(-4)}. Verify the selected account to use it with CAPROV.`);
+      setMessage(`Selected ${selected.slice(0, 6)}…${selected.slice(-4)}. Verify the selected account to use it with PRIVATEASSETZ.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Could not select that MetaMask account.');
     } finally {
@@ -230,7 +230,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         if (current && next[0]?.toLowerCase() === current.toLowerCase()) return current;
         return undefined;
       });
-      if (next.length) setMessage('MetaMask account changed. Connect wallet to verify the selected account for CAPROV.');
+      if (next.length) setMessage('MetaMask account changed. Connect wallet to verify the selected account for PRIVATEASSETZ.');
     };
     // Do not probe an injected provider during page load. Some browser wallet
     // extensions reject even `eth_accounts` until explicitly selected by the
@@ -250,7 +250,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         setMessage(`MetaMask switched to ${network.chainName} (chain ID ${network.chainId}).`);
         return;
       }
-      setMessage('MetaMask switched to an unsupported network. Select CAPROV Besu or Ethereum Sepolia to continue.');
+      setMessage('MetaMask switched to an unsupported network. Select PRIVATEASSETZ Besu or Ethereum Sepolia to continue.');
     };
     const handleDisconnect = () => {
       clearMetaMaskConnection();
@@ -258,9 +258,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setSelectedAccount(undefined);
       setSelectedAccountNetworkId(undefined);
       setAddress(undefined);
-      setMessage('MetaMask disconnected or restarted. Unlock MetaMask, then reconnect it to CAPROV.');
+      setMessage('MetaMask disconnected or restarted. Unlock MetaMask, then reconnect it to PRIVATEASSETZ.');
     };
-    // Subscribe to the exact EIP-6963 MetaMask provider selected by CAPROV,
+    // Subscribe to the exact EIP-6963 MetaMask provider selected by PRIVATEASSETZ,
     // rather than whichever wallet extension last assigned window.ethereum.
     // This matters when MetaMask and another injected wallet are installed.
     void activeMetaMaskProvider()

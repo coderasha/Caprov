@@ -6,7 +6,7 @@ export function reservedPayload(context: string) {
     status: 'reserved' as const,
     context,
     message:
-      'This bounded context is reserved in the CAPROV architecture for a later release. It is intentionally not part of the core Asset DNA platform.',
+      'This bounded context is reserved in the PRIVATEASSETZ architecture for a later release. It is intentionally not part of the core Asset DNA platform.',
   };
 }
 

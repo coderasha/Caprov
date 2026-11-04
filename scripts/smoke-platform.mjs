@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * End-to-end smoke test for CAPROV platform features.
+ * End-to-end smoke test for PRIVATEASSETZ platform features.
  * Usage: node scripts/smoke-platform.mjs
  */
 import http from 'node:http';
@@ -62,7 +62,7 @@ async function main() {
   // Auth
   const login = await request(API, '/auth/login', {
     method: 'POST',
-    body: { email: 'elena@meridian.caprov', password: 'CaprovDemo!23' },
+    body: { email: 'elena@meridian.privateassetz', password: 'PrivateAssetzDemo!23' },
   });
   if (!login.ok || !login.data?.token) {
     fail('Auth login', JSON.stringify(login.data));
@@ -129,9 +129,9 @@ async function main() {
   const selectModel = await request(API, '/intelligence/models', {
     method: 'PATCH',
     token,
-    body: { modelId: 'caprov-deterministic' },
+    body: { modelId: 'privateassetz-deterministic' },
   });
-  selectModel.ok && selectModel.data?.selectedModelId === 'caprov-deterministic'
+  selectModel.ok && selectModel.data?.selectedModelId === 'privateassetz-deterministic'
     ? pass('LLM model select', selectModel.data.selectedModelId)
     : fail('LLM model select', JSON.stringify(selectModel.data));
 

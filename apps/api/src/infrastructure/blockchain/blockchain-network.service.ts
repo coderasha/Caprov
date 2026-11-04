@@ -15,7 +15,7 @@ const requestNetwork = new AsyncLocalStorage<BlockchainNetworkId>();
 @Injectable()
 export class BlockchainNetworkMiddleware implements NestMiddleware {
   use(req: Request, _res: Response, next: NextFunction) {
-    const header = String(req.headers['x-caprov-network'] ?? '').toLowerCase();
+    const header = String(req.headers['x-privateassetz-network'] ?? '').toLowerCase();
     requestNetwork.run(header === 'besu' ? 'besu' : 'sepolia', next);
   }
 }

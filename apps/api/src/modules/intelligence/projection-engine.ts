@@ -7,7 +7,7 @@ import type {
   ValuationProjection,
   ValuationProjectionHorizon,
   ValuationSummary,
-} from '@caprov/types';
+} from '@privateassetz/types';
 
 const CLASS_BASE_GROWTH: Record<AssetClass, number> = {
   REAL_ESTATE: 0.025,
@@ -159,7 +159,7 @@ export function projectValuation(input: {
     baseAmount,
     baseAsOf: valuation.asOf,
     baseMethod: valuation.method,
-    model: 'caprov-forward-mark-v1',
+    model: 'privateassetz-forward-mark-v1',
     generatedAt: new Date().toISOString(),
     assumptions: {
       annualGrowthRate,

@@ -11,7 +11,7 @@ const owner = process.env.COLLATERAL_VAULT_OWNER;
 const activator = process.env.COLLATERAL_VAULT_INITIAL_ACTIVATOR;
 const releaseExecutor = process.env.COLLATERAL_VAULT_INITIAL_RELEASE_EXECUTOR || activator;
 if (!credential || !owner || !activator) throw new Error('Set a signer plus COLLATERAL_VAULT_OWNER and COLLATERAL_VAULT_INITIAL_ACTIVATOR.');
-const sourceName = 'CaprovCollateralVaultV2.sol';
+const sourceName = 'PrivateAssetzCollateralVaultV2.sol';
 const output = JSON.parse(solc.compile(JSON.stringify({
   language: 'Solidity', sources: { [sourceName]: { content: readFileSync(resolve(process.cwd(), 'contracts', sourceName), 'utf8') } },
   settings: { optimizer: { enabled: true, runs: 200 }, outputSelection: { '*': { '*': ['abi', 'evm.bytecode'] } } },
@@ -22,7 +22,7 @@ const signer = /^(0x)?[0-9a-fA-F]{64}$/.test(credential)
   ? new Wallet(credential.startsWith('0x') ? credential : `0x${credential}`, provider)
   : HDNodeWallet.fromPhrase(credential).connect(provider);
 if (signer.address.toLowerCase() !== getAddress(owner).toLowerCase()) throw new Error('Deployment signer must be the requested initial owner.');
-const artifact = output.contracts[sourceName].CaprovCollateralVaultV2;
+const artifact = output.contracts[sourceName].PrivateAssetzCollateralVaultV2;
 const vault = await new ContractFactory(artifact.abi, `0x${artifact.evm.bytecode.object}`, signer).deploy(getAddress(owner));
 await vault.waitForDeployment();
 const address = await vault.getAddress();

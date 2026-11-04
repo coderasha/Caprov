@@ -10,8 +10,8 @@ const address = process.env.ETHEREUM_COLLATERAL_VAULT_CONTRACT;
 if (!apiKey) throw new Error('Set ETHERSCAN_API_KEY for this command.');
 if (!address) throw new Error('Set ETHEREUM_COLLATERAL_VAULT_CONTRACT for this command.');
 
-const sourceName = process.env.COLLATERAL_VAULT_SOURCE || 'CaprovCollateralVault.sol';
-const contractName = process.env.COLLATERAL_VAULT_CONTRACT_NAME || 'CaprovCollateralVault';
+const sourceName = process.env.COLLATERAL_VAULT_SOURCE || 'PrivateAssetzCollateralVault.sol';
+const contractName = process.env.COLLATERAL_VAULT_CONTRACT_NAME || 'PrivateAssetzCollateralVault';
 const initialOwner = process.env.COLLATERAL_VAULT_OWNER?.trim();
 const constructorArguments = initialOwner
   ? AbiCoder.defaultAbiCoder().encode(['address'], [getAddress(initialOwner)]).slice(2)

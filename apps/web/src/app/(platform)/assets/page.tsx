@@ -12,7 +12,7 @@ import {
 import type { HydratedAsset } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth-store';
-import type { AssetClass, AssetStatus } from '@caprov/types';
+import type { AssetClass, AssetStatus } from '@privateassetz/types';
 import { useQuery } from '@tanstack/react-query';
 import {
   ArrowDownUp,

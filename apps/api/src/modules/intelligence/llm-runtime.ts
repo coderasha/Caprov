@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import type { LlmModelOption } from '@caprov/types';
+import type { LlmModelOption } from '@privateassetz/types';
 import { isLlmModelLive } from './llm-catalog';
 
 export interface LlmCopilotResult {
@@ -103,7 +103,7 @@ export async function resolveCopilotAnswer(options: {
   const { model, question, context, localAnswer } = options;
   const live = isLlmModelLive(model);
 
-  if (model.alwaysAvailable || model.provider === 'caprov' || !live) {
+  if (model.alwaysAvailable || model.provider === 'privateassetz' || !live) {
     return {
       answer: localAnswer,
       mode: 'deterministic',
@@ -113,7 +113,7 @@ export async function resolveCopilotAnswer(options: {
       note: live
         ? undefined
         : model.apiKeyEnv
-          ? `Selected ${model.label}; set ${model.apiKeyEnv} for live remote inference. Using CAPROV deterministic core.`
+          ? `Selected ${model.label}; set ${model.apiKeyEnv} for live remote inference. Using PRIVATEASSETZ deterministic core.`
           : undefined,
     };
   }
@@ -140,7 +140,7 @@ export async function resolveCopilotAnswer(options: {
         modelId: model.id,
         modelLabel: model.label,
         live: true,
-        note: `${model.label} live call unavailable (${message}); using CAPROV deterministic core.`,
+        note: `${model.label} live call unavailable (${message}); using PRIVATEASSETZ deterministic core.`,
       };
     }
   }
@@ -178,7 +178,7 @@ export async function resolveCopilotAnswer(options: {
       modelId: model.id,
       modelLabel: model.label,
       live: true,
-      note: `${model.label} live call unavailable (${message}); using CAPROV deterministic core.`,
+      note: `${model.label} live call unavailable (${message}); using PRIVATEASSETZ deterministic core.`,
     };
   }
 }
@@ -213,7 +213,7 @@ async function callRemoteModel(
   }
 
   const system =
-    'You are CAPROV Asset DNA copilot. Answer only from the provided context; if unknown, say so clearly. Return a concise professional briefing using exactly these Markdown headings when relevant: ## Answer, ## Key findings, ## Evidence and caveats. Put one finding per bullet under Key findings. Do not invent sources, use tables, or give legal, tax, or investment advice.';
+    'You are PRIVATEASSETZ Asset DNA copilot. Answer only from the provided context; if unknown, say so clearly. Return a concise professional briefing using exactly these Markdown headings when relevant: ## Answer, ## Key findings, ## Evidence and caveats. Put one finding per bullet under Key findings. Do not invent sources, use tables, or give legal, tax, or investment advice.';
 
   if (endpoint.url === 'https://api.openai.com/v1/responses') {
     const response = await fetch(endpoint.url, {
@@ -354,7 +354,7 @@ async function callCursorAgentModel(
   }
 
   const prompt = [
-    'You are CAPROV Asset DNA copilot.',
+    'You are PRIVATEASSETZ Asset DNA copilot.',
     'Answer only from the provided context.',
     'Do not run commands.',
     'Do not edit files.',

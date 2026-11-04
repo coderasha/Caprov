@@ -70,8 +70,8 @@ export function FactSummaryTable({
         <h2 className="text-lg font-semibold">{title}</h2>
       </div>
       {rows.length ? (
-        <div className="caprov-scroll">
-          <table className="caprov-table w-full text-left text-sm">
+        <div className="privateassetz-scroll">
+          <table className="privateassetz-table w-full text-left text-sm">
             <thead className="text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
               <tr>
                 <th className="px-4 py-3.5 font-medium sm:px-5">Field</th>

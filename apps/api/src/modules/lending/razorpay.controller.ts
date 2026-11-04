@@ -21,7 +21,7 @@ export class RazorpayController {
   async createTestOrder(@CurrentUser() user: AuthUser, @Body() dto: TestOrderDto) {
     const keyId = process.env.RAZORPAY_KEY_ID?.trim(); const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
     if (!keyId || !keySecret) throw new BadRequestException('Razorpay test credentials are not configured.');
-    const response = await fetch('https://api.razorpay.com/v1/orders', { method: 'POST', headers: { Authorization: `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString('base64')}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: dto.amountPaise, currency: 'INR', receipt: dto.receipt ?? `caprov_${Date.now()}`, notes: { organizationId: user.organizationId, environment: 'test' } }) });
+    const response = await fetch('https://api.razorpay.com/v1/orders', { method: 'POST', headers: { Authorization: `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString('base64')}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: dto.amountPaise, currency: 'INR', receipt: dto.receipt ?? `privateassetz_${Date.now()}`, notes: { organizationId: user.organizationId, environment: 'test' } }) });
     const body = await response.json() as Record<string, unknown>;
     if (!response.ok) throw new BadRequestException('Razorpay could not create the test order.');
     this.audit.log({ organizationId: user.organizationId, actorUserId: user.id, action: 'razorpay.test_order_created', entityType: 'RazorpayOrder', entityId: String(body.id), metadata: { amountPaise: dto.amountPaise, currency: 'INR' } });

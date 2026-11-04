@@ -120,7 +120,7 @@ export function assertSelectedNetwork(network?: DocumentNetworkStatus) {
   const selected = selectedBlockchainNetwork();
   if (network.networkId !== selected.id || network.chainId !== selected.chainId) {
     throw new Error(
-      `Network selection changed or is stale. CAPROV selected ${selected.chainName} (chain ID ${selected.chainId}), but the document anchor is configured for ${network.chainName} (chain ID ${network.chainId}). Refresh and try again.`,
+      `Network selection changed or is stale. PRIVATEASSETZ selected ${selected.chainName} (chain ID ${selected.chainId}), but the document anchor is configured for ${network.chainName} (chain ID ${network.chainId}). Refresh and try again.`,
     );
   }
 }

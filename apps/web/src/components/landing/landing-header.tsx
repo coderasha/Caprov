@@ -1,6 +1,6 @@
 'use client';
 
-import { PrivateAssetzWordmark } from '@/components/brand/caprov-logo';
+import { PrivateAssetzWordmark } from '@/components/brand/privateassetz-logo';
 import { cn } from '@/lib/utils';
 import { Menu, X } from 'lucide-react';
 import Link from 'next/link';

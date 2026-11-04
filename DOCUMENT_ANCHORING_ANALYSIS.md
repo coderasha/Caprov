@@ -3,7 +3,7 @@
 
 ## Executive Summary
 
-Document anchoring in Caprov uses a **wallet-signed, frontend-initiated** model where:
+Document anchoring in PrivateAssetz uses a **wallet-signed, frontend-initiated** model where:
 1. Users sign transactions in their browser (MetaMask) on Ethereum Sepolia
 2. Transaction ID is captured after execution
 3. Transaction ID is sent to backend for recording in the database

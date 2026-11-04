@@ -4,7 +4,7 @@ import { BadRequestException } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
 import {
   emptyStore,
-  type CaprovData,
+  type PrivateAssetzData,
 } from '../../infrastructure/database/models';
 import type { DatabaseService } from '../../infrastructure/database/database.service';
 import type { StorageService } from '../../infrastructure/storage/storage.service';
@@ -18,7 +18,7 @@ import type { AuthUser } from '../../common/types/auth-user';
 describe('DocumentsService', () => {
   const user: AuthUser = {
     id: 'usr_test',
-    email: 'test@caprov.io',
+    email: 'test@privateassetz.io',
     fullName: 'Test User',
     organizationId: 'org_test',
     organizationName: 'Test Org',
@@ -250,7 +250,7 @@ describe('DocumentsService', () => {
     const store = emptyStore();
     store.users.push({
       id: 'usr_test',
-      email: 'test@caprov.io',
+      email: 'test@privateassetz.io',
       passwordHash: 'hash',
       fullName: 'Test User',
       createdAt: '2026-09-03T00:00:00.000Z',
@@ -296,13 +296,13 @@ describe('DocumentsService', () => {
   });
 });
 
-function buildStore(): CaprovData {
+function buildStore(): PrivateAssetzData {
   const store = emptyStore();
   const content = Buffer.from('test document content', 'utf8');
   const documentHash = `0x${createHash('sha256').update(content).digest('hex')}`;
   store.users.push({
     id: 'usr_test',
-    email: 'test@caprov.io',
+    email: 'test@privateassetz.io',
     passwordHash: 'hash',
     fullName: 'Test User',
     createdAt: '2026-09-03T00:00:00.000Z',
@@ -338,7 +338,7 @@ function buildStore(): CaprovData {
     previousVersionHash: undefined,
     documentHash,
     hashAlgorithm: 'sha256',
-    offChainUri: 'caprov://storage/ast_test/KYC/doc.docx',
+    offChainUri: 'privateassetz://storage/ast_test/KYC/doc.docx',
     anchorStatus: 'PENDING',
     anchorMode: 'LIVE',
     anchorChainId: 11155111,
@@ -351,14 +351,14 @@ function buildStore(): CaprovData {
 }
 
 function createService(input: {
-  store: CaprovData;
+  store: PrivateAssetzData;
   blockchain?: BlockchainAdapter;
 }) {
   const storage = {
     save: jest.fn((name: string, _buffer: Buffer, mimeType: string, folder: string) => ({
       storageKey: `${folder}/${name}`,
       mimeType,
-      uri: `caprov://storage/${folder}/${name}`,
+      uri: `privateassetz://storage/${folder}/${name}`,
     })),
     readBuffer: jest
       .fn()
@@ -376,17 +376,17 @@ function createService(input: {
   );
 }
 
-function createDbMock(store: CaprovData): DatabaseService {
+function createDbMock(store: PrivateAssetzData): DatabaseService {
   return {
     get snapshot() {
       return store;
     },
-    mutate<T>(fn: (draft: CaprovData) => T): T {
+    mutate<T>(fn: (draft: PrivateAssetzData) => T): T {
       return fn(store);
     },
     async mutateWithDocumentLock<T>(
       _documentId: string,
-      fn: (draft: CaprovData) => T,
+      fn: (draft: PrivateAssetzData) => T,
     ): Promise<T> {
       return fn(store);
     },

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Creates and starts Besu's official four-validator private quickstart network,
- * deploys all CAPROV contracts, and prints the API/web configuration to copy.
+ * deploys all PRIVATEASSETZ contracts, and prints the API/web configuration to copy.
  * This is development-only: its prefunded private key is intentionally public.
  */
 import { existsSync } from 'node:fs';

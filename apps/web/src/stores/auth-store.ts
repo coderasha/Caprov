@@ -1,6 +1,6 @@
 'use client';
 
-import type { AuthSession, MembershipRole, PublicUser } from '@caprov/types';
+import type { AuthSession, MembershipRole, PublicUser } from '@privateassetz/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>()(
         }),
     }),
     {
-      name: 'caprov-auth',
+      name: 'privateassetz-auth',
       partialize: (state) => ({
         token: state.token,
         user: state.user,

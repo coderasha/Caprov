@@ -1,6 +1,6 @@
-# CAPROV Web (`apps/web`)
+# PRIVATEASSETZ Web (`apps/web`)
 
-Next.js operator / analyst console for CAPROV.
+Next.js operator / analyst console for PRIVATEASSETZ.
 
 ## Run
 
@@ -27,7 +27,7 @@ Set `NEXT_PUBLIC_API_URL` if the API is not at `http://localhost:3001/api`.
 - App Router under `src/app`
 - TanStack Query for API data
 - Zustand auth store (persisted token)
-- Shared UI in `src/components` (PageHeader, Caprov branding, DNA/copilot widgets)
+- Shared UI in `src/components` (PageHeader, PrivateAssetz branding, DNA/copilot widgets)
 
 ## Docs
 

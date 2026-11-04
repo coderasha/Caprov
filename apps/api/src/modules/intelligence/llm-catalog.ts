@@ -1,8 +1,8 @@
 import { accessSync, constants } from 'node:fs';
 import { delimiter, join } from 'node:path';
-import type { LlmModelOption } from '@caprov/types';
+import type { LlmModelOption } from '@privateassetz/types';
 
-export const DEFAULT_LLM_MODEL_ID = 'caprov-deterministic';
+export const DEFAULT_LLM_MODEL_ID = 'privateassetz-deterministic';
 export const DEFAULT_OPENAI_MODEL_ID = 'openai-gpt-5.6-terra';
 const CURSOR_AGENT_BINARY =
   process.env.CURSOR_AGENT_BIN?.trim() || 'cursor-agent';
@@ -11,9 +11,9 @@ let cursorAgentAvailable: boolean | undefined;
 
 export const LLM_MODEL_CATALOG: LlmModelOption[] = [
   {
-    id: 'caprov-deterministic',
-    provider: 'caprov',
-    label: 'CAPROV Deterministic Extractor',
+    id: 'privateassetz-deterministic',
+    provider: 'privateassetz',
+    label: 'PRIVATEASSETZ Deterministic Extractor',
     description:
       'Provenance-first labeled-document extractor. Highest accuracy on SPA, title, valuation, LPA and NAV packs without an external LLM.',
     contextWindow: 32_000,
@@ -38,7 +38,7 @@ export const LLM_MODEL_CATALOG: LlmModelOption[] = [
     provider: 'openai',
     label: 'OpenAI GPT-5.6 Terra',
     description:
-      'Production-grade reasoning for source-grounded Asset DNA assistance and CAPROV Copilot.',
+      'Production-grade reasoning for source-grounded Asset DNA assistance and PRIVATEASSETZ Copilot.',
     contextWindow: 1_050_000,
     strengths: ['Reasoning', 'Long context', 'Asset DNA', 'Copilot'],
     capabilities: ['extraction', 'asset_dna', 'copilot'],
@@ -225,7 +225,7 @@ export function getLlmModelAvailability(model: LlmModelOption): {
   if (model.alwaysAvailable) {
     return {
       available: true,
-      reason: 'Built-in CAPROV extractor — always ready.',
+      reason: 'Built-in PRIVATEASSETZ extractor — always ready.',
     };
   }
 

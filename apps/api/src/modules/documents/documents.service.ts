@@ -10,7 +10,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { DocumentType } from '@caprov/types';
+import type { DocumentType } from '@privateassetz/types';
 import type { AuthUser } from '../../common/types/auth-user';
 import {
   DOCUMENT_BLOCKCHAIN_ADAPTER,

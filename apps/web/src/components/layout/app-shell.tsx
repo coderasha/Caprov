@@ -1,6 +1,6 @@
 'use client';
 
-import { CaprovWordmark } from '@/components/brand/caprov-logo';
+import { PrivateAssetzWordmark } from '@/components/brand/privateassetz-logo';
 import { WalletStatus } from '@/components/layout/wallet-status';
 import { WalletProvider, useWallet } from '@/components/wallet/wallet-provider';
 import { cn } from '@/lib/utils';
@@ -164,11 +164,11 @@ function SidebarContent({
     <div className="flex h-full min-h-0 flex-col px-4 py-5 sm:px-5 sm:py-6">
       <div className="flex items-start justify-between gap-3 px-2">
         <Link href="/dashboard" className="min-w-0" onClick={onNavigate}>
-          <CaprovWordmark
+          <PrivateAssetzWordmark
             tone="dark"
             variant="compact"
             priority
-            className="h-8 max-h-8 w-auto max-w-[9.75rem]"
+            className="h-10 max-h-10 w-auto max-w-[12rem] rounded-lg bg-white/95 p-1.5 shadow-[0_8px_20px_rgba(0,0,0,0.2)]"
           />
           {buyerOnly ? (
             <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-white/40">
@@ -320,7 +320,7 @@ function OperatorHeader({
       <div className="flex items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-3.5 xl:px-8">
         <button
           type="button"
-          className="caprov-touch-target inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--card)] text-[var(--ink)] transition hover:border-[var(--ink)]/25 xl:hidden"
+          className="privateassetz-touch-target inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[var(--line)] bg-[var(--card)] text-[var(--ink)] transition hover:border-[var(--ink)]/25 xl:hidden"
           aria-label="Open navigation"
           aria-expanded={navOpen}
           onClick={onOpenNav}
@@ -444,7 +444,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (!hasHydrated || !token) {
     return (
       <div className="grid min-h-screen place-items-center bg-[var(--paper)] px-4 text-sm text-[var(--muted)]">
-        Opening CAPROV…
+        Opening PRIVATEASSETZ…
       </div>
     );
   }

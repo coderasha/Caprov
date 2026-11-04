@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Deploy CaprovAssetToken to Ethereum Sepolia.
+ * Deploy PrivateAssetzAssetToken to Ethereum Sepolia.
  *
- *   ETHEREUM_SEPOLIA_PRIVATE_KEY=0x... node scripts/deploy-caprov-token.mjs
+ *   ETHEREUM_SEPOLIA_PRIVATE_KEY=0x... node scripts/deploy-privateassetz-token.mjs
  *
  * Optional: ETHEREUM_SEPOLIA_RPC_URL (defaults to https://ethereum-sepolia-rpc.publicnode.com)
  */
@@ -21,11 +21,11 @@ if (!KEY && !MNEMONIC) {
   process.exit(1);
 }
 
-const sourcePath = resolve(process.cwd(), 'contracts/CaprovAssetToken.sol');
+const sourcePath = resolve(process.cwd(), 'contracts/PrivateAssetzAssetToken.sol');
 const source = readFileSync(sourcePath, 'utf8');
 const input = {
   language: 'Solidity',
-  sources: { 'CaprovAssetToken.sol': { content: source } },
+  sources: { 'PrivateAssetzAssetToken.sol': { content: source } },
   settings: { outputSelection: { '*': { '*': ['abi', 'evm.bytecode'] } } },
 };
 
@@ -38,7 +38,7 @@ try {
   process.exit(1);
 }
 
-const artifact = output.contracts?.['CaprovAssetToken.sol']?.CaprovAssetToken;
+const artifact = output.contracts?.['PrivateAssetzAssetToken.sol']?.PrivateAssetzAssetToken;
 if (!artifact?.evm?.bytecode?.object) {
   console.error(JSON.stringify(output.errors ?? output, null, 2));
   process.exit(1);
@@ -47,12 +47,12 @@ if (!artifact?.evm?.bytecode?.object) {
 const provider = new JsonRpcProvider(RPC, 11155111);
 const wallet = KEY ? new Wallet(KEY, provider) : HDNodeWallet.fromPhrase(MNEMONIC).connect(provider);
 const factory = new ContractFactory(artifact.abi, '0x' + artifact.evm.bytecode.object, wallet);
-const uri = process.env.CAPROV_TOKEN_URI || 'https://caprov.local/token/{id}.json';
+const uri = process.env.PRIVATEASSETZ_TOKEN_URI || 'https://privateassetz.local/token/{id}.json';
 console.log(`Deploying from ${wallet.address} on Sepolia...`);
 const contract = await factory.deploy(uri);
 await contract.waitForDeployment();
 const address = await contract.getAddress();
-console.log(`CaprovAssetToken deployed: ${address}`);
+console.log(`PrivateAssetzAssetToken deployed: ${address}`);
 console.log(`Explorer: https://sepolia.etherscan.io/address/${address}`);
 console.log(`Set ETHEREUM_TOKEN_CONTRACT=${address} in apps/api/.env`);
 

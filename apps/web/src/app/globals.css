@@ -84,7 +84,7 @@ canvas {
   font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
 }
 
-.caprov-grid {
+.privateassetz-grid {
   background-image:
     linear-gradient(rgba(12, 18, 32, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(12, 18, 32, 0.04) 1px, transparent 1px);
@@ -119,32 +119,32 @@ canvas {
   background: var(--gold);
 }
 
-.caprov-panel {
+.privateassetz-panel {
   border: 1px solid color-mix(in srgb, var(--line) 82%, white 18%);
   background: color-mix(in srgb, var(--card) 96%, white 4%);
   border-radius: var(--radius-panel);
   box-shadow: var(--shadow);
 }
 
-.caprov-scroll {
+.privateassetz-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
 }
 
-.caprov-table {
+.privateassetz-table {
   min-width: 640px;
 }
 
-.caprov-table thead {
+.privateassetz-table thead {
   background: color-mix(in srgb, var(--paper-2) 50%, white 50%);
 }
 
-.caprov-table tbody tr {
+.privateassetz-table tbody tr {
   transition: background 160ms ease;
 }
 
-.caprov-table tbody tr:hover {
+.privateassetz-table tbody tr:hover {
   background: color-mix(in srgb, var(--gold-soft) 35%, transparent);
 }
 
@@ -481,7 +481,7 @@ canvas {
     padding-block: 0.75rem;
   }
 
-  .caprov-touch-target {
+  .privateassetz-touch-target {
     min-height: 3rem;
     min-width: 3rem;
   }
@@ -696,6 +696,11 @@ canvas {
   align-items: flex-start;
   gap: 0.2rem;
   width: fit-content;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 24px rgba(3, 9, 19, 0.22);
   text-decoration: none;
 }
 
@@ -1582,10 +1587,12 @@ canvas {
 
 .landing-header__logo {
   display: block;
-  height: 1.9rem !important;
-  max-height: 1.9rem !important;
+  /* The supplied lockup includes transparent breathing room; size its canvas
+     deliberately so the visible mark balances the navigation controls. */
+  height: 2.7rem !important;
+  max-height: 2.7rem !important;
   width: auto !important;
-  max-width: 8.75rem !important;
+  max-width: 12.5rem !important;
   object-position: left center;
 }
 
@@ -1595,9 +1602,9 @@ canvas {
   }
 
   .landing-header__logo {
-    height: 2.1rem !important;
-    max-height: 2.1rem !important;
-    max-width: 9.75rem !important;
+    height: 3rem !important;
+    max-height: 3rem !important;
+    max-width: 13.75rem !important;
   }
 }
 

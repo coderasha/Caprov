@@ -1,10 +1,10 @@
 # Blockchain Document Anchoring
 
-CAPROV supports versioned document anchoring for asset documents using Ethereum Sepolia.
+PRIVATEASSETZ supports versioned document anchoring for asset documents using Ethereum Sepolia.
 
 ## Design
 
-- Actual document files remain off-chain in CAPROV storage.
+- Actual document files remain off-chain in PRIVATEASSETZ storage.
 - Each upload creates a new immutable document version.
 - Versioning is independent per `assetId + documentType`.
 - The newest version becomes the current reference document.
@@ -35,11 +35,11 @@ Each anchored version stores:
 - off-chain URI
 - anchor timestamp
 
-Transaction hash and explorer URL are stored by CAPROV alongside the document version after anchoring.
+Transaction hash and explorer URL are stored by PRIVATEASSETZ alongside the document version after anchoring.
 
 ## Ethereum Abstraction
 
-CAPROV uses a blockchain abstraction for document anchoring:
+PRIVATEASSETZ uses a blockchain abstraction for document anchoring:
 
 - `BlockchainAdapter`
 - `EthereumSepoliaDocumentRegistryService`
@@ -50,11 +50,11 @@ This keeps the document and asset domain logic decoupled from Ethereum-specific 
 
 Sepolia anchoring uses:
 
-- [contracts/CaprovDocumentRegistry.sol](/home/vara/Projects/Caprov/contracts/CaprovDocumentRegistry.sol)
+- [contracts/PrivateAssetzDocumentRegistry.sol](/home/vara/Projects/PrivateAssetz/contracts/PrivateAssetzDocumentRegistry.sol)
 
 Deploy helper:
 
-- [scripts/deploy-document-registry.mjs](/home/vara/Projects/Caprov/scripts/deploy-document-registry.mjs)
+- [scripts/deploy-document-registry.mjs](/home/vara/Projects/PrivateAssetz/scripts/deploy-document-registry.mjs)
 
 ## Environment Variables
 
@@ -64,15 +64,15 @@ For live Sepolia anchoring, set:
 - `ETHEREUM_SEPOLIA_PRIVATE_KEY`
 - `ETHEREUM_DOCUMENT_REGISTRY_CONTRACT`
 
-If these are missing, CAPROV records a simulated anchor result instead of a live Sepolia write.
+If these are missing, PRIVATEASSETZ records a simulated anchor result instead of a live Sepolia write.
 
 ## Verification Flow
 
-For a current document version, CAPROV can:
+For a current document version, PRIVATEASSETZ can:
 
 1. load the off-chain file
 2. recalculate SHA-256
-3. compare with the stored CAPROV hash
+3. compare with the stored PRIVATEASSETZ hash
 4. fetch the anchored on-chain hash
 5. compare both values
 6. return whether the document is authentic / unchanged
@@ -87,7 +87,7 @@ Document endpoints now support:
 
 Relevant implementation:
 
-- [documents.service.ts](/home/vara/Projects/Caprov/apps/api/src/modules/documents/documents.service.ts)
-- [documents.controller.ts](/home/vara/Projects/Caprov/apps/api/src/modules/documents/documents.controller.ts)
-- [blockchain.adapter.ts](/home/vara/Projects/Caprov/apps/api/src/infrastructure/blockchain/blockchain.adapter.ts)
-- [ethereum-sepolia-document-registry.service.ts](/home/vara/Projects/Caprov/apps/api/src/infrastructure/blockchain/ethereum-sepolia-document-registry.service.ts)
+- [documents.service.ts](/home/vara/Projects/PrivateAssetz/apps/api/src/modules/documents/documents.service.ts)
+- [documents.controller.ts](/home/vara/Projects/PrivateAssetz/apps/api/src/modules/documents/documents.controller.ts)
+- [blockchain.adapter.ts](/home/vara/Projects/PrivateAssetz/apps/api/src/infrastructure/blockchain/blockchain.adapter.ts)
+- [ethereum-sepolia-document-registry.service.ts](/home/vara/Projects/PrivateAssetz/apps/api/src/infrastructure/blockchain/ethereum-sepolia-document-registry.service.ts)

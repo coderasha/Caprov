@@ -54,8 +54,8 @@ export default function PortfolioDetailPage() {
         <p className="mt-2 text-[var(--muted)]">{portfolio.description}</p>
       </div>
       <Card className="overflow-hidden">
-        <div className="caprov-scroll">
-        <table className="caprov-table w-full text-left text-sm">
+        <div className="privateassetz-scroll">
+        <table className="privateassetz-table w-full text-left text-sm">
           <thead className="text-xs uppercase tracking-[0.12em] text-[var(--muted)]">
             <tr>
               <th className="px-4 py-3 font-medium sm:px-6">Asset</th>

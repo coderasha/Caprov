@@ -1,5 +1,5 @@
-export const CAPROV_SERVICES = {
-  api: 'caprov-api',
-  intelligenceEngine: 'caprov-intelligence-engine',
-  web: 'caprov-web',
+export const PRIVATEASSETZ_SERVICES = {
+  api: 'privateassetz-api',
+  intelligenceEngine: 'privateassetz-intelligence-engine',
+  web: 'privateassetz-web',
 } as const;

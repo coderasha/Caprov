@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import type { MembershipRole } from '@caprov/types';
+import type { MembershipRole } from '@privateassetz/types';
 
 export const ROLES_KEY = 'roles';
 

@@ -5,13 +5,13 @@ import type {
   AssetStatus,
   CurrencyCode,
   OwnershipType,
-} from '@caprov/types';
-import { assetSubcategories } from '@caprov/types';
+} from '@privateassetz/types';
+import { assetSubcategories } from '@privateassetz/types';
 import type { AuthUser } from '../../common/types/auth-user';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import type {
   AssetDnaSnapshotRecord,
-  CaprovData,
+  PrivateAssetzData,
 } from '../../infrastructure/database/models';
 import { createId } from '../../infrastructure/database/ids';
 import { AuditService } from '../audit/audit.service';
@@ -268,7 +268,7 @@ export class AssetsService {
    * slim DNA envelope so the platform shell stays responsive under large orgs.
    */
   private hydrateMany(
-    assets: CaprovData['assets'],
+    assets: PrivateAssetzData['assets'],
     options: { slim: boolean },
   ) {
     if (!assets.length) return [];

@@ -415,7 +415,7 @@ export function OrgAdminDashboard() {
               View all
             </Link>
           </div>
-          <div className="caprov-scroll">
+          <div className="privateassetz-scroll">
             <table className="org-dash__table w-full min-w-[960px] table-fixed text-left text-sm">
               <colgroup>
                 <col className="w-[28%]" />

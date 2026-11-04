@@ -7,24 +7,24 @@ import type {
   DnaTimelineEvent,
   RiskSummary,
   ValuationSummary,
-} from '@caprov/types';
-import type { CaprovData, DocumentRecord } from './models';
+} from '@privateassetz/types';
+import type { PrivateAssetzData, DocumentRecord } from './models';
 import { getPreferredDefaultLlmModelId } from '../../modules/intelligence/llm-catalog';
 
-const DEMO_PASSWORD = 'CaprovDemo!23';
+export const DEMO_PASSWORD = 'PrivateAssetzDemo!23';
 const passwordHash = hashSync(DEMO_PASSWORD, 10);
 const now = '2026-08-10T10:00:00.000Z';
 
 const orgId = 'org_meridian';
-const platformOrgId = 'org_caprov';
-const bankOrgId = 'org_caprov_demo_bank';
+const platformOrgId = 'org_privateassetz';
+const bankOrgId = 'org_privateassetz_demo_bank';
 const buyerOrgId = 'org_mehta';
 const elenaId = 'usr_elena';
 const arjunId = 'usr_arjun';
 const sofiaId = 'usr_sofia';
-const adminId = 'usr_caprov_admin';
+const adminId = 'usr_privateassetz_admin';
 const bankerId = 'usr_bank_demo';
-const platformAdminEmail = 'priya@caprov.io';
+const platformAdminEmail = 'priya@privateassetz.io';
 const platformAdminName = 'Priya Nair';
 const defaultLlmModelId = getPreferredDefaultLlmModelId();
 
@@ -135,7 +135,7 @@ function withDocumentVersioning(documents: SeedDocument[]): DocumentRecord[] {
     version: 1,
     isCurrent: true,
     hashAlgorithm: 'sha256',
-    offChainUri: `caprov://storage/${document.storageKey}`,
+    offChainUri: `privateassetz://storage/${document.storageKey}`,
     anchorStatus: 'NOT_APPLICABLE',
   }));
 }
@@ -997,7 +997,7 @@ SPV: Harbourview Tower SPV Limited
 Beneficial ownership: 100% Meridian Capital Partners LLP
 Directors: Elena Voss, Jonathan Hale`;
 
-export function buildSeedData(): CaprovData {
+export function buildSeedData(): PrivateAssetzData {
   return {
     organizations: [
       {
@@ -1011,20 +1011,20 @@ export function buildSeedData(): CaprovData {
       },
       {
         id: platformOrgId,
-        name: 'Caprov Platform',
-        slug: 'caprov-platform',
+        name: 'PrivateAssetz Platform',
+        slug: 'privateassetz-platform',
         status: 'ACTIVE',
         llmModelId: defaultLlmModelId,
         createdAt: '2020-01-06T09:00:00.000Z',
         updatedAt: now,
       },
-      { id: bankOrgId, name: 'CAPROV Demo Bank', slug: 'caprov-demo-bank', status: 'ACTIVE', llmModelId: defaultLlmModelId, createdAt: now, updatedAt: now },
+      { id: bankOrgId, name: 'PRIVATEASSETZ Demo Bank', slug: 'privateassetz-demo-bank', status: 'ACTIVE', llmModelId: defaultLlmModelId, createdAt: now, updatedAt: now },
       { id: buyerOrgId, name: 'Mehta Family Office', slug: 'mehta-family-office', status: 'ACTIVE', llmModelId: defaultLlmModelId, createdAt: now, updatedAt: now },
     ],
     users: [
       {
         id: elenaId,
-        email: 'elena@meridian.caprov',
+        email: 'elena@meridian.privateassetz',
         passwordHash,
         fullName: 'Elena Voss',
         title: 'Managing Partner',
@@ -1033,7 +1033,7 @@ export function buildSeedData(): CaprovData {
       },
       {
         id: arjunId,
-        email: 'arjun@meridian.caprov',
+        email: 'arjun@meridian.privateassetz',
         passwordHash,
         fullName: 'Arjun Mehta',
         title: 'Buyer',
@@ -1042,7 +1042,7 @@ export function buildSeedData(): CaprovData {
       },
       {
         id: sofiaId,
-        email: 'sofia@meridian.caprov',
+        email: 'sofia@meridian.privateassetz',
         passwordHash,
         fullName: 'Sofia Laurent',
         title: 'Head of Compliance',
@@ -1058,7 +1058,7 @@ export function buildSeedData(): CaprovData {
         createdAt: '2020-01-06T09:00:00.000Z',
         updatedAt: now,
       },
-      { id: bankerId, email: 'banker@caprov.demo', passwordHash, fullName: 'Jordan Lee', title: 'Banker', createdAt: now, updatedAt: now },
+      { id: bankerId, email: 'banker@privateassetz.demo', passwordHash, fullName: 'Jordan Lee', title: 'Banker', createdAt: now, updatedAt: now },
     ],
     walletLinks: [],
     walletChallenges: [],
@@ -1085,7 +1085,7 @@ export function buildSeedData(): CaprovData {
         createdAt: '2022-06-02T09:00:00.000Z',
       },
       {
-        id: 'mem_caprov_admin',
+        id: 'mem_privateassetz_admin',
         organizationId: platformOrgId,
         userId: adminId,
         role: 'PLATFORM_ADMIN',
@@ -2015,7 +2015,7 @@ export function buildSeedData(): CaprovData {
 }
 
 export const DEMO_ACCOUNTS = [
-  { name: 'Jordan Lee', email: 'banker@caprov.demo', password: DEMO_PASSWORD, role: 'Banker' },
+  { name: 'Jordan Lee', email: 'banker@privateassetz.demo', password: DEMO_PASSWORD, role: 'Banker' },
   {
     email: platformAdminEmail,
     password: DEMO_PASSWORD,
@@ -2023,19 +2023,19 @@ export const DEMO_ACCOUNTS = [
     role: 'PLATFORM_ADMIN',
   },
   {
-    email: 'elena@meridian.caprov',
+    email: 'elena@meridian.privateassetz',
     password: DEMO_PASSWORD,
     name: 'Elena Voss',
     role: 'ORG_ADMIN',
   },
   {
-    email: 'arjun@meridian.caprov',
+    email: 'arjun@meridian.privateassetz',
     password: DEMO_PASSWORD,
     name: 'Arjun Mehta',
     role: 'Buyer',
   },
   {
-    email: 'sofia@meridian.caprov',
+    email: 'sofia@meridian.privateassetz',
     password: DEMO_PASSWORD,
     name: 'Sofia Laurent',
     role: 'COMPLIANCE',

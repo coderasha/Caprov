@@ -1,4 +1,4 @@
-# CAPROV Intelligence Engine (`apps/intelligence-engine`)
+# PRIVATEASSETZ Intelligence Engine (`apps/intelligence-engine`)
 
 FastAPI AI runtime for deterministic private-asset document intelligence.
 
@@ -73,4 +73,4 @@ pytest -q
 
 ## LLM selection
 
-Org-level model preference is owned by `apps/api`. This service remains the deterministic CAPROV pipeline for DNA extraction.
+Org-level model preference is owned by `apps/api`. This service remains the deterministic PRIVATEASSETZ pipeline for DNA extraction.

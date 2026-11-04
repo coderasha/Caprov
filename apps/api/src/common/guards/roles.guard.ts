@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import type { MembershipRole } from '@caprov/types';
+import type { MembershipRole } from '@privateassetz/types';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import type { AuthUser } from '../types/auth-user';
 

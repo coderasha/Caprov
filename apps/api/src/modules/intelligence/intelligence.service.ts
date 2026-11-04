@@ -5,7 +5,7 @@ import type {
   IntelligenceJobType,
   ProvenanceAnchor,
   TrustedAssetDnaSnapshot,
-} from '@caprov/types';
+} from '@privateassetz/types';
 import type { AuthUser } from '../../common/types/auth-user';
 import { EthereumSepoliaTokenService } from '../../infrastructure/blockchain/ethereum-sepolia-token.service';
 import { DatabaseService } from '../../infrastructure/database/database.service';
@@ -30,7 +30,7 @@ import { attachProjection } from './projection-engine';
 
 type ComposedEnvelope = {
   envelope: AssetDnaEnvelope;
-  extractionEngine: 'caprov-deterministic' | 'llm-primary';
+  extractionEngine: 'privateassetz-deterministic' | 'llm-primary';
   note?: string;
 };
 
@@ -472,7 +472,7 @@ export class IntelligenceService {
     let local = runLocalPipeline(asset, documents);
     const model = this.llmModels.getDnaSelectedModel(organizationId);
     let extractionEngine: ComposedEnvelope['extractionEngine'] =
-      'caprov-deterministic';
+      'privateassetz-deterministic';
     let extractionNote: string | undefined;
 
     // An opted-in live DNA model receives the entire supported fact set. Its
@@ -751,7 +751,7 @@ function applyOwnershipRegister(
         confidence: 1,
         provenance: [{
           sourceDocumentId: 'ownership-register',
-          sourceFragment: 'CAPROV ownership register: ' + holders.map((item) => item.holderName + ' ' + item.percentage + '%').join('; '),
+          sourceFragment: 'PRIVATEASSETZ ownership register: ' + holders.map((item) => item.holderName + ' ' + item.percentage + '%').join('; '),
           confidence: 1,
           observedAt,
         }],

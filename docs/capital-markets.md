@@ -1,6 +1,6 @@
 # Capital markets
 
-CAPROV capital-markets modules sit on top of Asset DNA valuation marks. Listings, trades, collateral, and loans reference `assetId` (and optionally token positions). They are **demo-grade workflows** on the file-backed store — not a regulated exchange or custody system.
+PRIVATEASSETZ capital-markets modules sit on top of Asset DNA valuation marks. Listings, trades, collateral, and loans reference `assetId` (and optionally token positions). They are **demo-grade workflows** on the file-backed store — not a regulated exchange or custody system.
 
 ## Domain flow
 
@@ -61,8 +61,8 @@ Roles for create/complete: `ORG_ADMIN`, `ANALYST`, `COMPLIANCE` (create), `PLATF
 - Chain id: **11155111** (Ethereum Sepolia)
 - Default mode: **SIMULATED** (deterministic tx hash + explorer URL)
 - Live mode when `ETHEREUM_SEPOLIA_PRIVATE_KEY` and `ETHEREUM_TOKEN_CONTRACT` are set
-- Contract source: `contracts/CaprovAssetToken.sol`
-- Deploy helper: `scripts/deploy-caprov-token.mjs`
+- Contract source: `contracts/PrivateAssetzAssetToken.sol`
+- Deploy helper: `scripts/deploy-privateassetz-token.mjs`
 
 Env (see `apps/api/.env.example`):
 
@@ -74,10 +74,10 @@ ETHEREUM_TOKEN_CONTRACT=
 
 ### On-chain delivery-versus-payment
 
-The Sepolia contract set has three parts: `CaprovAssetToken` (ERC-1155 asset units), `CaprovPaymentToken` (test CAPROV ERC-20), and `CaprovMarketplace` (escrow and atomic settlement). Deploy all three with:
+The Sepolia contract set has three parts: `PrivateAssetzAssetToken` (ERC-1155 asset units), `PrivateAssetzPaymentToken` (test PRIVATEASSETZ ERC-20), and `PrivateAssetzMarketplace` (escrow and atomic settlement). Deploy all three with:
 
 ```bash
-node scripts/deploy-caprov-marketplace.mjs
+node scripts/deploy-privateassetz-marketplace.mjs
 ```
 
 Then configure:
@@ -88,7 +88,7 @@ ETHEREUM_PAYMENT_TOKEN_CONTRACT=0x...
 ETHEREUM_MARKETPLACE_CONTRACT=0x...
 ```
 
-Asset tokenization may happen only once for a token id, fixing its total supply. A seller calls `setApprovalForAll(marketplace, true)` before creating an on-chain listing. A buyer approves the marketplace to spend CAPROV and calls `buy(listingId, units)`. The contract sends payment to the seller and units to the buyer in the same transaction.
+Asset tokenization may happen only once for a token id, fixing its total supply. A seller calls `setApprovalForAll(marketplace, true)` before creating an on-chain listing. A buyer approves the marketplace to spend PRIVATEASSETZ and calls `buy(listingId, units)`. The contract sends payment to the seller and units to the buyer in the same transaction.
 
 ### Collateral
 

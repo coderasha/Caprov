@@ -24,7 +24,7 @@ import { cn } from '@/lib/utils';
 import { selectedBlockchainNetwork, type BlockchainNetworkId } from '@/lib/blockchain-network';
 import { walletBrowserProvider } from '@/lib/sepolia-marketplace';
 import { useAuthStore } from '@/stores/auth-store';
-import type { DocumentType } from '@caprov/types';
+import type { DocumentType } from '@privateassetz/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Contract } from 'ethers';
 import {
@@ -158,8 +158,8 @@ export default function DocumentsPage() {
 
   useEffect(() => {
     const handleNetworkChange = () => setNetworkId(selectedBlockchainNetwork().id);
-    window.addEventListener('caprov-network-changed', handleNetworkChange);
-    return () => window.removeEventListener('caprov-network-changed', handleNetworkChange);
+    window.addEventListener('privateassetz-network-changed', handleNetworkChange);
+    return () => window.removeEventListener('privateassetz-network-changed', handleNetworkChange);
   }, []);
 
   const assetsQuery = useQuery({

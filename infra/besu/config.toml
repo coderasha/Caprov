@@ -1,4 +1,4 @@
-# Hyperledger Besu private QBFT network configuration for CAPROV.
+# Hyperledger Besu private QBFT network configuration for PRIVATEASSETZ.
 # All validator nodes must use min-gas-price=0 for zero-fee transactions.
 data-path="/var/lib/besu"
 genesis-file="/config/genesis.json"

@@ -1,10 +1,10 @@
-# CAPROV Intelligence Engine
+# PRIVATEASSETZ Intelligence Engine
 
-This document explains how CAPROV's intelligence layer works, with special focus on the `CAPROV Deterministic Extractor`, the Asset DNA pipeline, confidence scoring, optional LLM usage, and copilot behavior.
+This document explains how PRIVATEASSETZ's intelligence layer works, with special focus on the `PRIVATEASSETZ Deterministic Extractor`, the Asset DNA pipeline, confidence scoring, optional LLM usage, and copilot behavior.
 
 ## Overview
 
-CAPROV's AI layer is not a single black-box model. It is a layered intelligence system with clear separation between:
+PRIVATEASSETZ's AI layer is not a single black-box model. It is a layered intelligence system with clear separation between:
 
 - deterministic extraction
 - optional LLM-assisted gap filling
@@ -40,9 +40,9 @@ The web app exposes:
 - copilot chat
 - LLM model selection
 
-## What the CAPROV Deterministic Extractor Is
+## What the PRIVATEASSETZ Deterministic Extractor Is
 
-The `CAPROV Deterministic Extractor` is the built-in extraction engine used for Asset DNA and valuation/risk inputs.
+The `PRIVATEASSETZ Deterministic Extractor` is the built-in extraction engine used for Asset DNA and valuation/risk inputs.
 
 It is:
 
@@ -127,7 +127,7 @@ For each supported field, the system scans the normalized text for matching patt
 
 ### 5. Candidate scoring and winner selection
 
-If multiple candidates exist for the same field, CAPROV does not just keep the first one. It ranks them using:
+If multiple candidates exist for the same field, PRIVATEASSETZ does not just keep the first one. It ranks them using:
 
 - field base confidence
 - document-type bonus
@@ -162,7 +162,7 @@ If multiple corroborating value candidates agree closely, confidence can be boos
 
 ### 8. Derived Asset DNA outputs
 
-Once facts are selected, CAPROV derives:
+Once facts are selected, PRIVATEASSETZ derives:
 
 - entities
 - relationships
@@ -264,7 +264,7 @@ Confidence decays as the horizon extends, so 1-year projections are more confide
 
 ## Confidence Scoring
 
-Confidence in CAPROV is heuristic and rule-driven, not a calibrated model probability.
+Confidence in PRIVATEASSETZ is heuristic and rule-driven, not a calibrated model probability.
 
 ### Fact confidence
 
@@ -320,7 +320,7 @@ Projection confidence is derived from valuation confidence, then reduced for ris
 
 ## Optional LLM Gap Fill
 
-The deterministic extractor is the primary system, but CAPROV can optionally ask a live LLM to fill missing fields.
+The deterministic extractor is the primary system, but PRIVATEASSETZ can optionally ask a live LLM to fill missing fields.
 
 This is tightly constrained.
 
@@ -396,7 +396,7 @@ These models do not replace the extracted facts. They synthesize answers from:
 - extracted facts
 - excerpts from source documents
 
-So the model is mainly answering over CAPROV's structured context, not re-parsing the full raw document set on every question.
+So the model is mainly answering over PRIVATEASSETZ's structured context, not re-parsing the full raw document set on every question.
 
 ### Cursor integration
 
@@ -427,7 +427,7 @@ Snapshots are then:
 
 This makes the intelligence layer reviewable and tamper-resistant.
 
-## What CAPROV Does Not Do
+## What PRIVATEASSETZ Does Not Do
 
 The intelligence layer does not:
 
@@ -441,7 +441,7 @@ Instead, it focuses on extracting the fields it knows how to support well, and t
 
 ## Practical Summary
 
-If you upload private-asset documents, CAPROV currently works like this:
+If you upload private-asset documents, PRIVATEASSETZ currently works like this:
 
 1. text is extracted from files
 2. text is normalized
@@ -456,11 +456,11 @@ If you upload private-asset documents, CAPROV currently works like this:
 
 ## Key Takeaway
 
-The `CAPROV Deterministic Extractor` is the authoritative fact engine. The rest of the AI layer is built around it:
+The `PRIVATEASSETZ Deterministic Extractor` is the authoritative fact engine. The rest of the AI layer is built around it:
 
 - deterministic extraction for reliability
 - constrained LLM assist for missing fields
 - Python engine enrichment for broader graph outputs
 - model-based copilot synthesis for better user-facing answers
 
-That architecture is what lets CAPROV be both explainable and practical for asset intelligence workflows.
+That architecture is what lets PRIVATEASSETZ be both explainable and practical for asset intelligence workflows.

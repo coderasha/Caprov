@@ -11,7 +11,7 @@ import { api } from '@/lib/api';
 import { confidenceLabel, formatDate, money, riskTone } from '@/lib/format';
 import { sepoliaTxExplorerUrl } from '@/lib/explorer';
 import type { HydratedAsset } from '@/lib/types';
-import type { TrustedAssetDnaSnapshot } from '@caprov/types';
+import type { TrustedAssetDnaSnapshot } from '@privateassetz/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';

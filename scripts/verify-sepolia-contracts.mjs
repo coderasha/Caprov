@@ -16,20 +16,20 @@ if (!asset || !payment || !marketplace || !registry) throw new Error('Set all fo
 
 const compilerVersion = `v${solc.version().split('.Emscripten')[0]}`;
 const coder = AbiCoder.defaultAbiCoder();
-const marketplaceSources = ['CaprovAssetToken.sol', 'CaprovPaymentToken.sol', 'CaprovMarketplaceSettlementV2.sol'];
+const marketplaceSources = ['PrivateAssetzAssetToken.sol', 'PrivateAssetzPaymentToken.sol', 'PrivateAssetzMarketplaceSettlementV2.sol'];
 const marketplaceInput = standardInput(marketplaceSources, {});
-const registryInput = standardInput(['CaprovDocumentRegistry.sol'], { optimizer: { enabled: true, runs: 200 }, viaIR: true });
+const registryInput = standardInput(['PrivateAssetzDocumentRegistry.sol'], { optimizer: { enabled: true, runs: 200 }, viaIR: true });
 const constructors = {
-  CaprovAssetToken: coder.encode(['string'], [process.env.CAPROV_TOKEN_URI || 'https://caprov.local/token/{id}.json']).slice(2),
-  CaprovPaymentToken: '',
-  CaprovMarketplaceSettlementV2: coder.encode(['address', 'address'], [asset, payment]).slice(2),
-  CaprovDocumentRegistry: '',
+  PrivateAssetzAssetToken: coder.encode(['string'], [process.env.PRIVATEASSETZ_TOKEN_URI || 'https://privateassetz.local/token/{id}.json']).slice(2),
+  PrivateAssetzPaymentToken: '',
+  PrivateAssetzMarketplaceSettlementV2: coder.encode(['address', 'address'], [asset, payment]).slice(2),
+  PrivateAssetzDocumentRegistry: '',
 };
 const contracts = [
-  { name: 'CaprovAssetToken', file: 'CaprovAssetToken.sol', address: asset, input: marketplaceInput, optimizationUsed: '0', runs: '200' },
-  { name: 'CaprovPaymentToken', file: 'CaprovPaymentToken.sol', address: payment, input: marketplaceInput, optimizationUsed: '0', runs: '200' },
-  { name: 'CaprovMarketplaceSettlementV2', file: 'CaprovMarketplaceSettlementV2.sol', address: marketplace, input: marketplaceInput, optimizationUsed: '0', runs: '200' },
-  { name: 'CaprovDocumentRegistry', file: 'CaprovDocumentRegistry.sol', address: registry, input: registryInput, optimizationUsed: '1', runs: '200' },
+  { name: 'PrivateAssetzAssetToken', file: 'PrivateAssetzAssetToken.sol', address: asset, input: marketplaceInput, optimizationUsed: '0', runs: '200' },
+  { name: 'PrivateAssetzPaymentToken', file: 'PrivateAssetzPaymentToken.sol', address: payment, input: marketplaceInput, optimizationUsed: '0', runs: '200' },
+  { name: 'PrivateAssetzMarketplaceSettlementV2', file: 'PrivateAssetzMarketplaceSettlementV2.sol', address: marketplace, input: marketplaceInput, optimizationUsed: '0', runs: '200' },
+  { name: 'PrivateAssetzDocumentRegistry', file: 'PrivateAssetzDocumentRegistry.sol', address: registry, input: registryInput, optimizationUsed: '1', runs: '200' },
 ];
 const requestedNames = process.env.VERIFY_ONLY?.split(',').map((value) => value.trim()).filter(Boolean);
 const targets = requestedNames?.length ? contracts.filter((contract) => requestedNames.includes(contract.name)) : contracts;

@@ -13,7 +13,7 @@ import type {
   PlatformOrganizationRow,
 } from '@/lib/types';
 import { useAuthStore } from '@/stores/auth-store';
-import type { AuthSession } from '@caprov/types';
+import type { AuthSession } from '@privateassetz/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -123,7 +123,7 @@ export default function PlatformAdminPage() {
             Platform admin access required
           </h1>
           <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-            This view is reserved for the Caprov platform administrator role.
+            This view is reserved for the PrivateAssetz platform administrator role.
           </p>
         </Card>
       </div>
@@ -296,8 +296,8 @@ export default function PlatformAdminPage() {
             </div>
             <Badge>{organization?.name ?? 'No active workspace'}</Badge>
           </div>
-          <div className="caprov-scroll">
-            <table className="caprov-table w-full text-left text-sm">
+          <div className="privateassetz-scroll">
+            <table className="privateassetz-table w-full text-left text-sm">
               <thead className="text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
                 <tr>
                   <th className="px-6 py-3.5 font-medium">Organization</th>
@@ -498,8 +498,8 @@ export default function PlatformAdminPage() {
         <div className="border-b border-[var(--line)]/80 px-6 py-5">
           <h2 className="font-display text-lg font-semibold tracking-[-0.02em]">Recent request history</h2>
         </div>
-        <div className="caprov-scroll">
-          <table className="caprov-table w-full text-left text-sm">
+        <div className="privateassetz-scroll">
+          <table className="privateassetz-table w-full text-left text-sm">
             <thead className="text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
               <tr>
                 <th className="px-6 py-3.5 font-medium">Organization</th>

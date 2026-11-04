@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 /// @notice CAP payment token. One CAP is intended to represent one USD only with an external reserve/redemption policy.
-contract CaprovPaymentToken {
+contract PrivateAssetzPaymentToken {
     string public constant name = "CAP"; string public constant symbol = "CAP"; uint8 public constant decimals = 18;
     address public owner; uint256 public totalSupply;
     mapping(address => uint256) public balanceOf; mapping(address => mapping(address => uint256)) public allowance;

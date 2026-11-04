@@ -7,7 +7,7 @@ from app.core.settings import get_settings
 def create_app() -> FastAPI:
     settings = get_settings()
     application = FastAPI(
-        title="CAPROV Intelligence Engine",
+        title="PRIVATEASSETZ Intelligence Engine",
         version="0.1.0",
         description="AI workflows for document intelligence, Asset DNA, valuation, risk, and copilot.",
     )

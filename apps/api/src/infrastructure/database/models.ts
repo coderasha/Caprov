@@ -25,7 +25,7 @@ import type {
   ValuationProjection,
   ValuationSummary,
   WalletTransaction,
-} from '@caprov/types';
+} from '@privateassetz/types';
 
 export interface OrganizationRecord {
   id: string;
@@ -281,7 +281,7 @@ export interface CopilotMessageRecord {
   createdAt: string;
 }
 
-export interface CaprovData {
+export interface PrivateAssetzData {
   organizations: OrganizationRecord[];
   users: UserRecord[];
   memberships: MembershipRecord[];
@@ -314,7 +314,7 @@ export interface CaprovData {
   loans: LoanFacility[];
 }
 
-export function emptyStore(): CaprovData {
+export function emptyStore(): PrivateAssetzData {
   return {
     organizations: [],
     users: [],

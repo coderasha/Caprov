@@ -27,7 +27,7 @@ import type {
   AssetStatus,
   CurrencyCode,
   OwnershipType,
-} from '@caprov/types';
+} from '@privateassetz/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';

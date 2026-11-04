@@ -25,7 +25,7 @@ import {
 } from '@/lib/format';
 import type { AssetDocumentsTree, AuditRow, DocumentRow, HydratedAsset } from '@/lib/types';
 import { useAuthStore } from '@/stores/auth-store';
-import type { DocumentType, OwnershipType } from '@caprov/types';
+import type { DocumentType, OwnershipType } from '@privateassetz/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { BrowserProvider, Contract, solidityPackedKeccak256 } from 'ethers';
 import { ArrowLeft, Building2, CalendarDays, CheckCircle2, Download, FileText, Landmark, MapPin, ScanSearch, Share2, Sparkles, Upload } from 'lucide-react';
@@ -135,8 +135,8 @@ export default function AssetDetailPage() {
 
   useEffect(() => {
     const handleNetworkChange = () => setNetworkId(selectedBlockchainNetwork().id);
-    window.addEventListener('caprov-network-changed', handleNetworkChange);
-    return () => window.removeEventListener('caprov-network-changed', handleNetworkChange);
+    window.addEventListener('privateassetz-network-changed', handleNetworkChange);
+    return () => window.removeEventListener('privateassetz-network-changed', handleNetworkChange);
   }, []);
 
   const assetQuery = useQuery({
@@ -984,7 +984,7 @@ async function connectMetaMask(network?: DocumentNetworkStatus): Promise<WalletS
   await ensureDocumentNetwork(provider, network);
   const selected = selectedBlockchainNetwork();
   const browserProvider = walletBrowserProvider(provider, network?.chainId ?? selected.chainId);
-  if (!account) throw new Error('MetaMask did not expose an account to CAPROV.');
+  if (!account) throw new Error('MetaMask did not expose an account to PRIVATEASSETZ.');
   const chain = await browserProvider.getNetwork();
   return {
     account,
@@ -1002,7 +1002,7 @@ function assertSelectedNetwork(network?: DocumentNetworkStatus) {
   const selected = selectedBlockchainNetwork();
   if (network.networkId !== selected.id || network.chainId !== selected.chainId) {
     throw new Error(
-      `Network selection changed or is stale. CAPROV selected ${selected.chainName} (chain ID ${selected.chainId}), but the document anchor is configured for ${network.chainName} (chain ID ${network.chainId}). Refresh and try again.`,
+      `Network selection changed or is stale. PRIVATEASSETZ selected ${selected.chainName} (chain ID ${selected.chainId}), but the document anchor is configured for ${network.chainName} (chain ID ${network.chainId}). Refresh and try again.`,
     );
   }
 }

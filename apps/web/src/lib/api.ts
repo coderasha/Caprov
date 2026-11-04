@@ -7,9 +7,9 @@ export const api = axios.create({
 
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
-    config.headers['X-Caprov-Network'] = selectedBlockchainNetwork().id;
-    const token = localStorage.getItem('caprov-auth')
-      ? (JSON.parse(localStorage.getItem('caprov-auth') as string)?.state?.token as string | undefined)
+    config.headers['X-PrivateAssetz-Network'] = selectedBlockchainNetwork().id;
+    const token = localStorage.getItem('privateassetz-auth')
+      ? (JSON.parse(localStorage.getItem('privateassetz-auth') as string)?.state?.token as string | undefined)
       : undefined;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

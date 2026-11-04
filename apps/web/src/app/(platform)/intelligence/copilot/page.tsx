@@ -12,7 +12,7 @@ import {
 import type { HydratedAsset } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth-store';
-import type { LlmModelSelection } from '@caprov/types';
+import type { LlmModelSelection } from '@privateassetz/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   ArrowRight,

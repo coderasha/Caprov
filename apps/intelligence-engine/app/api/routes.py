@@ -6,7 +6,7 @@ from app.api.schemas import (
     CopilotResponse,
     HealthResponse,
 )
-from caprov_intelligence.pipeline import answer_copilot, run_asset_dna
+from privateassetz_intelligence.pipeline import answer_copilot, run_asset_dna
 
 router = APIRouter()
 
@@ -14,7 +14,7 @@ router = APIRouter()
 @router.get("/health", response_model=HealthResponse)
 def health_check() -> HealthResponse:
     return HealthResponse(
-        service="caprov-intelligence-engine",
+        service="privateassetz-intelligence-engine",
         status="ok",
     )
 

@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { IsInt, IsOptional, IsString, Min, MinLength } from 'class-validator';
 import { getAddress, isAddress } from 'ethers';
-import type { TokenPosition } from '@caprov/types';
+import type { TokenPosition } from '@privateassetz/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';

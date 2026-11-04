@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import type { LlmModelOption, LlmModelSelection } from '@caprov/types';
+import type { LlmModelOption, LlmModelSelection } from '@privateassetz/types';
 import { DatabaseService } from '../../infrastructure/database/database.service';
 import { AuditService } from '../audit/audit.service';
 import {
@@ -53,7 +53,7 @@ export class LlmModelsService {
       (item) => item.id === organizationId,
     );
     // DNA remains deterministic by default until an organization opts into a model.
-    return organization?.dnaLlmModelId || 'caprov-deterministic';
+    return organization?.dnaLlmModelId || 'privateassetz-deterministic';
   }
 
   getDnaSelectedModel(organizationId: string): LlmModelOption {

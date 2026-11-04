@@ -37,7 +37,7 @@ async function request(path, { method = 'GET', token, body } = {}) {
 async function main() {
   const login = await request('/auth/login', {
     method: 'POST',
-    body: { email: 'elena@meridian.caprov', password: 'CaprovDemo!23' },
+    body: { email: 'elena@meridian.privateassetz', password: 'PrivateAssetzDemo!23' },
   });
   if (!login.ok || !login.data?.token) {
     fail('login', JSON.stringify(login.data));
@@ -226,7 +226,7 @@ async function main() {
   // Role checks: viewer-like compliance can read markets
   const sofia = await request('/auth/login', {
     method: 'POST',
-    body: { email: 'sofia@meridian.caprov', password: 'CaprovDemo!23' },
+    body: { email: 'sofia@meridian.privateassetz', password: 'PrivateAssetzDemo!23' },
   });
   if (sofia.ok) {
     const sofiaToken = sofia.data.token;

@@ -165,7 +165,7 @@ export function DnaDecisionTable({ asset }: { asset: HydratedAsset }) {
               <h3 className="text-sm font-semibold text-[var(--ink)]">{section.title}</h3>
               <p className="mt-0.5 text-xs text-[var(--muted)]">{section.description}</p>
             </div>
-            <div className="caprov-scroll rounded-xl border border-[var(--line)]/80">
+            <div className="privateassetz-scroll rounded-xl border border-[var(--line)]/80">
               <table className="min-w-[680px] w-full text-left text-sm">
                 <thead className="bg-[var(--paper)]/70 text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">
                   <tr>

@@ -1,14 +1,14 @@
-# CAPROV Product Lifecycle Architecture Assessment
+# PRIVATEASSETZ Product Lifecycle Architecture Assessment
 
 ## Scope and inspection result
 
-This document records the current CAPROV implementation and the recommended product/process architecture for the lifecycle:
+This document records the current PRIVATEASSETZ implementation and the recommended product/process architecture for the lifecycle:
 
 ```text
 Asset → Marketplace → Trading → Settlement → Ownership → Collateral → Lending
 ```
 
-No implementation changes are proposed by this document. CAPROV is presently a NestJS modular monolith with a JSON file-backed store. `PrismaService` is currently a no-op rather than an active Prisma-backed database. The Python intelligence engine performs extraction and intelligence assistance; NestJS owns transactional business APIs.
+No implementation changes are proposed by this document. PRIVATEASSETZ is presently a NestJS modular monolith with a JSON file-backed store. `PrismaService` is currently a no-op rather than an active Prisma-backed database. The Python intelligence engine performs extraction and intelligence assistance; NestJS owns transactional business APIs.
 
 Relevant modules are Assets, Documents, Intelligence, Audit, Marketplace, Trading, Settlement, Tokenization, Collateral, and Lending.
 

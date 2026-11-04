@@ -262,7 +262,7 @@ export function BuyerDashboard() {
           <div>
             <p className="buyer-dash__eyebrow">Portfolio</p>
             <h2 id="buyer-investments-heading">Your investments</h2>
-            <p>Properties and private assets purchased through CAPROV.</p>
+            <p>Properties and private assets purchased through PRIVATEASSETZ.</p>
           </div>
           <Link href="/trading" className="buyer-dash__investments-link">View trading activity <ArrowRight size={15} /></Link>
         </div>

@@ -12,7 +12,7 @@ function shortAddress(address: string) {
 }
 
 function networkLabel(id: string) {
-  return id === 'sepolia' ? 'Ethereum Sepolia' : 'CAPROV Besu Local';
+  return id === 'sepolia' ? 'Ethereum Sepolia' : 'PRIVATEASSETZ Besu Local';
 }
 
 type VerifiedWallet = {
@@ -94,7 +94,7 @@ export function WalletStatus() {
             <div>
               <p className="text-sm font-semibold text-[var(--ink)]">Wallet access</p>
               <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
-                Connect MetaMask on Ethereum Sepolia or CAPROV Besu Local.
+                Connect MetaMask on Ethereum Sepolia or PRIVATEASSETZ Besu Local.
               </p>
             </div>
             <button
@@ -124,7 +124,7 @@ export function WalletStatus() {
               // A historical link is useful after a reload, but must never
               // conceal the account the user has just selected in MetaMask.
               // Network-tagging the selection prevents a Sepolia address
-              // appearing after the user changes the CAPROV network to Besu.
+              // appearing after the user changes the PRIVATEASSETZ network to Besu.
               const currentSelection =
                 selectedAccountNetworkId === networkId ? selectedAccount ?? address : undefined;
               const waitingForVerification = Boolean(
@@ -169,7 +169,7 @@ export function WalletStatus() {
               ))}
             </div>
             <p className="mt-1.5 text-[11px] leading-4 text-[var(--muted)]">
-              Selecting a network asks MetaMask to switch. Add CAPROV Besu Local in MetaMask once before using it.
+              Selecting a network asks MetaMask to switch. Add PRIVATEASSETZ Besu Local in MetaMask once before using it.
             </p>
           </div>
 

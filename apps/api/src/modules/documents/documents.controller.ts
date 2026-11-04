@@ -15,7 +15,7 @@ import type { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
-import type { DocumentType } from '@caprov/types';
+import type { DocumentType } from '@privateassetz/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';

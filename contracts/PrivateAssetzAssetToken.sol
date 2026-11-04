@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 /// @notice ERC-1155 asset units. One id represents one asset and its fungible units.
-contract CaprovAssetToken {
+contract PrivateAssetzAssetToken {
     address public owner;
     string private baseURI;
     mapping(uint256 => mapping(address => uint256)) private balances;

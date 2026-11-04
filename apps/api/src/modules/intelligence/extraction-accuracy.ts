@@ -1,4 +1,4 @@
-import type { CurrencyCode, DnaFact, DocumentType } from '@caprov/types';
+import type { CurrencyCode, DnaFact, DocumentType } from '@privateassetz/types';
 import { createId } from '../../infrastructure/database/ids';
 
 export interface ExtractionDocument {

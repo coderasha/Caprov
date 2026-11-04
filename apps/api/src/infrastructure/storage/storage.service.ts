@@ -97,6 +97,6 @@ export class StorageService {
   }
 
   getUri(storageKey: string): string {
-    return `caprov://storage/${storageKey}`;
+    return `privateassetz://storage/${storageKey}`;
   }
 }

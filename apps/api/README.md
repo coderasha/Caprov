@@ -1,12 +1,12 @@
-# CAPROV API (`apps/api`)
+# PRIVATEASSETZ API (`apps/api`)
 
-NestJS business platform for CAPROV — system of record, intelligence orchestration, and capital markets.
+NestJS business platform for PRIVATEASSETZ — system of record, intelligence orchestration, and capital markets.
 
 ## Run
 
 ```bash
 # from repo root
-pnpm --filter @caprov/types build
+pnpm --filter @privateassetz/types build
 pnpm --filter api build
 PORT=3001 node apps/api/dist/main.js
 # → http://localhost:3001/api

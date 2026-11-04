@@ -19,7 +19,7 @@ export const ETHEREUM_SEPOLIA_EXPLORER = 'https://sepolia.etherscan.io';
 export const DEFAULT_ETHEREUM_SEPOLIA_RPC =
   'https://ethereum-sepolia-rpc.publicnode.com';
 
-const CAPROV_TOKEN_ABI = [
+const PRIVATEASSETZ_TOKEN_ABI = [
   'function mintAsset(address to, uint256 id, uint256 amount, string assetReference)',
   'function uri(uint256 id) view returns (string)',
   'event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)',
@@ -119,7 +119,7 @@ export class EthereumSepoliaTokenService {
       walletAddress,
       mode: liveMintReady ? 'LIVE' : 'UNAVAILABLE',
       message: liveMintReady
-        ? `Live minting enabled against ${config.chainName} with configured signer and CaprovAssetToken contract.`
+        ? `Live minting enabled against ${config.chainName} with configured signer and PrivateAssetzAssetToken contract.`
         : contractAddress
           ? `Wallet-signed ${config.chainName} minting is available in Marketplace. Connect an authorized MetaMask account to mint; the API does not hold or require a private key for this flow.`
           : `${config.chainName} tokenization is unavailable because its asset-token contract is not configured.`,
@@ -142,7 +142,7 @@ export class EthereumSepoliaTokenService {
 
   /** The ERC-1155 type is deterministic for an asset, regardless of who signs the mint. */
   tokenIdForAsset(assetId: string): string {
-    return BigInt(ethId(`caprov:asset:${assetId}`)).toString();
+    return BigInt(ethId(`privateassetz:asset:${assetId}`)).toString();
   }
 
   /**
@@ -157,7 +157,7 @@ export class EthereumSepoliaTokenService {
       const provider = new JsonRpcProvider(status.rpcUrl, status.chainId);
       const receipt = await provider.getTransactionReceipt(input.txHash);
       if (!receipt || receipt.status !== 1) return false;
-      const iface = new Interface(CAPROV_TOKEN_ABI);
+      const iface = new Interface(PRIVATEASSETZ_TOKEN_ABI);
       const expectedTokenId = this.tokenIdForAsset(input.assetId);
       const recipient = getAddress(input.recipientAddress);
       let assetCreated = false;
@@ -217,7 +217,7 @@ export class EthereumSepoliaTokenService {
       const wallet = this.buildWallet(this.networks.selected(), provider);
       const contract = new Contract(
         status.contractAddress!,
-        CAPROV_TOKEN_ABI,
+        PRIVATEASSETZ_TOKEN_ABI,
         wallet,
       );
       const to = getAddress(request.recipientAddress?.trim() || wallet.address);
@@ -228,7 +228,7 @@ export class EthereumSepoliaTokenService {
       const tx = await mintFn(to, tokenId, BigInt(request.supply), request.assetId, this.transactionOverrides());
       const receipt = await tx.wait();
       const txHash = receipt?.hash ?? tx.hash;
-      this.logger.log(`Minted Caprov token on Sepolia tx=${txHash}`);
+      this.logger.log(`Minted PrivateAssetz token on Sepolia tx=${txHash}`);
       return {
         mode: 'LIVE',
         chainId: status.chainId,

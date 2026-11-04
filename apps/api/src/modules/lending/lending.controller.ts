@@ -17,7 +17,7 @@ import {
   Min,
 } from 'class-validator';
 import { id as ethId } from 'ethers';
-import type { CurrencyCode, LoanFacility } from '@caprov/types';
+import type { CurrencyCode, LoanFacility } from '@privateassetz/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -279,7 +279,7 @@ export class LendingController {
     if (!collateral.vaultCollateralId || !this.vault.isConfigured()) {
       throw new BadRequestException('A verified live Sepolia collateral vault position is required before disbursal.');
     }
-    const loanReference = ethId(`caprov:loan:${id}`);
+    const loanReference = ethId(`privateassetz:loan:${id}`);
     const activated = dto.vaultTxHash
       ? await this.vault.verifyLoanActivation({ txHash: dto.vaultTxHash, collateralId: collateral.vaultCollateralId, loanReference })
       : await this.vault.hasLoanActivation(collateral.vaultCollateralId, loanReference);

@@ -1,10 +1,10 @@
 'use client';
 
-import { CaprovWordmark } from '@/components/brand/caprov-logo';
+import { PrivateAssetzWordmark } from '@/components/brand/privateassetz-logo';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth-store';
-import type { AuthSession } from '@caprov/types';
+import type { AuthSession } from '@privateassetz/types';
 import axios from 'axios';
 import {
   ArrowRight,
@@ -35,8 +35,8 @@ interface DemoAccount {
 
 const DEFAULT_PERSONA: DemoAccount = {
   name: 'Jordan Lee',
-  email: 'banker@caprov.demo',
-  password: 'CaprovDemo!23',
+  email: 'banker@privateassetz.demo',
+  password: 'PrivateAssetzDemo!23',
   role: 'Banker',
 };
 
@@ -44,26 +44,26 @@ const DEMO_PERSONAS: DemoAccount[] = [
   DEFAULT_PERSONA,
   {
     name: 'Priya Nair',
-    email: 'priya@caprov.io',
-    password: 'CaprovDemo!23',
+    email: 'priya@privateassetz.io',
+    password: 'PrivateAssetzDemo!23',
     role: 'PLATFORM_ADMIN',
   },
   {
     name: 'Elena Voss',
-    email: 'elena@meridian.caprov',
-    password: 'CaprovDemo!23',
+    email: 'elena@meridian.privateassetz',
+    password: 'PrivateAssetzDemo!23',
     role: 'ORG_ADMIN',
   },
   {
     name: 'Arjun Mehta',
-    email: 'arjun@meridian.caprov',
-    password: 'CaprovDemo!23',
+    email: 'arjun@meridian.privateassetz',
+    password: 'PrivateAssetzDemo!23',
     role: 'Buyer',
   },
   {
     name: 'Sofia Laurent',
-    email: 'sofia@meridian.caprov',
-    password: 'CaprovDemo!23',
+    email: 'sofia@meridian.privateassetz',
+    password: 'PrivateAssetzDemo!23',
     role: 'COMPLIANCE',
   },
 ];
@@ -178,7 +178,7 @@ export default function LoginPage() {
 
   return (
     <main className="auth-login">
-      <section className="auth-login__brand" aria-label="CAPROV platform overview">
+      <section className="auth-login__brand" aria-label="PRIVATEASSETZ platform overview">
         <div className="auth-login__brand-media" aria-hidden="true">
           <Image
             src="/login-hero-skyline.jpg"
@@ -193,7 +193,7 @@ export default function LoginPage() {
 
         <div className="auth-login__brand-content">
           <Link href="/" className="auth-login__brand-logo">
-            <CaprovWordmark
+            <PrivateAssetzWordmark
               tone="dark"
               variant="full"
               priority
@@ -245,7 +245,7 @@ export default function LoginPage() {
 
         <div className="auth-login__card">
           <div className="auth-login__card-header">
-            <CaprovWordmark
+            <PrivateAssetzWordmark
               tone="light"
               variant="full"
               priority

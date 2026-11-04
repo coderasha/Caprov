@@ -23,7 +23,7 @@ importers:
 
   apps/api:
     dependencies:
-      '@caprov/types':
+      '@privateassetz/types':
         specifier: workspace:*
         version: link:../../packages/types
       '@nestjs/common':
@@ -188,7 +188,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@caprov/types':
+      '@privateassetz/types':
         specifier: workspace:*
         version: link:../../packages/types
       '@hookform/resolvers':
@@ -264,7 +264,7 @@ importers:
 
   packages/auth:
     dependencies:
-      '@caprov/types':
+      '@privateassetz/types':
         specifier: workspace:*
         version: link:../types
 

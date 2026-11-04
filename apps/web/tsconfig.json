@@ -16,7 +16,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@caprov/types": ["../../packages/types/src/index.ts"]
+      "@privateassetz/types": ["../../packages/types/src/index.ts"]
     }
   },
   "include": [

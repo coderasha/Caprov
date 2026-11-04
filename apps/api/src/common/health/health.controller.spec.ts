@@ -8,7 +8,7 @@ describe('HealthController', () => {
     const controller = new HealthController(db);
 
     expect(controller.getHealth()).toMatchObject({
-      service: 'caprov-api',
+      service: 'privateassetz-api',
       status: 'ok',
       assets: 0,
       documents: 0,

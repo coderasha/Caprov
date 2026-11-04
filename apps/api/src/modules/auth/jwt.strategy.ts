@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import type { MembershipRole } from '@caprov/types';
+import type { MembershipRole } from '@privateassetz/types';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import type { AuthUser } from '../../common/types/auth-user';
 import { DatabaseService } from '../../infrastructure/database/database.service';
@@ -17,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET ?? 'caprov-dev-secret-change-me',
+      secretOrKey: process.env.JWT_SECRET ?? 'privateassetz-dev-secret-change-me',
     });
   }
 

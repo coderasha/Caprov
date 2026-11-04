@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-interface ICaprovAssetTokenV2 {
+interface IPrivateAssetzAssetTokenV2 {
     function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes calldata data) external;
 }
 
@@ -18,7 +18,7 @@ interface IERC1155ReceiverV2 {
 /// @notice CAP-denominated ERC-1155 marketplace with buyer-funded escrow and seller settlement approval.
 /// @dev One CAP represents one USD only when the CAP issuer maintains the required reserve/redemption policy.
 ///      The contract cannot itself establish a fiat peg.
-contract CaprovMarketplaceSettlementV2 is IERC1155ReceiverV2 {
+contract PrivateAssetzMarketplaceSettlementV2 is IERC1155ReceiverV2 {
     enum PurchaseStatus { NONE, PAYMENT_ESCROWED, SETTLED, REJECTED, CANCELLED }
 
     struct Listing {
@@ -37,7 +37,7 @@ contract CaprovMarketplaceSettlementV2 is IERC1155ReceiverV2 {
         PurchaseStatus status;
     }
 
-    ICaprovAssetTokenV2 public immutable assetToken;
+    IPrivateAssetzAssetTokenV2 public immutable assetToken;
     ICAPToken public immutable capToken;
     uint256 public nextListingId = 1;
     uint256 public nextPurchaseId = 1;
@@ -53,7 +53,7 @@ contract CaprovMarketplaceSettlementV2 is IERC1155ReceiverV2 {
 
     constructor(address assetToken_, address capToken_) {
         require(assetToken_ != address(0) && capToken_ != address(0), "zero address");
-        assetToken = ICaprovAssetTokenV2(assetToken_);
+        assetToken = IPrivateAssetzAssetTokenV2(assetToken_);
         capToken = ICAPToken(capToken_);
     }
 

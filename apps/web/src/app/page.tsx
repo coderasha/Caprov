@@ -1,4 +1,4 @@
-import { PrivateAssetzWordmark } from '@/components/brand/caprov-logo';
+import { PrivateAssetzWordmark } from '@/components/brand/privateassetz-logo';
 import { LandingAssetCarousel } from '@/components/landing/landing-asset-carousel';
 import { LandingHeader } from '@/components/landing/landing-header';
 import { LandingReveal } from '@/components/landing/landing-reveal';

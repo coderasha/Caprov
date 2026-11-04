@@ -657,7 +657,7 @@ def run_asset_dna(asset: dict[str, Any], documents: list[dict[str, Any]]) -> dic
             "provenance": round(provenance, 2),
         },
         "sourceDocumentIds": [document["id"] for document in classified],
-        "engine": "caprov-intelligence-engine",
+        "engine": "privateassetz-intelligence-engine",
     }
 
 

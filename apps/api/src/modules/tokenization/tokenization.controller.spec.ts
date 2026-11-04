@@ -1,19 +1,19 @@
 import { TokenizationController } from './tokenization.controller';
 import {
   emptyStore,
-  type CaprovData,
+  type PrivateAssetzData,
 } from '../../infrastructure/database/models';
 import type { DatabaseService } from '../../infrastructure/database/database.service';
 import type { AuditService } from '../audit/audit.service';
 import type { EthereumSepoliaTokenService } from '../../infrastructure/blockchain/ethereum-sepolia-token.service';
 import type { EthereumSepoliaMarketplaceService } from '../../infrastructure/blockchain/ethereum-sepolia-marketplace.service';
 import type { AuthUser } from '../../common/types/auth-user';
-import type { AssetClass, TokenPosition } from '@caprov/types';
+import type { AssetClass, TokenPosition } from '@privateassetz/types';
 
 describe('TokenizationController', () => {
   const user: AuthUser = {
     id: 'usr_test',
-    email: 'test@caprov.io',
+    email: 'test@privateassetz.io',
     fullName: 'Test User',
     organizationId: 'org_test',
     organizationName: 'Test Org',
@@ -74,7 +74,7 @@ describe('TokenizationController', () => {
   });
 });
 
-function buildStore(assetClass: AssetClass): CaprovData {
+function buildStore(assetClass: AssetClass): PrivateAssetzData {
   const store = emptyStore();
   store.assets.push({
     id: 'ast_test',
@@ -89,12 +89,12 @@ function buildStore(assetClass: AssetClass): CaprovData {
   return store;
 }
 
-function createDbMock(store: CaprovData): DatabaseService {
+function createDbMock(store: PrivateAssetzData): DatabaseService {
   return {
     get snapshot() {
       return store;
     },
-    mutate<T>(fn: (draft: CaprovData) => T): T {
+    mutate<T>(fn: (draft: PrivateAssetzData) => T): T {
       return fn(store);
     },
   } as DatabaseService;

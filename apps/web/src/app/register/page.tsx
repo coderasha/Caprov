@@ -1,11 +1,11 @@
 'use client';
 
-import { CaprovWordmark } from '@/components/brand/caprov-logo';
+import { PrivateAssetzWordmark } from '@/components/brand/privateassetz-logo';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Field, Input } from '@/components/ui/input';
 import { api } from '@/lib/api';
-import type { RegistrationRequestReceipt } from '@caprov/types';
+import type { RegistrationRequestReceipt } from '@privateassetz/types';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -43,8 +43,8 @@ export default function RegisterPage() {
     <main className="platform-canvas grid min-h-screen place-items-center px-4 py-8">
       <div className="hub-auth-shell">
         <div className="flex justify-center">
-          <Link href="/" aria-label="CAPROV home">
-            <CaprovWordmark
+          <Link href="/" aria-label="PRIVATEASSETZ home">
+            <PrivateAssetzWordmark
               tone="light"
               variant="full"
               priority

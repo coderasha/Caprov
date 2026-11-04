@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// CAPROV Phase 2 domain model. Local development currently uses a file-backed
+/// PRIVATEASSETZ Phase 2 domain model. Local development currently uses a file-backed
 /// store with the same entities so the operator platform can run without
 /// external Postgres. This schema remains the target PostgreSQL model.
 

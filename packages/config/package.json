@@ -1,5 +1,5 @@
 {
-  "name": "@caprov/config",
+  "name": "@privateassetz/config",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,6 +9,6 @@
     "build": "tsc -p tsconfig.json",
     "lint": "tsc -p tsconfig.json --noEmit",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "echo \"No tests for @caprov/config\""
+    "test": "echo \"No tests for @privateassetz/config\""
   }
 }

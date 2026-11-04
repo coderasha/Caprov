@@ -1,6 +1,6 @@
-# CAPROV Role Profiles
+# PRIVATEASSETZ Role Profiles
 
-This document describes the user roles currently implemented in CAPROV, what each role is responsible for, and which product features each role can access in the current build.
+This document describes the user roles currently implemented in PRIVATEASSETZ, what each role is responsible for, and which product features each role can access in the current build.
 
 ## Shared platform areas
 
@@ -31,7 +31,7 @@ Important implementation note: some pages are visible in navigation for all sign
 
 | Role | Primary responsibility | Typical user |
 | --- | --- | --- |
-| `PLATFORM_ADMIN` | Operate the CAPROV platform across all organizations | Internal CAPROV administrator |
+| `PLATFORM_ADMIN` | Operate the PRIVATEASSETZ platform across all organizations | Internal PRIVATEASSETZ administrator |
 | `ORG_ADMIN` | Manage one organization, its members, settings, and operating workflows | Firm administrator or operations lead |
 | `ANALYST` | Run day-to-day asset, document, intelligence, and market workflows | Investment or research analyst |
 | `COMPLIANCE` | Review records, provenance, auditability, and settlement steps | Compliance or control officer |

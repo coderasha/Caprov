@@ -10,8 +10,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 const origin = 'https://www.indiapost.gov.in';
-const headers = { 'user-agent': 'Mozilla/5.0 (compatible; CAPROV-address-directory/1.0)' };
-const work = mkdtempSync(join(tmpdir(), 'caprov-india-post-'));
+const headers = { 'user-agent': 'Mozilla/5.0 (compatible; PRIVATEASSETZ-address-directory/1.0)' };
+const work = mkdtempSync(join(tmpdir(), 'privateassetz-india-post-'));
 const pause = (milliseconds) => new Promise((resolvePromise) => setTimeout(resolvePromise, milliseconds));
 
 async function download(url) {

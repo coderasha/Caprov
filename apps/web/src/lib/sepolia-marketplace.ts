@@ -81,7 +81,7 @@ function walletErrorCode(error: unknown) {
 function accountConnectionError(error: unknown) {
   if (walletErrorCode(error) === -32002) {
     return new Error(
-      'MetaMask already has a connection request open for CAPROV. Open the MetaMask extension, complete or reject that request, then return here and press Select account. Do not open another connection prompt.',
+      'MetaMask already has a connection request open for PRIVATEASSETZ. Open the MetaMask extension, complete or reject that request, then return here and press Select account. Do not open another connection prompt.',
     );
   }
   return error;
@@ -90,7 +90,7 @@ function accountConnectionError(error: unknown) {
 /**
  * Opens at most one MetaMask account permission request for this page origin.
  * It is used only for the initial connection. Account switching is handled
- * by CAPROV's picker from accounts MetaMask has already authorized.
+ * by PRIVATEASSETZ's picker from accounts MetaMask has already authorized.
  */
 async function requestMetaMaskAccounts(provider: WalletProvider) {
   if (!accountConnectionRequest) {
@@ -166,11 +166,11 @@ export async function connectMetaMaskWallet() {
   const accounts = exposedAccounts.length
     ? exposedAccounts
     : await requestMetaMaskAccounts(metaMask.provider);
-  if (!accounts[0]) throw new Error('MetaMask did not expose an account to CAPROV.');
+  if (!accounts[0]) throw new Error('MetaMask did not expose an account to PRIVATEASSETZ.');
   activeAccount = activeAccount && accounts.some((account) => account.toLowerCase() === activeAccount?.toLowerCase())
     ? activeAccount
     : accounts[0];
-  // Move MetaMask onto the CAPROV-selected chain before signer work.
+  // Move MetaMask onto the PRIVATEASSETZ-selected chain before signer work.
   await switchWalletToSelectedNetwork();
   const provider = walletBrowserProvider(metaMask.provider);
   const network = await provider.getNetwork();
@@ -184,11 +184,11 @@ export async function connectMetaMaskWallet() {
   return { address, accounts };
 }
 
-/** Returns accounts that MetaMask has already authorized for CAPROV. */
+/** Returns accounts that MetaMask has already authorized for PRIVATEASSETZ. */
 export async function chooseMetaMaskAccount() {
   const provider = await selectedProvider();
   const accounts = await provider.request({ method: 'eth_accounts' }) as string[];
-  if (!accounts[0]) throw new Error('MetaMask did not expose an account to CAPROV.');
+  if (!accounts[0]) throw new Error('MetaMask did not expose an account to PRIVATEASSETZ.');
   activeAccount = activeAccount && accounts.some((account) => account.toLowerCase() === activeAccount?.toLowerCase())
     ? activeAccount
     : accounts[0];
@@ -197,7 +197,7 @@ export async function chooseMetaMaskAccount() {
 
 /**
  * Reopens MetaMask's account-permission flow so a user can add or remove the
- * accounts this origin may see. MetaMask owns the dialog; CAPROV only requests
+ * accounts this origin may see. MetaMask owns the dialog; PRIVATEASSETZ only requests
  * it and then reads the accounts the user approved.
  */
 export async function requestMetaMaskAccountSelection() {
@@ -211,7 +211,7 @@ export async function requestMetaMaskAccountSelection() {
     throw accountConnectionError(error);
   }
   const accounts = (await provider.request({ method: 'eth_accounts' })) as string[];
-  if (!accounts[0]) throw new Error('No MetaMask account was approved for CAPROV.');
+  if (!accounts[0]) throw new Error('No MetaMask account was approved for PRIVATEASSETZ.');
   activeAccount = accounts[0];
   return { address: accounts[0], accounts };
 }
@@ -230,10 +230,10 @@ export async function promptMetaMaskAccountSelection() {
     ) as Record<`0x${string}`, string>;
     metaMaskConnectClient = import('@metamask/connect-evm')
       .then(({ createEVMClient }) => createEVMClient({
-        dapp: { name: 'CAPROV', url: window.location.origin },
+        dapp: { name: 'PRIVATEASSETZ', url: window.location.origin },
         api: { supportedNetworks },
         ui: { preferExtension: true, showInstallModal: false },
-        // CAPROV already performs EIP-6963 discovery for its transaction provider.
+        // PRIVATEASSETZ already performs EIP-6963 discovery for its transaction provider.
         // Do not announce a second provider when this helper is used only as a picker.
         skipAutoAnnounce: true,
       }))
@@ -249,7 +249,7 @@ export async function promptMetaMaskAccountSelection() {
     forceRequest: true,
   });
   const accounts = [...result.accounts];
-  if (!accounts[0]) throw new Error('No MetaMask account was selected for CAPROV.');
+  if (!accounts[0]) throw new Error('No MetaMask account was selected for PRIVATEASSETZ.');
   activeWallet = { id: 'metamask-connect', provider: client.getProvider() as unknown as WalletProvider };
   activeAccount = accounts[0];
   return { address: accounts[0], accounts };
@@ -260,7 +260,7 @@ export async function selectMetaMaskAccount(account: string) {
   const provider = await selectedProvider();
   const accounts = await provider.request({ method: 'eth_accounts' }) as string[];
   const match = accounts.find((item) => item.toLowerCase() === account.toLowerCase());
-  if (!match) throw new Error('This account is not connected to CAPROV in MetaMask. Reconnect the site in MetaMask and select that account.');
+  if (!match) throw new Error('This account is not connected to PRIVATEASSETZ in MetaMask. Reconnect the site in MetaMask and select that account.');
   activeAccount = match;
   return activeAccount;
 }
@@ -311,7 +311,7 @@ async function selectedProvider(walletId?: string) {
 }
 
 /**
- * Makes the wallet follow the CAPROV network selected in the application.
+ * Makes the wallet follow the PRIVATEASSETZ network selected in the application.
  * Both Sepolia and Besu are EVM networks, so their contract workflows use the
  * same signer once the wallet has moved to the selected chain.
  */
@@ -321,7 +321,7 @@ export async function switchWalletToSelectedNetwork() {
 }
 
 /**
- * Aligns MetaMask to `network` for both Ethereum Sepolia and CAPROV Besu.
+ * Aligns MetaMask to `network` for both Ethereum Sepolia and PRIVATEASSETZ Besu.
  * Tries `wallet_switchEthereumChain` first; when the chain is missing (common
  * for Besu), adds it with `wallet_addEthereumChain`, then verifies.
  */
@@ -422,12 +422,12 @@ export function walletBrowserProvider(provider: Eip1193Provider, chainId?: numbe
   return browserProvider;
 }
 
-/** Switch MetaMask to the CAPROV-selected chain without reopening the connect prompt. */
+/** Switch MetaMask to the PRIVATEASSETZ-selected chain without reopening the connect prompt. */
 export async function alignMetaMaskToSelectedNetwork() {
   await alignMetaMaskToNetwork(selectedBlockchainNetwork());
 }
 
-/** Switch to an explicit target without changing CAPROV's selected-network state first. */
+/** Switch to an explicit target without changing PRIVATEASSETZ's selected-network state first. */
 export async function alignMetaMaskToNetwork(network: BrowserNetwork) {
   const provider = await selectedProvider();
   await ensureProviderChain(provider, network);
@@ -518,7 +518,7 @@ function metaMaskExplorerUrl(value?: string) {
 
 function networkSelectionMessage(network: BrowserNetwork) {
   if (network.id === 'sepolia') {
-    return 'Could not switch MetaMask to Ethereum Sepolia. Open MetaMask, enable “Show test networks”, select Ethereum Sepolia, then retry. CAPROV will detect the change automatically.';
+    return 'Could not switch MetaMask to Ethereum Sepolia. Open MetaMask, enable “Show test networks”, select Ethereum Sepolia, then retry. PRIVATEASSETZ will detect the change automatically.';
   }
   return besuNetworkSetupMessage(network);
 }
@@ -526,18 +526,18 @@ function networkSelectionMessage(network: BrowserNetwork) {
 function besuNetworkSetupMessage(network: BrowserNetwork) {
   const rpcUrl = metamaskRpcUrl(network.rpcUrl);
   return [
-    `CAPROV Besu Local must be added once in MetaMask before it can be selected.`,
+    `PRIVATEASSETZ Besu Local must be added once in MetaMask before it can be selected.`,
     `In MetaMask: Settings → Networks → Add network manually. Name: ${network.chainName}; RPC URL: ${rpcUrl}; Chain ID: ${network.chainId}; currency symbol: ETH.`,
-    'Save it, select it in MetaMask, then return to CAPROV and choose CAPROV Besu Local again.',
+    'Save it, select it in MetaMask, then return to PRIVATEASSETZ and choose PRIVATEASSETZ Besu Local again.',
   ].join(' ');
 }
 
-/** The exact MetaMask provider selected by CAPROV's global wallet menu. */
+/** The exact MetaMask provider selected by PRIVATEASSETZ's global wallet menu. */
 export async function activeMetaMaskProvider(): Promise<WalletProvider> {
   return selectedProvider();
 }
 
-/** Returns the provider and account selected from CAPROV's global wallet menu. */
+/** Returns the provider and account selected from PRIVATEASSETZ's global wallet menu. */
 export async function activeMetaMaskConnection() {
   const provider = await selectedProvider();
   const accounts = await provider.request({ method: 'eth_accounts' }) as string[];
@@ -563,7 +563,7 @@ async function signer(walletId?: string) {
   const account = activeAccount && requestedAccounts.find((item) => item.toLowerCase() === activeAccount?.toLowerCase())
     ? activeAccount
     : requestedAccounts[0];
-  if (!account) throw new Error('MetaMask did not expose an account to CAPROV.');
+  if (!account) throw new Error('MetaMask did not expose an account to PRIVATEASSETZ.');
   return provider.getSigner(account);
 }
 
@@ -594,7 +594,7 @@ export async function activateCollateralLoanOnSepolia(input: { collateralId: str
   const connectedSigner = await signer();
   const contract = new Contract(vault, collateralVaultAbi, connectedSigner);
   const receipt = await (await contract.getFunction('activateLoan')(
-    BigInt(input.collateralId), ethId(`caprov:loan:${input.loanId}`),
+    BigInt(input.collateralId), ethId(`privateassetz:loan:${input.loanId}`),
   )).wait();
   if (!receipt) throw new Error('Collateral-loan activation did not confirm.');
   return { txHash: receipt.hash };
@@ -623,7 +623,7 @@ export async function mintAssetFromWallet(input: { assetId: string; supply: numb
   }
   const assetToken = assetTokenAddress();
   const asset = new Contract(assetToken, assetAbi, connectedSigner);
-  const tokenId = BigInt(ethId(`caprov:asset:${input.assetId}`));
+  const tokenId = BigInt(ethId(`privateassetz:asset:${input.assetId}`));
   const receipt = await (await asset.getFunction('mintAsset')(selectedAddress, tokenId, BigInt(input.supply), input.assetId)).wait();
   if (!receipt) throw new Error('MetaMask submitted the mint but no confirmed receipt was returned.');
   return { txHash: receipt.hash, tokenId: tokenId.toString() };

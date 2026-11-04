@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Deploy CaprovDocumentRegistry to Ethereum Sepolia.
+ * Deploy PrivateAssetzDocumentRegistry to Ethereum Sepolia.
  *
  *   ETHEREUM_SEPOLIA_PRIVATE_KEY=0x... node scripts/deploy-document-registry.mjs
  */
@@ -19,11 +19,11 @@ if (!KEY && !MNEMONIC) {
   process.exit(1);
 }
 
-const sourcePath = resolve(process.cwd(), 'contracts/CaprovDocumentRegistry.sol');
+const sourcePath = resolve(process.cwd(), 'contracts/PrivateAssetzDocumentRegistry.sol');
 const source = readFileSync(sourcePath, 'utf8');
 const input = {
   language: 'Solidity',
-  sources: { 'CaprovDocumentRegistry.sol': { content: source } },
+  sources: { 'PrivateAssetzDocumentRegistry.sol': { content: source } },
   settings: {
     optimizer: { enabled: true, runs: 200 },
     viaIR: true,
@@ -40,7 +40,7 @@ try {
   process.exit(1);
 }
 
-const artifact = output.contracts?.['CaprovDocumentRegistry.sol']?.CaprovDocumentRegistry;
+const artifact = output.contracts?.['PrivateAssetzDocumentRegistry.sol']?.PrivateAssetzDocumentRegistry;
 if (!artifact?.evm?.bytecode?.object) {
   console.error(JSON.stringify(output.errors ?? output, null, 2));
   process.exit(1);
@@ -55,7 +55,7 @@ console.log(`Deploying from ${wallet.address} on Sepolia...`);
 const contract = await factory.deploy();
 await contract.waitForDeployment();
 const address = await contract.getAddress();
-console.log(`CaprovDocumentRegistry deployed: ${address}`);
+console.log(`PrivateAssetzDocumentRegistry deployed: ${address}`);
 console.log(`Explorer: https://sepolia.etherscan.io/address/${address}`);
 console.log(`Set ETHEREUM_DOCUMENT_REGISTRY_CONTRACT=${address} in apps/api/.env`);
 

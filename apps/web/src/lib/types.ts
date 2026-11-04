@@ -13,7 +13,7 @@ import type {
   OwnershipType,
   RiskSummary,
   ValuationSummary,
-} from '@caprov/types';
+} from '@privateassetz/types';
 
 export interface HydratedAsset {
   id: string;

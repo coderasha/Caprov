@@ -8,7 +8,7 @@ import { api } from '@/lib/api';
 import { documentTypeLabel, formatDate, formatDateTime } from '@/lib/format';
 import { transactionExplorerUrl } from '@/lib/explorer';
 import { useAuthStore } from '@/stores/auth-store';
-import type { DocumentType } from '@caprov/types';
+import type { DocumentType } from '@privateassetz/types';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';

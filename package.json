@@ -1,8 +1,8 @@
 {
-  "name": "Caprov",
+  "name": "PrivateAssetz",
   "version": "1.0.0",
   "private": true,
-  "description": "CAPROV monorepo",
+  "description": "PRIVATEASSETZ monorepo",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev --parallel",
@@ -12,7 +12,7 @@
     "format": "turbo run format"
   },
   "keywords": [
-    "caprov",
+    "privateassetz",
     "monorepo",
     "private-assets",
     "ai"

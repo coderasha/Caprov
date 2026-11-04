@@ -1,6 +1,6 @@
-# CAPROV Product Summary
+# PRIVATEASSETZ Product Summary
 
-CAPROV is an AI-first private-asset intelligence platform for firms that manage complex, document-heavy alternative assets. Its core idea is **Asset DNA**: a versioned intelligence envelope that turns source documents like title deeds, SPAs, valuation memos, KYC packs, and financial statements into structured facts with provenance, confidence scoring, valuation, risk, and timeline context.
+PRIVATEASSETZ is an AI-first private-asset intelligence platform for firms that manage complex, document-heavy alternative assets. Its core idea is **Asset DNA**: a versioned intelligence envelope that turns source documents like title deeds, SPAs, valuation memos, KYC packs, and financial statements into structured facts with provenance, confidence scoring, valuation, risk, and timeline context.
 
 The updated platform now also creates a **trusted internal intelligence layer** by versioning each DNA rebuild, hashing the snapshot content, and recording provenance anchors for supporting documents and the snapshot itself.
 
@@ -11,7 +11,7 @@ The product combines three layers into one operating system:
 - **Operating platform**: organization management, approval-gated onboarding, users, role-based access control, audit trail, assets, documents, and portfolios.
 - **Capital markets workflows**: marketplace listings, trading orders, settlement, tokenization, collateral management, and lending built on top of DNA-backed asset records.
 
-## What makes CAPROV different
+## What makes PRIVATEASSETZ different
 
 - **Versioned Asset DNA** keeps a historical record of each intelligence rebuild instead of replacing prior snapshots.
 - **Provenance-first extraction** links facts back to source documents and fragments so operators can review why a value or ownership claim exists.
@@ -50,8 +50,8 @@ The product combines three layers into one operating system:
 
 ## Ideal user
 
-CAPROV is best suited for private-market operators, investment teams, asset managers, structured finance teams, and control functions that need a reliable way to turn fragmented asset paperwork into an actionable, auditable operating record.
+PRIVATEASSETZ is best suited for private-market operators, investment teams, asset managers, structured finance teams, and control functions that need a reliable way to turn fragmented asset paperwork into an actionable, auditable operating record.
 
 ## Short positioning statement
 
-CAPROV helps firms convert private-asset documents into trusted, versioned intelligence and use that intelligence across operating and capital-markets workflows.
+PRIVATEASSETZ helps firms convert private-asset documents into trusted, versioned intelligence and use that intelligence across operating and capital-markets workflows.

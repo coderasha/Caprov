@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
 import { getAddress, isAddress } from 'ethers';
-import type { SettlementRecord } from '@caprov/types';
+import type { SettlementRecord } from '@privateassetz/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';

@@ -24,7 +24,7 @@ import type {
   CurrencyCode,
   MarketplaceListing,
   TokenPosition,
-} from '@caprov/types';
+} from '@privateassetz/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -190,7 +190,7 @@ export class MarketplaceController {
     if (this.db.snapshot.listings.some((item) => item.onChainListingId === dto.onChainListingId && item.marketplaceContractAddress === this.marketplace.contractAddress())) {
       throw new BadRequestException('This on-chain listing has already been registered.');
     }
-    if (!this.marketplace.isConfigured()) throw new BadRequestException(`The ${network.chainName} marketplace and CAPROV payment token are not configured.`);
+    if (!this.marketplace.isConfigured()) throw new BadRequestException(`The ${network.chainName} marketplace and PRIVATEASSETZ payment token are not configured.`);
     if (dto.availableTokenUnits > token.supply) throw new BadRequestException('Listing quantity exceeds the asset token supply.');
     const valid = await this.marketplace.verifyListingTransaction({
       txHash: dto.onChainTxHash,
@@ -200,7 +200,7 @@ export class MarketplaceController {
       units: String(dto.availableTokenUnits),
       pricePerTokenWei: dto.pricePerTokenWei,
     });
-    if (!valid) throw new BadRequestException('The submitted transaction is not a confirmed matching Caprov marketplace listing.');
+    if (!valid) throw new BadRequestException('The submitted transaction is not a confirmed matching PrivateAssetz marketplace listing.');
     const sourceListing = dto.sourceListingId
       ? this.db.snapshot.listings.find((item) => item.id === dto.sourceListingId && item.organizationId === user.organizationId)
       : undefined;

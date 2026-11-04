@@ -16,7 +16,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
-import type { OrganizationStatus } from '@caprov/types';
+import type { OrganizationStatus } from '@privateassetz/types';
 import { hash } from 'bcryptjs';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -305,7 +305,7 @@ export class OrganizationsController {
     @Param('id') id: string,
     @Body() dto: UpdateOrganizationStatusDto,
   ) {
-    if (id === 'org_caprov' && dto.status === 'SUSPENDED') {
+    if (id === 'org_privateassetz' && dto.status === 'SUSPENDED') {
       throw new ForbiddenException(
         'The platform organization cannot be suspended',
       );

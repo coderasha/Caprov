@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { IsBoolean, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
-import type { IntelligenceJobType } from '@caprov/types';
+import type { IntelligenceJobType } from '@privateassetz/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';

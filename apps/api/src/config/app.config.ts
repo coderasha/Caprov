@@ -12,5 +12,5 @@ export default (): AppConfig => ({
   redisUrl: process.env.REDIS_URL ?? 'redis://localhost:6379',
   intelligenceEngineUrl:
     process.env.INTELLIGENCE_ENGINE_URL ?? 'http://localhost:8000',
-  objectStorageBucket: process.env.OBJECT_STORAGE_BUCKET ?? 'caprov-documents',
+  objectStorageBucket: process.env.OBJECT_STORAGE_BUCKET ?? 'privateassetz-documents',
 });

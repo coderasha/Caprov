@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import type { AuthSession, RegistrationRequestReceipt } from '@caprov/types';
+import type { AuthSession, RegistrationRequestReceipt } from '@privateassetz/types';
 import { compare, hash } from 'bcryptjs';
 import type { AuthUser } from '../../common/types/auth-user';
 import { DatabaseService } from '../../infrastructure/database/database.service';

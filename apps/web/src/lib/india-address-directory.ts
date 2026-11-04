@@ -1,4 +1,4 @@
-import type { AssetAddress } from '@caprov/types';
+import type { AssetAddress } from '@privateassetz/types';
 
 export const indiaStates = [
   ['AN', 'Andaman and Nicobar Islands'], ['AP', 'Andhra Pradesh'], ['AR', 'Arunachal Pradesh'], ['AS', 'Assam'],

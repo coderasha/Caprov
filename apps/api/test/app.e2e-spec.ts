@@ -4,7 +4,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 
-describe('CAPROV API (e2e)', () => {
+describe('PRIVATEASSETZ API (e2e)', () => {
   let app: INestApplication<App>;
 
   beforeEach(async () => {
@@ -29,7 +29,7 @@ describe('CAPROV API (e2e)', () => {
       .get('/api/health')
       .expect(200)
       .expect((response) => {
-        expect(response.body.service).toBe('caprov-api');
+        expect(response.body.service).toBe('privateassetz-api');
         expect(response.body.status).toBe('ok');
       });
   });

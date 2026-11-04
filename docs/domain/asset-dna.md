@@ -2,7 +2,7 @@
 
 Asset DNA is the canonical **intelligence envelope** for an asset.
 
-It is **not** the legal source of truth for asset existence or ownership. Those remain in the CAPROV core platform (`assets`, ownership records, documents). Asset DNA aggregates extracted facts, derived relationships, confidence scores, provenance, timelines, and downstream intelligence outputs such as valuation, risk, and forward projections.
+It is **not** the legal source of truth for asset existence or ownership. Those remain in the PRIVATEASSETZ core platform (`assets`, ownership records, documents). Asset DNA aggregates extracted facts, derived relationships, confidence scores, provenance, timelines, and downstream intelligence outputs such as valuation, risk, and forward projections.
 
 In the current platform, Asset DNA also acts as a **versioned trusted internal intelligence layer**: every rebuild creates a new snapshot with a deterministic content hash and linked provenance anchors.
 

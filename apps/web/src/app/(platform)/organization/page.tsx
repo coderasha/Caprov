@@ -9,7 +9,7 @@ import { LlmModelPicker } from '@/components/intelligence/llm-model-picker';
 import { api } from '@/lib/api';
 import { formatDate, money, roleLabel } from '@/lib/format';
 import type { MemberRow } from '@/lib/types';
-import type { MembershipRole } from '@caprov/types';
+import type { MembershipRole } from '@privateassetz/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
@@ -40,7 +40,7 @@ export default function OrganizationPage() {
   const [invite, setInvite] = useState({
     fullName: '',
     email: '',
-    password: 'CaprovDemo!23',
+    password: 'PrivateAssetzDemo!23',
     title: '',
     role: 'ANALYST' as MembershipRole,
   });
@@ -70,7 +70,7 @@ export default function OrganizationPage() {
   const inviteMember = useMutation({
     mutationFn: async () => api.post('/users', invite),
     onSuccess: async () => {
-      setInvite({ fullName: '', email: '', password: 'CaprovDemo!23', title: '', role: 'ANALYST' });
+      setInvite({ fullName: '', email: '', password: 'PrivateAssetzDemo!23', title: '', role: 'ANALYST' });
       await queryClient.invalidateQueries({ queryKey: ['users'] });
     },
   });
@@ -186,8 +186,8 @@ export default function OrganizationPage() {
         <LlmModelPicker purpose="DNA" />
       </Card>
       <Card className="overflow-hidden">
-        <div className="caprov-scroll">
-        <table className="caprov-table w-full text-left text-sm">
+        <div className="privateassetz-scroll">
+        <table className="privateassetz-table w-full text-left text-sm">
           <thead className="text-xs uppercase tracking-[0.12em] text-[var(--muted)]">
             <tr>
               <th className="px-4 py-3 font-medium sm:px-6">Member</th>

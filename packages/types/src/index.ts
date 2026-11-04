@@ -323,7 +323,7 @@ export interface OrganizationAccessRequest {
 }
 
 export type LlmProvider =
-  | 'caprov'
+  | 'privateassetz'
   | 'cursor'
   | 'openai'
   | 'anthropic'
@@ -479,7 +479,7 @@ export interface TradeRecord {
   currency: CurrencyCode;
   quantityBps: number;
   notional: number;
-  /** Confirmed CaprovMarketplaceSettlementV2 purchase reference. */
+  /** Confirmed PrivateAssetzMarketplaceSettlementV2 purchase reference. */
   onChainPurchaseId?: string;
   onChainListingId?: string;
   buyerWalletAddress?: string;

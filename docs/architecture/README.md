@@ -1,6 +1,6 @@
-# CAPROV Architecture
+# PRIVATEASSETZ Architecture
 
-CAPROV is a modular monolith (`apps/api`) backed by a separate Python intelligence engine (`apps/intelligence-engine`) and a Next.js operator console (`apps/web`).
+PRIVATEASSETZ is a modular monolith (`apps/api`) backed by a separate Python intelligence engine (`apps/intelligence-engine`) and a Next.js operator console (`apps/web`).
 
 ## Runtime ownership
 
@@ -10,14 +10,14 @@ CAPROV is a modular monolith (`apps/api`) backed by a separate Python intelligen
 | `apps/intelligence-engine` | Deterministic document classification/extraction, entity/relationship/timeline enrichment, Asset DNA envelope, valuation & risk estimates, engine-side copilot answers |
 | `apps/web` | Operator / analyst UI (responsive), registration request flow, platform-admin approval desk, org LLM picker, DNA explorer, capital-markets screens |
 
-Shared contracts live in `packages/types`. The Sepolia token contract lives in `contracts/CaprovAssetToken.sol`.
+Shared contracts live in `packages/types`. The Sepolia token contract lives in `contracts/PrivateAssetzAssetToken.sol`.
 
 ## Core design rules
 
 1. **Asset DNA** is the central intelligence model — not the legal ownership ledger.
 2. Extracted facts retain **source provenance** and **confidence**.
 3. **Accuracy-first marks**: Nest deterministic extractor is authoritative; the Python engine may enrich graph/timeline.
-4. Organizations select a preferred **LLM for copilot**; DNA extraction stays on the CAPROV deterministic core.
+4. Organizations select a preferred **LLM for copilot**; DNA extraction stays on the PRIVATEASSETZ deterministic core.
 5. **Capital markets** consume DNA valuation marks; they do not invent legal title.
 6. **Blockchain** is an adapter for tokenization and provenance anchoring (Ethereum Sepolia) — live when configured, otherwise simulated.
 7. **Platform admin approval** gates creation of new organization workspaces from public registration.
@@ -43,7 +43,7 @@ Reset demo data by deleting the store file or starting with `RESET_DEMO=true`.
 - `orders` — order list alias
 - `trading` — place/match buy orders → trades
 - `settlement` — settle trades (pending → completed)
-- `tokenization` — mint Caprov units on Ethereum Sepolia
+- `tokenization` — mint PrivateAssetz units on Ethereum Sepolia
 - `collateral` — pledge assets/tokens with haircut & utilization
 - `lending` — draw/repay facilities against collateral
 

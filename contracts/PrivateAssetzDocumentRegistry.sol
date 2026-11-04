@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-/// @title CaprovDocumentRegistry
-/// @notice Stores versioned document hashes and metadata for CAPROV assets on Ethereum Sepolia.
+/// @title PrivateAssetzDocumentRegistry
+/// @notice Stores versioned document hashes and metadata for PRIVATEASSETZ assets on Ethereum Sepolia.
 /// @dev Document contents remain off-chain. This contract stores immutable proof records only.
-contract CaprovDocumentRegistry {
+contract PrivateAssetzDocumentRegistry {
     struct DocumentVersion {
         string assetId;
         string documentId;

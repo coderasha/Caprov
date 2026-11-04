@@ -1,5 +1,5 @@
 import { MarketplaceController } from './marketplace.controller';
-import { emptyStore, type CaprovData } from '../../infrastructure/database/models';
+import { emptyStore, type PrivateAssetzData } from '../../infrastructure/database/models';
 import type { DatabaseService } from '../../infrastructure/database/database.service';
 import type { AuditService } from '../audit/audit.service';
 import type { EthereumSepoliaTokenService } from '../../infrastructure/blockchain/ethereum-sepolia-token.service';
@@ -35,6 +35,6 @@ describe('MarketplaceController on-chain listings', () => {
   });
 });
 
-function mockDb(store: CaprovData): DatabaseService {
-  return { get snapshot() { return store; }, mutate<T>(fn: (draft: CaprovData) => T): T { return fn(store); } } as DatabaseService;
+function mockDb(store: PrivateAssetzData): DatabaseService {
+  return { get snapshot() { return store; }, mutate<T>(fn: (draft: PrivateAssetzData) => T): T { return fn(store); } } as DatabaseService;
 }

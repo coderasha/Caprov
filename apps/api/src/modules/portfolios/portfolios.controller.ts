@@ -17,7 +17,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import type { CurrencyCode } from '@caprov/types';
+import type { CurrencyCode } from '@privateassetz/types';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';

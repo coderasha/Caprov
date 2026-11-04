@@ -10,7 +10,7 @@ const rpc = process.env.ETHEREUM_SEPOLIA_RPC_URL || 'https://ethereum-sepolia-rp
 const key = process.env.ETHEREUM_SEPOLIA_PRIVATE_KEY;
 const mnemonic = process.env.ETHEREUM_SEPOLIA_MNEMONIC;
 if (!key && !mnemonic) throw new Error('Set a funded ETHEREUM_SEPOLIA_PRIVATE_KEY or ETHEREUM_SEPOLIA_MNEMONIC.');
-const sources = Object.fromEntries(['CaprovAssetToken.sol', 'CaprovPaymentToken.sol', 'CaprovMarketplaceSettlementV2.sol'].map((name) => [name, { content: readFileSync(resolve(process.cwd(), 'contracts', name), 'utf8') }]));
+const sources = Object.fromEntries(['PrivateAssetzAssetToken.sol', 'PrivateAssetzPaymentToken.sol', 'PrivateAssetzMarketplaceSettlementV2.sol'].map((name) => [name, { content: readFileSync(resolve(process.cwd(), 'contracts', name), 'utf8') }]));
 const output = JSON.parse(solc.compile(JSON.stringify({ language: 'Solidity', sources, settings: { outputSelection: { '*': { '*': ['abi', 'evm.bytecode'] } } } })));
 if (output.errors?.some((error) => error.severity === 'error')) throw new Error(output.errors.map((error) => error.formattedMessage).join('\n'));
 const provider = new JsonRpcProvider(rpc, 11155111);
@@ -21,9 +21,9 @@ const deploy = async (file, name, args = []) => {
   await contract.waitForDeployment();
   return contract.getAddress();
 };
-const asset = await deploy('CaprovAssetToken.sol', 'CaprovAssetToken', [process.env.CAPROV_TOKEN_URI || 'https://caprov.local/token/{id}.json']);
-const payment = await deploy('CaprovPaymentToken.sol', 'CaprovPaymentToken');
-const marketplace = await deploy('CaprovMarketplaceSettlementV2.sol', 'CaprovMarketplaceSettlementV2', [asset, payment]);
+const asset = await deploy('PrivateAssetzAssetToken.sol', 'PrivateAssetzAssetToken', [process.env.PRIVATEASSETZ_TOKEN_URI || 'https://privateassetz.local/token/{id}.json']);
+const payment = await deploy('PrivateAssetzPaymentToken.sol', 'PrivateAssetzPaymentToken');
+const marketplace = await deploy('PrivateAssetzMarketplaceSettlementV2.sol', 'PrivateAssetzMarketplaceSettlementV2', [asset, payment]);
 console.log(`Asset token: ${asset}`);
 console.log(`Payment token: ${payment}`);
 console.log(`Marketplace: ${marketplace}`);

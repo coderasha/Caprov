@@ -7,8 +7,8 @@ import { distinctOptions, indiaAddressDirectory, indiaStates } from '@/lib/india
 import { readFileAsDataUrl, readFilesAsDataUrls } from '@/lib/files';
 import type { HydratedAsset } from '@/lib/types';
 import { useAuthStore } from '@/stores/auth-store';
-import type { AssetAddress } from '@caprov/types';
-import { assetSubcategories, type AssetClass, type AssetStatus, type CurrencyCode } from '@caprov/types';
+import type { AssetAddress } from '@privateassetz/types';
+import { assetSubcategories, type AssetClass, type AssetStatus, type CurrencyCode } from '@privateassetz/types';
 import { ArrowLeft, ArrowRight, Building2, CalendarDays, Check, CircleHelp, FileImage, Landmark, MapPin, Plus, Search, ShieldCheck, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
