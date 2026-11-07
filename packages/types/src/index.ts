@@ -20,7 +20,7 @@ export type AssetClass =
 
 export const assetSubcategories = {
   REAL_ESTATE: [
-    'Land & Development',
+    'Land',
     'Residential Real Estate',
     'Commercial Real Estate',
     'Industrial & Logistics Real Estate',
