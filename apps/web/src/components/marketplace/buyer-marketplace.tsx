@@ -739,7 +739,10 @@ function ListingCard({
               Notify me
             </button>
           ) : (
-            <Link href="/trading" className="buyer-mkt__btn buyer-mkt__btn--primary">
+            <Link
+              href={`/trading?listingId=${encodeURIComponent(listing.id)}`}
+              className="buyer-mkt__btn buyer-mkt__btn--primary"
+            >
               Invest now
             </Link>
           )}

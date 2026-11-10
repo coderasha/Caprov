@@ -1,5 +1,9 @@
 import { createHash } from 'node:crypto';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type {
   AssetDnaEnvelope,
   IntelligenceJobType,
@@ -36,6 +40,13 @@ type ComposedEnvelope = {
 
 @Injectable()
 export class IntelligenceService {
+  /**
+   * Serialise builds for a single asset. The pipeline awaits extraction and
+   * provenance work, so without this guard two near-simultaneous requests can
+   * both observe the same prior snapshot and each create a new version.
+   */
+  private readonly pipelineLocks = new Map<string, Promise<void>>();
+
   constructor(
     private readonly db: DatabaseService,
     private readonly audit: AuditService,
@@ -69,7 +80,10 @@ export class IntelligenceService {
   }
 
   getValuationForUser(user: AuthUser, assetId: string) {
-    return this.getValuation(this.organizationForAssetRead(user, assetId), assetId);
+    return this.getValuation(
+      this.organizationForAssetRead(user, assetId),
+      assetId,
+    );
   }
 
   getProjection(organizationId: string, assetId: string) {
@@ -80,7 +94,10 @@ export class IntelligenceService {
   }
 
   getProjectionForUser(user: AuthUser, assetId: string) {
-    return this.getProjection(this.organizationForAssetRead(user, assetId), assetId);
+    return this.getProjection(
+      this.organizationForAssetRead(user, assetId),
+      assetId,
+    );
   }
 
   getRisk(organizationId: string, assetId: string) {
@@ -98,6 +115,34 @@ export class IntelligenceService {
     user: AuthUser,
     assetId: string,
     type: IntelligenceJobType = 'FULL_PIPELINE',
+    force = false,
+  ) {
+    const pending = this.pipelineLocks.get(assetId);
+    if (pending) {
+      await pending;
+    }
+
+    let release!: () => void;
+    const lock = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    this.pipelineLocks.set(assetId, lock);
+
+    try {
+      return await this.runPipelineUnlocked(user, assetId, type, force);
+    } finally {
+      release();
+      if (this.pipelineLocks.get(assetId) === lock) {
+        this.pipelineLocks.delete(assetId);
+      }
+    }
+  }
+
+  private async runPipelineUnlocked(
+    user: AuthUser,
+    assetId: string,
+    type: IntelligenceJobType,
+    force: boolean,
   ) {
     const asset = this.assertAsset(user.organizationId, assetId);
     const documents = this.db.snapshot.documents.filter(
@@ -106,6 +151,20 @@ export class IntelligenceService {
         item.organizationId === user.organizationId &&
         item.isCurrent !== false,
     );
+
+    // A DNA version represents a distinct set of current evidence versions.
+    // Retrying an upload request, double-clicking, or refreshing the client
+    // must not create another immutable snapshot for identical evidence.
+    if (!force) {
+      const existing = this.findSnapshotForDocuments(
+        assetId,
+        documents.map((item) => item.id),
+      );
+      if (existing) {
+        return this.toTrustedSnapshot(user.organizationId, existing.id);
+      }
+    }
+
     const job: IntelligenceJobRecord = {
       id: createId('job'),
       organizationId: user.organizationId,
@@ -246,6 +305,20 @@ export class IntelligenceService {
     }
   }
 
+  private findSnapshotForDocuments(assetId: string, documentIds: string[]) {
+    const currentIds = [...documentIds].sort();
+    return this.db.snapshot.dnaSnapshots
+      .filter((snapshot) => snapshot.assetId === assetId)
+      .sort((a, b) => b.version - a.version)
+      .find((snapshot) => {
+        const sourceIds = [...snapshot.envelope.sourceDocumentIds].sort();
+        return (
+          sourceIds.length === currentIds.length &&
+          sourceIds.every((id, index) => id === currentIds[index])
+        );
+      });
+  }
+
   async chat(
     user: AuthUser,
     input: {
@@ -259,7 +332,10 @@ export class IntelligenceService {
     const searchDocuments = input.searchDocuments !== false;
     const includeMarketData = input.includeMarketData !== false;
     const asset = input.assetId
-      ? this.assertAsset(this.organizationForAssetRead(user, input.assetId), input.assetId)
+      ? this.assertAsset(
+          this.organizationForAssetRead(user, input.assetId),
+          input.assetId,
+        )
       : undefined;
     const allDocuments = input.assetId
       ? this.db.snapshot.documents.filter(
@@ -299,20 +375,26 @@ export class IntelligenceService {
       resolved.mode === 'deterministic' ? local.answer : resolved.answer;
 
     const now = new Date().toISOString();
-    const existingThread = input.threadId && this.db.snapshot.copilotThreads.find(
-          (item) =>
-            item.id === input.threadId &&
-            item.organizationId === user.organizationId,
-        );
+    const existingThread =
+      input.threadId &&
+      this.db.snapshot.copilotThreads.find(
+        (item) =>
+          item.id === input.threadId &&
+          item.organizationId === user.organizationId,
+      );
     if (input.threadId && !existingThread) {
       throw new NotFoundException('Copilot thread not found');
     }
     // A thread is permanently bound to its original asset context. This avoids
     // accidental evidence mixing when a user changes the selected asset.
     if (existingThread && existingThread.assetId !== input.assetId) {
-      throw new BadRequestException('This Copilot thread belongs to a different asset. Start a new conversation for the selected asset.');
+      throw new BadRequestException(
+        'This Copilot thread belongs to a different asset. Start a new conversation for the selected asset.',
+      );
     }
-    const thread = existingThread || this.db.mutate((draft) => {
+    const thread =
+      existingThread ||
+      this.db.mutate((draft) => {
         const created = {
           id: createId('thd'),
           organizationId: user.organizationId,
@@ -324,7 +406,7 @@ export class IntelligenceService {
         };
         draft.copilotThreads.unshift(created);
         return created;
-    });
+      });
 
     this.db.mutate((draft) => {
       draft.copilotMessages.push(
@@ -398,14 +480,19 @@ export class IntelligenceService {
   /** A lender can read intelligence only for live collateral awaiting or under approval. */
   private organizationForAssetRead(user: AuthUser, assetId: string) {
     const asset = this.db.snapshot.assets.find((item) => item.id === assetId);
-    const collateralAccess = user.roles.includes('BANKER') && this.db.snapshot.collateralPositions.some(
-      (position) =>
-        position.assetId === assetId &&
-        (position.status === 'PENDING_APPROVAL' || position.status === 'ACTIVE'),
-    );
+    const collateralAccess =
+      user.roles.includes('BANKER') &&
+      this.db.snapshot.collateralPositions.some(
+        (position) =>
+          position.assetId === assetId &&
+          (position.status === 'PENDING_APPROVAL' ||
+            position.status === 'ACTIVE'),
+      );
     if (
       !asset ||
-      (!user.roles.includes('PLATFORM_ADMIN') && asset.organizationId !== user.organizationId && !collateralAccess)
+      (!user.roles.includes('PLATFORM_ADMIN') &&
+        asset.organizationId !== user.organizationId &&
+        !collateralAccess)
     ) {
       throw new NotFoundException('Asset not found');
     }
@@ -484,7 +571,8 @@ export class IntelligenceService {
         facts: mergeExtractedFacts(local.facts, primary.facts),
       });
       extractionEngine = 'llm-primary';
-      extractionNote = `Primary extraction via ${model.label}. ${primary.note ?? ''}`.trim();
+      extractionNote =
+        `Primary extraction via ${model.label}. ${primary.note ?? ''}`.trim();
     } else {
       const assist = await assistExtractionGaps({
         model,
@@ -510,7 +598,14 @@ export class IntelligenceService {
         signal: AbortSignal.timeout(1500),
       });
       if (!health.ok) {
-        return { envelope: { ...local, summary: `${local.summary} (local intelligence fallback)` }, extractionEngine, note: extractionNote };
+        return {
+          envelope: {
+            ...local,
+            summary: `${local.summary} (local intelligence fallback)`,
+          },
+          extractionEngine,
+          note: extractionNote,
+        };
       }
       const response = await fetch(`${engineUrl}/api/pipeline/asset-dna`, {
         method: 'POST',
@@ -527,7 +622,14 @@ export class IntelligenceService {
         signal: AbortSignal.timeout(8000),
       });
       if (!response.ok) {
-        return { envelope: { ...local, summary: `${local.summary} (local intelligence fallback)` }, extractionEngine, note: extractionNote };
+        return {
+          envelope: {
+            ...local,
+            summary: `${local.summary} (local intelligence fallback)`,
+          },
+          extractionEngine,
+          note: extractionNote,
+        };
       }
       const remote = (await response.json()) as AssetDnaEnvelope & {
         engine?: string;
@@ -548,7 +650,9 @@ export class IntelligenceService {
           summary: `${local.summary} (engine-enriched graph)`.trim(),
         };
         return {
-          envelope: merged.projection ? merged : attachProjection(merged, asset.assetClass),
+          envelope: merged.projection
+            ? merged
+            : attachProjection(merged, asset.assetClass),
           extractionEngine,
           note: extractionNote,
         };
@@ -556,7 +660,10 @@ export class IntelligenceService {
       return { envelope: local, extractionEngine, note: extractionNote };
     } catch {
       return {
-        envelope: { ...local, summary: `${local.summary} (local intelligence fallback)` },
+        envelope: {
+          ...local,
+          summary: `${local.summary} (local intelligence fallback)`,
+        },
         extractionEngine,
         note: extractionNote,
       };
@@ -709,24 +816,35 @@ function createSynthesisBriefing(answer: string) {
     .split(/^\s*#{1,3}\s+/m)
     .map((part) => part.trim())
     .filter(Boolean);
-  const sections = parts.length > 1
-    ? parts.map((part) => {
-        const [title = '', ...body] = part.split('\n');
-        const content = body.join('\n').trim();
-        return {
-          title: title.replace(/[\*_]/g, '') || 'Response',
-          body: content || title,
-          kind: /^key findings$/i.test(title) ? ('list' as const) : /^evidence|caveats/i.test(title) ? ('note' as const) : ('detail' as const),
-        };
-      })
-    : [{ title: 'Answer', body: answer.trim(), kind: 'detail' as const }];
-  const answerSection =
-    sections.find((section) => /^answer$/i.test(section.title)) ??
-    sections[0] ??
-    { title: 'Answer', body: 'No response returned.', kind: 'detail' as const };
+  const sections =
+    parts.length > 1
+      ? parts.map((part) => {
+          const [title = '', ...body] = part.split('\n');
+          const content = body.join('\n').trim();
+          return {
+            title: title.replace(/[\*_]/g, '') || 'Response',
+            body: content || title,
+            kind: /^key findings$/i.test(title)
+              ? ('list' as const)
+              : /^evidence|caveats/i.test(title)
+                ? ('note' as const)
+                : ('detail' as const),
+          };
+        })
+      : [{ title: 'Answer', body: answer.trim(), kind: 'detail' as const }];
+  const answerSection = sections.find((section) =>
+    /^answer$/i.test(section.title),
+  ) ??
+    sections[0] ?? {
+      title: 'Answer',
+      body: 'No response returned.',
+      kind: 'detail' as const,
+    };
   return {
     title: 'Briefing',
-    headline: answerSection?.body.split(/[\n.!?]/)[0]?.trim() || 'Response prepared from the current Asset DNA context.',
+    headline:
+      answerSection?.body.split(/[\n.!?]/)[0]?.trim() ||
+      'Response prepared from the current Asset DNA context.',
     sections,
     disclaimer:
       'Briefing grounded in the selected asset DNA and authorized sources. Verify material conclusions against source documents.',
@@ -745,26 +863,49 @@ function applyOwnershipRegister(
       if (!holders.length) return null;
       return {
         id: createId('fact'),
-        key: type === 'LEGAL' ? 'legal_ownership' : type.toLowerCase() + '_ownership',
+        key:
+          type === 'LEGAL'
+            ? 'legal_ownership'
+            : type.toLowerCase() + '_ownership',
         label: type.charAt(0) + type.slice(1).toLowerCase() + ' ownership',
-        value: holders.map((item) => item.holderName + ' (' + item.percentage + '%)').join('; '),
+        value: holders
+          .map((item) => item.holderName + ' (' + item.percentage + '%)')
+          .join('; '),
         confidence: 1,
-        provenance: [{
-          sourceDocumentId: 'ownership-register',
-          sourceFragment: 'PRIVATEASSETZ ownership register: ' + holders.map((item) => item.holderName + ' ' + item.percentage + '%').join('; '),
-          confidence: 1,
-          observedAt,
-        }],
+        provenance: [
+          {
+            sourceDocumentId: 'ownership-register',
+            sourceFragment:
+              'PRIVATEASSETZ ownership register: ' +
+              holders
+                .map((item) => item.holderName + ' ' + item.percentage + '%')
+                .join('; '),
+            confidence: 1,
+            observedAt,
+          },
+        ],
       };
     })
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
   const keys = new Set(registeredFacts.map((fact) => fact.key));
-  const facts = [...envelope.facts.filter((fact) => !keys.has(fact.key)), ...registeredFacts];
-  const summary = envelope.summary + ' Ownership register synced (' + ownerships.length + ' holder' + (ownerships.length === 1 ? '' : 's') + ', 100% allocated).';
+  const facts = [
+    ...envelope.facts.filter((fact) => !keys.has(fact.key)),
+    ...registeredFacts,
+  ];
+  const summary =
+    envelope.summary +
+    ' Ownership register synced (' +
+    ownerships.length +
+    ' holder' +
+    (ownerships.length === 1 ? '' : 's') +
+    ', 100% allocated).';
   return { ...envelope, facts, summary };
 }
 
-function mergeExtractedFacts<T extends { key: string }>(base: T[], additions: T[]): T[] {
+function mergeExtractedFacts<T extends { key: string }>(
+  base: T[],
+  additions: T[],
+): T[] {
   const addedKeys = new Set(additions.map((fact) => fact.key));
   return [...base.filter((fact) => !addedKeys.has(fact.key)), ...additions];
 }

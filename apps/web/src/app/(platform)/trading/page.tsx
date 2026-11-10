@@ -10,7 +10,8 @@ import { api } from '@/lib/api';
 import { formatUnits, requestPurchase } from '@/lib/sepolia-marketplace';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 
 interface Listing { id: string; title: string; status: string; listerWalletAddress?: string; onChainListingId?: string; availableTokenUnits?: number; totalTokenSupply?: number; pricePerTokenWei?: string; asset?: { name: string } | null; }
 interface Trade { id: string; status: string; quantityBps: number; notional: number; currency: string; tokenUnits?: number; onChainPurchaseId?: string; asset?: { name: string } | null; }
@@ -18,11 +19,19 @@ interface Trade { id: string; status: string; quantityBps: number; notional: num
 export default function TradingPage() {
   const client = useQueryClient();
   const { address: wallet, network } = useWallet();
+  const searchParams = useSearchParams();
+  const requestedListingId = searchParams.get('listingId') ?? '';
   const [listingId, setListingId] = useState('');
   const [bps, setBps] = useState('100');
   const market = useQuery({ queryKey: ['marketplace'], queryFn: async () => (await api.get<{ listings: Listing[] }>('/marketplace')).data.listings });
   const trades = useQuery({ queryKey: ['trading'], queryFn: async () => (await api.get<{ trades: Trade[] }>('/trading')).data.trades });
   const listings = useMemo(() => (market.data ?? []).filter((item) => item.status !== 'CLOSED' && item.onChainListingId && item.pricePerTokenWei && item.availableTokenUnits && item.listerWalletAddress?.toLowerCase() !== wallet?.toLowerCase()), [market.data, wallet]);
+  const requestedListing = listings.find((item) => item.id === requestedListingId);
+  useEffect(() => {
+    if (requestedListing) {
+      setListingId(requestedListing.id);
+    }
+  }, [requestedListing]);
   const selected = listings.find((item) => item.id === listingId);
   const units = selected ? Math.floor((Number(selected.totalTokenSupply ?? selected.availableTokenUnits) * Number(bps)) / 10_000) : 0;
   const cap = selected && units > 0 ? formatUnits(BigInt(selected.pricePerTokenWei!) * BigInt(units), 18) : '0';
@@ -39,6 +48,7 @@ export default function TradingPage() {
   return <div className="mx-auto max-w-6xl space-y-6">
     <PageHeader eyebrow="Trading" title="CAP escrow trades" description={`Select a tokenized listing, set the economic interest in basis points, and escrow CAP on ${network.chainName}.`} />
     {!wallet ? <p className="rounded-xl border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--muted)]">Connect a MetaMask wallet from the top-right menu to create a CAP escrow trade.</p> : null}
+    {requestedListingId && market.isSuccess && !requestedListing ? <p className="rounded-xl border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--muted)]">This listing is no longer available for purchase. Please select another tokenized listing.</p> : null}
     <div className="grid gap-6 lg:grid-cols-[.9fr_1.1fr]"><Card className="p-6"><h2 className="font-display text-lg font-semibold">Create buy trade</h2><form className="mt-4 grid gap-3" onSubmit={(e) => { e.preventDefault(); buy.mutate(); }}>
       <Field label="Tokenized listing"><Select value={listingId} onChange={(e) => setListingId(e.target.value)} required><option value="">Select asset</option>{listings.map((item) => <option key={item.id} value={item.id}>{item.title} · {item.asset?.name}</option>)}</Select></Field>
       <Field label="Economic interest (BPS)"><Input type="number" min="1" max="10000" value={bps} onChange={(e) => setBps(e.target.value)} required /></Field>

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type {
   AssetClass,
   AssetAddress,
@@ -55,21 +59,32 @@ export class AssetsService {
 
   list(organizationId: string) {
     return this.hydrateMany(
-      this.db.snapshot.assets.filter((asset) => asset.organizationId === organizationId),
+      this.db.snapshot.assets.filter(
+        (asset) => asset.organizationId === organizationId,
+      ),
       { slim: true },
     );
   }
 
   /** A lender's inventory is only the assets actively presented for credit review. */
   listForUser(user: AuthUser) {
-    if (user.roles.includes('BANKER') && !user.roles.some((role) => ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN'].includes(role))) {
+    if (
+      user.roles.includes('BANKER') &&
+      !user.roles.some((role) =>
+        ['ORG_ADMIN', 'ANALYST', 'PLATFORM_ADMIN'].includes(role),
+      )
+    ) {
       const collateralAssetIds = new Set(
         this.db.snapshot.collateralPositions
-          .filter((position) => ['PENDING_APPROVAL', 'ACTIVE'].includes(position.status))
+          .filter((position) =>
+            ['PENDING_APPROVAL', 'ACTIVE'].includes(position.status),
+          )
           .map((position) => position.assetId),
       );
       return this.hydrateMany(
-        this.db.snapshot.assets.filter((asset) => collateralAssetIds.has(asset.id)),
+        this.db.snapshot.assets.filter((asset) =>
+          collateralAssetIds.has(asset.id),
+        ),
         { slim: true },
       );
     }
@@ -104,7 +119,8 @@ export class AssetsService {
         this.db.snapshot.collateralPositions.some(
           (position) =>
             position.assetId === assetId &&
-            (position.status === 'PENDING_APPROVAL' || position.status === 'ACTIVE'),
+            (position.status === 'PENDING_APPROVAL' ||
+              position.status === 'ACTIVE'),
         ))
     ) {
       return asset;
@@ -154,15 +170,14 @@ export class AssetsService {
 
   update(user: AuthUser, assetId: string, input: Partial<CreateAssetInput>) {
     this.get(user.organizationId, assetId);
-    const existing = this.db.snapshot.assets.find((item) => item.id === assetId);
+    const existing = this.db.snapshot.assets.find(
+      (item) => item.id === assetId,
+    );
     const nextAssetClass = input.assetClass ?? existing?.assetClass ?? 'OTHER';
-    const nextAssetSubcategory = input.assetSubcategory ?? (
-      input.assetClass ? undefined : existing?.assetSubcategory
-    );
-    this.assertValidSubcategory(
-      nextAssetClass,
-      nextAssetSubcategory,
-    );
+    const nextAssetSubcategory =
+      input.assetSubcategory ??
+      (input.assetClass ? undefined : existing?.assetSubcategory);
+    this.assertValidSubcategory(nextAssetClass, nextAssetSubcategory);
     if (input.primaryImageUrl != null || input.imageUrls != null) {
       assertImageBudget(input.primaryImageUrl, input.imageUrls);
     }
@@ -182,7 +197,7 @@ export class AssetsService {
           : asset.imageUrls;
       const nextPrimary =
         input.primaryImageUrl != null || input.imageUrls != null
-          ? persistImageUrl(input.primaryImageUrl) ?? nextImageUrls?.[0]
+          ? (persistImageUrl(input.primaryImageUrl) ?? nextImageUrls?.[0])
           : asset.primaryImageUrl;
       Object.assign(asset, {
         ...input,
@@ -211,16 +226,32 @@ export class AssetsService {
   ) {
     this.get(user.organizationId, assetId);
     if (!inputs.length) {
-      throw new BadRequestException('At least one ownership holder is required.');
-    }
-    const total = inputs.reduce((sum, item) => sum + Number(item.percentage), 0);
-    if (Math.abs(total - 100) > 0.001) {
       throw new BadRequestException(
-        'Ownership percentages must total exactly 100%. Current total: ' + total.toFixed(2) + '%.',
+        'At least one ownership holder is required.',
       );
     }
-    if (inputs.some((item) => !item.holderName.trim() || item.percentage < 0 || item.percentage > 100)) {
-      throw new BadRequestException('Each holder needs a name and a percentage between 0 and 100.');
+    const total = inputs.reduce(
+      (sum, item) => sum + Number(item.percentage),
+      0,
+    );
+    if (Math.abs(total - 100) > 0.001) {
+      throw new BadRequestException(
+        'Ownership percentages must total exactly 100%. Current total: ' +
+          total.toFixed(2) +
+          '%.',
+      );
+    }
+    if (
+      inputs.some(
+        (item) =>
+          !item.holderName.trim() ||
+          item.percentage < 0 ||
+          item.percentage > 100,
+      )
+    ) {
+      throw new BadRequestException(
+        'Each holder needs a name and a percentage between 0 and 100.',
+      );
     }
     const ownerships = inputs.map((input) => ({
       id: createId('own'),
@@ -232,7 +263,9 @@ export class AssetsService {
       notes: input.notes,
     }));
     this.db.mutate((draft) => {
-      draft.ownerships = draft.ownerships.filter((item) => item.assetId !== assetId);
+      draft.ownerships = draft.ownerships.filter(
+        (item) => item.assetId !== assetId,
+      );
       draft.ownerships.push(...ownerships);
     });
     this.audit.log({
@@ -243,14 +276,25 @@ export class AssetsService {
       entityId: assetId,
       metadata: { holderCount: ownerships.length, totalPercentage: total },
     });
-    await this.intelligence.runPipeline(user, assetId);
+    // Ownership is evidence outside the uploaded-document set, so it is an
+    // intentional material change and must create a fresh DNA snapshot.
+    await this.intelligence.runPipeline(user, assetId, 'FULL_PIPELINE', true);
     return this.hydrate(assetId);
   }
 
-  private assertValidSubcategory(assetClass: AssetClass, assetSubcategory?: string) {
+  private assertValidSubcategory(
+    assetClass: AssetClass,
+    assetSubcategory?: string,
+  ) {
     if (!assetSubcategory) return;
-    if (!(assetSubcategories[assetClass] as readonly string[]).includes(assetSubcategory)) {
-      throw new BadRequestException('Asset subcategory does not belong to the selected asset class.');
+    if (
+      !(assetSubcategories[assetClass] as readonly string[]).includes(
+        assetSubcategory,
+      )
+    ) {
+      throw new BadRequestException(
+        'Asset subcategory does not belong to the selected asset class.',
+      );
     }
   }
 
@@ -285,7 +329,9 @@ export class AssetsService {
       ),
     );
     const latestDnaByAsset = latestByAssetId(
-      this.db.snapshot.dnaSnapshots.filter((item) => assetIds.has(item.assetId)),
+      this.db.snapshot.dnaSnapshots.filter((item) =>
+        assetIds.has(item.assetId),
+      ),
       (item) => item.version,
     );
     const latestValuationByAsset = latestByAssetId(
@@ -354,7 +400,9 @@ function slimDnaSnapshot(dna: AssetDnaSnapshotRecord | null) {
   if (!dna) return null;
   const facts = (dna.envelope?.facts ?? [])
     .filter((fact) =>
-      /occupancy|market_value|purchase_price|legal_ownership|nav/i.test(fact.key),
+      /occupancy|market_value|purchase_price|legal_ownership|nav/i.test(
+        fact.key,
+      ),
     )
     .slice(0, 8)
     .map((fact) => ({
